@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -15,15 +16,16 @@ public class GameManager : MonoBehaviour {
     public LifeCounter lifeCounter;
     public float timer = 3;
     public float maxTimer = 15;
-    public float currentTimergain = 5;
+    public float currentTimerGain = 5;
     public TextMeshProUGUI timerText; 
     public int score = 0;
     public TextMeshProUGUI scoreText; 
     public int turnNumber = 1;
+    public int bonusOnAmountOfAppearences = 9;
+    public int bonusMultiplicator = 1;
     
     public FadeOut amountOfAppearancesText; 
     public TextMeshProUGUI imageIDText; 
-    
 
     public ImageSet imageSetName = ImageSet.Landscapes_IMAGES_10;
     public GameObject imageOnDisplay;
@@ -40,7 +42,8 @@ public class GameManager : MonoBehaviour {
     public AudioClip bonusClip;
 
     public Button buttonReplay;
-    
+    public float delayBetweenImages = .5f;
+
 
     public static GameManager Instance {
         get {
@@ -71,7 +74,7 @@ public class GameManager : MonoBehaviour {
         else
             DestroyImmediate(this);
     }
-    public void ProcessGuess(int number) {
+    public IEnumerator ProcessGuess(int number) {
         Debug.Log("Guessed number "+number+", amount of appearances "+_spritesFromSet[_currentlySelectedImage].amountOfAppearances);
         if (number == _spritesFromSet[_currentlySelectedImage].amountOfAppearances) {
             Debug.Log("CorrectGuess");
@@ -81,7 +84,7 @@ public class GameManager : MonoBehaviour {
             Debug.Log("IncorrectGuess");
             OnIncorrectGuess();
         }
-
+        yield return new WaitForSeconds(delayBetweenImages);
         if (!gameEnded) NextTurn();
     }
 
@@ -93,21 +96,35 @@ public class GameManager : MonoBehaviour {
         SetRandomImage();
 
     }
-
+    [ContextMenu("UseClue")]
+    public void UseClue() {
+        OnCorrectGuess();
+        NextTurn();
+    }
     private void OnIncorrectGuess() {
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances,
             false);
         audioSource.PlayOneShot(incorrectGuessClip);
         lifeCounter.LoseLive();
+        _spritesFromSet[_currentlySelectedImage]= (
+            _spritesFromSet[_currentlySelectedImage].sprite,
+            _spritesFromSet[_currentlySelectedImage].amountOfAppearances-1);
     }
     private void OnCorrectGuess() {
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances,
             true);
         audioSource.PlayOneShot(correctGuessClip);
-        SetTimer(timer+currentTimergain);
-        ModifyScore(1);
+        SetTimer(timer+currentTimerGain);
+        ModifyScore(_spritesFromSet[_currentlySelectedImage].amountOfAppearances);
+        if (_spritesFromSet[_currentlySelectedImage].amountOfAppearances == 9) {
+            Debug.Log("gain bonus");
+            ModifyScore(_spritesFromSet[_currentlySelectedImage].amountOfAppearances * bonusMultiplicator);
+            bonusMultiplicator++;
+            audioSource.PlayOneShot(bonusClip);
+            lifeCounter.GainLive();
+        }
     }
 
     private void ModifyScore(int modificationAmount) {
@@ -129,31 +146,41 @@ public class GameManager : MonoBehaviour {
         string type = splitedImageSetName[1];
         int amount;
         int.TryParse(splitedImageSetName[2], out amount);
-        
-        for (int imageID = 0; imageID < amount; imageID++) {
-            string path;
-            Sprite loadedSprite = null;
-            switch (type) {
-                case "SPRITESHEET":
-                    path = imageSetName + "/" + name;
-                    loadedSprite = Load(path,name+"_"+imageID);
-                    break;
-                case "IMAGES":
-                    path = imageSetName + "/(" + imageID + ")";
-                    loadedSprite = Resources.Load<Sprite>(path);
-                    break;
-                default:
-                    throw new Exception("INVALID IMAGESET TYPE");
-            }
-            Debug.Log("PATH: "+path);
-            if (loadedSprite != null) {
-                _spritesFromSet.Add(imageID,(loadedSprite,0));
-            }
-            else {
-                Debug.LogError("No se pudo cargar el sprite.");
-            }
+        List<int> selection = new List<int>() { 0, 3, 6, 24 };
+        // for (int imageID = 0; imageID < amount; imageID++) {
+        //     AddImageFromSet(imageSetName, type, name, imageID);
+        // }
+
+        foreach (var imageID in selection) {
+            AddImageFromSet(imageSetName, type, name, imageID);
         }
     }
+
+    private void AddImageFromSet(string imageSetName, string type, string name, int imageID) {
+        string path;
+        Sprite loadedSprite = null;
+        switch (type) {
+            case "SPRITESHEET":
+                path = imageSetName + "/" + name;
+                loadedSprite = Load(path, name + "_" + imageID);
+                break;
+            case "IMAGES":
+                path = imageSetName + "/(" + imageID + ")";
+                loadedSprite = Resources.Load<Sprite>(path);
+                break;
+            default:
+                throw new Exception("INVALID IMAGESET TYPE");
+        }
+
+        Debug.Log("PATH: " + path);
+        if (loadedSprite != null) {
+            _spritesFromSet.Add(imageID, (loadedSprite, 0));
+        }
+        else {
+            Debug.LogError("No se pudo cargar el sprite.");
+        }
+    }
+
     public Sprite Load(string resourcePath, string spriteName)
     {
         Sprite[] all = Resources.LoadAll<Sprite>(resourcePath);
@@ -173,16 +200,18 @@ public class GameManager : MonoBehaviour {
         
         // si ya la imagen aparecio 9 veces, se la saca del pool
         if (_spritesFromSet[_currentlySelectedImage].amountOfAppearances == 9) {
-            _spritesFromSet[_currentlySelectedImage]= (
+            _spritesFromSet[_currentlySelectedImage] = (
                 _spritesFromSet[_currentlySelectedImage].sprite,
                 0);
             currentlyInGameImages.Remove(_currentlySelectedImage);
-            //bonus?
-            ModifyScore(5);
-            audioSource.PlayOneShot(bonusClip);
+            // aca se setea si la imagen vuelve al set general o no  
+            _spritesFromSet.Remove(_currentlySelectedImage);
         }
-  
-        
+
+        if (currentlyInGameImages.Count == 0) {
+            Win();
+            return;
+        }    
         int nextImageIndex = Random.Range(0, currentlyInGameImages.Count);
         int nextImageID = currentlyInGameImages[nextImageIndex];
 
@@ -198,6 +227,11 @@ public class GameManager : MonoBehaviour {
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances+1);
         imageIDText.text = (nextImageID+1).ToString();
         // image.sprite = _spritesFromSet[Random.Range(0, _spritesFromSet.Count)].sprite;
+    }
+
+    private void Win() {
+        Debug.Log("Win");
+        EndGame();
     }
 
     private bool AddImages(int amountOfImages) {
@@ -247,6 +281,7 @@ public class GameManager : MonoBehaviour {
         SetTimer(15);
         SetScore(0);
         turnNumber = 1;
+        bonusMultiplicator = 1;
         lifeCounter.ResetLives();
         LoadImages(imageSetName.ToString());
         currentlyInGameImages = new List<int>();

@@ -46,6 +46,13 @@ public class LifeCounter : MonoBehaviour
         UpdateHearts();
     }
 
+    public void GainLive() {
+        if (lives < hearts.Count) {
+            lives++;
+            UpdateHearts();
+        }
+
+    }
 }
 
 public static class MyExtensions
