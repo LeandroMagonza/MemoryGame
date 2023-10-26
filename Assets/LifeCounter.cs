@@ -15,7 +15,7 @@ public class LifeCounter : MonoBehaviour
         lives--;
         UpdateHearts();
         if (lives <= 0) {
-            GameManager.Instance.EndGame();
+            GameManager.Instance.Lose();
         }
     }
 

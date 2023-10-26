@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour {
     public int turnNumber = 1;
     public int bonusOnAmountOfAppearences = 9;
     public int bonusMultiplicator = 1;
+    public int currentHighScore => PlayerPrefs.GetInt("HighScore",0);
+    public TextMeshProUGUI highScoreText; 
     
     public FadeOut amountOfAppearancesText; 
     public TextMeshProUGUI imageIDText; 
@@ -40,10 +42,13 @@ public class GameManager : MonoBehaviour {
     public AudioClip incorrectGuessClip;
     public AudioClip endGameClip;
     public AudioClip bonusClip;
+    public AudioClip winClip;
+    public AudioClip highScoreClip;
 
     public Button buttonReplay;
     public float delayBetweenImages = .5f;
 
+    public bool disableInput = false;
 
     public static GameManager Instance {
         get {
@@ -65,8 +70,10 @@ public class GameManager : MonoBehaviour {
         else if (_instance != this)
             DestroySelf();
     }
-    private void Start() {
+    private void Start()
+    {
         scoreText.text = score.ToString();
+        highScoreText.text = currentHighScore.ToString();
     }
     private void DestroySelf() {
         if (Application.isPlaying)
@@ -74,9 +81,13 @@ public class GameManager : MonoBehaviour {
         else
             DestroyImmediate(this);
     }
-    public IEnumerator ProcessGuess(int number) {
-        Debug.Log("Guessed number "+number+", amount of appearances "+_spritesFromSet[_currentlySelectedImage].amountOfAppearances);
-        if (number == _spritesFromSet[_currentlySelectedImage].amountOfAppearances) {
+
+    public IEnumerator ProcessGuess(int number)
+    {
+        disableInput = true;
+        Debug.Log("Guessed number " + number + ", amount of appearances " + _spritesFromSet[_currentlySelectedImage].amountOfAppearances);
+        if (number == _spritesFromSet[_currentlySelectedImage].amountOfAppearances)
+        {
             Debug.Log("CorrectGuess");
             OnCorrectGuess();
         }
@@ -94,6 +105,7 @@ public class GameManager : MonoBehaviour {
             AddImages(turnNumber/10);
         }
         SetRandomImage();
+        disableInput = false;
 
     }
     [ContextMenu("UseClue")]
@@ -146,7 +158,7 @@ public class GameManager : MonoBehaviour {
         string type = splitedImageSetName[1];
         int amount;
         int.TryParse(splitedImageSetName[2], out amount);
-        List<int> selection = new List<int>() { 0, 3, 6, 24 };
+        List<int> selection = new List<int>() { 0, 3, 6, 24, 132, 95, 138, 148, 33, 130  };
         // for (int imageID = 0; imageID < amount; imageID++) {
         //     AddImageFromSet(imageSetName, type, name, imageID);
         // }
@@ -192,12 +204,12 @@ public class GameManager : MonoBehaviour {
                 return s;
             }
         }
-        return null;
+        return null;
     }
     
     private void SetRandomImage() {
         Image image = imageOnDisplay.GetComponent<Image>();
-        
+       
         // si ya la imagen aparecio 9 veces, se la saca del pool
         if (_spritesFromSet[_currentlySelectedImage].amountOfAppearances == 9) {
             _spritesFromSet[_currentlySelectedImage] = (
@@ -230,8 +242,9 @@ public class GameManager : MonoBehaviour {
     }
 
     private void Win() {
+        audioSource.PlayOneShot(winClip);
         Debug.Log("Win");
-        EndGame();
+        StartCoroutine(EndGame(winClip.length));
     }
 
     private bool AddImages(int amountOfImages) {
@@ -259,22 +272,46 @@ public class GameManager : MonoBehaviour {
         return false;
     }
 
-    public void EndGame() {
+    public IEnumerator EndGame(float delay) {
         buttonReplay.transform.parent.gameObject.SetActive(true);
-        audioSource.PlayOneShot(endGameClip);
         gameEnded = true;
         Debug.Log("Match Ended");
+        yield return new WaitForSeconds(delay);
+        if (currentHighScore < score)
+        {
+            StartCoroutine(SetHighScore(score));
+        }
+    }
+
+    private IEnumerator SetHighScore(int highScoreToSet)
+    {
+        audioSource.Pause();
+        audioSource.PlayOneShot(highScoreClip);
+        yield return new WaitForSeconds(.25f);
+        //Todo: Add highscore animation
+        PlayerPrefs.SetInt("HighScore",highScoreToSet);
+        highScoreText.text = highScoreToSet.ToString();
     }
 
     public void SetTimer(float timer) {
         this.timer = Mathf.Clamp(timer,0,maxTimer);
         timerText.text = ((int)this.timer).ToString();
         
-        if (this.timer<=1) {
-            EndGame();
+        if (this.timer<=1)
+        {
+            Lose();
         }
     }
+
+    public void Lose()
+    {
+        Debug.Log("Lose");
+        audioSource.PlayOneShot(endGameClip);
+        StartCoroutine(EndGame(endGameClip.length));
+    }
+
     public void Reset() {
+        //if (disableInput) return;
         gameEnded = false;
         buttonReplay.transform.parent.gameObject.SetActive(false);
         audioSource.Play();
@@ -289,6 +326,7 @@ public class GameManager : MonoBehaviour {
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion
         _currentlySelectedImage = 0;
         SetRandomImage();
+        disableInput = false;
 
     }
 

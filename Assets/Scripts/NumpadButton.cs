@@ -19,7 +19,7 @@ public class NumpadButton : MonoBehaviour {
 
     public void OnClick()
     {
-        if (GameManager.Instance.gameEnded) {
+        if (GameManager.Instance.gameEnded || GameManager.Instance.disableInput) {
             return;
         }
        Debug.Log("Clicked number "+number);
