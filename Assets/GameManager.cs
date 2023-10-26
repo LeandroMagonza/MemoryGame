@@ -97,6 +97,7 @@ public class GameManager : MonoBehaviour {
     {
         if (_spritesFromSet[_currentlySelectedImage].amountOfAppearances == bonusOnAmountOfAppearences)
         {
+            Debug.Log("Clear: " + _spritesFromSet[_currentlySelectedImage].sprite.name);
             GainBonus();
             RemoveStickerFromPool();
         }
@@ -112,6 +113,7 @@ public class GameManager : MonoBehaviour {
     }
     [ContextMenu("UseClue")]
     public void UseClue() {
+        Debug.Log("USE CLUE");
         OnCorrectGuess();
         NextTurn();
     }
@@ -119,6 +121,7 @@ public class GameManager : MonoBehaviour {
         [ContextMenu("UseRemove")]
     public void UseRemove()
     {
+        Debug.Log("USE REMOVE");
         RemoveStickerFromPool();
         NextTurn();
     }
@@ -170,7 +173,7 @@ public class GameManager : MonoBehaviour {
         string type = splitedImageSetName[1];
         int amount;
         int.TryParse(splitedImageSetName[2], out amount);
-        List<int> selection = new List<int>() { 0, 3, 6, 24 };
+        List<int> selection = new List<int>() { 0, 3, 9, 18, 24, 36, 47, 73, 99, 119};
         // for (int imageID = 0; imageID < amount; imageID++) {
         //     AddImageFromSet(imageSetName, type, name, imageID);
         // }
