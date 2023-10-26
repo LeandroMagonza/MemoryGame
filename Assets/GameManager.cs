@@ -42,7 +42,7 @@ public class GameManager : MonoBehaviour {
     public AudioClip bonusClip;
 
     public Button buttonReplay;
-    public float delayBetweenImages = .5f;
+    public float delayBetweenImages = .72f;
 
 
     public static GameManager Instance {
@@ -74,18 +74,32 @@ public class GameManager : MonoBehaviour {
         else
             DestroyImmediate(this);
     }
-    public IEnumerator ProcessGuess(int number) {
-        Debug.Log("Guessed number "+number+", amount of appearances "+_spritesFromSet[_currentlySelectedImage].amountOfAppearances);
-        if (number == _spritesFromSet[_currentlySelectedImage].amountOfAppearances) {
+    public IEnumerator ProcessGuess(int number)
+    {
+        Debug.Log("Guessed number " + number + ", amount of appearances " + _spritesFromSet[_currentlySelectedImage].amountOfAppearances);
+        if (number == _spritesFromSet[_currentlySelectedImage].amountOfAppearances)
+        {
             Debug.Log("CorrectGuess");
             OnCorrectGuess();
         }
-        else {
+        else
+        {
             Debug.Log("IncorrectGuess");
             OnIncorrectGuess();
         }
         yield return new WaitForSeconds(delayBetweenImages);
+        // si ya la imagen aparecio 9 veces, se la saca del pool
+        CheckAmountOfAppearances();
         if (!gameEnded) NextTurn();
+    }
+
+    private void CheckAmountOfAppearances()
+    {
+        if (_spritesFromSet[_currentlySelectedImage].amountOfAppearances == bonusOnAmountOfAppearences)
+        {
+            GainBonus();
+            RemoveStickerFromPool();
+        }
     }
 
     private void NextTurn() {
@@ -99,6 +113,13 @@ public class GameManager : MonoBehaviour {
     [ContextMenu("UseClue")]
     public void UseClue() {
         OnCorrectGuess();
+        NextTurn();
+    }
+
+        [ContextMenu("UseRemove")]
+    public void UseRemove()
+    {
+        RemoveStickerFromPool();
         NextTurn();
     }
     private void OnIncorrectGuess() {
@@ -118,13 +139,16 @@ public class GameManager : MonoBehaviour {
         audioSource.PlayOneShot(correctGuessClip);
         SetTimer(timer+currentTimerGain);
         ModifyScore(_spritesFromSet[_currentlySelectedImage].amountOfAppearances);
-        if (_spritesFromSet[_currentlySelectedImage].amountOfAppearances == 9) {
-            Debug.Log("gain bonus");
-            ModifyScore(_spritesFromSet[_currentlySelectedImage].amountOfAppearances * bonusMultiplicator);
-            bonusMultiplicator++;
-            audioSource.PlayOneShot(bonusClip);
-            lifeCounter.GainLive();
-        }
+
+    }
+    [ContextMenu("GainBonus")]
+    private void GainBonus()
+    {
+        Debug.Log("gain bonus");
+        ModifyScore(_spritesFromSet[_currentlySelectedImage].amountOfAppearances * bonusMultiplicator);
+        bonusMultiplicator++;
+        audioSource.PlayOneShot(bonusClip);
+        lifeCounter.GainLive();
     }
 
     private void ModifyScore(int modificationAmount) {
@@ -198,15 +222,7 @@ public class GameManager : MonoBehaviour {
     private void SetRandomImage() {
         Image image = imageOnDisplay.GetComponent<Image>();
         
-        // si ya la imagen aparecio 9 veces, se la saca del pool
-        if (_spritesFromSet[_currentlySelectedImage].amountOfAppearances == 9) {
-            _spritesFromSet[_currentlySelectedImage] = (
-                _spritesFromSet[_currentlySelectedImage].sprite,
-                0);
-            currentlyInGameImages.Remove(_currentlySelectedImage);
-            // aca se setea si la imagen vuelve al set general o no  
-            _spritesFromSet.Remove(_currentlySelectedImage);
-        }
+
 
         if (currentlyInGameImages.Count == 0) {
             Win();
@@ -227,6 +243,15 @@ public class GameManager : MonoBehaviour {
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances+1);
         imageIDText.text = (nextImageID+1).ToString();
         // image.sprite = _spritesFromSet[Random.Range(0, _spritesFromSet.Count)].sprite;
+    }
+    private void RemoveStickerFromPool()
+    {
+        _spritesFromSet[_currentlySelectedImage] = (
+            _spritesFromSet[_currentlySelectedImage].sprite,
+            0);
+        currentlyInGameImages.Remove(_currentlySelectedImage);
+        // aca se setea si la imagen vuelve al set general o no  
+        _spritesFromSet.Remove(_currentlySelectedImage);
     }
 
     private void Win() {
