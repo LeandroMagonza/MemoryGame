@@ -231,7 +231,7 @@ public class GameManager : MonoBehaviour {
         int nextImageIndex = Random.Range(0, currentlyInGameImages.Count);
         int nextImageID = currentlyInGameImages[nextImageIndex];
 
-        while (_currentlySelectedImage == nextImageID) {
+        while (_currentlySelectedImage == nextImageID && currentlyInGameImages.Count > 1) {
             nextImageIndex = Random.Range(0, currentlyInGameImages.Count);
             nextImageID = currentlyInGameImages[nextImageIndex];
         }
