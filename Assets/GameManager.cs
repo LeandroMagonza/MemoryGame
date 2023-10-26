@@ -45,8 +45,11 @@ public class GameManager : MonoBehaviour {
     public AudioClip winClip;
     public AudioClip highScoreClip;
 
+    public ParticleSystem correctGuessParticle;
+    public ParticleSystem incorrectGuessParticle;
+
     public Button buttonReplay;
-    public float delayBetweenImages = .5f;
+    public float delayBetweenImages = .72f;
 
     public bool disableInput = false;
 
@@ -91,12 +94,26 @@ public class GameManager : MonoBehaviour {
             Debug.Log("CorrectGuess");
             OnCorrectGuess();
         }
-        else {
+        else
+        {
             Debug.Log("IncorrectGuess");
             OnIncorrectGuess();
         }
         yield return new WaitForSeconds(delayBetweenImages);
+        // si ya la imagen aparecio 9 veces, se la saca del pool
+        CheckAmountOfAppearances();
         if (!gameEnded) NextTurn();
+    }
+   
+
+    private void CheckAmountOfAppearances()
+    {
+        if (_spritesFromSet[_currentlySelectedImage].amountOfAppearances == bonusOnAmountOfAppearences)
+        {
+            Debug.Log("Clear: " + _spritesFromSet[_currentlySelectedImage].sprite.name);
+            GainBonus();
+            RemoveStickerFromPool();
+        }
     }
 
     private void NextTurn() {
@@ -110,33 +127,64 @@ public class GameManager : MonoBehaviour {
     }
     [ContextMenu("UseClue")]
     public void UseClue() {
+        Debug.Log("USE CLUE");
         OnCorrectGuess();
         NextTurn();
     }
-    private void OnIncorrectGuess() {
+
+        [ContextMenu("UseRemove")]
+    public void UseRemove()
+    {
+        Debug.Log("USE REMOVE");
+        RemoveStickerFromPool();
+        NextTurn();
+    }
+    private void OnIncorrectGuess()
+    {
+        IncorrectGuessFX();
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances,
             false);
         audioSource.PlayOneShot(incorrectGuessClip);
         lifeCounter.LoseLive();
-        _spritesFromSet[_currentlySelectedImage]= (
+        _spritesFromSet[_currentlySelectedImage] = (
             _spritesFromSet[_currentlySelectedImage].sprite,
-            _spritesFromSet[_currentlySelectedImage].amountOfAppearances-1);
+            _spritesFromSet[_currentlySelectedImage].amountOfAppearances - 1);
     }
-    private void OnCorrectGuess() {
+
+   
+
+    private void OnCorrectGuess()
+    {
+        CorrectGuessFX();
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances,
             true);
         audioSource.PlayOneShot(correctGuessClip);
-        SetTimer(timer+currentTimerGain);
+        SetTimer(timer + currentTimerGain);
         ModifyScore(_spritesFromSet[_currentlySelectedImage].amountOfAppearances);
-        if (_spritesFromSet[_currentlySelectedImage].amountOfAppearances == 9) {
-            Debug.Log("gain bonus");
-            ModifyScore(_spritesFromSet[_currentlySelectedImage].amountOfAppearances * bonusMultiplicator);
-            bonusMultiplicator++;
-            audioSource.PlayOneShot(bonusClip);
-            lifeCounter.GainLive();
-        }
+    }
+
+    private void CorrectGuessFX()
+    {
+        StartCoroutine(Squash(imageOnDisplay.transform, .2f, 0.1f, 5));
+        correctGuessParticle.Play();
+    }
+
+    private void IncorrectGuessFX()
+    {
+        StartCoroutine(Shake(imageOnDisplay.transform, .2f, 5, 80));
+        incorrectGuessParticle.Play();
+    }
+
+    [ContextMenu("GainBonus")]
+    private void GainBonus()
+    {
+        Debug.Log("gain bonus");
+        ModifyScore(_spritesFromSet[_currentlySelectedImage].amountOfAppearances * bonusMultiplicator);
+        bonusMultiplicator++;
+        audioSource.PlayOneShot(bonusClip);
+        lifeCounter.GainLive();
     }
 
     private void ModifyScore(int modificationAmount) {
@@ -209,16 +257,8 @@ public class GameManager : MonoBehaviour {
     
     private void SetRandomImage() {
         Image image = imageOnDisplay.GetComponent<Image>();
-       
-        // si ya la imagen aparecio 9 veces, se la saca del pool
-        if (_spritesFromSet[_currentlySelectedImage].amountOfAppearances == 9) {
-            _spritesFromSet[_currentlySelectedImage] = (
-                _spritesFromSet[_currentlySelectedImage].sprite,
-                0);
-            currentlyInGameImages.Remove(_currentlySelectedImage);
-            // aca se setea si la imagen vuelve al set general o no  
-            _spritesFromSet.Remove(_currentlySelectedImage);
-        }
+        
+
 
         if (currentlyInGameImages.Count == 0) {
             Win();
@@ -227,7 +267,7 @@ public class GameManager : MonoBehaviour {
         int nextImageIndex = Random.Range(0, currentlyInGameImages.Count);
         int nextImageID = currentlyInGameImages[nextImageIndex];
 
-        while (_currentlySelectedImage == nextImageID) {
+        while (_currentlySelectedImage == nextImageID && currentlyInGameImages.Count > 1) {
             nextImageIndex = Random.Range(0, currentlyInGameImages.Count);
             nextImageID = currentlyInGameImages[nextImageIndex];
         }
@@ -239,6 +279,15 @@ public class GameManager : MonoBehaviour {
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances+1);
         imageIDText.text = (nextImageID+1).ToString();
         // image.sprite = _spritesFromSet[Random.Range(0, _spritesFromSet.Count)].sprite;
+    }
+    private void RemoveStickerFromPool()
+    {
+        _spritesFromSet[_currentlySelectedImage] = (
+            _spritesFromSet[_currentlySelectedImage].sprite,
+            0);
+        currentlyInGameImages.Remove(_currentlySelectedImage);
+        // aca se setea si la imagen vuelve al set general o no  
+        _spritesFromSet.Remove(_currentlySelectedImage);
     }
 
     private void Win() {
@@ -334,6 +383,50 @@ public class GameManager : MonoBehaviour {
         if (gameEnded) return;
         SetTimer(timer - Time.deltaTime);
 
+    }
+
+    private IEnumerator Squash(Transform transform, float delay, float amount, float speed)
+    {
+        Vector3 initialScale = transform.localScale;
+        while (delay > 0)
+        {
+            float scale = 1.0f + Mathf.Sin(Time.time * speed) * amount;
+            transform.localScale = new Vector3(initialScale.x * scale, initialScale.y / scale, initialScale.z);
+            delay -= Time.deltaTime;
+            yield return new WaitForSeconds(0.01f);
+        }
+        transform.localScale = initialScale;
+        StopCoroutine(Squash(transform, delay: 0, amount: 0, speed: 0));
+    }
+    private IEnumerator Wooble(Transform transform, float delay, float angleAmount, float angleSpeed, float verticalAmount, float verticalSpeed)
+    {
+        Vector3 initialPosition = transform.localPosition;
+        Vector3 initialRotation = transform.localEulerAngles;
+        while (delay > 0)
+        {
+            float angle = 1.0f + Mathf.Sin(Time.time * angleSpeed) * angleAmount;
+            float verticalOffset = 1.0f + Mathf.PingPong(Time.time * verticalSpeed, verticalAmount);
+            transform.localPosition = new Vector3(initialPosition.x, initialPosition.y + verticalOffset, initialPosition.z);
+            transform.localEulerAngles = new Vector3(initialRotation.x, initialRotation.y, initialRotation.z + angle);
+            delay -= Time.deltaTime;
+            yield return new WaitForSeconds(0.01f);
+        }
+        transform.localEulerAngles = initialRotation;
+        transform.localPosition = initialPosition;
+        StopCoroutine(Wooble(transform, delay: 0, angleAmount: 0, angleSpeed: 0, verticalAmount: 0, verticalSpeed: 0));
+    }
+    private IEnumerator Shake(Transform transform, float delay, float amount, float speed)
+    {
+        Vector3 initialPosition = transform.localPosition;
+        while (delay > 0)
+        {
+            float scale = 1.0f + Mathf.Sin(Time.time * speed) * amount;
+            transform.localPosition = new Vector3(initialPosition.x + scale, initialPosition.y, initialPosition.z);
+            delay -= Time.deltaTime;
+            yield return new WaitForSeconds(0.01f);
+        }
+        transform.localPosition = initialPosition;
+        StopCoroutine(Shake(transform, delay: 0, amount: 0, speed: 0));
     }
 }
 
