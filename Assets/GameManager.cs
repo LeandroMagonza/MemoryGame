@@ -41,6 +41,9 @@ public class GameManager : MonoBehaviour {
     public AudioClip endGameClip;
     public AudioClip bonusClip;
 
+    public ParticleSystem correctGuessParticle;
+    public ParticleSystem incorrectGuessParticle;
+
     public Button buttonReplay;
     public float delayBetweenImages = .72f;
 
@@ -92,6 +95,7 @@ public class GameManager : MonoBehaviour {
         CheckAmountOfAppearances();
         if (!gameEnded) NextTurn();
     }
+   
 
     private void CheckAmountOfAppearances()
     {
@@ -125,25 +129,44 @@ public class GameManager : MonoBehaviour {
         RemoveStickerFromPool();
         NextTurn();
     }
-    private void OnIncorrectGuess() {
+    private void OnIncorrectGuess()
+    {
+        IncorrectGuessFX();
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances,
             false);
         audioSource.PlayOneShot(incorrectGuessClip);
         lifeCounter.LoseLive();
-        _spritesFromSet[_currentlySelectedImage]= (
+        _spritesFromSet[_currentlySelectedImage] = (
             _spritesFromSet[_currentlySelectedImage].sprite,
-            _spritesFromSet[_currentlySelectedImage].amountOfAppearances-1);
+            _spritesFromSet[_currentlySelectedImage].amountOfAppearances - 1);
     }
-    private void OnCorrectGuess() {
+
+   
+
+    private void OnCorrectGuess()
+    {
+        CorrectGuessFX();
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances,
             true);
         audioSource.PlayOneShot(correctGuessClip);
-        SetTimer(timer+currentTimerGain);
+        SetTimer(timer + currentTimerGain);
         ModifyScore(_spritesFromSet[_currentlySelectedImage].amountOfAppearances);
-
     }
+
+    private void CorrectGuessFX()
+    {
+        StartCoroutine(Squash(imageOnDisplay.transform, .2f, 0.1f, 5));
+        correctGuessParticle.Play();
+    }
+
+    private void IncorrectGuessFX()
+    {
+        StartCoroutine(Shake(imageOnDisplay.transform, .2f, 5, 80));
+        incorrectGuessParticle.Play();
+    }
+
     [ContextMenu("GainBonus")]
     private void GainBonus()
     {
@@ -324,6 +347,50 @@ public class GameManager : MonoBehaviour {
         if (gameEnded) return;
         SetTimer(timer - Time.deltaTime);
 
+    }
+
+    private IEnumerator Squash(Transform transform, float delay, float amount, float speed)
+    {
+        Vector3 initialScale = transform.localScale;
+        while (delay > 0)
+        {
+            float scale = 1.0f + Mathf.Sin(Time.time * speed) * amount;
+            transform.localScale = new Vector3(initialScale.x * scale, initialScale.y / scale, initialScale.z);
+            delay -= Time.deltaTime;
+            yield return new WaitForSeconds(0.01f);
+        }
+        transform.localScale = initialScale;
+        StopCoroutine(Squash(transform, delay: 0, amount: 0, speed: 0));
+    }
+    private IEnumerator Wooble(Transform transform, float delay, float angleAmount, float angleSpeed, float verticalAmount, float verticalSpeed)
+    {
+        Vector3 initialPosition = transform.localPosition;
+        Vector3 initialRotation = transform.localEulerAngles;
+        while (delay > 0)
+        {
+            float angle = 1.0f + Mathf.Sin(Time.time * angleSpeed) * angleAmount;
+            float verticalOffset = 1.0f + Mathf.PingPong(Time.time * verticalSpeed, verticalAmount);
+            transform.localPosition = new Vector3(initialPosition.x, initialPosition.y + verticalOffset, initialPosition.z);
+            transform.localEulerAngles = new Vector3(initialRotation.x, initialRotation.y, initialRotation.z + angle);
+            delay -= Time.deltaTime;
+            yield return new WaitForSeconds(0.01f);
+        }
+        transform.localEulerAngles = initialRotation;
+        transform.localPosition = initialPosition;
+        StopCoroutine(Wooble(transform, delay: 0, angleAmount: 0, angleSpeed: 0, verticalAmount: 0, verticalSpeed: 0));
+    }
+    private IEnumerator Shake(Transform transform, float delay, float amount, float speed)
+    {
+        Vector3 initialPosition = transform.localPosition;
+        while (delay > 0)
+        {
+            float scale = 1.0f + Mathf.Sin(Time.time * speed) * amount;
+            transform.localPosition = new Vector3(initialPosition.x + scale, initialPosition.y, initialPosition.z);
+            delay -= Time.deltaTime;
+            yield return new WaitForSeconds(0.01f);
+        }
+        transform.localPosition = initialPosition;
+        StopCoroutine(Shake(transform, delay: 0, amount: 0, speed: 0));
     }
 }
 
