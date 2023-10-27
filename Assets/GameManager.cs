@@ -89,6 +89,8 @@ public class GameManager : MonoBehaviour {
     private void Start()
     {
         scoreText.text = score.ToString();
+        buttonClue.interactable = currentClues > 0;
+        buttonRemove.interactable = currentRemoves > 0;
         buttonTextClue.text = currentClues.ToString();
         buttonTextRemove.text = currentRemoves.ToString();
         highScoreText.text = currentHighScore.ToString();
@@ -144,13 +146,17 @@ public class GameManager : MonoBehaviour {
     private void AddClue()
     {
         currentClues++;
+        buttonClue.interactable = currentClues > 0;
         currentClues = currentClues > maxCluesAmount ? maxCluesAmount : currentClues;
+        buttonTextClue.text = currentClues.ToString();
     }
 
     private void AddRemove() 
     {
-        currentRemoves++; 
+        currentRemoves++;
+        buttonRemove.interactable = currentRemoves > 0;
         currentRemoves = currentRemoves > maxRemovesAmount ? maxRemovesAmount : currentRemoves;
+        buttonTextRemove.text = currentRemoves.ToString();
     }
 
     [ContextMenu("UseClue")]
@@ -423,7 +429,14 @@ public class GameManager : MonoBehaviour {
         disableInput = false;
 
     }
-
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            AddClue();
+            AddRemove();
+        }
+    }
     private void FixedUpdate() {
         if (gameEnded) return;
         SetTimer(timer - Time.deltaTime);
