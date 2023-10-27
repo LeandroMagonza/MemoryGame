@@ -53,6 +53,19 @@ public class GameManager : MonoBehaviour {
 
     public bool disableInput = false;
 
+    [Header("Clue And Remove Settings")]
+    [SerializeField] private Button buttonClue;
+    [SerializeField] private Button buttonRemove;
+    [SerializeField] private TextMeshProUGUI buttonTextClue;
+    [SerializeField] private TextMeshProUGUI buttonTextRemove;
+    [SerializeField] private AudioClip buttonClueAudioClip;
+    [SerializeField] private AudioClip buttonRemoveAudioClip;
+
+    public int currentClues = 0;
+    public int maxCluesAmount = 5;
+    public int currentRemoves = 0;
+    public int maxRemovesAmount = 5;
+
     public static GameManager Instance {
         get {
             if (_instance == null)
@@ -76,6 +89,8 @@ public class GameManager : MonoBehaviour {
     private void Start()
     {
         scoreText.text = score.ToString();
+        buttonTextClue.text = currentClues.ToString();
+        buttonTextRemove.text = currentRemoves.ToString();
         highScoreText.text = currentHighScore.ToString();
     }
     private void DestroySelf() {
@@ -125,9 +140,31 @@ public class GameManager : MonoBehaviour {
         disableInput = false;
 
     }
+
+    private void AddClue()
+    {
+        currentClues++;
+        currentClues = currentClues > maxCluesAmount ? maxCluesAmount : currentClues;
+    }
+
+    private void AddRemove() 
+    {
+        currentRemoves++; 
+        currentRemoves = currentRemoves > maxRemovesAmount ? maxRemovesAmount : currentRemoves;
+    }
+
     [ContextMenu("UseClue")]
     public void UseClue() {
-        Debug.Log("USE CLUE");
+        Debug.Log("USE CLUE: " + currentClues);
+
+        if (currentClues < 1) return;
+
+        audioSource.PlayOneShot(buttonClueAudioClip);
+        // anim
+        currentClues--;
+        currentClues = currentClues < 0 ? 0 : currentClues;
+        buttonClue.interactable = currentClues != 0;
+        buttonTextClue.text = currentClues.ToString();
         OnCorrectGuess();
         NextTurn();
     }
@@ -136,6 +173,14 @@ public class GameManager : MonoBehaviour {
     public void UseRemove()
     {
         Debug.Log("USE REMOVE");
+        if (currentRemoves < 1) return;
+
+        audioSource.PlayOneShot(buttonRemoveAudioClip);
+        //anim
+        currentRemoves--;
+        currentRemoves = currentRemoves < 0 ? 0 : currentRemoves;
+        buttonRemove.interactable = currentRemoves != 0;
+        buttonTextRemove.text = currentRemoves.ToString();
         RemoveStickerFromPool();
         NextTurn();
     }
