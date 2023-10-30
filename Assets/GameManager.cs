@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour {
     public bool gameEnded = false;
     public LifeCounter lifeCounter;
     public float timer = 3;
-    public float maxTimer = 15;
+    public float maxTimer = 10;
     public float currentTimerGain = 5;
     public TextMeshProUGUI timerText; 
     public int score = 0;
@@ -135,8 +135,13 @@ public class GameManager : MonoBehaviour {
 
     private void NextTurn() {
         turnNumber++;
-        if (turnNumber % 10 == 0) {
-            AddImages(turnNumber/10);
+        if (currentlyInGameImages.Count < 3)
+        {
+            AddImages(1);
+        }
+        else if (turnNumber % 10 == 0)
+        {
+            AddImages(turnNumber / 10);
         }
         SetRandomImage();
         disableInput = false;
@@ -198,6 +203,7 @@ public class GameManager : MonoBehaviour {
             false);
         audioSource.PlayOneShot(incorrectGuessClip);
         lifeCounter.LoseLive();
+        SetTimer(maxTimer);
         _spritesFromSet[_currentlySelectedImage] = (
             _spritesFromSet[_currentlySelectedImage].sprite,
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances - 1);
@@ -212,7 +218,7 @@ public class GameManager : MonoBehaviour {
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances,
             true);
         audioSource.PlayOneShot(correctGuessClip);
-        SetTimer(timer + currentTimerGain);
+        SetTimer(maxTimer);
         ModifyScore(_spritesFromSet[_currentlySelectedImage].amountOfAppearances);
     }
 
@@ -257,7 +263,7 @@ public class GameManager : MonoBehaviour {
         string type = splitedImageSetName[1];
         int amount;
         int.TryParse(splitedImageSetName[2], out amount);
-        List<int> selection = new List<int>() { 0, 3, 6, 24, 132, 95, 138, 148, 33, 130  };
+        List<int> selection = new List<int>() { 0, 3, 6, 24, 132  };
         // for (int imageID = 0; imageID < amount; imageID++) {
         //     AddImageFromSet(imageSetName, type, name, imageID);
         // }
@@ -399,7 +405,9 @@ public class GameManager : MonoBehaviour {
         
         if (this.timer<=1)
         {
-            Lose();
+            lifeCounter.LoseLive();
+            NextTurn();
+            SetTimer(maxTimer);
         }
     }
 
