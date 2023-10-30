@@ -11733,7 +11733,7 @@ MonoBehaviour:
   score: 0
   scoreText: {fileID: 1311056529}
   turnNumber: 1
-  bonusOnAmountOfAppearences: 1
+  bonusOnAmountOfAppearences: 6
   bonusMultiplicator: 1
   highScoreText: {fileID: 2139734648}
   amountOfAppearancesText: {fileID: 426789308}
@@ -11747,11 +11747,11 @@ MonoBehaviour:
   bonusClip: {fileID: 8300000, guid: 404ad2f2639dda64f965113ff1f8f666, type: 3}
   winClip: {fileID: 8300000, guid: 218bb145b8c91f14185fb2ec9cb1b54d, type: 3}
   highScoreClip: {fileID: 8300000, guid: 97d73190587a27a498cc93daba75e6da, type: 3}
-  buttonReplay: {fileID: 7760058}
-  disableInput: 0
   correctGuessParticle: {fileID: 207292370}
   incorrectGuessParticle: {fileID: 334700922}
+  buttonReplay: {fileID: 7760058}
   delayBetweenImages: 0.5
+  disableInput: 0
 --- !u!4 &1079194499
 Transform:
   m_ObjectHideFlags: 0
@@ -15071,7 +15071,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 53.765385, y: 70.53699}
+  m_AnchoredPosition: {x: 53.76538, y: 70.53699}
   m_SizeDelta: {x: -120.1218, y: -158.54}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2139734647

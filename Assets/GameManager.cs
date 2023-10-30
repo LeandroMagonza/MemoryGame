@@ -206,7 +206,13 @@ public class GameManager : MonoBehaviour {
         string type = splitedImageSetName[1];
         int amount;
         int.TryParse(splitedImageSetName[2], out amount);
-        List<int> selection = new List<int>() { 0, 3, 6, 24, 132, 95, 138, 148, 33, 130  };
+        List<List<int>> stages = new () {
+            new List<int>() { 0, 3, 6, 24},
+            new List<int>() { 0, 3, 6, 24,128},
+        };
+        List<int> selection = new List<int>() { 0, 3, 6, 24};
+        
+            //, 132, 95, 138, 148, 33, 130  };
         // for (int imageID = 0; imageID < amount; imageID++) {
         //     AddImageFromSet(imageSetName, type, name, imageID);
         // }
