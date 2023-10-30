@@ -53,6 +53,23 @@ public class GameManager : MonoBehaviour {
 
     public bool disableInput = false;
 
+    public int selectedStage = 0;
+    public int selectedDifficulty = 0;
+    
+    List<(Color color,List<int> imageList)> stages = new () {
+        (Color.green, new List<int>() { 0, 3, 6, 24 }),
+        (Color.cyan, new List<int>() {15,18,9,40,42,51}),
+        (Color.yellow, new List<int>() {1,4,7,28,31,53,108,132,128}),
+        (Color.magenta, new List<int>() {11,23,25,49,57,76,107,112,121,122,127,131}),
+        (Color.red, new List<int>() {2,5,8,33,64,67,93,94,129,130,133,134,135,142,143,144,145,148,149,150}),
+    };
+
+    public GameObject selectStageAndDifficultyCanvas;
+
+    public GameObject numpadRow0;
+    public GameObject numpadRow1;
+    public GameObject numpadRow2;
+
     public static GameManager Instance {
         get {
             if (_instance == null)
@@ -65,10 +82,11 @@ public class GameManager : MonoBehaviour {
     protected void Awake() {
         if (_instance == null) {
             _instance = this as GameManager;
-            LoadImages(imageSetName.ToString());
+            /*LoadImages(imageSetName.ToString());
             AddImages(4);
-            SetRandomImage();
+            SetRandomImage();*/
             audioSource = GetComponent<AudioSource>();
+            Reset();
         }
         else if (_instance != this)
             DestroySelf();
@@ -206,18 +224,9 @@ public class GameManager : MonoBehaviour {
         string type = splitedImageSetName[1];
         int amount;
         int.TryParse(splitedImageSetName[2], out amount);
-        List<List<int>> stages = new () {
-            new List<int>() { 0, 3, 6, 24},
-            new List<int>() { 0, 3, 6, 24,128},
-        };
-        List<int> selection = new List<int>() { 0, 3, 6, 24};
-        
-            //, 132, 95, 138, 148, 33, 130  };
-        // for (int imageID = 0; imageID < amount; imageID++) {
-        //     AddImageFromSet(imageSetName, type, name, imageID);
-        // }
 
-        foreach (var imageID in selection) {
+  
+        foreach (var imageID in stages[selectedStage].imageList) {
             AddImageFromSet(imageSetName, type, name, imageID);
         }
     }
@@ -367,6 +376,9 @@ public class GameManager : MonoBehaviour {
 
     public void Reset() {
         //if (disableInput) return;
+        selectStageAndDifficultyCanvas.SetActive(false);
+        SetNumpadByDifficulty(selectedDifficulty);
+        bonusOnAmountOfAppearences = (selectedDifficulty+1)*3;
         gameEnded = false;
         buttonReplay.transform.parent.gameObject.SetActive(false);
         audioSource.Play();
@@ -383,6 +395,17 @@ public class GameManager : MonoBehaviour {
         SetRandomImage();
         disableInput = false;
 
+    }
+
+    private void SetNumpadByDifficulty(int difficulty)
+    {
+        numpadRow1.SetActive(false);
+        numpadRow2.SetActive(false);
+        if (difficulty > 0)
+        {
+            numpadRow1.SetActive(true);
+            if (difficulty > 1) numpadRow2.SetActive(true);
+        }
     }
 
     private void FixedUpdate() {
@@ -433,6 +456,18 @@ public class GameManager : MonoBehaviour {
         }
         transform.localPosition = initialPosition;
         StopCoroutine(Shake(transform, delay: 0, amount: 0, speed: 0));
+    }
+
+    public void SetStageAndDifficulty(int stage, int difficulty)
+    {
+        selectedDifficulty = difficulty;
+        selectedStage = stage;
+        Reset();
+    }
+
+    public void OpenStagesCanvas()
+    {
+        selectStageAndDifficultyCanvas.SetActive(true);
     }
 }
 
