@@ -11703,10 +11703,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 998286063}
-  - component: {fileID: 998286062}
   - component: {fileID: 998286061}
-  - component: {fileID: 998286060}
+  - component: {fileID: 998286062}
   - component: {fileID: 998286059}
+  - component: {fileID: 998286060}
   m_Layer: 0
   m_Name: AdsManager
   m_TagString: Untagged
@@ -11757,6 +11757,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _androidGameId: 5462684
   _iOSGameId: 5462685
+  Banner: {fileID: 998286062}
+  Intersticial: {fileID: 998286059}
+  Rewarded: {fileID: 998286060}
   _testMode: 1
 --- !u!114 &998286062
 MonoBehaviour:

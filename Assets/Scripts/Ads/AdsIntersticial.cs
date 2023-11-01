@@ -36,6 +36,7 @@ public class AdsIntersticial : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsSh
     // Implement Load Listener and Show Listener interface methods: 
     public void OnUnityAdsAdLoaded(string adUnitId)
     {
+        Debug.Log("AdIntersticial Loaded: " + adUnitId);
         // Optionally execute code if the Ad Unit successfully loads content.
     }
 
