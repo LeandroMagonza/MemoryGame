@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using TMPro;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using ColorUtility = UnityEngine.ColorUtility;
 using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour {
@@ -114,6 +116,15 @@ public class GameManager : MonoBehaviour {
 
     private void Start() {
         foreach (var stageIndexAndData in stages) {
+            //stages = LoadStages();
+            foreach (var stage in stages.Values)
+            {
+                if (ColorUtility.TryParseHtmlString("#" + stage.color, out Color colorValue))
+                {
+                    stage.ColorValue = colorValue;
+                }
+            }
+            
             //.ToArray().Select((data, index) => new { index, data })
             StageData stageData = stageIndexAndData.Value;
             for (int difficulty = 0; difficulty < 3; difficulty++) {
@@ -128,7 +139,7 @@ public class GameManager : MonoBehaviour {
 
             newStage.name = stageData.title;
             newStage.SetTitle(stageData.title);
-            newStage.SetColor(stageData.color);
+            newStage.SetColor(stageData.ColorValue);
             newStage.SetAmountOfImages(stageData.images.Count);
             newStage.SetStage(stageData.stageID);
 
@@ -136,6 +147,8 @@ public class GameManager : MonoBehaviour {
             newStage.SetScore(1,userData.stages[(stageData.stageID,1)].highScore);
             newStage.SetScore(2,userData.stages[(stageData.stageID,2)].highScore);
         }
+        
+        
         SetScoreTexts();
 
     }
@@ -576,9 +589,54 @@ public class GameManager : MonoBehaviour {
         }
         return highScores;
     }
+    
+    public void SaveStages(Dictionary<int, StageData> stagesToSave)
+    {
+        List<StageData> stageList = stagesToSave.Values.ToList();
+        string json = JsonUtility.ToJson(new Serialization<StageData>(stageList), true);
+        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        File.WriteAllText(filePath, json);
+        Debug.Log("Stages saved to " + filePath);
+    }
+
+    private void OnApplicationQuit()
+    {
+        SaveStages(stages);
+    }
+    
+    public Dictionary<int, StageData> LoadStages()
+    {
+        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        if (!File.Exists(filePath))
+        {
+            Debug.Log("No saved stages found at " + filePath);
+            return new Dictionary<int, StageData>();
+        }
+
+        string json = File.ReadAllText(filePath);
+        Serialization<StageData> stageList = JsonUtility.FromJson<Serialization<StageData>>(json);
+        Dictionary<int, StageData> stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
+        Debug.Log("Stages loaded from " + filePath);
+        return stages;
+    }
+
+
 }
 
 public enum ImageSet {
     Pokemons_SPRITESHEET_151,
     Landscapes_IMAGES_10
+}
+
+
+[Serializable] 
+public class Serialization<T>
+{
+    [SerializeField]
+    public List<T> items;
+    
+    public Serialization(List<T> items)
+    {
+        this.items = items;
+    }
 }

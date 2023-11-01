@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -6,6 +7,7 @@ using UnityEditor.XR;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
+using ColorUtility = UnityEngine.ColorUtility;
 
 public class Stage : MonoBehaviour
 {
@@ -35,22 +37,31 @@ public class Stage : MonoBehaviour
     
 }
 
-public class StageData {
+[Serializable]
+public class StageData
+{
     public int stageID;
     public string title;
     public int basePoints;
-    public Color color;
+    public string color; // Almacenar como string en formato hexadecimal
     public List<int> images;
     public Stage stageObject;
-    public StageData(int stageID, string title, int basePoints, Color color, List<int> images) {
+
+    [NonSerialized]
+    public Color ColorValue; // Propiedad para acceder al valor de color
+
+    public StageData(int stageID, string title, int basePoints, Color color, List<int> images)
+    {
         this.stageID = stageID;
         this.title = title;
         this.basePoints = basePoints;
-        this.color = color;
+        this.ColorValue = color;
+        this.color = ColorUtility.ToHtmlStringRGBA(color);
         this.images = images;
     }
-    
 }
+
+
 public class UserData
 {
     public string name;
@@ -102,8 +113,8 @@ public class Match {
     }
 
     public (List<int> clearedImages, List<Achievement> achievementsFullfilled) EndMatch() {
-        foreach (var VARIABLE in turnHistory) {
-            score += VARIABLE.scoreModification;
+        foreach (var turn in turnHistory) {
+            score += turn.scoreModification;
             amountOfTurns ++;
         }
         List<int> clearedImages = new();
@@ -119,3 +130,4 @@ public enum TurnAction {
     UseRemove,
     Peek,
 }
+
