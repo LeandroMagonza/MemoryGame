@@ -23,7 +23,7 @@ public class GameManager : MonoBehaviour {
     public int turnNumber = 1;
     public int bonusOnAmountOfAppearences = 9;
     public int bonusMultiplicator = 1;
-    public int currentHighScore => PlayerPrefs.GetInt("HighScore",0);
+
     public TextMeshProUGUI highScoreText; 
     
     public FadeOut amountOfAppearancesText; 
@@ -56,20 +56,43 @@ public class GameManager : MonoBehaviour {
     public int selectedStage = 0;
     public int selectedDifficulty = 0;
     
-    List<(Color color,List<int> imageList)> stages = new () {
-        (Color.green, new List<int>() { 0, 3, 6, 24 }),
-        (Color.cyan, new List<int>() {15,18,9,40,42,51}),
-        (Color.yellow, new List<int>() {1,4,7,28,31,53,108,132,128}),
-        (Color.magenta, new List<int>() {11,23,25,49,57,76,107,112,121,122,127,131}),
-        (Color.red, new List<int>() {2,5,8,33,64,67,93,94,129,130,133,134,135,142,143,144,145,148,149,150}),
+    Dictionary<int, StageData> stages = new () {
+        {
+            0,new StageData(0,"Stage 0",0,Color.green, new List<int>()
+                {0,3,6,24}
+            )
+        },
+        {
+            1,new StageData(1,"Stage 1",1,Color.cyan, new List<int>()
+                {15,18,9,40,42,51}
+            )
+        },    
+        {
+            2,new StageData(2,"Stage 2",2,Color.yellow, new List<int>() 
+                { 1, 4, 7, 28, 31, 53, 108, 132, 128 }
+            )
+        },
+        {
+            3,new StageData(3,"Stage 3",3,Color.magenta, new List<int>() 
+                {11,23,25,49,57,76,107,112,121,122,127,131}
+            )
+        },
+        {
+            4,new StageData(4,"Stage 4",4,Color.red, new List<int>() 
+                { 2, 5, 8, 33, 64, 67, 93, 94, 129, 130, 133, 134, 135, 142, 143, 144, 145, 148, 149, 150 }
+            )
+        },
     };
 
+    public UserData userData = new UserData();
     public GameObject selectStageAndDifficultyCanvas;
+    public GameObject gameCanvas;
 
     public GameObject numpadRow0;
     public GameObject numpadRow1;
     public GameObject numpadRow2;
 
+    public GameObject stageDisplayPrefab;
     public static GameManager Instance {
         get {
             if (_instance == null)
@@ -82,20 +105,46 @@ public class GameManager : MonoBehaviour {
     protected void Awake() {
         if (_instance == null) {
             _instance = this as GameManager;
-            /*LoadImages(imageSetName.ToString());
-            AddImages(4);
-            SetRandomImage();*/
             audioSource = GetComponent<AudioSource>();
-            Reset();
+            //Reset();
         }
         else if (_instance != this)
             DestroySelf();
     }
-    private void Start()
-    {
-        scoreText.text = score.ToString();
-        highScoreText.text = currentHighScore.ToString();
+
+    private void Start() {
+        foreach (var stageIndexAndData in stages) {
+            //.ToArray().Select((data, index) => new { index, data })
+            StageData stageData = stageIndexAndData.Value;
+            for (int difficulty = 0; difficulty < 3; difficulty++) {
+                UserStageData userStageData = new UserStageData();
+                userStageData.highScore = ParseSavedScore(PlayerPrefs.GetString(stageData.title, "0;0;0"))[difficulty];
+                userData.stages.Add((stageIndexAndData.Key, difficulty),userStageData);
+            }
+            GameObject stageDisplay = Instantiate(stageDisplayPrefab, selectStageAndDifficultyCanvas.transform);
+            Stage newStage = stageDisplay.GetComponent<Stage>();
+            stageData.stageObject = newStage;
+            
+
+            newStage.name = stageData.title;
+            newStage.SetTitle(stageData.title);
+            newStage.SetColor(stageData.color);
+            newStage.SetAmountOfImages(stageData.images.Count);
+            newStage.SetStage(stageData.stageID);
+
+            newStage.SetScore(0,userData.stages[(stageData.stageID,0)].highScore);
+            newStage.SetScore(1,userData.stages[(stageData.stageID,1)].highScore);
+            newStage.SetScore(2,userData.stages[(stageData.stageID,2)].highScore);
+        }
+        SetScoreTexts();
+
     }
+
+    private void SetScoreTexts() {
+        scoreText.text = userData.stages[(selectedStage, selectedDifficulty)].highScore.ToString();
+        highScoreText.text = userData.stages[(selectedStage, selectedDifficulty)].highScore.ToString();
+    }
+
     private void DestroySelf() {
         if (Application.isPlaying)
             Destroy(this);
@@ -180,7 +229,8 @@ public class GameManager : MonoBehaviour {
             true);
         audioSource.PlayOneShot(correctGuessClip);
         SetTimer(timer + currentTimerGain);
-        ModifyScore(_spritesFromSet[_currentlySelectedImage].amountOfAppearances);
+        ModifyScore(stages[selectedStage].basePoints+
+            _spritesFromSet[_currentlySelectedImage].amountOfAppearances);
     }
 
     private void CorrectGuessFX()
@@ -226,10 +276,12 @@ public class GameManager : MonoBehaviour {
         int.TryParse(splitedImageSetName[2], out amount);
 
   
-        foreach (var imageID in stages[selectedStage].imageList) {
+        foreach (var imageID in stages[selectedStage].images) {
             AddImageFromSet(imageSetName, type, name, imageID);
         }
     }
+
+  
 
     private void AddImageFromSet(string imageSetName, string type, string name, int imageID) {
         string path;
@@ -341,7 +393,7 @@ public class GameManager : MonoBehaviour {
         gameEnded = true;
         Debug.Log("Match Ended");
         yield return new WaitForSeconds(delay);
-        if (currentHighScore < score)
+        if (userData.stages[(selectedStage, selectedDifficulty)].highScore < score)
         {
             StartCoroutine(SetHighScore(score));
         }
@@ -353,7 +405,16 @@ public class GameManager : MonoBehaviour {
         audioSource.PlayOneShot(highScoreClip);
         yield return new WaitForSeconds(.25f);
         //Todo: Add highscore animation
-        PlayerPrefs.SetInt("HighScore",highScoreToSet);
+        userData.stages[(selectedStage, selectedDifficulty)].highScore = highScoreToSet;
+        //TODO: reemplazar con escribir en json
+        PlayerPrefs.SetString(stages[selectedStage].title,
+            userData.stages[(selectedStage, 0)].highScore+";"+
+            userData.stages[(selectedStage, 1)].highScore+";"+
+            userData.stages[(selectedStage, 2)].highScore
+            );
+        //oasar esto a userdata que llame automaticamente cuando se modificque el highscore en user data, agregar funcionn en vez de seteo directo
+        stages[selectedStage].stageObject.SetScore(selectedDifficulty,highScoreToSet);
+        
         highScoreText.text = highScoreToSet.ToString();
     }
 
@@ -377,6 +438,7 @@ public class GameManager : MonoBehaviour {
     public void Reset() {
         //if (disableInput) return;
         selectStageAndDifficultyCanvas.SetActive(false);
+        gameCanvas.SetActive(true);
         SetNumpadByDifficulty(selectedDifficulty);
         bonusOnAmountOfAppearences = (selectedDifficulty+1)*3;
         gameEnded = false;
@@ -462,12 +524,57 @@ public class GameManager : MonoBehaviour {
     {
         selectedDifficulty = difficulty;
         selectedStage = stage;
+        SetScoreTexts();
         Reset();
     }
 
     public void OpenStagesCanvas()
     {
         selectStageAndDifficultyCanvas.SetActive(true);
+        gameCanvas.SetActive(false);
+    }
+    private List<bool> ParseSavedClears(string allClears) {
+        string[] clearedArray = allClears.Split(';');
+        List<bool> clears = new List<bool>();
+
+        foreach (string clear in clearedArray)
+        {
+            if (bool.TryParse(clear, out bool parsedScore))
+            {
+                clears.Add(parsedScore);
+            }
+            else
+            {
+                Debug.LogError("No se pudo convertir el string a bool: " + clear);
+            }
+        }
+        // modificar para recibir tambien cantidad de imagenes en pack?
+        // if (clears.Count != 3) {
+        //     Debug.LogError("Cantidad incorrecta de clears " + allClears);
+        // }
+        return clears;
+    }
+    public static List<int> ParseSavedScore(string allScores) {
+        //string highScoreString = PlayerPrefs.GetString("HighScore", "0;0;0");
+        string[] highScoreArray = allScores.Split(';');
+        List<int> highScores = new List<int>();
+
+        foreach (string score in highScoreArray)
+        {
+            if (int.TryParse(score, out int parsedScore))
+            {
+                highScores.Add(parsedScore);
+            }
+            else
+            {
+                Debug.LogError("No se pudo convertir el string a entero: " + score);
+            }
+        }
+
+        if (highScores.Count != 3) {
+                Debug.LogError("Cantidad incorrecta de puntajes " + allScores);
+        }
+        return highScores;
     }
 }
 
