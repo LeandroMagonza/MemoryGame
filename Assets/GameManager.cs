@@ -7,6 +7,7 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour {
@@ -36,6 +37,10 @@ public class GameManager : MonoBehaviour {
     private Dictionary<int,(Sprite sprite, int amountOfAppearances)> _spritesFromSet = new Dictionary<int, (Sprite sprite, int amountOfAppearances)>();
 
     private List<int> currentlyInGameImages =new List<int>();
+
+    private Dictionary<ShopItemType, int> inventary = new Dictionary<ShopItemType, int>();
+    private Dictionary<ShopItemType, int> matchInventary = new Dictionary<ShopItemType, int>();
+    private Dictionary<ShopItemType, int> upgrades = new Dictionary<ShopItemType, int>();
 
     public AudioSource audioSource;
     public AudioClip correctGuessClip;
@@ -101,7 +106,6 @@ public class GameManager : MonoBehaviour {
         else
             DestroyImmediate(this);
     }
-
     public IEnumerator ProcessGuess(int number)
     {
         disableInput = true;
@@ -121,8 +125,6 @@ public class GameManager : MonoBehaviour {
         CheckAmountOfAppearances();
         if (!gameEnded) NextTurn();
     }
-   
-
     private void CheckAmountOfAppearances()
     {
         if (_spritesFromSet[_currentlySelectedImage].amountOfAppearances == bonusOnAmountOfAppearences)
@@ -132,7 +134,6 @@ public class GameManager : MonoBehaviour {
             RemoveStickerFromPool();
         }
     }
-
     private void NextTurn() {
         turnNumber++;
         if (currentlyInGameImages.Count < 3)
@@ -179,8 +180,7 @@ public class GameManager : MonoBehaviour {
         OnCorrectGuess();
         NextTurn();
     }
-
-        [ContextMenu("UseRemove")]
+    [ContextMenu("UseRemove")]
     public void UseRemove()
     {
         Debug.Log("USE REMOVE");
@@ -208,9 +208,6 @@ public class GameManager : MonoBehaviour {
             _spritesFromSet[_currentlySelectedImage].sprite,
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances - 1);
     }
-
-   
-
     private void OnCorrectGuess()
     {
         CorrectGuessFX();
@@ -221,13 +218,11 @@ public class GameManager : MonoBehaviour {
         SetTimer(maxTimer);
         ModifyScore(_spritesFromSet[_currentlySelectedImage].amountOfAppearances);
     }
-
     private void CorrectGuessFX()
     {
         StartCoroutine(Squash(imageOnDisplay.transform, .2f, 0.1f, 5));
         correctGuessParticle.Play();
     }
-
     private void IncorrectGuessFX()
     {
         StartCoroutine(Shake(imageOnDisplay.transform, .2f, 5, 80));
@@ -244,7 +239,8 @@ public class GameManager : MonoBehaviour {
         lifeCounter.GainLive();
     }
 
-    private void ModifyScore(int modificationAmount) {
+    public void ModifyScore(int modificationAmount) 
+    {
         score += modificationAmount;
         scoreText.text = score.ToString();
         
@@ -450,7 +446,64 @@ public class GameManager : MonoBehaviour {
         SetTimer(timer - Time.deltaTime);
 
     }
+    public void MoveItemFromInventaryToMatchInventary(ShopItemType item)
+    {
+        if (inventary.ContainsKey(item))
+        {
+            if (matchInventary.ContainsKey(item))
+            {
+                matchInventary[item] = matchInventary[item]++;
+            }
+            else
+            {
+                matchInventary.Add(item, 1);
+            }
+            inventary[item]--;
+            if (inventary[item] == 0)
+            {
+                inventary.Remove(item);
+            }
+        }
 
+    }
+    public void UseItemFromMatchInventary(ShopItemType item)
+    {
+        if (matchInventary.ContainsKey(item))
+        {
+            Debug.Log($"You uses {item}");
+            matchInventary[item]--;
+            if (matchInventary[item] == 0)
+            {
+                matchInventary.Remove(item);
+            }
+        }
+        else
+        {
+            Debug.Log($"You dont have any {item}");
+        }
+    }
+    public void AddItemToInventary(ShopItemType item)
+    {
+        if (inventary.ContainsKey(item))
+        {
+            inventary[item] = inventary[item]++;
+        }
+        else
+        {
+            inventary.Add(item, 1);
+        }
+    }
+    public void AddUpgrade(ShopItemType item)
+    {
+        if (upgrades.ContainsKey(item))
+        {
+            upgrades[item] = upgrades[item]++;
+        }
+        else
+        {
+            upgrades.Add(item, 1);
+        }
+    }
     private IEnumerator Squash(Transform transform, float delay, float amount, float speed)
     {
         Vector3 initialScale = transform.localScale;
@@ -499,4 +552,23 @@ public class GameManager : MonoBehaviour {
 public enum ImageSet {
     Pokemons_SPRITESHEET_151,
     Landscapes_IMAGES_10
+}
+
+public enum ShopItemType
+{
+    Consumible_Clue,
+    Consumible_Remove,
+    Consumible_Cut,
+    Consumible_Peek,
+
+    Upgrade_ExtraLife,
+    Upgrade_ProtectedLife,
+    Upgrade_MaxClue,
+    Upgrade_BetterClue,
+    Upgrade_MaxRemove,
+    Upgrade_MaxCut,
+    Upgrade_BetterCut,
+    Upgrade_BetterPeek,
+    Upgrade_Block,
+    Upgrade_DeathDefy
 }
