@@ -57,34 +57,8 @@ public class GameManager : MonoBehaviour {
 
     public int selectedStage = 0;
     public int selectedDifficulty = 0;
-    
-    Dictionary<int, StageData> stages = new () {
-        {
-            0,new StageData(0,"Stage 0",0,Color.green, new List<int>()
-                {0,3,6,24}
-            )
-        },
-        {
-            1,new StageData(1,"Stage 1",1,Color.cyan, new List<int>()
-                {15,18,9,40,42,51}
-            )
-        },    
-        {
-            2,new StageData(2,"Stage 2",2,Color.yellow, new List<int>() 
-                { 1, 4, 7, 28, 31, 53, 108, 132, 128 }
-            )
-        },
-        {
-            3,new StageData(3,"Stage 3",3,Color.magenta, new List<int>() 
-                {11,23,25,49,57,76,107,112,121,122,127,131}
-            )
-        },
-        {
-            4,new StageData(4,"Stage 4",4,Color.red, new List<int>() 
-                { 2, 5, 8, 33, 64, 67, 93, 94, 129, 130, 133, 134, 135, 142, 143, 144, 145, 148, 149, 150 }
-            )
-        },
-    };
+
+    private Dictionary<int, StageData> _stages;
 
     public UserData userData = new UserData();
     public GameObject selectStageAndDifficultyCanvas;
@@ -95,6 +69,10 @@ public class GameManager : MonoBehaviour {
     public GameObject numpadRow2;
 
     public GameObject stageDisplayPrefab;
+
+    private Match _currentMatch;
+    private int _currentStreak = 0;
+    
     public static GameManager Instance {
         get {
             if (_instance == null)
@@ -108,16 +86,18 @@ public class GameManager : MonoBehaviour {
         if (_instance == null) {
             _instance = this as GameManager;
             audioSource = GetComponent<AudioSource>();
-            //Reset();
         }
         else if (_instance != this)
             DestroySelf();
     }
 
-    private void Start() {
-        foreach (var stageIndexAndData in stages) {
-            //stages = LoadStages();
-            foreach (var stage in stages.Values)
+    private void Start()
+    {
+        _stages = LoadStages();
+        
+        foreach (var stageIndexAndData in _stages) {
+            //_stages = LoadStages();
+            foreach (var stage in _stages.Values)
             {
                 if (ColorUtility.TryParseHtmlString("#" + stage.color, out Color colorValue))
                 {
@@ -165,23 +145,37 @@ public class GameManager : MonoBehaviour {
             DestroyImmediate(this);
     }
 
-    public IEnumerator ProcessGuess(int number)
+    public IEnumerator ProcessTurnAction(int number)
     {
         disableInput = true;
         Debug.Log("Guessed number " + number + ", amount of appearances " + _spritesFromSet[_currentlySelectedImage].amountOfAppearances);
+        TurnAction turnAction;
+        int scoreModification = 0;
         if (number == _spritesFromSet[_currentlySelectedImage].amountOfAppearances)
         {
             Debug.Log("CorrectGuess");
-            OnCorrectGuess();
+            scoreModification = OnCorrectGuess();
+            turnAction = TurnAction.GuessCorrect;
         }
         else
         {
             Debug.Log("IncorrectGuess");
             OnIncorrectGuess();
+            turnAction = TurnAction.GuessIncorrect;
         }
         yield return new WaitForSeconds(delayBetweenImages);
         // si ya la imagen aparecio 9 veces, se la saca del pool
         CheckAmountOfAppearances();
+        _currentMatch.AddTurn(
+            _currentlySelectedImage,
+            _spritesFromSet[_currentlySelectedImage].amountOfAppearances,
+            0f,
+            number,
+            turnAction,
+            lifeCounter.lives,
+            0f,
+            scoreModification
+            );
         if (!gameEnded) NextTurn();
     }
    
@@ -230,11 +224,17 @@ public class GameManager : MonoBehaviour {
         _spritesFromSet[_currentlySelectedImage] = (
             _spritesFromSet[_currentlySelectedImage].sprite,
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances - 1);
+        SetCurrentStreak(0);
     }
 
+    public void SetCurrentStreak(int newCurrentStreakAmount)
+    {
+        _currentStreak = newCurrentStreakAmount;
+        //TODO: set currentStreak display and multiplayer display, and update here
+    }
    
 
-    private void OnCorrectGuess()
+    private int OnCorrectGuess()
     {
         CorrectGuessFX();
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
@@ -242,8 +242,13 @@ public class GameManager : MonoBehaviour {
             true);
         audioSource.PlayOneShot(correctGuessClip);
         SetTimer(timer + currentTimerGain);
-        ModifyScore(stages[selectedStage].basePoints+
-            _spritesFromSet[_currentlySelectedImage].amountOfAppearances);
+        int scoreModification = _stages[selectedStage].basePoints +
+                                _spritesFromSet[_currentlySelectedImage].amountOfAppearances
+                                + CalculateScoreStreakBonus();
+        ModifyScore(scoreModification);
+        SetCurrentStreak(_currentStreak+1);
+        return scoreModification;
+               ;
     }
 
     private void CorrectGuessFX()
@@ -289,7 +294,7 @@ public class GameManager : MonoBehaviour {
         int.TryParse(splitedImageSetName[2], out amount);
 
   
-        foreach (var imageID in stages[selectedStage].images) {
+        foreach (var imageID in _stages[selectedStage].images) {
             AddImageFromSet(imageSetName, type, name, imageID);
         }
     }
@@ -420,13 +425,13 @@ public class GameManager : MonoBehaviour {
         //Todo: Add highscore animation
         userData.stages[(selectedStage, selectedDifficulty)].highScore = highScoreToSet;
         //TODO: reemplazar con escribir en json
-        PlayerPrefs.SetString(stages[selectedStage].title,
+        PlayerPrefs.SetString(_stages[selectedStage].title,
             userData.stages[(selectedStage, 0)].highScore+";"+
             userData.stages[(selectedStage, 1)].highScore+";"+
             userData.stages[(selectedStage, 2)].highScore
             );
         //oasar esto a userdata que llame automaticamente cuando se modificque el highscore en user data, agregar funcionn en vez de seteo directo
-        stages[selectedStage].stageObject.SetScore(selectedDifficulty,highScoreToSet);
+        _stages[selectedStage].stageObject.SetScore(selectedDifficulty,highScoreToSet);
         
         highScoreText.text = highScoreToSet.ToString();
     }
@@ -469,6 +474,8 @@ public class GameManager : MonoBehaviour {
         _currentlySelectedImage = 0;
         SetRandomImage();
         disableInput = false;
+        _currentMatch = new Match(selectedStage,selectedDifficulty,false);
+        _currentStreak = 0;
 
     }
 
@@ -590,26 +597,36 @@ public class GameManager : MonoBehaviour {
         return highScores;
     }
     
+  
+
+    private void OnApplicationQuit()
+    {
+        //SaveStages(_stages);
+        SaveUserData(userData);
+    }
+    
+  
     public void SaveStages(Dictionary<int, StageData> stagesToSave)
     {
         List<StageData> stageList = stagesToSave.Values.ToList();
         string json = JsonUtility.ToJson(new Serialization<StageData>(stageList), true);
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        string filePath = Path.Combine(Application.persistentDataPath, "_stages.json");
         File.WriteAllText(filePath, json);
         Debug.Log("Stages saved to " + filePath);
     }
-
-    private void OnApplicationQuit()
+    public void SaveUserData(UserData userData)
     {
-        SaveStages(stages);
+        string json = JsonUtility.ToJson(userData, true);
+        string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
+        File.WriteAllText(filePath, json);
+        Debug.Log("UserData saved to " + filePath);
     }
-    
     public Dictionary<int, StageData> LoadStages()
     {
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        string filePath = Path.Combine(Application.persistentDataPath, "_stages.json");
         if (!File.Exists(filePath))
         {
-            Debug.Log("No saved stages found at " + filePath);
+            Debug.Log("No saved _stages found at " + filePath);
             return new Dictionary<int, StageData>();
         }
 
@@ -619,7 +636,31 @@ public class GameManager : MonoBehaviour {
         Debug.Log("Stages loaded from " + filePath);
         return stages;
     }
+    public UserData LoadUserData()
+    {
+        string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
+        if (!File.Exists(filePath))
+        {
+            Debug.Log("No saved userData found at " + filePath);
+            return new UserData(); // O puedes devolver null o una nueva instancia con valores predeterminados
+        }
 
+        string json = File.ReadAllText(filePath);
+        UserData userData = JsonUtility.FromJson<UserData>(json);
+        Debug.Log("UserData loaded from " + filePath);
+        return userData;
+    }
+
+    public int CalculateScoreStreakBonus()
+    {
+        int maxStreakBonus = 5;
+        int calculatedStreakBonus = (int)Math.Floor(((float)_currentStreak / 2));
+        if (calculatedStreakBonus > maxStreakBonus)
+        {
+            calculatedStreakBonus = maxStreakBonus;
+        }
+        return calculatedStreakBonus;
+    }
 
 }
 

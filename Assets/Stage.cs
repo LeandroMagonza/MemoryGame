@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
-using UnityEditor.XR;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
@@ -61,15 +60,14 @@ public class StageData
     }
 }
 
-
+[Serializable]
 public class UserData
 {
-    public string name;
-    public int id;
-    public List<int> images;
+    public string name = "NOT_SET";
+    public int id = 0;
     public Dictionary<(int stage, int difficulty), UserStageData> stages = new();
 }
-
+[Serializable]
 public class UserStageData {
     public List<int> clearedImages;
     public int highScore;
@@ -83,7 +81,7 @@ public class UserStageData {
     public List<Match> matches;
 
 }
-
+[Serializable]
 public enum Achievement {
     ClearedEveryImage,
     ClearedStage,
@@ -91,8 +89,11 @@ public enum Achievement {
     ClearedStageNoUpgrades,
     ClearedStageNoMistakesNoUpgrades,
 }
-
-public class Match {
+[Serializable]
+public class Match
+{
+    //public List<Updgrades> upgrades;
+    public List<(int id, int level)> imageLevels;
     public int stage;
     public int difficulty;
     public int score;
@@ -122,12 +123,13 @@ public class Match {
         return (clearedImages, achievementsFullFilled);
     }
 }
-
+[Serializable]
 public enum TurnAction {
     GuessCorrect,
     GuessIncorrect,
     UseClue,
     UseRemove,
     Peek,
+    ReduceOptions
 }
 
