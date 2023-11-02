@@ -59,28 +59,6 @@ public class StageData
         this.images = images;
     }
 }
-
-[Serializable]
-public class UserData
-{
-    public string name = "NOT_SET";
-    public int id = 0;
-    public Dictionary<(int stage, int difficulty), UserStageData> stages = new();
-}
-[Serializable]
-public class UserStageData {
-    public List<int> clearedImages;
-    public int highScore;
-    public Dictionary<Achievement, bool> achievements = new Dictionary<Achievement, bool>() {
-        { Achievement.ClearedEveryImage, false },
-        { Achievement.ClearedStage, false },
-        { Achievement.ClearedStageNoMistakes, false },
-        { Achievement.ClearedStageNoUpgrades, false },
-        { Achievement.ClearedStageNoMistakesNoUpgrades, false }
-    };
-    public List<Match> matches;
-
-}
 [Serializable]
 public enum Achievement {
     ClearedEveryImage,
@@ -96,11 +74,12 @@ public class Match
     public List<(int id, int level)> imageLevels;
     public int stage;
     public int difficulty;
+    public DateTime date;
     public int score;
     public int amountOfTurns;
     public bool hardcore;
     public List<(int turn, int imageID, int amountOfAppearences, float turnDuration, int guess, TurnAction action, int
-        remainingLives, float multiplier, int scoreModification)> turnHistory = new ();
+        remainingLives, int multiplier, int scoreModification)> turnHistory = new ();
 
     public Match(int stage, int difficulty, bool hardcore) {
         this.stage = stage;
@@ -109,8 +88,8 @@ public class Match
     }
 
     public void AddTurn(int imageID, int amountOfAppearences, float turnDuration, int guess, TurnAction action, int
-        remainingLives, float multiplier, int scoreModification) {
-        turnHistory.Add((turnHistory.Count, imageID, amountOfAppearences, turnDuration, guess,action,remainingLives, multiplier, scoreModification));
+        remainingLives, int streak, int scoreModification) {
+        turnHistory.Add((turnHistory.Count, imageID, amountOfAppearences, turnDuration, guess,action,remainingLives, streak, scoreModification));
     }
 
     public (List<int> clearedImages, List<Achievement> achievementsFullfilled) EndMatch() {
@@ -123,6 +102,46 @@ public class Match
         return (clearedImages, achievementsFullFilled);
     }
 }
+[Serializable]
+public class UserData
+{
+    public string name;
+    public int id;
+    public List<UserStageData> stages;
+
+    public UserStageData GetUserStageData(int stage,int difficulty)
+    {
+        foreach (var VARIABLE in stages)
+        {
+            if (VARIABLE.stage == stage && VARIABLE.difficulty == difficulty)
+            {
+                return VARIABLE;
+            }
+        }
+        return null;
+    }
+}
+
+[Serializable]
+public class UserStageData
+{
+    public int stage;
+    public int difficulty;
+    public List<int> clearedImages;
+    public int highScore;
+    public List<AchievementData> achievements;
+    public List<Match> matches;
+}
+
+[Serializable]
+public class AchievementData
+{
+    public string achievement;
+    public bool unlocked;
+}
+
+// Otras clases...
+
 [Serializable]
 public enum TurnAction {
     GuessCorrect,

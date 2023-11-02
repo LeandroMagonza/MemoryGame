@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using ColorUtility = UnityEngine.ColorUtility;
 using Random = UnityEngine.Random;
+using Newtonsoft.Json;
 
 public class GameManager : MonoBehaviour {
     private static GameManager _instance;
@@ -94,7 +95,7 @@ public class GameManager : MonoBehaviour {
     private void Start()
     {
         _stages = LoadStages();
-        
+        userData = LoadUserData();
         foreach (var stageIndexAndData in _stages) {
             //_stages = LoadStages();
             foreach (var stage in _stages.Values)
@@ -107,11 +108,7 @@ public class GameManager : MonoBehaviour {
             
             //.ToArray().Select((data, index) => new { index, data })
             StageData stageData = stageIndexAndData.Value;
-            for (int difficulty = 0; difficulty < 3; difficulty++) {
-                UserStageData userStageData = new UserStageData();
-                userStageData.highScore = ParseSavedScore(PlayerPrefs.GetString(stageData.title, "0;0;0"))[difficulty];
-                userData.stages.Add((stageIndexAndData.Key, difficulty),userStageData);
-            }
+
             GameObject stageDisplay = Instantiate(stageDisplayPrefab, selectStageAndDifficultyCanvas.transform);
             Stage newStage = stageDisplay.GetComponent<Stage>();
             stageData.stageObject = newStage;
@@ -123,9 +120,18 @@ public class GameManager : MonoBehaviour {
             newStage.SetAmountOfImages(stageData.images.Count);
             newStage.SetStage(stageData.stageID);
 
-            newStage.SetScore(0,userData.stages[(stageData.stageID,0)].highScore);
-            newStage.SetScore(1,userData.stages[(stageData.stageID,1)].highScore);
-            newStage.SetScore(2,userData.stages[(stageData.stageID,2)].highScore);
+            for (int difficulty = 0; difficulty < 3; difficulty++)
+            {
+                if (userData.GetUserStageData(stageData.stageID,difficulty) is not null)
+                {
+                    newStage.SetScore(difficulty,userData.GetUserStageData(stageData.stageID,difficulty).highScore);
+                }
+                else
+                {
+                    newStage.SetScore(difficulty,0);
+                }
+                
+            }
         }
         
         
@@ -134,8 +140,8 @@ public class GameManager : MonoBehaviour {
     }
 
     private void SetScoreTexts() {
-        scoreText.text = userData.stages[(selectedStage, selectedDifficulty)].highScore.ToString();
-        highScoreText.text = userData.stages[(selectedStage, selectedDifficulty)].highScore.ToString();
+        scoreText.text = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore.ToString();
+        highScoreText.text = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore.ToString();
     }
 
     private void DestroySelf() {
@@ -173,7 +179,7 @@ public class GameManager : MonoBehaviour {
             number,
             turnAction,
             lifeCounter.lives,
-            0f,
+            _currentStreak,
             scoreModification
             );
         if (!gameEnded) NextTurn();
@@ -411,7 +417,7 @@ public class GameManager : MonoBehaviour {
         gameEnded = true;
         Debug.Log("Match Ended");
         yield return new WaitForSeconds(delay);
-        if (userData.stages[(selectedStage, selectedDifficulty)].highScore < score)
+        if (userData.GetUserStageData(selectedStage, selectedDifficulty).highScore < score)
         {
             StartCoroutine(SetHighScore(score));
         }
@@ -423,13 +429,8 @@ public class GameManager : MonoBehaviour {
         audioSource.PlayOneShot(highScoreClip);
         yield return new WaitForSeconds(.25f);
         //Todo: Add highscore animation
-        userData.stages[(selectedStage, selectedDifficulty)].highScore = highScoreToSet;
-        //TODO: reemplazar con escribir en json
-        PlayerPrefs.SetString(_stages[selectedStage].title,
-            userData.stages[(selectedStage, 0)].highScore+";"+
-            userData.stages[(selectedStage, 1)].highScore+";"+
-            userData.stages[(selectedStage, 2)].highScore
-            );
+        userData.GetUserStageData(selectedStage, selectedDifficulty).highScore = highScoreToSet;
+
         //oasar esto a userdata que llame automaticamente cuando se modificque el highscore en user data, agregar funcionn en vez de seteo directo
         _stages[selectedStage].stageObject.SetScore(selectedDifficulty,highScoreToSet);
         
@@ -602,6 +603,7 @@ public class GameManager : MonoBehaviour {
     private void OnApplicationQuit()
     {
         //SaveStages(_stages);
+        userData.GetUserStageData(0, 0).highScore = 500;
         SaveUserData(userData);
     }
     
@@ -616,25 +618,10 @@ public class GameManager : MonoBehaviour {
     }
     public void SaveUserData(UserData userData)
     {
-        string json = JsonUtility.ToJson(userData, true);
         string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
+        string json = JsonConvert.SerializeObject(userData, Formatting.Indented);
         File.WriteAllText(filePath, json);
         Debug.Log("UserData saved to " + filePath);
-    }
-    public Dictionary<int, StageData> LoadStages()
-    {
-        string filePath = Path.Combine(Application.persistentDataPath, "_stages.json");
-        if (!File.Exists(filePath))
-        {
-            Debug.Log("No saved _stages found at " + filePath);
-            return new Dictionary<int, StageData>();
-        }
-
-        string json = File.ReadAllText(filePath);
-        Serialization<StageData> stageList = JsonUtility.FromJson<Serialization<StageData>>(json);
-        Dictionary<int, StageData> stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
-        Debug.Log("Stages loaded from " + filePath);
-        return stages;
     }
     public UserData LoadUserData()
     {
@@ -646,11 +633,33 @@ public class GameManager : MonoBehaviour {
         }
 
         string json = File.ReadAllText(filePath);
-        UserData userData = JsonUtility.FromJson<UserData>(json);
-        Debug.Log("UserData loaded from " + filePath);
+        UserData userData = JsonConvert.DeserializeObject<UserData>(json);
+
+        if (userData != null)
+        {
+            Debug.Log("UserData loaded from " + filePath + " stages:" + userData.stages.Count);
+        }
+        else
+        {
+            Debug.LogError("Failed to load UserData from " + filePath);
+        }
         return userData;
     }
+    public Dictionary<int, StageData> LoadStages()
+    {
+        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        if (!File.Exists(filePath))
+        {
+            Debug.Log("No saved stages found at " + filePath);
+            return new Dictionary<int, StageData>();
+        }
 
+        string json = File.ReadAllText(filePath);
+        Serialization<StageData> stageList = JsonUtility.FromJson<Serialization<StageData>>(json);
+        Dictionary<int, StageData> stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
+        Debug.Log("Stages loaded from " + filePath);
+        return stages;
+    }
     public int CalculateScoreStreakBonus()
     {
         int maxStreakBonus = 5;
