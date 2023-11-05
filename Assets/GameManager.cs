@@ -171,7 +171,6 @@ public class GameManager : MonoBehaviour {
         }
         yield return new WaitForSeconds(delayBetweenImages);
         // si ya la imagen aparecio 9 veces, se la saca del pool
-        CheckAmountOfAppearances();
         _currentMatch.AddTurn(
             _currentlySelectedImage,
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances,
@@ -182,6 +181,7 @@ public class GameManager : MonoBehaviour {
             _currentStreak,
             scoreModification
             );
+        CheckAmountOfAppearances();
         if (!gameEnded) NextTurn();
     }
    
@@ -610,12 +610,46 @@ public class GameManager : MonoBehaviour {
   
     public void SaveStages(Dictionary<int, StageData> stagesToSave)
     {
-        List<StageData> stageList = stagesToSave.Values.ToList();
-        string json = JsonUtility.ToJson(new Serialization<StageData>(stageList), true);
-        string filePath = Path.Combine(Application.persistentDataPath, "_stages.json");
+        List<StageData> stageList = new List<StageData>(stagesToSave.Values);
+        string json = JsonConvert.SerializeObject(stageList, Formatting.Indented);
+        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
         File.WriteAllText(filePath, json);
         Debug.Log("Stages saved to " + filePath);
     }
+
+    public Dictionary<int, StageData> LoadStages()
+    {
+        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        if (!File.Exists(filePath))
+        {
+            Debug.Log("No saved stages found at " + filePath);
+            return new Dictionary<int, StageData>();
+        }
+        Debug.Log(filePath);
+        string json = File.ReadAllText(filePath);
+
+        // Deserialize the JSON to the intermediate object
+        Serialization<StageData> stageList = JsonConvert.DeserializeObject<Serialization<StageData>>(json);
+        // Después de deserializar
+   
+
+        if (stageList == null || stageList.items == null)
+        {
+            Debug.LogError("Failed to deserialize stages.");
+            return new Dictionary<int, StageData>();
+        }
+        foreach (var stageData in stageList.items)
+        {
+            stageData.ConvertColorStringToColorValue();
+        }
+        
+        // Convert the list to a dictionary
+        Dictionary<int, StageData> stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
+        Debug.Log("Stages loaded from " + filePath + " stages: " + stages.Count);
+        return stages;
+    }
+
+
     public void SaveUserData(UserData userData)
     {
         string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
@@ -645,21 +679,7 @@ public class GameManager : MonoBehaviour {
         }
         return userData;
     }
-    public Dictionary<int, StageData> LoadStages()
-    {
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
-        if (!File.Exists(filePath))
-        {
-            Debug.Log("No saved stages found at " + filePath);
-            return new Dictionary<int, StageData>();
-        }
 
-        string json = File.ReadAllText(filePath);
-        Serialization<StageData> stageList = JsonUtility.FromJson<Serialization<StageData>>(json);
-        Dictionary<int, StageData> stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
-        Debug.Log("Stages loaded from " + filePath);
-        return stages;
-    }
     public int CalculateScoreStreakBonus()
     {
         int maxStreakBonus = 5;

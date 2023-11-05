@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -42,6 +43,7 @@ public class StageData
     public int stageID;
     public string title;
     public int basePoints;
+    [JsonProperty("color")]
     public string color; // Almacenar como string en formato hexadecimal
     public List<int> images;
     public Stage stageObject;
@@ -49,6 +51,12 @@ public class StageData
     [NonSerialized]
     public Color ColorValue; // Propiedad para acceder al valor de color
 
+    // Constructor sin parámetros
+    public StageData()
+    {
+    }
+
+    // Constructor con parámetros
     public StageData(int stageID, string title, int basePoints, Color color, List<int> images)
     {
         this.stageID = stageID;
@@ -58,7 +66,17 @@ public class StageData
         this.color = ColorUtility.ToHtmlStringRGBA(color);
         this.images = images;
     }
+
+    // Método para convertir el string hexadecimal a Color después de la deserialización
+    public void ConvertColorStringToColorValue()
+    {
+        if (ColorUtility.TryParseHtmlString("#" + color, out Color colorValue))
+        {
+            ColorValue = colorValue;
+        }
+    }
 }
+
 [Serializable]
 public enum Achievement {
     ClearedEveryImage,
