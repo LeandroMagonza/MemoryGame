@@ -23,6 +23,6 @@ public class NumpadButton : MonoBehaviour {
             return;
         }
        Debug.Log("Clicked number "+number);
-       StartCoroutine(GameManager.Instance.ProcessGuess(number));
+       StartCoroutine(GameManager.Instance.ProcessTurnAction(number));
     }
 }

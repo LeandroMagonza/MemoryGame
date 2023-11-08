@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using TMPro;
 using Unity.Mathematics;
@@ -8,7 +9,9 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using static UnityEditor.Progress;
+using ColorUtility = UnityEngine.ColorUtility;
 using Random = UnityEngine.Random;
+using Newtonsoft.Json;
 
 public class GameManager : MonoBehaviour {
     private static GameManager _instance;
@@ -24,7 +27,7 @@ public class GameManager : MonoBehaviour {
     public int turnNumber = 1;
     public int bonusOnAmountOfAppearences = 9;
     public int bonusMultiplicator = 1;
-    public int currentHighScore => PlayerPrefs.GetInt("HighScore",0);
+
     public TextMeshProUGUI highScoreText; 
     
     public FadeOut amountOfAppearancesText; 
@@ -70,6 +73,25 @@ public class GameManager : MonoBehaviour {
     public int maxCluesAmount = 5;
     public int currentRemoves = 0;
     public int maxRemovesAmount = 5;
+    public int selectedStage = 0;
+    public int selectedDifficulty = 0;
+
+    private Dictionary<int, StageData> _stages;
+
+    public UserData userData = new UserData();
+    public GameObject selectStageAndDifficultyCanvas;
+    public GameObject gameCanvas;
+
+    public GameObject numpadRow0;
+    public GameObject numpadRow1;
+    public GameObject numpadRow2;
+
+    public GameObject stageDisplayPrefab;
+
+    private Match _currentMatch;
+    private int _currentCombo = 0;
+    public TextMeshProUGUI comboBonusText;
+    public TextMeshProUGUI comboText;
 
     public static GameManager Instance {
         get {
@@ -83,45 +105,105 @@ public class GameManager : MonoBehaviour {
     protected void Awake() {
         if (_instance == null) {
             _instance = this as GameManager;
-            LoadImages(imageSetName.ToString());
-            AddImages(4);
-            SetRandomImage();
             audioSource = GetComponent<AudioSource>();
         }
         else if (_instance != this)
             DestroySelf();
     }
+
     private void Start()
     {
-        scoreText.text = score.ToString();
         buttonClue.interactable = currentClues > 0;
         buttonRemove.interactable = currentRemoves > 0;
         buttonTextClue.text = currentClues.ToString();
         buttonTextRemove.text = currentRemoves.ToString();
         highScoreText.text = currentHighScore.ToString();
+        _stages = LoadStages();
+        userData = LoadUserData();
+        foreach (var stageIndexAndData in _stages) {
+            //_stages = LoadStages();
+            foreach (var stage in _stages.Values)
+            {
+                if (ColorUtility.TryParseHtmlString("#" + stage.color, out Color colorValue))
+                {
+                    stage.ColorValue = colorValue;
+                }
+            }
+            
+            //.ToArray().Select((data, index) => new { index, data })
+            StageData stageData = stageIndexAndData.Value;
+
+            GameObject stageDisplay = Instantiate(stageDisplayPrefab, selectStageAndDifficultyCanvas.transform);
+            Stage newStage = stageDisplay.GetComponent<Stage>();
+            stageData.stageObject = newStage;
+            
+
+            newStage.name = stageData.title;
+            newStage.SetTitle(stageData.title);
+            newStage.SetColor(stageData.ColorValue);
+            newStage.SetAmountOfImages(stageData.images.Count);
+            newStage.SetStage(stageData.stageID);
+
+            for (int difficulty = 0; difficulty < 3; difficulty++)
+            {
+                if (userData.GetUserStageData(stageData.stageID,difficulty) is not null)
+                {
+                    newStage.SetScore(difficulty,userData.GetUserStageData(stageData.stageID,difficulty).highScore);
+                }
+                else
+                {
+                    newStage.SetScore(difficulty,0);
+                }
+                
+            }
+        }
+        SetScoreTexts();
+
     }
+
+    private void SetScoreTexts() {
+        scoreText.text = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore.ToString();
+        highScoreText.text = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore.ToString();
+    }
+
     private void DestroySelf() {
         if (Application.isPlaying)
             Destroy(this);
         else
             DestroyImmediate(this);
     }
-    public IEnumerator ProcessGuess(int number)
+
+    public IEnumerator ProcessTurnAction(int number)
     {
         disableInput = true;
         Debug.Log("Guessed number " + number + ", amount of appearances " + _spritesFromSet[_currentlySelectedImage].amountOfAppearances);
+        TurnAction turnAction;
+        int scoreModification = 0;
+        float timerModification = maxTimer - timer;
         if (number == _spritesFromSet[_currentlySelectedImage].amountOfAppearances)
         {
             Debug.Log("CorrectGuess");
-            OnCorrectGuess();
+            scoreModification = OnCorrectGuess();
+            turnAction = TurnAction.GuessCorrect;
         }
         else
         {
             Debug.Log("IncorrectGuess");
             OnIncorrectGuess();
+            turnAction = TurnAction.GuessIncorrect;
         }
         yield return new WaitForSeconds(delayBetweenImages);
         // si ya la imagen aparecio 9 veces, se la saca del pool
+        _currentMatch.AddTurn(
+            _currentlySelectedImage,
+            _spritesFromSet[_currentlySelectedImage].amountOfAppearances,
+            timerModification,
+            number,
+            turnAction,
+            lifeCounter.lives,
+            _currentCombo,
+            scoreModification
+            );
         CheckAmountOfAppearances();
         if (!gameEnded) NextTurn();
     }
@@ -207,8 +289,19 @@ public class GameManager : MonoBehaviour {
         _spritesFromSet[_currentlySelectedImage] = (
             _spritesFromSet[_currentlySelectedImage].sprite,
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances - 1);
+        SetCurrentCombo(0);
     }
-    private void OnCorrectGuess()
+
+    public void SetCurrentCombo(int newCurrentComboAmount)
+    {
+        _currentCombo = newCurrentComboAmount;
+        comboBonusText.text = CalculateScoreComboBonus().ToString();
+        comboText.text = _currentCombo.ToString(); 
+        //TODO: add animation
+    }
+   
+
+    private int OnCorrectGuess()
     {
         CorrectGuessFX();
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
@@ -216,8 +309,14 @@ public class GameManager : MonoBehaviour {
             true);
         audioSource.PlayOneShot(correctGuessClip);
         SetTimer(maxTimer);
-        ModifyScore(_spritesFromSet[_currentlySelectedImage].amountOfAppearances);
+        int scoreModification = _stages[selectedStage].basePoints +
+                                _spritesFromSet[_currentlySelectedImage].amountOfAppearances
+                                + CalculateScoreComboBonus();
+        ModifyScore(scoreModification);
+        SetCurrentCombo(_currentCombo+1);
+        return scoreModification;
     }
+
     private void CorrectGuessFX()
     {
         StartCoroutine(Squash(imageOnDisplay.transform, .2f, 0.1f, 5));
@@ -259,15 +358,13 @@ public class GameManager : MonoBehaviour {
         string type = splitedImageSetName[1];
         int amount;
         int.TryParse(splitedImageSetName[2], out amount);
-        List<int> selection = new List<int>() { 0, 3, 6, 24, 132  };
-        // for (int imageID = 0; imageID < amount; imageID++) {
-        //     AddImageFromSet(imageSetName, type, name, imageID);
-        // }
 
-        foreach (var imageID in selection) {
+        foreach (var imageID in _stages[selectedStage].images) {
             AddImageFromSet(imageSetName, type, name, imageID);
         }
     }
+
+  
 
     private void AddImageFromSet(string imageSetName, string type, string name, int imageID) {
         string path;
@@ -378,11 +475,18 @@ public class GameManager : MonoBehaviour {
         buttonReplay.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
         Debug.Log("Match Ended");
+        SaveMatch();
         yield return new WaitForSeconds(delay);
-        if (currentHighScore < score)
+        userData.coins += score;
+        if (userData.GetUserStageData(selectedStage, selectedDifficulty).highScore < score)
         {
             StartCoroutine(SetHighScore(score));
         }
+    }
+
+    private void SaveMatch() {
+        userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
+        SaveUserData();
     }
 
     private IEnumerator SetHighScore(int highScoreToSet)
@@ -391,7 +495,11 @@ public class GameManager : MonoBehaviour {
         audioSource.PlayOneShot(highScoreClip);
         yield return new WaitForSeconds(.25f);
         //Todo: Add highscore animation
-        PlayerPrefs.SetInt("HighScore",highScoreToSet);
+        userData.GetUserStageData(selectedStage, selectedDifficulty).highScore = highScoreToSet;
+
+        //oasar esto a userdata que llame automaticamente cuando se modificque el highscore en user data, agregar funcionn en vez de seteo directo
+        _stages[selectedStage].stageObject.SetScore(selectedDifficulty,highScoreToSet);
+        
         highScoreText.text = highScoreToSet.ToString();
     }
 
@@ -416,12 +524,17 @@ public class GameManager : MonoBehaviour {
 
     public void Reset() {
         //if (disableInput) return;
+        selectStageAndDifficultyCanvas.SetActive(false);
+        gameCanvas.SetActive(true);
+        SetNumpadByDifficulty(selectedDifficulty);
+        bonusOnAmountOfAppearences = (selectedDifficulty+1)*3;
         gameEnded = false;
         buttonReplay.transform.parent.gameObject.SetActive(false);
         audioSource.Play();
         SetTimer(15);
         SetScore(0);
         turnNumber = 1;
+        SetCurrentCombo(0);
         bonusMultiplicator = 1;
         lifeCounter.ResetLives();
         LoadImages(imageSetName.ToString());
@@ -431,6 +544,8 @@ public class GameManager : MonoBehaviour {
         _currentlySelectedImage = 0;
         SetRandomImage();
         disableInput = false;
+        _currentMatch = new Match(selectedStage,selectedDifficulty,false);
+        _currentCombo = 0;
 
     }
     private void Update()
@@ -441,6 +556,18 @@ public class GameManager : MonoBehaviour {
             AddRemove();
         }
     }
+
+    private void SetNumpadByDifficulty(int difficulty)
+    {
+        numpadRow1.SetActive(false);
+        numpadRow2.SetActive(false);
+        if (difficulty > 0)
+        {
+            numpadRow1.SetActive(true);
+            if (difficulty > 1) numpadRow2.SetActive(true);
+        }
+    }
+
     private void FixedUpdate() {
         if (gameEnded) return;
         SetTimer(timer - Time.deltaTime);
@@ -547,6 +674,156 @@ public class GameManager : MonoBehaviour {
         transform.localPosition = initialPosition;
         StopCoroutine(Shake(transform, delay: 0, amount: 0, speed: 0));
     }
+
+    public void SetStageAndDifficulty(int stage, int difficulty)
+    {
+        selectedDifficulty = difficulty;
+        selectedStage = stage;
+        SetScoreTexts();
+        Reset();
+    }
+
+    public void OpenStagesCanvas()
+    {
+        selectStageAndDifficultyCanvas.SetActive(true);
+        gameCanvas.SetActive(false);
+    }
+    private List<bool> ParseSavedClears(string allClears) {
+        string[] clearedArray = allClears.Split(';');
+        List<bool> clears = new List<bool>();
+
+        foreach (string clear in clearedArray)
+        {
+            if (bool.TryParse(clear, out bool parsedScore))
+            {
+                clears.Add(parsedScore);
+            }
+            else
+            {
+                Debug.LogError("No se pudo convertir el string a bool: " + clear);
+            }
+        }
+        // modificar para recibir tambien cantidad de imagenes en pack?
+        // if (clears.Count != 3) {
+        //     Debug.LogError("Cantidad incorrecta de clears " + allClears);
+        // }
+        return clears;
+    }
+    public static List<int> ParseSavedScore(string allScores) {
+        //string highScoreString = PlayerPrefs.GetString("HighScore", "0;0;0");
+        string[] highScoreArray = allScores.Split(';');
+        List<int> highScores = new List<int>();
+
+        foreach (string score in highScoreArray)
+        {
+            if (int.TryParse(score, out int parsedScore))
+            {
+                highScores.Add(parsedScore);
+            }
+            else
+            {
+                Debug.LogError("No se pudo convertir el string a entero: " + score);
+            }
+        }
+
+        if (highScores.Count != 3) {
+                Debug.LogError("Cantidad incorrecta de puntajes " + allScores);
+        }
+        return highScores;
+    }
+    
+  
+
+    private void OnApplicationQuit()
+    {
+        //SaveStages(_stages);
+        SaveUserData();
+    }
+    
+  
+    public void SaveStages(Dictionary<int, StageData> stagesToSave)
+    {
+        List<StageData> stageList = new List<StageData>(stagesToSave.Values);
+        string json = JsonConvert.SerializeObject(stageList, Formatting.Indented);
+        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        File.WriteAllText(filePath, json);
+        Debug.Log("Stages saved to " + filePath);
+    }
+
+    public Dictionary<int, StageData> LoadStages()
+    {
+        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        if (!File.Exists(filePath))
+        {
+            Debug.Log("No saved stages found at " + filePath);
+            return new Dictionary<int, StageData>();
+        }
+        Debug.Log(filePath);
+        string json = File.ReadAllText(filePath);
+
+        // Deserialize the JSON to the intermediate object
+        Serialization<StageData> stageList = JsonConvert.DeserializeObject<Serialization<StageData>>(json);
+        // Después de deserializar
+   
+
+        if (stageList == null || stageList.items == null)
+        {
+            Debug.LogError("Failed to deserialize stages.");
+            return new Dictionary<int, StageData>();
+        }
+        foreach (var stageData in stageList.items)
+        {
+            stageData.ConvertColorStringToColorValue();
+        }
+        
+        // Convert the list to a dictionary
+        Dictionary<int, StageData> stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
+        Debug.Log("Stages loaded from " + filePath + " stages: " + stages.Count);
+        return stages;
+    }
+
+
+    public void SaveUserData()
+    {
+        string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
+        string json = JsonConvert.SerializeObject(userData, Formatting.Indented);
+        File.WriteAllText(filePath, json);
+        Debug.Log("UserData saved to " + filePath);
+    }
+    public UserData LoadUserData()
+    {
+        string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
+        if (!File.Exists(filePath))
+        {
+            Debug.Log("No saved userData found at " + filePath);
+            return new UserData(); // O puedes devolver null o una nueva instancia con valores predeterminados
+        }
+
+        string json = File.ReadAllText(filePath);
+        UserData userData = JsonConvert.DeserializeObject<UserData>(json);
+
+        if (userData != null)
+        {
+            Debug.Log("UserData loaded from " + filePath + " stages:" + userData.stages.Count);
+        }
+        else
+        {
+            Debug.LogError("Failed to load UserData from " + filePath);
+        }
+        return userData;
+    }
+
+    public int CalculateScoreComboBonus()
+    {
+        int maxComboBonus = 5;
+        int calculatedComboBonus = (int)Math.Floor(((float)_currentCombo / 2));
+        if (calculatedComboBonus > maxComboBonus)
+        {
+            calculatedComboBonus = maxComboBonus;
+        }
+        return calculatedComboBonus;
+    }
+
 }
 
 public enum ImageSet {
@@ -571,4 +848,16 @@ public enum ShopItemType
     Upgrade_BetterPeek,
     Upgrade_Block,
     Upgrade_DeathDefy
+}
+
+[Serializable] 
+public class Serialization<T>
+{
+    [SerializeField]
+    public List<T> items;
+    
+    public Serialization(List<T> items)
+    {
+        this.items = items;
+    }
 }
