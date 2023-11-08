@@ -111,11 +111,14 @@ public class Match
     }
 
     public (List<int> clearedImages, List<Achievement> achievementsFullfilled) EndMatch() {
+        List<int> clearedImages = new();
         foreach (var turn in turnHistory) {
             score += turn.scoreModification;
             amountOfTurns ++;
+            if (turn.amountOfAppearences == difficulty && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)) {
+                clearedImages.Add(turn.imageID);
+            }
         }
-        List<int> clearedImages = new();
         List<Achievement> achievementsFullFilled = new List<Achievement>();
         return (clearedImages, achievementsFullFilled);
     }
@@ -147,15 +150,21 @@ public class UserStageData
     public int difficulty;
     public List<int> clearedImages;
     public int highScore;
-    public List<AchievementData> achievements;
+    public List<Achievement> achievements;
     public List<Match> matches;
-}
 
-[Serializable]
-public class AchievementData
-{
-    public string achievement;
-    public bool unlocked;
+    public void AddMatch(Match currentMatch) {
+        matches.Add(currentMatch);
+        var matchResult = currentMatch.EndMatch();
+        foreach (var clearedImageID in matchResult.clearedImages) {
+            if ( !clearedImages.Contains(clearedImageID)) clearedImages.Add(clearedImageID); 
+        }
+        foreach (var fullfilledAchievement in matchResult.achievementsFullfilled) {
+            if ( !achievements.Contains(fullfilledAchievement)) achievements.Add(fullfilledAchievement); 
+        }
+        Debug.Log("Added Match with turns "+currentMatch.turnHistory.Count);
+        
+    }
 }
 
 // Otras clases...

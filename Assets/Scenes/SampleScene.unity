@@ -12019,7 +12019,7 @@ MonoBehaviour:
   userData:
     name: 
     id: 0
-    stagesList: []
+    stages: []
   selectStageAndDifficultyCanvas: {fileID: 743536595}
   gameCanvas: {fileID: 686750641}
   numpadRow0: {fileID: 1680333290}
@@ -12053,10 +12053,10 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 888eb33f254074b4e913b38d3bd81881, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.511
+  m_Volume: 0.12
   m_Pitch: 1
   Loop: 1
-  Mute: 0
+  Mute: 1
   Spatialize: 0
   SpatializePostEffects: 0
   Priority: 128

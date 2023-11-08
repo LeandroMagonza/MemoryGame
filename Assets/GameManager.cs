@@ -133,8 +133,6 @@ public class GameManager : MonoBehaviour {
                 
             }
         }
-        
-        
         SetScoreTexts();
 
     }
@@ -416,11 +414,17 @@ public class GameManager : MonoBehaviour {
         buttonReplay.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
         Debug.Log("Match Ended");
+        SaveMatch();
         yield return new WaitForSeconds(delay);
         if (userData.GetUserStageData(selectedStage, selectedDifficulty).highScore < score)
         {
             StartCoroutine(SetHighScore(score));
         }
+    }
+
+    private void SaveMatch() {
+        userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
+        SaveUserData();
     }
 
     private IEnumerator SetHighScore(int highScoreToSet)
@@ -603,8 +607,7 @@ public class GameManager : MonoBehaviour {
     private void OnApplicationQuit()
     {
         //SaveStages(_stages);
-        userData.GetUserStageData(0, 0).highScore = 500;
-        SaveUserData(userData);
+        SaveUserData();
     }
     
   
@@ -650,7 +653,7 @@ public class GameManager : MonoBehaviour {
     }
 
 
-    public void SaveUserData(UserData userData)
+    public void SaveUserData()
     {
         string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
         string json = JsonConvert.SerializeObject(userData, Formatting.Indented);
