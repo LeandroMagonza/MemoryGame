@@ -72,8 +72,10 @@ public class GameManager : MonoBehaviour {
     public GameObject stageDisplayPrefab;
 
     private Match _currentMatch;
-    private int _currentStreak = 0;
-    
+    private int _currentCombo = 0;
+    public TextMeshProUGUI comboBonusText;
+    public TextMeshProUGUI comboText;
+
     public static GameManager Instance {
         get {
             if (_instance == null)
@@ -155,6 +157,7 @@ public class GameManager : MonoBehaviour {
         Debug.Log("Guessed number " + number + ", amount of appearances " + _spritesFromSet[_currentlySelectedImage].amountOfAppearances);
         TurnAction turnAction;
         int scoreModification = 0;
+        float timerModification = maxTimer - timer;
         if (number == _spritesFromSet[_currentlySelectedImage].amountOfAppearances)
         {
             Debug.Log("CorrectGuess");
@@ -172,11 +175,11 @@ public class GameManager : MonoBehaviour {
         _currentMatch.AddTurn(
             _currentlySelectedImage,
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances,
-            0f,
+            timerModification,
             number,
             turnAction,
             lifeCounter.lives,
-            _currentStreak,
+            _currentCombo,
             scoreModification
             );
         CheckAmountOfAppearances();
@@ -228,13 +231,15 @@ public class GameManager : MonoBehaviour {
         _spritesFromSet[_currentlySelectedImage] = (
             _spritesFromSet[_currentlySelectedImage].sprite,
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances - 1);
-        SetCurrentStreak(0);
+        SetCurrentCombo(0);
     }
 
-    public void SetCurrentStreak(int newCurrentStreakAmount)
+    public void SetCurrentCombo(int newCurrentComboAmount)
     {
-        _currentStreak = newCurrentStreakAmount;
-        //TODO: set currentStreak display and multiplayer display, and update here
+        _currentCombo = newCurrentComboAmount;
+        comboBonusText.text = CalculateScoreComboBonus().ToString();
+        comboText.text = _currentCombo.ToString(); 
+        //TODO: add animation
     }
    
 
@@ -248,9 +253,9 @@ public class GameManager : MonoBehaviour {
         SetTimer(timer + currentTimerGain);
         int scoreModification = _stages[selectedStage].basePoints +
                                 _spritesFromSet[_currentlySelectedImage].amountOfAppearances
-                                + CalculateScoreStreakBonus();
+                                + CalculateScoreComboBonus();
         ModifyScore(scoreModification);
-        SetCurrentStreak(_currentStreak+1);
+        SetCurrentCombo(_currentCombo+1);
         return scoreModification;
                ;
     }
@@ -416,6 +421,7 @@ public class GameManager : MonoBehaviour {
         Debug.Log("Match Ended");
         SaveMatch();
         yield return new WaitForSeconds(delay);
+        userData.coins += score;
         if (userData.GetUserStageData(selectedStage, selectedDifficulty).highScore < score)
         {
             StartCoroutine(SetHighScore(score));
@@ -470,6 +476,7 @@ public class GameManager : MonoBehaviour {
         SetTimer(15);
         SetScore(0);
         turnNumber = 1;
+        SetCurrentCombo(0);
         bonusMultiplicator = 1;
         lifeCounter.ResetLives();
         LoadImages(imageSetName.ToString());
@@ -480,7 +487,7 @@ public class GameManager : MonoBehaviour {
         SetRandomImage();
         disableInput = false;
         _currentMatch = new Match(selectedStage,selectedDifficulty,false);
-        _currentStreak = 0;
+        _currentCombo = 0;
 
     }
 
@@ -683,15 +690,15 @@ public class GameManager : MonoBehaviour {
         return userData;
     }
 
-    public int CalculateScoreStreakBonus()
+    public int CalculateScoreComboBonus()
     {
-        int maxStreakBonus = 5;
-        int calculatedStreakBonus = (int)Math.Floor(((float)_currentStreak / 2));
-        if (calculatedStreakBonus > maxStreakBonus)
+        int maxComboBonus = 5;
+        int calculatedComboBonus = (int)Math.Floor(((float)_currentCombo / 2));
+        if (calculatedComboBonus > maxComboBonus)
         {
-            calculatedStreakBonus = maxStreakBonus;
+            calculatedComboBonus = maxComboBonus;
         }
-        return calculatedStreakBonus;
+        return calculatedComboBonus;
     }
 
 }

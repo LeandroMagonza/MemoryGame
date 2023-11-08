@@ -1,11 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 using ColorUtility = UnityEngine.ColorUtility;
 
@@ -29,9 +27,23 @@ public class Stage : MonoBehaviour
     public void SetScore(int difficulty, int score) {
         difficultyButtons[difficulty].SetScore(score);
     }
-    public void SetStage(int stage) {
-        foreach (var difficultyButton in difficultyButtons) {
+    public void SetStage(int stage)
+    {
+        int difficulty = 0;
+        foreach (var difficultyButton in difficultyButtons)
+        {
+            if (GameManager.Instance.userData.GetUserStageData(stage, difficulty-1) is null ||
+                GameManager.Instance.userData.GetUserStageData(stage, difficulty-1).achievements
+                .Contains(Achievement.ClearedStage))
+            {
+                difficultyButton.GetComponent<Button>().interactable = true;
+            }
+            else
+            {
+                difficultyButton.GetComponent<Button>().interactable = false;
+            }
             difficultyButton.SetStage(stage);
+            difficulty++;
         }
     }
     
@@ -89,15 +101,14 @@ public enum Achievement {
 public class Match
 {
     //public List<Updgrades> upgrades;
-    public List<(int id, int level)> imageLevels;
+    public List<(int id, int level)> imageDuplicates = new List<(int id, int level)>();
     public int stage;
     public int difficulty;
     public DateTime date;
     public int score;
     public int amountOfTurns;
     public bool hardcore;
-    public List<(int turn, int imageID, int amountOfAppearences, float turnDuration, int guess, TurnAction action, int
-        remainingLives, int multiplier, int scoreModification)> turnHistory = new ();
+    public List<TurnData> turnHistory = new ();
 
     public Match(int stage, int difficulty, bool hardcore) {
         this.stage = stage;
@@ -107,7 +118,7 @@ public class Match
 
     public void AddTurn(int imageID, int amountOfAppearences, float turnDuration, int guess, TurnAction action, int
         remainingLives, int streak, int scoreModification) {
-        turnHistory.Add((turnHistory.Count, imageID, amountOfAppearences, turnDuration, guess,action,remainingLives, streak, scoreModification));
+        turnHistory.Add(new TurnData(turnHistory.Count, imageID, amountOfAppearences, turnDuration, guess,action,remainingLives, streak, scoreModification));
     }
 
     public (List<int> clearedImages, List<Achievement> achievementsFullfilled) EndMatch() {
@@ -119,8 +130,36 @@ public class Match
                 clearedImages.Add(turn.imageID);
             }
         }
+        date = DateTime.Now;
         List<Achievement> achievementsFullFilled = new List<Achievement>();
         return (clearedImages, achievementsFullFilled);
+    }
+}
+
+[Serializable]
+public class TurnData
+{
+    public int turn;
+    public int imageID;
+    public int amountOfAppearences;
+    public float turnDuration;
+    public int guess;
+    public TurnAction action;
+    public int remainingLives;
+    public int combo;
+    public int scoreModification;
+    public TurnData(int turn, int imageID, int amountOfAppearences, float turnDuration, int guess, TurnAction action,
+        int remainingLives, int combo, int scoreModification)
+    {
+        this.turn = turn;
+        this.imageID = imageID;
+        this.amountOfAppearences = amountOfAppearences;
+        this.turnDuration = turnDuration;
+        this.guess = guess;
+        this.action = action;
+        this.remainingLives = remainingLives;
+        this.combo = combo;
+        this.scoreModification = scoreModification;
     }
 }
 [Serializable]
@@ -128,7 +167,11 @@ public class UserData
 {
     public string name;
     public int id;
+    public int coins;
     public List<UserStageData> stages;
+    public Dictionary<int,int> imageDuplicates;
+    //upgrades, inventario
+    //historial de compras
 
     public UserStageData GetUserStageData(int stage,int difficulty)
     {
@@ -150,7 +193,9 @@ public class UserStageData
     public int difficulty;
     public List<int> clearedImages;
     public int highScore;
+    [JsonProperty (ItemConverterType = typeof(StringEnumConverter))]
     public List<Achievement> achievements;
+    
     public List<Match> matches;
 
     public void AddMatch(Match currentMatch) {
@@ -169,7 +214,7 @@ public class UserStageData
 
 // Otras clases...
 
-[Serializable]
+[JsonConverter(typeof(StringEnumConverter))]
 public enum TurnAction {
     GuessCorrect,
     GuessIncorrect,
