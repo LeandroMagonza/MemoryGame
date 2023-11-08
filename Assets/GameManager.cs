@@ -117,7 +117,6 @@ public class GameManager : MonoBehaviour {
         buttonRemove.interactable = currentRemoves > 0;
         buttonTextClue.text = currentClues.ToString();
         buttonTextRemove.text = currentRemoves.ToString();
-        highScoreText.text = currentHighScore.ToString();
         _stages = LoadStages();
         userData = LoadUserData();
         foreach (var stageIndexAndData in _stages) {
@@ -510,6 +509,9 @@ public class GameManager : MonoBehaviour {
         if (this.timer<=1)
         {
             lifeCounter.LoseLive();
+            _spritesFromSet[_currentlySelectedImage] = (
+                _spritesFromSet[_currentlySelectedImage].sprite,
+                _spritesFromSet[_currentlySelectedImage].amountOfAppearances - 1);
             NextTurn();
             SetTimer(maxTimer);
         }
