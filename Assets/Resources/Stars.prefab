@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7244103133712004899}
   - component: {fileID: 8713072282458262407}
   m_Layer: 5
-  m_Name: Star2
+  m_Name: StarClearedStageNoMistakes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -68,7 +68,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 758dfb8648edb4bf1b998174c2ecab26, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -87,6 +87,7 @@ GameObject:
   - component: {fileID: 9176433312624522575}
   - component: {fileID: 3180337552502014203}
   - component: {fileID: 3968947994394633527}
+  - component: {fileID: 9045226155342458168}
   m_Layer: 5
   m_Name: Stars
   m_TagString: Untagged
@@ -165,6 +166,26 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &9045226155342458168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4192001195610365474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2ca24dc9ebe1ca41baeb2901f030845, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  starOff: {fileID: 21300000, guid: 758dfb8648edb4bf1b998174c2ecab26, type: 3}
+  starOn: {fileID: 21300000, guid: 479b862926e3947de8e20b85fe6f2afc, type: 3}
+  stars:
+  - {fileID: 6383361906414278457}
+  - {fileID: 8662851885656898631}
+  - {fileID: 2357677573918674066}
+  - {fileID: 8860812343169766595}
+  - {fileID: 4926774433381558638}
 --- !u!1 &4926774433381558638
 GameObject:
   m_ObjectHideFlags: 0
@@ -177,7 +198,7 @@ GameObject:
   - component: {fileID: 937497750900870}
   - component: {fileID: 5007576734394762320}
   m_Layer: 5
-  m_Name: Star4
+  m_Name: StarClearedStageNoMistakesNoUpgrades
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -253,7 +274,7 @@ GameObject:
   - component: {fileID: 8482968374524299980}
   - component: {fileID: 3156861675955737954}
   m_Layer: 5
-  m_Name: Star0
+  m_Name: StarClearedEveryImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -309,7 +330,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 758dfb8648edb4bf1b998174c2ecab26, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -329,7 +350,7 @@ GameObject:
   - component: {fileID: 2395924784750437721}
   - component: {fileID: 6305757878266348298}
   m_Layer: 5
-  m_Name: Star1
+  m_Name: StarClearedStage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -385,7 +406,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 758dfb8648edb4bf1b998174c2ecab26, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -405,7 +426,7 @@ GameObject:
   - component: {fileID: 6328119917361324395}
   - component: {fileID: 6750333667531616986}
   m_Layer: 5
-  m_Name: Star3
+  m_Name: StarClearedStageNoUpgrades
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

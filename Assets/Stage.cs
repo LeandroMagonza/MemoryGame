@@ -32,16 +32,6 @@ public class Stage : MonoBehaviour
         int difficulty = 0;
         foreach (var difficultyButton in difficultyButtons)
         {
-            if (GameManager.Instance.userData.GetUserStageData(stage, difficulty-1) is null ||
-                GameManager.Instance.userData.GetUserStageData(stage, difficulty-1).achievements
-                .Contains(Achievement.ClearedStage))
-            {
-                difficultyButton.GetComponent<Button>().interactable = true;
-            }
-            else
-            {
-                difficultyButton.GetComponent<Button>().interactable = false;
-            }
             difficultyButton.SetStage(stage);
             difficulty++;
         }
@@ -123,15 +113,26 @@ public class Match
 
     public (List<int> clearedImages, List<Achievement> achievementsFullfilled) EndMatch() {
         List<int> clearedImages = new();
+        int maxLives = turnHistory[0].remainingLives;
+        bool lostLife = false;
         foreach (var turn in turnHistory) {
             score += turn.scoreModification;
             amountOfTurns ++;
-            if (turn.amountOfAppearences == difficulty && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)) {
+            if (turn.amountOfAppearences == GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)) {
                 clearedImages.Add(turn.imageID);
+                Debug.Log("Ädding clearedImages");
+            }
+
+            if (turn.remainingLives < maxLives)
+            {
+                lostLife = true;
             }
         }
-        date = DateTime.Now;
+        
+        Debug.Log("clearedImages " +clearedImages.Count);
         List<Achievement> achievementsFullFilled = new List<Achievement>();
+        date = DateTime.Now;
+        if (!lostLife) achievementsFullFilled.Add(Achievement.ClearedStageNoMistakes);
         return (clearedImages, achievementsFullFilled);
     }
 }
@@ -198,17 +199,46 @@ public class UserStageData
     
     public List<Match> matches;
 
-    public void AddMatch(Match currentMatch) {
+    public List<Achievement> AddMatch(Match currentMatch)
+    {
+        List<Achievement> firstTimeAchievements = new List<Achievement>();
         matches.Add(currentMatch);
         var matchResult = currentMatch.EndMatch();
+        int amountOfImagesInStage = GameManager.Instance.stages[stage].images.Count;
         foreach (var clearedImageID in matchResult.clearedImages) {
             if ( !clearedImages.Contains(clearedImageID)) clearedImages.Add(clearedImageID); 
         }
-        foreach (var fullfilledAchievement in matchResult.achievementsFullfilled) {
-            if ( !achievements.Contains(fullfilledAchievement)) achievements.Add(fullfilledAchievement); 
-        }
-        Debug.Log("Added Match with turns "+currentMatch.turnHistory.Count);
+        Debug.Log("-------------------Achievement ClearedStage----------------------");
+        Debug.Log("amountOfImagesInStage == matchResult.clearedImages.Count");
+        Debug.Log(amountOfImagesInStage +" == "+ matchResult.clearedImages.Count);
+        Debug.Log(amountOfImagesInStage == matchResult.clearedImages.Count);
+        Debug.Log("---------------------------------------------------------");
         
+        if (amountOfImagesInStage == matchResult.clearedImages.Count)
+        {
+            matchResult.achievementsFullfilled.Add(Achievement.ClearedStage);
+        }
+        Debug.Log("-------------------Achievement ClearedEveryImage----------------------");
+        Debug.Log("amountOfImagesInStage == clearedImages.Count");
+        Debug.Log(amountOfImagesInStage +" == "+ clearedImages.Count);
+        Debug.Log(amountOfImagesInStage == clearedImages.Count);
+        Debug.Log("---------------------------------------------------------");
+        if (amountOfImagesInStage == clearedImages.Count)
+        {
+            matchResult.achievementsFullfilled.Add(Achievement.ClearedEveryImage);
+        }
+        Debug.Log("achievements fullfilled count"+matchResult.achievementsFullfilled.Count);
+        foreach (var fullfilledAchievement in matchResult.achievementsFullfilled) {
+            Debug.Log("achievement fullfilled "+fullfilledAchievement);
+            if (!achievements.Contains(fullfilledAchievement))
+            {
+                achievements.Add(fullfilledAchievement);
+                firstTimeAchievements.Add(fullfilledAchievement);
+            } 
+        }
+        
+        Debug.Log("Added Match with turns "+currentMatch.turnHistory.Count);
+        return firstTimeAchievements;
     }
 }
 

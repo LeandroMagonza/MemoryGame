@@ -8,10 +8,10 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
 using ColorUtility = UnityEngine.ColorUtility;
 using Random = UnityEngine.Random;
 using Newtonsoft.Json;
+using UnityEngine.Networking;
 
 public class GameManager : MonoBehaviour {
     private static GameManager _instance;
@@ -76,7 +76,7 @@ public class GameManager : MonoBehaviour {
     public int selectedStage = 0;
     public int selectedDifficulty = 0;
 
-    private Dictionary<int, StageData> _stages;
+    public Dictionary<int, StageData> stages;
 
     public UserData userData = new UserData();
     public GameObject selectStageAndDifficultyCanvas;
@@ -117,25 +117,30 @@ public class GameManager : MonoBehaviour {
         buttonRemove.interactable = currentRemoves > 0;
         buttonTextClue.text = currentClues.ToString();
         buttonTextRemove.text = currentRemoves.ToString();
-        _stages = LoadStages();
-        userData = LoadUserData();
-        foreach (var stageIndexAndData in _stages) {
-            //_stages = LoadStages();
-            foreach (var stage in _stages.Values)
+        StartCoroutine(LoadUserData());
+        
+    }
+
+    private void InitializeStages()
+    {
+        foreach (var stageIndexAndData in stages)
+        {
+            //stages = LoadStages();
+            foreach (var stage in stages.Values)
             {
                 if (ColorUtility.TryParseHtmlString("#" + stage.color, out Color colorValue))
                 {
                     stage.ColorValue = colorValue;
                 }
             }
-            
+
             //.ToArray().Select((data, index) => new { index, data })
             StageData stageData = stageIndexAndData.Value;
 
             GameObject stageDisplay = Instantiate(stageDisplayPrefab, selectStageAndDifficultyCanvas.transform);
             Stage newStage = stageDisplay.GetComponent<Stage>();
             stageData.stageObject = newStage;
-            
+
 
             newStage.name = stageData.title;
             newStage.SetTitle(stageData.title);
@@ -145,19 +150,20 @@ public class GameManager : MonoBehaviour {
 
             for (int difficulty = 0; difficulty < 3; difficulty++)
             {
-                if (userData.GetUserStageData(stageData.stageID,difficulty) is not null)
+                if (userData.GetUserStageData(stageData.stageID, difficulty) is not null)
                 {
-                    newStage.SetScore(difficulty,userData.GetUserStageData(stageData.stageID,difficulty).highScore);
+                    newStage.SetScore(difficulty, userData.GetUserStageData(stageData.stageID, difficulty).highScore);
+                    StartCoroutine(newStage.difficultyButtons[selectedDifficulty]
+                        .SetAchievements(userData.GetUserStageData(stageData.stageID, difficulty).achievements, 0f));
                 }
                 else
                 {
-                    newStage.SetScore(difficulty,0);
+                    newStage.SetScore(difficulty, 0);
                 }
-                
             }
         }
-        SetScoreTexts();
 
+        SetScoreTexts();
     }
 
     private void SetScoreTexts() {
@@ -308,7 +314,7 @@ public class GameManager : MonoBehaviour {
             true);
         audioSource.PlayOneShot(correctGuessClip);
         SetTimer(maxTimer);
-        int scoreModification = _stages[selectedStage].basePoints +
+        int scoreModification = stages[selectedStage].basePoints +
                                 _spritesFromSet[_currentlySelectedImage].amountOfAppearances
                                 + CalculateScoreComboBonus();
         ModifyScore(scoreModification);
@@ -358,7 +364,7 @@ public class GameManager : MonoBehaviour {
         int amount;
         int.TryParse(splitedImageSetName[2], out amount);
 
-        foreach (var imageID in _stages[selectedStage].images) {
+        foreach (var imageID in stages[selectedStage].images) {
             AddImageFromSet(imageSetName, type, name, imageID);
         }
     }
@@ -471,20 +477,39 @@ public class GameManager : MonoBehaviour {
     }
 
     public IEnumerator EndGame(float delay) {
+        
+        SaveMatch();
         buttonReplay.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
         Debug.Log("Match Ended");
-        SaveMatch();
-        yield return new WaitForSeconds(delay);
-        userData.coins += score;
+        
         if (userData.GetUserStageData(selectedStage, selectedDifficulty).highScore < score)
         {
-            StartCoroutine(SetHighScore(score));
+            yield return StartCoroutine(SetHighScore(score));
+        }
+        
+        yield return new WaitForSeconds(delay);
+        //animation achievements
+        var firstTimeAchievements = userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
+        
+        yield return stages[selectedStage].stageObject.difficultyButtons[selectedDifficulty].SetAchievements(firstTimeAchievements,0.5f);
+
+        UpdateAchievementAndUnlockedLevels();
+        //animationScore
+        userData.coins += score;
+    }
+
+    private void UpdateAchievementAndUnlockedLevels()
+    {
+        foreach (var stageIndexAndData in stages) {
+            foreach (var difficultyButton in stageIndexAndData.Value.stageObject.difficultyButtons)
+            {
+                difficultyButton.UpdateDifficultyUnlocked();
+            }
         }
     }
 
     private void SaveMatch() {
-        userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
         SaveUserData();
     }
 
@@ -497,7 +522,7 @@ public class GameManager : MonoBehaviour {
         userData.GetUserStageData(selectedStage, selectedDifficulty).highScore = highScoreToSet;
 
         //oasar esto a userdata que llame automaticamente cuando se modificque el highscore en user data, agregar funcionn en vez de seteo directo
-        _stages[selectedStage].stageObject.SetScore(selectedDifficulty,highScoreToSet);
+        stages[selectedStage].stageObject.SetScore(selectedDifficulty,highScoreToSet);
         
         highScoreText.text = highScoreToSet.ToString();
     }
@@ -529,7 +554,7 @@ public class GameManager : MonoBehaviour {
         selectStageAndDifficultyCanvas.SetActive(false);
         gameCanvas.SetActive(true);
         SetNumpadByDifficulty(selectedDifficulty);
-        bonusOnAmountOfAppearences = (selectedDifficulty+1)*3;
+        bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
         gameEnded = false;
         buttonReplay.transform.parent.gameObject.SetActive(false);
         audioSource.Play();
@@ -550,6 +575,12 @@ public class GameManager : MonoBehaviour {
         _currentCombo = 0;
 
     }
+
+    public int DifficultyToAmountOfAppearences(int difficulty)
+    {
+        return (selectedDifficulty + 1)*3;
+    }
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha0))
@@ -738,7 +769,7 @@ public class GameManager : MonoBehaviour {
 
     private void OnApplicationQuit()
     {
-        //SaveStages(_stages);
+        //SaveStages(stages);
         SaveUserData();
     }
     
@@ -752,26 +783,25 @@ public class GameManager : MonoBehaviour {
         Debug.Log("Stages saved to " + filePath);
     }
 
-    public Dictionary<int, StageData> LoadStages()
+    public IEnumerator LoadStages()
     {
         string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        string json;
         if (!File.Exists(filePath))
         {
             Debug.Log("No saved stages found at " + filePath);
-            return new Dictionary<int, StageData>();
+            yield return StartCoroutine(GetJson("stages"));
         }
         Debug.Log(filePath);
-        string json = File.ReadAllText(filePath);
+        json = File.ReadAllText(filePath);
 
         // Deserialize the JSON to the intermediate object
         Serialization<StageData> stageList = JsonConvert.DeserializeObject<Serialization<StageData>>(json);
         // Después de deserializar
    
-
         if (stageList == null || stageList.items == null)
         {
             Debug.LogError("Failed to deserialize stages.");
-            return new Dictionary<int, StageData>();
         }
         foreach (var stageData in stageList.items)
         {
@@ -781,7 +811,9 @@ public class GameManager : MonoBehaviour {
         // Convert the list to a dictionary
         Dictionary<int, StageData> stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
         Debug.Log("Stages loaded from " + filePath + " stages: " + stages.Count);
-        return stages;
+        this.stages = stages;
+        yield return null;
+        InitializeStages();
     }
 
 
@@ -792,13 +824,13 @@ public class GameManager : MonoBehaviour {
         File.WriteAllText(filePath, json);
         Debug.Log("UserData saved to " + filePath);
     }
-    public UserData LoadUserData()
+    public IEnumerator LoadUserData()
     {
         string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
         if (!File.Exists(filePath))
         {
-            Debug.Log("No saved userData found at " + filePath);
-            return new UserData(); // O puedes devolver null o una nueva instancia con valores predeterminados
+            Debug.Log("No userdata found at " + filePath);
+            yield return StartCoroutine(GetJson("userData"));
         }
 
         string json = File.ReadAllText(filePath);
@@ -812,7 +844,11 @@ public class GameManager : MonoBehaviour {
         {
             Debug.LogError("Failed to load UserData from " + filePath);
         }
-        return userData;
+        
+        
+        this.userData =  userData;
+        yield return null;
+        StartCoroutine(LoadStages());
     }
 
     public int CalculateScoreComboBonus()
@@ -825,6 +861,26 @@ public class GameManager : MonoBehaviour {
         }
         return calculatedComboBonus;
     }
+    
+    IEnumerator GetJson(string file_name)
+    {
+        string url = "https://leandromagonza.github.io/MemoGram.Pokemon/" + file_name + ".json";
+        using (UnityWebRequest www = UnityWebRequest.Get(url))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                string filePath = Path.Combine(Application.persistentDataPath, file_name + ".json");
+                File.WriteAllText(filePath, www.downloadHandler.text);
+            }
+        }
+    }
+
 
 }
 
