@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour {
     public float currentTimerGain = 5;
     public TextMeshProUGUI timerText; 
     public int score = 0;
+    public int currentBuyScore = 0;
     public TextMeshProUGUI scoreText; 
     public int turnNumber = 1;
     public int bonusOnAmountOfAppearences = 9;
@@ -38,10 +39,6 @@ public class GameManager : MonoBehaviour {
 
     private List<int> currentlyInGameImages =new List<int>();
 
-    private Dictionary<ShopItemType, int> inventary = new Dictionary<ShopItemType, int>();
-    private Dictionary<ShopItemType, int> matchInventary = new Dictionary<ShopItemType, int>();
-    private Dictionary<ShopItemType, int> upgrades = new Dictionary<ShopItemType, int>();
-
     public AudioSource audioSource;
     public AudioClip correctGuessClip;
     public AudioClip incorrectGuessClip;
@@ -58,13 +55,8 @@ public class GameManager : MonoBehaviour {
 
     public bool disableInput = false;
 
-    [Header("Clue And Remove Settings")]
-    [SerializeField] private Button buttonClue;
-    [SerializeField] private Button buttonRemove;
-    [SerializeField] private TextMeshProUGUI buttonTextClue;
-    [SerializeField] private TextMeshProUGUI buttonTextRemove;
-    [SerializeField] private AudioClip buttonClueAudioClip;
-    [SerializeField] private AudioClip buttonRemoveAudioClip;
+
+
 
     public int currentClues = 0;
     public int maxCluesAmount = 5;
@@ -94,10 +86,6 @@ public class GameManager : MonoBehaviour {
     private void Start()
     {
         scoreText.text = score.ToString();
-        buttonClue.interactable = currentClues > 0;
-        buttonRemove.interactable = currentRemoves > 0;
-        buttonTextClue.text = currentClues.ToString();
-        buttonTextRemove.text = currentRemoves.ToString();
         highScoreText.text = currentHighScore.ToString();
     }
     private void DestroySelf() {
@@ -134,7 +122,7 @@ public class GameManager : MonoBehaviour {
             RemoveStickerFromPool();
         }
     }
-    private void NextTurn() {
+    public void NextTurn() {
         turnNumber++;
         if (currentlyInGameImages.Count < 3)
         {
@@ -149,53 +137,11 @@ public class GameManager : MonoBehaviour {
 
     }
 
-    private void AddClue()
-    {
-        currentClues++;
-        buttonClue.interactable = currentClues > 0;
-        currentClues = currentClues > maxCluesAmount ? maxCluesAmount : currentClues;
-        buttonTextClue.text = currentClues.ToString();
-    }
 
-    private void AddRemove() 
-    {
-        currentRemoves++;
-        buttonRemove.interactable = currentRemoves > 0;
-        currentRemoves = currentRemoves > maxRemovesAmount ? maxRemovesAmount : currentRemoves;
-        buttonTextRemove.text = currentRemoves.ToString();
-    }
 
-    [ContextMenu("UseClue")]
-    public void UseClue() {
-        Debug.Log("USE CLUE: " + currentClues);
+   
 
-        if (currentClues < 1) return;
-
-        audioSource.PlayOneShot(buttonClueAudioClip);
-        // anim
-        currentClues--;
-        currentClues = currentClues < 0 ? 0 : currentClues;
-        buttonClue.interactable = currentClues != 0;
-        buttonTextClue.text = currentClues.ToString();
-        OnCorrectGuess();
-        NextTurn();
-    }
-    [ContextMenu("UseRemove")]
-    public void UseRemove()
-    {
-        Debug.Log("USE REMOVE");
-        if (currentRemoves < 1) return;
-
-        audioSource.PlayOneShot(buttonRemoveAudioClip);
-        //anim
-        currentRemoves--;
-        currentRemoves = currentRemoves < 0 ? 0 : currentRemoves;
-        buttonRemove.interactable = currentRemoves != 0;
-        buttonTextRemove.text = currentRemoves.ToString();
-        RemoveStickerFromPool();
-        NextTurn();
-    }
-    private void OnIncorrectGuess()
+    public void OnIncorrectGuess()
     {
         IncorrectGuessFX();
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
@@ -208,7 +154,7 @@ public class GameManager : MonoBehaviour {
             _spritesFromSet[_currentlySelectedImage].sprite,
             _spritesFromSet[_currentlySelectedImage].amountOfAppearances - 1);
     }
-    private void OnCorrectGuess()
+    public void OnCorrectGuess()
     {
         CorrectGuessFX();
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
@@ -242,9 +188,15 @@ public class GameManager : MonoBehaviour {
     public void ModifyScore(int modificationAmount) 
     {
         score += modificationAmount;
+        ModifyBuyScore(modificationAmount);
         scoreText.text = score.ToString();
         
-    } 
+    }
+    
+    public void ModifyBuyScore(int modificationAmount)
+    {
+        currentBuyScore += modificationAmount;
+    }
     private void SetScore(int newScore) {
         score = newScore;
         scoreText.text = score.ToString();
@@ -333,7 +285,7 @@ public class GameManager : MonoBehaviour {
         imageIDText.text = (nextImageID+1).ToString();
         // image.sprite = _spritesFromSet[Random.Range(0, _spritesFromSet.Count)].sprite;
     }
-    private void RemoveStickerFromPool()
+    public void RemoveStickerFromPool()
     {
         _spritesFromSet[_currentlySelectedImage] = (
             _spritesFromSet[_currentlySelectedImage].sprite,
@@ -342,13 +294,11 @@ public class GameManager : MonoBehaviour {
         // aca se setea si la imagen vuelve al set general o no  
         _spritesFromSet.Remove(_currentlySelectedImage);
     }
-
     private void Win() {
         audioSource.PlayOneShot(winClip);
         Debug.Log("Win");
         StartCoroutine(EndGame(winClip.length));
     }
-
     private bool AddImages(int amountOfImages) {
         //para agregar una imagen al pool, se mezclan todos los sprites,
         //y se agrega el primer sprite que no este en el pool, al pool
@@ -373,7 +323,6 @@ public class GameManager : MonoBehaviour {
 
         return false;
     }
-
     public IEnumerator EndGame(float delay) {
         buttonReplay.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
@@ -384,7 +333,6 @@ public class GameManager : MonoBehaviour {
             StartCoroutine(SetHighScore(score));
         }
     }
-
     private IEnumerator SetHighScore(int highScoreToSet)
     {
         audioSource.Pause();
@@ -394,7 +342,6 @@ public class GameManager : MonoBehaviour {
         PlayerPrefs.SetInt("HighScore",highScoreToSet);
         highScoreText.text = highScoreToSet.ToString();
     }
-
     public void SetTimer(float timer) {
         this.timer = Mathf.Clamp(timer,0,maxTimer);
         timerText.text = ((int)this.timer).ToString();
@@ -406,14 +353,12 @@ public class GameManager : MonoBehaviour {
             SetTimer(maxTimer);
         }
     }
-
     public void Lose()
     {
         Debug.Log("Lose");
         audioSource.PlayOneShot(endGameClip);
         StartCoroutine(EndGame(endGameClip.length));
     }
-
     public void Reset() {
         //if (disableInput) return;
         gameEnded = false;
@@ -433,76 +378,11 @@ public class GameManager : MonoBehaviour {
         disableInput = false;
 
     }
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha0))
-        {
-            AddClue();
-            AddRemove();
-        }
-    }
+
     private void FixedUpdate() {
         if (gameEnded) return;
         SetTimer(timer - Time.deltaTime);
 
-    }
-    public void MoveItemFromInventaryToMatchInventary(ShopItemType item)
-    {
-        if (inventary.ContainsKey(item))
-        {
-            if (matchInventary.ContainsKey(item))
-            {
-                matchInventary[item] = matchInventary[item]++;
-            }
-            else
-            {
-                matchInventary.Add(item, 1);
-            }
-            inventary[item]--;
-            if (inventary[item] == 0)
-            {
-                inventary.Remove(item);
-            }
-        }
-
-    }
-    public void UseItemFromMatchInventary(ShopItemType item)
-    {
-        if (matchInventary.ContainsKey(item))
-        {
-            Debug.Log($"You uses {item}");
-            matchInventary[item]--;
-            if (matchInventary[item] == 0)
-            {
-                matchInventary.Remove(item);
-            }
-        }
-        else
-        {
-            Debug.Log($"You dont have any {item}");
-        }
-    }
-    public void AddItemToInventary(ShopItemType item)
-    {
-        if (inventary.ContainsKey(item))
-        {
-            inventary[item] = inventary[item]++;
-        }
-        else
-        {
-            inventary.Add(item, 1);
-        }
-    }
-    public void AddUpgrade(ShopItemType item)
-    {
-        if (upgrades.ContainsKey(item))
-        {
-            upgrades[item] = upgrades[item]++;
-        }
-        else
-        {
-            upgrades.Add(item, 1);
-        }
     }
     private IEnumerator Squash(Transform transform, float delay, float amount, float speed)
     {
