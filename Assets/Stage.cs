@@ -47,7 +47,7 @@ public class StageData
     public int basePoints;
     [JsonProperty("color")]
     public string color; // Almacenar como string en formato hexadecimal
-    public List<int> images;
+    public List<int> stickers;
     public Stage stageObject;
 
     [NonSerialized]
@@ -59,14 +59,14 @@ public class StageData
     }
 
     // Constructor con parámetros
-    public StageData(int stageID, string title, int basePoints, Color color, List<int> images)
+    public StageData(int stageID, string title, int basePoints, Color color, List<int> stickers)
     {
         this.stageID = stageID;
         this.title = title;
         this.basePoints = basePoints;
         this.ColorValue = color;
         this.color = ColorUtility.ToHtmlStringRGBA(color);
-        this.images = images;
+        this.stickers = stickers;
     }
 
     // Método para convertir el string hexadecimal a Color después de la deserialización
@@ -204,7 +204,7 @@ public class UserStageData
         List<Achievement> firstTimeAchievements = new List<Achievement>();
         matches.Add(currentMatch);
         var matchResult = currentMatch.EndMatch();
-        int amountOfImagesInStage = GameManager.Instance.stages[stage].images.Count;
+        int amountOfImagesInStage = GameManager.Instance.stages[stage].stickers.Count;
         foreach (var clearedImageID in matchResult.clearedImages) {
             if ( !clearedImages.Contains(clearedImageID)) clearedImages.Add(clearedImageID); 
         }

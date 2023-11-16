@@ -107,7 +107,6 @@ public class GameManager : MonoBehaviour {
     {
         StartCoroutine(LoadUserData());
         scoreText.text = score.ToString();
-        highScoreText.text = currentHighScore.ToString();
     }
 
     private void InitializeStages()
@@ -134,7 +133,7 @@ public class GameManager : MonoBehaviour {
             newStage.name = stageData.title;
             newStage.SetTitle(stageData.title);
             newStage.SetColor(stageData.ColorValue);
-            newStage.SetAmountOfImages(stageData.images.Count);
+            newStage.SetAmountOfImages(stageData.stickers.Count);
             newStage.SetStage(stageData.stageID);
 
             for (int difficulty = 0; difficulty < 3; difficulty++)
@@ -254,7 +253,7 @@ public class GameManager : MonoBehaviour {
         //TODO: add animation
     }
    
-    public void OnCorrectGuess()
+    public int OnCorrectGuess()
     {
         CorrectGuessFX();
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
@@ -318,7 +317,7 @@ public class GameManager : MonoBehaviour {
         int amount;
         int.TryParse(splitedImageSetName[2], out amount);
 
-        foreach (var imageID in stages[selectedStage].images) {
+        foreach (var imageID in stages[selectedStage].stickers) {
             AddImageFromSet(imageSetName, type, name, imageID);
         }
     }
@@ -526,15 +525,6 @@ public class GameManager : MonoBehaviour {
     public int DifficultyToAmountOfAppearences(int difficulty)
     {
         return (selectedDifficulty + 1)*3;
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha0))
-        {
-            AddClue();
-            AddRemove();
-        }
     }
 
     private void SetNumpadByDifficulty(int difficulty)
