@@ -9,8 +9,10 @@ using ColorUtility = UnityEngine.ColorUtility;
 
 public class Stage : MonoBehaviour
 {
+    public int stage;
     public TextMeshProUGUI titleText; 
-    public TextMeshProUGUI amountOfImagesText; 
+    public TextMeshProUGUI amountStickersTotalText; 
+    public TextMeshProUGUI amountStickersCurrentText; 
     public List<DifficultyButton> difficultyButtons; 
     public void SetTitle(string title) {
         titleText.text = title;
@@ -20,8 +22,11 @@ public class Stage : MonoBehaviour
         GetComponent<Image>().color = color;
     }
 
-    public void SetAmountOfImages(int imageListCount) {
-        amountOfImagesText.text = imageListCount.ToString();
+    public void SetAmountOfStickersTotal(int imageListCount) {
+        amountStickersTotalText.text = imageListCount.ToString();
+    }
+    public void SetAmountOfStickersCurrent(int imageListCount) {
+        amountStickersCurrentText.text = imageListCount.ToString();
     }
 
     public void SetScore(int difficulty, int score) {
@@ -29,11 +34,32 @@ public class Stage : MonoBehaviour
     }
     public void SetStage(int stage)
     {
+        this.stage = stage;
         int difficulty = 0;
         foreach (var difficultyButton in difficultyButtons)
         {
             difficultyButton.SetStage(stage);
             difficulty++;
+        }
+        UpdateDifficultyUnlockedAndAmountOfStickersUnlocked();
+    }
+    public void UpdateDifficultyUnlockedAndAmountOfStickersUnlocked()
+    {
+        List<int> unlockedStickers = new List<int>();
+        
+        foreach (var stickerFromStage in GameManager.Instance.stages[stage].stickers) {
+            //tiene por lo menos una vez la figurita del stage, en sus imageduplicates
+            if (GameManager.Instance.userData.imageDuplicates.ContainsKey(stickerFromStage)
+                &&
+                GameManager.Instance.userData.imageDuplicates[stickerFromStage] > 0) {
+                unlockedStickers.Add(stickerFromStage);
+            }
+        }
+        SetAmountOfStickersCurrent(unlockedStickers.Count);
+        SetAmountOfStickersTotal(GameManager.Instance.stages[stage].stickers.Count);
+        foreach (var difficultyButton in difficultyButtons)
+        {
+            difficultyButton.UpdateDifficultyUnlocked();
         }
     }
     
@@ -47,7 +73,7 @@ public class StageData
     public int basePoints;
     [JsonProperty("color")]
     public string color; // Almacenar como string en formato hexadecimal
-    public List<int> images;
+    public List<int> stickers;
     public Stage stageObject;
     //int = stageID, int = chance de una carta de ese stage, la suma de todos los floats tiene que dar 100
     public Dictionary<int, int> packOdds = new Dictionary<int, int>(); 
@@ -60,14 +86,14 @@ public class StageData
     }
 
     // Constructor con parámetros
-    public StageData(int stageID, string title, int basePoints, Color color, List<int> images)
+    public StageData(int stageID, string title, int basePoints, Color color, List<int> stickers)
     {
         this.stageID = stageID;
         this.title = title;
         this.basePoints = basePoints;
         this.ColorValue = color;
         this.color = ColorUtility.ToHtmlStringRGBA(color);
-        this.images = images;
+        this.stickers = stickers;
     }
 
     // Método para convertir el string hexadecimal a Color después de la deserialización
@@ -78,6 +104,8 @@ public class StageData
             ColorValue = colorValue;
         }
     }
+
+
 }
 
 [Serializable]
@@ -186,6 +214,17 @@ public class UserData
         }
         return null;
     }
+
+    public bool ModifyCoins(int modificationAmount)
+    {
+        modificationAmount += coins;
+        if (modificationAmount >= 0 )
+        {
+            coins = modificationAmount;
+            return true;
+        }
+        return false;
+    }
 }
 
 [Serializable]
@@ -205,7 +244,7 @@ public class UserStageData
         List<Achievement> firstTimeAchievements = new List<Achievement>();
         matches.Add(currentMatch);
         var matchResult = currentMatch.EndMatch();
-        int amountOfImagesInStage = GameManager.Instance.stages[stage].images.Count;
+        int amountOfImagesInStage = GameManager.Instance.stages[stage].stickers.Count;
         foreach (var clearedImageID in matchResult.clearedImages) {
             if ( !clearedImages.Contains(clearedImageID)) clearedImages.Add(clearedImageID); 
         }

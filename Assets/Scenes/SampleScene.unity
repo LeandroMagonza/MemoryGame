@@ -12117,10 +12117,10 @@ RectTransform:
   m_Father: {fileID: 1758976881}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 426.81}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 140.68266, y: -286.11102}
+  m_SizeDelta: {x: 281.36533, y: 426.81}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &770925442
 MonoBehaviour:
@@ -15405,10 +15405,10 @@ RectTransform:
   m_Father: {fileID: 1758976881}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 72.222}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 140.68266, y: -36.111}
+  m_SizeDelta: {x: 281.36533, y: 72.222}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1536458566
 MonoBehaviour:
@@ -16341,7 +16341,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1758976877
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16465,6 +16465,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stickerHolder: {fileID: 770925440}
   stickerPrefab: {fileID: 6881186438950080297, guid: 73415a2d4708c7f4186db30c61475e17, type: 3}
+  coins: {fileID: 827933959}
 --- !u!1 &1765245776
 GameObject:
   m_ObjectHideFlags: 0

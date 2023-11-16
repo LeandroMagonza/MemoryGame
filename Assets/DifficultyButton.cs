@@ -29,14 +29,12 @@ public class DifficultyButton : MonoBehaviour {
     public void SetStage(int stage) {
         this.stage = stage;
         gameObject.name = "ButtonDifficulty S" + stage+" D"+difficulty;
-        
-        UpdateDifficultyUnlocked();
     }
 
     public void UpdateDifficultyUnlocked() {
         //Debug.Log("Called updatedifficulty in" + (stage, difficulty));
         bool hasUnlockedStage = true;
-        foreach (var imageFromStage in GameManager.Instance.stages[stage].images) {
+        foreach (var imageFromStage in GameManager.Instance.stages[stage].stickers) {
             //tiene por lo menos una vez la figurita del stage, en sus imageduplicates
             if (!GameManager.Instance.userData.imageDuplicates.ContainsKey(imageFromStage)
                 ||

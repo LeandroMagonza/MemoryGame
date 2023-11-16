@@ -148,7 +148,6 @@ public class GameManager : MonoBehaviour {
             newStage.name = stageData.title;
             newStage.SetTitle(stageData.title);
             newStage.SetColor(stageData.ColorValue);
-            newStage.SetAmountOfImages(stageData.images.Count);
             newStage.SetStage(stageData.stageID);
 
             for (int difficulty = 0; difficulty < 3; difficulty++)
@@ -369,7 +368,7 @@ public class GameManager : MonoBehaviour {
         int amount;
         int.TryParse(splitedImageSetName[2], out amount);
 
-        foreach (var imageID in stages[selectedStage].images) {
+        foreach (var imageID in stages[selectedStage].stickers) {
             _spritesFromStage.Add(imageID, (GetSpriteFromSetByImageID(imageID), 0));
         }
     }
@@ -510,13 +509,10 @@ public class GameManager : MonoBehaviour {
         userData.coins += score;
     }
 
-    private void UpdateAchievementAndUnlockedLevels()
+    public void UpdateAchievementAndUnlockedLevels()
     {
         foreach (var stageIndexAndData in stages) {
-            foreach (var difficultyButton in stageIndexAndData.Value.stageObject.difficultyButtons)
-            {
-                difficultyButton.UpdateDifficultyUnlocked();
-            }
+                stageIndexAndData.Value.stageObject.UpdateDifficultyUnlockedAndAmountOfStickersUnlocked();
         }
     }
 

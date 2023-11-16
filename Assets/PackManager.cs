@@ -1,11 +1,15 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class PackManager : MonoBehaviour {
     public GameObject stickerHolder;
     public GameObject stickerPrefab;
+    public TextMeshProUGUI coins;
     private static PackManager _instance;
     
     public static PackManager Instance {
@@ -30,8 +34,26 @@ public class PackManager : MonoBehaviour {
         else
             DestroyImmediate(this);
     }
-    
-    public void OpenPack(int packStage = 0) {
+
+    private void Start()
+    {
+        coins.text = GameManager.Instance.userData.coins.ToString();
+    }
+
+    public IEnumerator OpenPack(int packStage = 0)
+    {
+        GameManager.Instance.disableInput = true;
+        int packCost = -(100 * packStage + 100);
+
+        bool canBuyPack = GameManager.Instance.userData.ModifyCoins(packCost);
+        if (!canBuyPack)
+        {
+            Debug.Log("Dont Have enough coins for pack");
+            GameManager.Instance.disableInput = false;
+            yield break;
+        }
+        
+        coins.text = GameManager.Instance.userData.coins.ToString();
         
         //destruyo todas las figuras que haya anteriores
         for (int i = stickerHolder.transform.childCount - 1; i >= 0; i--) {
@@ -57,10 +79,10 @@ public class PackManager : MonoBehaviour {
                 }
             }
             Debug.Log("sticker randomizer "+stickerStageRandomizer+" stage "+stickerStage);
-            Debug.Log("set has "+GameManager.Instance.stages[stickerStage].images.Count+" images");
-            int selectedStickerIndex = Random.Range(0, GameManager.Instance.stages[stickerStage].images.Count);
+            Debug.Log("set has "+GameManager.Instance.stages[stickerStage].stickers.Count+" stickerstickers");
+            int selectedStickerIndex = Random.Range(0, GameManager.Instance.stages[stickerStage].stickers.Count);
             Debug.Log("selected sticker from index "+selectedStickerIndex);
-            int selectedStickerImageID = GameManager.Instance.stages[stickerStage].images[selectedStickerIndex];
+            int selectedStickerImageID = GameManager.Instance.stages[stickerStage].stickers[selectedStickerIndex];
             Debug.Log("corresponds to imageID "+selectedStickerImageID);
             
             GameObject newSticker = Instantiate(stickerPrefab, stickerHolder.transform);
@@ -77,5 +99,7 @@ public class PackManager : MonoBehaviour {
             }
             
         }
+        GameManager.Instance.UpdateAchievementAndUnlockedLevels();
+        GameManager.Instance.disableInput = false;
     }
 }
