@@ -17,27 +17,24 @@ public class ShopManager : MonoBehaviour
     public Button betterCut_Upgrade_Button;
     public Button betterPeek_Upgrade_Button;
     public Button block;
-    public Button beathDefy_Upgrade_Button;
+    public Button deathDefy_Upgrade_Button;
     public void BuyItem(int itemID)
     {
         ItemID item = (ItemID)itemID;
         Debug.Log("Added Item:" + item.ToString());
         int price = ItemManager.Instance.GetItemPrice(item);
-        int money = GameManager.Instance.currentBuyScore;
-        if (money < price)
+        bool canBuy = GameManager.Instance.userData.ModifyCoins(-price);
+        if (!canBuy)
         {   
-            Debug.Log("Not enought money");        
-            return; 
+            Debug.Log("Not enough money");        
+            return;
         }
-
-        money -= price;
-        GameManager.Instance.currentBuyScore = money;
         ProcessItem(item);
     }
     [ContextMenu("Add Money")]
     public void AddMoney()
     {
-        GameManager.Instance.ModifyScore(1000);
+        GameManager.Instance.userData.ModifyCoins(1000);
     }
     private void ProcessItem(ItemID itemId)
     {

@@ -33,22 +33,14 @@ public class DifficultyButton : MonoBehaviour {
 
     public void UpdateDifficultyUnlocked() {
         //Debug.Log("Called updatedifficulty in" + (stage, difficulty));
-        bool hasUnlockedStage = true;
-        foreach (var imageFromStage in GameManager.Instance.stages[stage].stickers) {
-            //tiene por lo menos una vez la figurita del stage, en sus imageduplicates
-            if (!GameManager.Instance.userData.imageDuplicates.ContainsKey(imageFromStage)
-                ||
-                GameManager.Instance.userData.imageDuplicates[imageFromStage] <= 0) {
-                hasUnlockedStage = false;
-            }
-        }
+       
         //stage condicion de tener el ultimo nivel del stage anterior pasado
         //GameManager.Instance.userData.GetUserStageData(stage-1, 2) is null ||
         //GameManager.Instance.userData.GetUserStageData(stage-1, 2).achievements.Contains(Achievement.ClearedEveryImage)
         if (
             //condicion stage
             (
-                hasUnlockedStage
+                GameManager.Instance.userData.GetUserStageData(stage, difficulty).HasUnlockedStage()
             )
             &&
             //condicion dificultad
