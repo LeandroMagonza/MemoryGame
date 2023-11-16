@@ -9,8 +9,10 @@ using ColorUtility = UnityEngine.ColorUtility;
 
 public class Stage : MonoBehaviour
 {
+    public int stage;
     public TextMeshProUGUI titleText; 
-    public TextMeshProUGUI amountOfImagesText; 
+    public TextMeshProUGUI amountStickersTotalText; 
+    public TextMeshProUGUI amountStickersCurrentText; 
     public List<DifficultyButton> difficultyButtons; 
     public void SetTitle(string title) {
         titleText.text = title;
@@ -20,8 +22,11 @@ public class Stage : MonoBehaviour
         GetComponent<Image>().color = color;
     }
 
-    public void SetAmountOfImages(int imageListCount) {
-        amountOfImagesText.text = imageListCount.ToString();
+    public void SetAmountOfStickersTotal(int imageListCount) {
+        amountStickersTotalText.text = imageListCount.ToString();
+    }
+    public void SetAmountOfStickersCurrent(int imageListCount) {
+        amountStickersCurrentText.text = imageListCount.ToString();
     }
 
     public void SetScore(int difficulty, int score) {
@@ -29,11 +34,32 @@ public class Stage : MonoBehaviour
     }
     public void SetStage(int stage)
     {
+        this.stage = stage;
         int difficulty = 0;
         foreach (var difficultyButton in difficultyButtons)
         {
             difficultyButton.SetStage(stage);
             difficulty++;
+        }
+        UpdateDifficultyUnlockedAndAmountOfStickersUnlocked();
+    }
+    public void UpdateDifficultyUnlockedAndAmountOfStickersUnlocked()
+    {
+        List<int> unlockedStickers = new List<int>();
+        
+        foreach (var stickerFromStage in GameManager.Instance.stages[stage].stickers) {
+            //tiene por lo menos una vez la figurita del stage, en sus imageduplicates
+            if (GameManager.Instance.userData.imageDuplicates.ContainsKey(stickerFromStage)
+                &&
+                GameManager.Instance.userData.imageDuplicates[stickerFromStage] > 0) {
+                unlockedStickers.Add(stickerFromStage);
+            }
+        }
+        SetAmountOfStickersCurrent(unlockedStickers.Count);
+        SetAmountOfStickersTotal(GameManager.Instance.stages[stage].stickers.Count);
+        foreach (var difficultyButton in difficultyButtons)
+        {
+            difficultyButton.UpdateDifficultyUnlocked();
         }
     }
     
@@ -49,7 +75,8 @@ public class StageData
     public string color; // Almacenar como string en formato hexadecimal
     public List<int> stickers;
     public Stage stageObject;
-
+    //int = stageID, int = chance de una carta de ese stage, la suma de todos los floats tiene que dar 100
+    public Dictionary<int, int> packOdds = new Dictionary<int, int>(); 
     [NonSerialized]
     public Color ColorValue; // Propiedad para acceder al valor de color
 
@@ -77,6 +104,8 @@ public class StageData
             ColorValue = colorValue;
         }
     }
+
+
 }
 
 [Serializable]
@@ -170,7 +199,7 @@ public class UserData
     public int id;
     public int coins;
     public List<UserStageData> stages;
-    public Dictionary<int,int> imageDuplicates;
+    public Dictionary<int,int> imageDuplicates = new Dictionary<int, int>();
     //upgrades, inventario
     //historial de compras
 
@@ -184,6 +213,17 @@ public class UserData
             }
         }
         return null;
+    }
+
+    public bool ModifyCoins(int modificationAmount)
+    {
+        modificationAmount += coins;
+        if (modificationAmount >= 0 )
+        {
+            coins = modificationAmount;
+            return true;
+        }
+        return false;
     }
 }
 
@@ -254,3 +294,17 @@ public enum TurnAction {
     ReduceOptions
 }
 
+public class StickerLevelsData
+{
+    public int amountRequired { get; set; }
+}
+
+// Estructura de Packs
+public class PacksData
+{
+    public float rareChance { get; set; }
+    public int rareAmountOfStickers { get; set; }
+    public float legendaryChance { get; set; }
+    public int legendaryAmountOfStickers { get; set; }
+    public int stickersPerPack { get; set; }
+}

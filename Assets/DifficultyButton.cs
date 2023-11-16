@@ -29,22 +29,34 @@ public class DifficultyButton : MonoBehaviour {
     public void SetStage(int stage) {
         this.stage = stage;
         gameObject.name = "ButtonDifficulty S" + stage+" D"+difficulty;
-        
-        UpdateDifficultyUnlocked();
     }
 
     public void UpdateDifficultyUnlocked() {
-        Debug.Log("Called updatedifficulty in" + (stage, difficulty));
+        //Debug.Log("Called updatedifficulty in" + (stage, difficulty));
+        bool hasUnlockedStage = true;
+        foreach (var imageFromStage in GameManager.Instance.stages[stage].stickers) {
+            //tiene por lo menos una vez la figurita del stage, en sus imageduplicates
+            if (!GameManager.Instance.userData.imageDuplicates.ContainsKey(imageFromStage)
+                ||
+                GameManager.Instance.userData.imageDuplicates[imageFromStage] <= 0) {
+                hasUnlockedStage = false;
+            }
+        }
+        //stage condicion de tener el ultimo nivel del stage anterior pasado
+        //GameManager.Instance.userData.GetUserStageData(stage-1, 2) is null ||
+        //GameManager.Instance.userData.GetUserStageData(stage-1, 2).achievements.Contains(Achievement.ClearedEveryImage)
         if (
+            //condicion stage
+            (
+                hasUnlockedStage
+            )
+            &&
+            //condicion dificultad
             (
                 GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null ||
             GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1).achievements.Contains(Achievement.ClearedEveryImage)
                 )
-            &&
-            (
-                GameManager.Instance.userData.GetUserStageData(stage-1, 2) is null ||
-                GameManager.Instance.userData.GetUserStageData(stage-1, 2).achievements.Contains(Achievement.ClearedEveryImage)
-            )
+            
         )
         {
             GetComponent<Button>().interactable = true;
