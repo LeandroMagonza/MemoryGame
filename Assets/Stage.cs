@@ -49,7 +49,8 @@ public class StageData
     public string color; // Almacenar como string en formato hexadecimal
     public List<int> images;
     public Stage stageObject;
-
+    //int = stageID, int = chance de una carta de ese stage, la suma de todos los floats tiene que dar 100
+    public Dictionary<int, int> packOdds = new Dictionary<int, int>(); 
     [NonSerialized]
     public Color ColorValue; // Propiedad para acceder al valor de color
 
@@ -170,7 +171,7 @@ public class UserData
     public int id;
     public int coins;
     public List<UserStageData> stages;
-    public Dictionary<int,int> imageDuplicates;
+    public Dictionary<int,int> imageDuplicates = new Dictionary<int, int>();
     //upgrades, inventario
     //historial de compras
 
@@ -254,3 +255,17 @@ public enum TurnAction {
     ReduceOptions
 }
 
+public class StickerLevelsData
+{
+    public int amountRequired { get; set; }
+}
+
+// Estructura de Packs
+public class PacksData
+{
+    public float rareChance { get; set; }
+    public int rareAmountOfStickers { get; set; }
+    public float legendaryChance { get; set; }
+    public int legendaryAmountOfStickers { get; set; }
+    public int stickersPerPack { get; set; }
+}

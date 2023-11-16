@@ -12,6 +12,7 @@ using ColorUtility = UnityEngine.ColorUtility;
 using Random = UnityEngine.Random;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
+using Newtonsoft.Json.Linq;
 
 public class GameManager : MonoBehaviour {
     private static GameManager _instance;
@@ -37,7 +38,7 @@ public class GameManager : MonoBehaviour {
     public GameObject imageOnDisplay;
 
     private int _currentlySelectedImage;
-    private Dictionary<int,(Sprite sprite, int amountOfAppearances)> _spritesFromSet = new Dictionary<int, (Sprite sprite, int amountOfAppearances)>();
+    private Dictionary<int,(Sprite sprite, int amountOfAppearances)> _spritesFromStage = new Dictionary<int, (Sprite sprite, int amountOfAppearances)>();
 
     private List<int> currentlyInGameImages =new List<int>();
 
@@ -77,7 +78,9 @@ public class GameManager : MonoBehaviour {
     public int selectedDifficulty = 0;
 
     public Dictionary<int, StageData> stages;
-
+    private Dictionary<int, StickerLevelsData> stickerLevels = new Dictionary<int, StickerLevelsData>();
+    public PacksData packs = new PacksData();
+    
     public UserData userData = new UserData();
     public GameObject selectStageAndDifficultyCanvas;
     public GameObject gameCanvas;
@@ -183,11 +186,11 @@ public class GameManager : MonoBehaviour {
     public IEnumerator ProcessTurnAction(int number)
     {
         disableInput = true;
-        Debug.Log("Guessed number " + number + ", amount of appearances " + _spritesFromSet[_currentlySelectedImage].amountOfAppearances);
+        Debug.Log("Guessed number " + number + ", amount of appearances " + _spritesFromStage[_currentlySelectedImage].amountOfAppearances);
         TurnAction turnAction;
         int scoreModification = 0;
         float timerModification = maxTimer - timer;
-        if (number == _spritesFromSet[_currentlySelectedImage].amountOfAppearances)
+        if (number == _spritesFromStage[_currentlySelectedImage].amountOfAppearances)
         {
             Debug.Log("CorrectGuess");
             scoreModification = OnCorrectGuess();
@@ -203,7 +206,7 @@ public class GameManager : MonoBehaviour {
         // si ya la imagen aparecio 9 veces, se la saca del pool
         _currentMatch.AddTurn(
             _currentlySelectedImage,
-            _spritesFromSet[_currentlySelectedImage].amountOfAppearances,
+            _spritesFromStage[_currentlySelectedImage].amountOfAppearances,
             timerModification,
             number,
             turnAction,
@@ -216,9 +219,9 @@ public class GameManager : MonoBehaviour {
     }
     private void CheckAmountOfAppearances()
     {
-        if (_spritesFromSet[_currentlySelectedImage].amountOfAppearances == bonusOnAmountOfAppearences)
+        if (_spritesFromStage[_currentlySelectedImage].amountOfAppearances == bonusOnAmountOfAppearences)
         {
-            Debug.Log("Clear: " + _spritesFromSet[_currentlySelectedImage].sprite.name);
+            Debug.Log("Clear: " + _spritesFromStage[_currentlySelectedImage].sprite.name);
             GainBonus();
             RemoveStickerFromPool();
         }
@@ -288,14 +291,14 @@ public class GameManager : MonoBehaviour {
     {
         IncorrectGuessFX();
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
-            _spritesFromSet[_currentlySelectedImage].amountOfAppearances,
+            _spritesFromStage[_currentlySelectedImage].amountOfAppearances,
             false);
         audioSource.PlayOneShot(incorrectGuessClip);
         lifeCounter.LoseLive();
         SetTimer(maxTimer);
-        _spritesFromSet[_currentlySelectedImage] = (
-            _spritesFromSet[_currentlySelectedImage].sprite,
-            _spritesFromSet[_currentlySelectedImage].amountOfAppearances - 1);
+        _spritesFromStage[_currentlySelectedImage] = (
+            _spritesFromStage[_currentlySelectedImage].sprite,
+            _spritesFromStage[_currentlySelectedImage].amountOfAppearances - 1);
         SetCurrentCombo(0);
     }
 
@@ -312,12 +315,12 @@ public class GameManager : MonoBehaviour {
     {
         CorrectGuessFX();
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
-            _spritesFromSet[_currentlySelectedImage].amountOfAppearances,
+            _spritesFromStage[_currentlySelectedImage].amountOfAppearances,
             true);
         audioSource.PlayOneShot(correctGuessClip);
         SetTimer(maxTimer);
         int scoreModification = stages[selectedStage].basePoints +
-                                _spritesFromSet[_currentlySelectedImage].amountOfAppearances
+                                _spritesFromStage[_currentlySelectedImage].amountOfAppearances
                                 + CalculateScoreComboBonus();
         ModifyScore(scoreModification);
         SetCurrentCombo(_currentCombo+1);
@@ -339,7 +342,7 @@ public class GameManager : MonoBehaviour {
     private void GainBonus()
     {
         Debug.Log("gain bonus");
-        ModifyScore(_spritesFromSet[_currentlySelectedImage].amountOfAppearances * bonusMultiplicator);
+        ModifyScore(_spritesFromStage[_currentlySelectedImage].amountOfAppearances * bonusMultiplicator);
         bonusMultiplicator++;
         audioSource.PlayOneShot(bonusClip);
         lifeCounter.GainLive();
@@ -357,7 +360,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private void LoadImages(string imageSetName) {
-        _spritesFromSet = new Dictionary<int, (Sprite sprite, int amountOfAppearances)>();
+        _spritesFromStage = new Dictionary<int, (Sprite sprite, int amountOfAppearances)>();
         
         string[] splitedImageSetName = imageSetName.Split("_");
         
@@ -367,34 +370,7 @@ public class GameManager : MonoBehaviour {
         int.TryParse(splitedImageSetName[2], out amount);
 
         foreach (var imageID in stages[selectedStage].images) {
-            AddImageFromSet(imageSetName, type, name, imageID);
-        }
-    }
-
-  
-
-    private void AddImageFromSet(string imageSetName, string type, string name, int imageID) {
-        string path;
-        Sprite loadedSprite = null;
-        switch (type) {
-            case "SPRITESHEET":
-                path = imageSetName + "/" + name;
-                loadedSprite = Load(path, name + "_" + imageID);
-                break;
-            case "IMAGES":
-                path = imageSetName + "/(" + imageID + ")";
-                loadedSprite = Resources.Load<Sprite>(path);
-                break;
-            default:
-                throw new Exception("INVALID IMAGESET TYPE");
-        }
-
-        Debug.Log("PATH: " + path);
-        if (loadedSprite != null) {
-            _spritesFromSet.Add(imageID, (loadedSprite, 0));
-        }
-        else {
-            Debug.LogError("No se pudo cargar el sprite.");
+            _spritesFromStage.Add(imageID, (GetSpriteFromSetByImageID(imageID), 0));
         }
     }
 
@@ -415,8 +391,6 @@ public class GameManager : MonoBehaviour {
     private void SetRandomImage() {
         Image image = imageOnDisplay.GetComponent<Image>();
         
-
-
         if (currentlyInGameImages.Count == 0) {
             Win();
             return;
@@ -429,22 +403,57 @@ public class GameManager : MonoBehaviour {
             nextImageID = currentlyInGameImages[nextImageIndex];
         }
         
-        image.sprite = _spritesFromSet[nextImageID].sprite;
+        image.sprite = _spritesFromStage[nextImageID].sprite;
+        
         _currentlySelectedImage = nextImageID;
-        _spritesFromSet[_currentlySelectedImage]= (
-            _spritesFromSet[_currentlySelectedImage].sprite,
-            _spritesFromSet[_currentlySelectedImage].amountOfAppearances+1);
+        _spritesFromStage[_currentlySelectedImage]= (
+            _spritesFromStage[_currentlySelectedImage].sprite,
+            _spritesFromStage[_currentlySelectedImage].amountOfAppearances+1);
         imageIDText.text = (nextImageID+1).ToString();
         // image.sprite = _spritesFromSet[Random.Range(0, _spritesFromSet.Count)].sprite;
     }
+
+    public Sprite GetSpriteFromSetByImageID(int imageID) {
+        string[] splitedImageSetName = imageSetName.ToString().Split("_");
+        
+        string name = splitedImageSetName[0];
+        string type = splitedImageSetName[1];
+        int amount;
+        int.TryParse(splitedImageSetName[2], out amount);
+        
+        string path;
+        Sprite loadedSprite = null;
+        switch (type) {
+            case "SPRITESHEET":
+                path = imageSetName + "/" + name;
+                loadedSprite = Load(path, name + "_" + imageID);
+                break;
+            case "IMAGES":
+                path = imageSetName + "/(" + imageID + ")";
+                loadedSprite = Resources.Load<Sprite>(path);
+                break;
+            default:
+                throw new Exception("INVALID IMAGESET TYPE");
+        }
+
+        Debug.Log("PATH: " + path);
+        if (loadedSprite != null) {
+            return loadedSprite;
+        }
+        else {
+            throw new Exception("ImageID not found in spritesFromSet");
+        }
+    }
+    
+    
     private void RemoveStickerFromPool()
     {
-        _spritesFromSet[_currentlySelectedImage] = (
-            _spritesFromSet[_currentlySelectedImage].sprite,
+        _spritesFromStage[_currentlySelectedImage] = (
+            _spritesFromStage[_currentlySelectedImage].sprite,
             0);
         currentlyInGameImages.Remove(_currentlySelectedImage);
         // aca se setea si la imagen vuelve al set general o no  
-        _spritesFromSet.Remove(_currentlySelectedImage);
+        _spritesFromStage.Remove(_currentlySelectedImage);
     }
 
     private void Win() {
@@ -459,7 +468,7 @@ public class GameManager : MonoBehaviour {
 
         List<(int id, Sprite sprite, int amountOfAppearances)> shuffledSprites =
             new List<(int id, Sprite sprite, int amountOfAppearances)>();
-        foreach (var VARIABLE in _spritesFromSet) {
+        foreach (var VARIABLE in _spritesFromStage) {
             shuffledSprites.Add((VARIABLE.Key, VARIABLE.Value.sprite, VARIABLE.Value.amountOfAppearances));
         }
 
@@ -536,9 +545,9 @@ public class GameManager : MonoBehaviour {
         if (this.timer<=1)
         {
             lifeCounter.LoseLive();
-            _spritesFromSet[_currentlySelectedImage] = (
-                _spritesFromSet[_currentlySelectedImage].sprite,
-                _spritesFromSet[_currentlySelectedImage].amountOfAppearances - 1);
+            _spritesFromStage[_currentlySelectedImage] = (
+                _spritesFromStage[_currentlySelectedImage].sprite,
+                _spritesFromStage[_currentlySelectedImage].amountOfAppearances - 1);
             NextTurn();
             SetTimer(maxTimer);
         }
@@ -850,7 +859,78 @@ public class GameManager : MonoBehaviour {
         
         this.userData =  userData;
         yield return null;
-        StartCoroutine(LoadStages());
+        yield return StartCoroutine(LoadStages());
+        yield return StartCoroutine(LoadStickerLevels());
+        yield return StartCoroutine(LoadPacks());
+    }
+    public IEnumerator LoadStickerLevels()
+    {
+        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        string json;
+        if (!File.Exists(filePath))
+        {
+            Debug.Log("No saved stages found at " + filePath);
+            yield return StartCoroutine(GetJson("stages"));
+        }
+        Debug.Log(filePath);
+        json = File.ReadAllText(filePath);
+
+        // Parse the JSON into a JObject
+        JObject jsonData = JObject.Parse(json);
+
+        // Deserialize the stickerLevels data
+        JObject stickerLevelsJson = jsonData["stickerLevels"].ToObject<JObject>();
+        Dictionary<int, StickerLevelsData> stickerLevels = new Dictionary<int, StickerLevelsData>();
+
+        foreach (var item in stickerLevelsJson)
+        {
+            int level = int.Parse(item.Key);
+            StickerLevelsData data = item.Value.ToObject<StickerLevelsData>();
+            stickerLevels.Add(level, data);
+        }
+
+        Debug.Log("StickerLevels loaded from " + filePath + " levels: " + stickerLevels.Count);
+
+        // Do whatever you need with the stickerLevels dictionary
+
+        yield return null;
+    }
+
+
+    // Función para cargar los datos de packs
+    public IEnumerator LoadPacks()
+    {
+        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        string json;
+        if (!File.Exists(filePath))
+        {
+            Debug.Log("No saved stages found at " + filePath);
+            yield return StartCoroutine(GetJson("stages"));
+        }
+        Debug.Log(filePath);
+        json = File.ReadAllText(filePath);
+
+        // Parse the JSON into a JObject
+        JObject jsonData = JObject.Parse(json);
+
+        // Extract the "packs" object
+        JObject packsJson = jsonData["packs"].ToObject<JObject>();
+
+        // Create a PacksData object and set its properties
+        PacksData packsData = new PacksData
+        {
+            rareChance = packsJson["rareChance"].Value<float>(),
+            rareAmountOfStickers = packsJson["rareAmountOfStickers"].Value<int>(),
+            legendaryChance = packsJson["legendaryChance"].Value<float>(),
+            legendaryAmountOfStickers = packsJson["legendaryAmountOfStickers"].Value<int>(),
+            stickersPerPack = packsJson["stickersPerPack"].Value<int>()
+        };
+
+        packs = packsData;
+    
+        Debug.Log("Packs loaded from " + filePath);
+        Debug.Log("stickersPerPack on load: " + packs.stickersPerPack);
+        yield return null;
     }
 
     public int CalculateScoreComboBonus()
