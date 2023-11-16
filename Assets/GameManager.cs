@@ -153,7 +153,7 @@ public class GameManager : MonoBehaviour {
                 if (userData.GetUserStageData(stageData.stageID, difficulty) is not null)
                 {
                     newStage.SetScore(difficulty, userData.GetUserStageData(stageData.stageID, difficulty).highScore);
-                    StartCoroutine(newStage.difficultyButtons[selectedDifficulty]
+                    StartCoroutine(newStage.difficultyButtons[difficulty]
                         .SetAchievements(userData.GetUserStageData(stageData.stageID, difficulty).achievements, 0f));
                 }
                 else
@@ -167,8 +167,10 @@ public class GameManager : MonoBehaviour {
     }
 
     private void SetScoreTexts() {
-        scoreText.text = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore.ToString();
-        highScoreText.text = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore.ToString();
+        if (userData.GetUserStageData(selectedStage, selectedDifficulty) is not null) {
+            scoreText.text = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore.ToString();
+            highScoreText.text = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore.ToString();
+        }
     }
 
     private void DestroySelf() {

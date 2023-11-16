@@ -34,6 +34,7 @@ public class DifficultyButton : MonoBehaviour {
     }
 
     public void UpdateDifficultyUnlocked() {
+        Debug.Log("Called updatedifficulty in" + (stage, difficulty));
         if (
             (
                 GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null ||
@@ -58,7 +59,7 @@ public class DifficultyButton : MonoBehaviour {
     {
         foreach (var achievement in achievements)
         {
-            yield return stars.SetAchievements(achievement, delay);
+            yield return stars.SetAchievement(achievement, delay);
         }
     }
 }
