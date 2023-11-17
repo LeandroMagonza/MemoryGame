@@ -105,7 +105,7 @@ public class ItemManager : MonoBehaviour
     public void UseClue()
     {
         Debug.Log("USE CLUE");
-        GameManager.Instance.GetCurrentlySelectedImage();
+        var turnSticker = GameManager.Instance.GetCurrentlySelectedSticker();
         if (!consumables.ContainsKey(ItemID.Clue) || consumables[ItemID.Clue] == 0) return;
         GameManager.Instance.audioSource.PlayOneShot(buttonClueAudioClip);
         //anim
@@ -118,9 +118,11 @@ public class ItemManager : MonoBehaviour
         int scoreModification = GameManager.Instance.OnCorrectGuess();
 
         StartCoroutine(GameManager.Instance.FinishProcessingTurnAction(
-            GameManager.Instance.GetCurrentlySelectedImage().amountOfAppearances,
+            turnSticker.amountOfAppearances,
             TurnAction.UseClue,
-            scoreModification));
+            scoreModification,
+            turnSticker
+            ));
     }
     
     public void UseRemove()
