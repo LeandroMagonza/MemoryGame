@@ -96,6 +96,7 @@ public class GameManager : MonoBehaviour {
             return _instance;
         }
     }
+   
     protected void Awake() {
         if (_instance == null) {
             _instance = this as GameManager;

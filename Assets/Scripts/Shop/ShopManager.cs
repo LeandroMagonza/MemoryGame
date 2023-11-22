@@ -22,7 +22,7 @@ public class ShopManager : MonoBehaviour
     {
         ItemID item = (ItemID)itemID;
         Debug.Log("Added Item:" + item.ToString());
-        int price = ItemManager.Instance.GetItemPrice(item);
+        int price = ItemPrizes.GetItemPrice(item);
         bool canBuy = GameManager.Instance.userData.ModifyCoins(-price);
         if (!canBuy)
         {   
