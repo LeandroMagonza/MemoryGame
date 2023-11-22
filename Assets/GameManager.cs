@@ -13,10 +13,38 @@ using Random = UnityEngine.Random;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
 using Newtonsoft.Json.Linq;
+using UnityEngine.Serialization;
 
 public class GameManager : MonoBehaviour {
+    #region Singleton
     private static GameManager _instance;
+    public static GameManager Instance {
+        get {
+            if (_instance == null)
+                _instance = FindObjectOfType<GameManager>();
+            if (_instance == null)
+                Debug.LogError("Singleton<" + typeof(GameManager) + "> instance has been not found.");
+            return _instance;
+        }
+    }
+    protected void Awake() {
+        if (_instance == null) {
+            _instance = this as GameManager;
+            audioSource = GetComponent<AudioSource>();
+        }
+        else if (_instance != this)
+            DestroySelf();
+    }
+    private void DestroySelf() {
+        if (Application.isPlaying)
+            Destroy(this);
+        else
+            DestroyImmediate(this);
+    }
+    
 
+    #endregion
+    
     public bool gameEnded = false;
     public LifeCounter lifeCounter;
     public float timer = 3;
@@ -37,14 +65,10 @@ public class GameManager : MonoBehaviour {
     public ImageSet imageSetName = ImageSet.Landscapes_IMAGES_10;
     public GameObject imageOnDisplay;
 
-    private int _currentlySelectedImage;
-    private Dictionary<int,(Sprite sprite, int amountOfAppearances)> _spritesFromStage = new Dictionary<int, (Sprite sprite, int amountOfAppearances)>();
+    private int _currentlySelectedSticker;
+    private Dictionary<int,(Sprite sprite, int amountOfAppearances)> _stickersFromStage = new Dictionary<int, (Sprite sprite, int amountOfAppearances)>();
 
     private List<int> currentlyInGameImages =new List<int>();
-
-    private Dictionary<ShopItemType, int> inventary = new Dictionary<ShopItemType, int>();
-    private Dictionary<ShopItemType, int> matchInventary = new Dictionary<ShopItemType, int>();
-    private Dictionary<ShopItemType, int> upgrades = new Dictionary<ShopItemType, int>();
 
     public AudioSource audioSource;
     public AudioClip correctGuessClip;
@@ -57,18 +81,17 @@ public class GameManager : MonoBehaviour {
     public ParticleSystem correctGuessParticle;
     public ParticleSystem incorrectGuessParticle;
 
-    public Button buttonReplay;
+    public GameObject endGameButtons;
     public float delayBetweenImages = .72f;
 
     public bool disableInput = false;
 
-    [Header("Clue And Remove Settings")]
-    [SerializeField] private Button buttonClue;
-    [SerializeField] private Button buttonRemove;
-    [SerializeField] private TextMeshProUGUI buttonTextClue;
-    [SerializeField] private TextMeshProUGUI buttonTextRemove;
-    [SerializeField] private AudioClip buttonClueAudioClip;
-    [SerializeField] private AudioClip buttonRemoveAudioClip;
+    #region PersistanceReferences
+    public UserData userData => PersistanceManager.Instance.userData;
+    public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
+    private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.stickerLevels;
+    public PacksData packs => PersistanceManager.Instance.packs;
+    #endregion
 
     public int currentClues = 0;
     public int maxCluesAmount = 5;
@@ -77,12 +100,7 @@ public class GameManager : MonoBehaviour {
     public int selectedStage = 0;
     public int selectedDifficulty = 0;
 
-    public Dictionary<int, StageData> stages;
-    private Dictionary<int, StickerLevelsData> stickerLevels = new Dictionary<int, StickerLevelsData>();
-    public PacksData packs = new PacksData();
-    
-    public UserData userData = new UserData();
-    public GameObject selectStageAndDifficultyCanvas;
+    [FormerlySerializedAs("selectStageAndDifficultyCanvas")] public GameObject stageHolder;
     public GameObject gameCanvas;
 
     public GameObject numpadRow0;
@@ -96,35 +114,15 @@ public class GameManager : MonoBehaviour {
     public TextMeshProUGUI comboBonusText;
     public TextMeshProUGUI comboText;
 
-    public static GameManager Instance {
-        get {
-            if (_instance == null)
-                _instance = FindObjectOfType<GameManager>();
-            if (_instance == null)
-                Debug.LogError("Singleton<" + typeof(GameManager) + "> instance has been not found.");
-            return _instance;
-        }
-    }
-    protected void Awake() {
-        if (_instance == null) {
-            _instance = this as GameManager;
-            audioSource = GetComponent<AudioSource>();
-        }
-        else if (_instance != this)
-            DestroySelf();
-    }
+    
 
     private void Start()
     {
-        buttonClue.interactable = currentClues > 0;
-        buttonRemove.interactable = currentRemoves > 0;
-        buttonTextClue.text = currentClues.ToString();
-        buttonTextRemove.text = currentRemoves.ToString();
-        StartCoroutine(LoadUserData());
-        
+        //scoreText.text = score.ToString();
     }
 
-    private void InitializeStages()
+    //TODO: Esta se va para manager stages o algo asi 
+    public void InitializeStages()
     {
         foreach (var stageIndexAndData in stages)
         {
@@ -140,7 +138,7 @@ public class GameManager : MonoBehaviour {
             //.ToArray().Select((data, index) => new { index, data })
             StageData stageData = stageIndexAndData.Value;
 
-            GameObject stageDisplay = Instantiate(stageDisplayPrefab, selectStageAndDifficultyCanvas.transform);
+            GameObject stageDisplay = Instantiate(stageDisplayPrefab, stageHolder.transform);
             Stage newStage = stageDisplay.GetComponent<Stage>();
             stageData.stageObject = newStage;
 
@@ -175,21 +173,16 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    private void DestroySelf() {
-        if (Application.isPlaying)
-            Destroy(this);
-        else
-            DestroyImmediate(this);
-    }
+
 
     public IEnumerator ProcessTurnAction(int number)
     {
         disableInput = true;
-        Debug.Log("Guessed number " + number + ", amount of appearances " + _spritesFromStage[_currentlySelectedImage].amountOfAppearances);
+        Debug.Log("Guessed number " + number + ", amount of appearances " + _stickersFromStage[_currentlySelectedSticker].amountOfAppearances);
         TurnAction turnAction;
         int scoreModification = 0;
-        float timerModification = maxTimer - timer;
-        if (number == _spritesFromStage[_currentlySelectedImage].amountOfAppearances)
+        var turnSticker = GetCurrentlySelectedSticker();
+        if (number == turnSticker.amountOfAppearances)
         {
             Debug.Log("CorrectGuess");
             scoreModification = OnCorrectGuess();
@@ -201,31 +194,51 @@ public class GameManager : MonoBehaviour {
             OnIncorrectGuess();
             turnAction = TurnAction.GuessIncorrect;
         }
+        //usar el dato del sticker tomado antes de la funcion oncorrectguess
+        yield return FinishProcessingTurnAction(number, turnAction, scoreModification, turnSticker);
+    }
+
+    public (int stickerID,Sprite sprite,int amountOfAppearances) GetCurrentlySelectedSticker()
+    {
+        return (_currentlySelectedSticker,
+            _stickersFromStage[_currentlySelectedSticker].sprite,
+            _stickersFromStage[_currentlySelectedSticker].amountOfAppearances
+            );
+    }
+    public IEnumerator FinishProcessingTurnAction(int number, TurnAction turnAction,
+        int scoreModification, (int stickerID,Sprite sprite,int amountOfAppearances) turnSticker)
+    {
+        float timerModification = maxTimer - timer;
+        SetTimer(maxTimer);
         yield return new WaitForSeconds(delayBetweenImages);
-        // si ya la imagen aparecio 9 veces, se la saca del pool
+        SaveTurn(number, timerModification, turnAction, scoreModification, turnSticker);
+        if (!gameEnded) NextTurn();
+    }
+
+    private void SaveTurn(int number, float timerModification, TurnAction turnAction, int scoreModification,(int stickerID,Sprite sprite,int amountOfAppearances) turnSticker)
+    {
         _currentMatch.AddTurn(
-            _currentlySelectedImage,
-            _spritesFromStage[_currentlySelectedImage].amountOfAppearances,
+            turnSticker.stickerID,
+            turnSticker.amountOfAppearances,
             timerModification,
             number,
             turnAction,
             lifeCounter.lives,
             _currentCombo,
             scoreModification
-            );
-        CheckAmountOfAppearances();
-        if (!gameEnded) NextTurn();
+        );
     }
+
     private void CheckAmountOfAppearances()
     {
-        if (_spritesFromStage[_currentlySelectedImage].amountOfAppearances == bonusOnAmountOfAppearences)
+        if (_stickersFromStage[_currentlySelectedSticker].amountOfAppearances == bonusOnAmountOfAppearences)
         {
-            Debug.Log("Clear: " + _spritesFromStage[_currentlySelectedImage].sprite.name);
+            Debug.Log("Clear: " + _stickersFromStage[_currentlySelectedSticker].sprite.name);
             GainBonus();
             RemoveStickerFromPool();
         }
     }
-    private void NextTurn() {
+    public void NextTurn() {
         turnNumber++;
         if (currentlyInGameImages.Count < 3)
         {
@@ -240,64 +253,21 @@ public class GameManager : MonoBehaviour {
 
     }
 
-    private void AddClue()
-    {
-        currentClues++;
-        buttonClue.interactable = currentClues > 0;
-        currentClues = currentClues > maxCluesAmount ? maxCluesAmount : currentClues;
-        buttonTextClue.text = currentClues.ToString();
-    }
 
-    private void AddRemove() 
-    {
-        currentRemoves++;
-        buttonRemove.interactable = currentRemoves > 0;
-        currentRemoves = currentRemoves > maxRemovesAmount ? maxRemovesAmount : currentRemoves;
-        buttonTextRemove.text = currentRemoves.ToString();
-    }
 
-    [ContextMenu("UseClue")]
-    public void UseClue() {
-        Debug.Log("USE CLUE: " + currentClues);
+   
 
-        if (currentClues < 1) return;
-
-        audioSource.PlayOneShot(buttonClueAudioClip);
-        // anim
-        currentClues--;
-        currentClues = currentClues < 0 ? 0 : currentClues;
-        buttonClue.interactable = currentClues != 0;
-        buttonTextClue.text = currentClues.ToString();
-        OnCorrectGuess();
-        NextTurn();
-    }
-    [ContextMenu("UseRemove")]
-    public void UseRemove()
-    {
-        Debug.Log("USE REMOVE");
-        if (currentRemoves < 1) return;
-
-        audioSource.PlayOneShot(buttonRemoveAudioClip);
-        //anim
-        currentRemoves--;
-        currentRemoves = currentRemoves < 0 ? 0 : currentRemoves;
-        buttonRemove.interactable = currentRemoves != 0;
-        buttonTextRemove.text = currentRemoves.ToString();
-        RemoveStickerFromPool();
-        NextTurn();
-    }
-    private void OnIncorrectGuess()
+    public void OnIncorrectGuess()
     {
         IncorrectGuessFX();
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
-            _spritesFromStage[_currentlySelectedImage].amountOfAppearances,
+            _stickersFromStage[_currentlySelectedSticker].amountOfAppearances,
             false);
         audioSource.PlayOneShot(incorrectGuessClip);
         lifeCounter.LoseLive();
-        SetTimer(maxTimer);
-        _spritesFromStage[_currentlySelectedImage] = (
-            _spritesFromStage[_currentlySelectedImage].sprite,
-            _spritesFromStage[_currentlySelectedImage].amountOfAppearances - 1);
+        _stickersFromStage[_currentlySelectedSticker] = (
+            _stickersFromStage[_currentlySelectedSticker].sprite,
+            _stickersFromStage[_currentlySelectedSticker].amountOfAppearances - 1);
         SetCurrentCombo(0);
     }
 
@@ -309,20 +279,19 @@ public class GameManager : MonoBehaviour {
         //TODO: add animation
     }
    
-
-    private int OnCorrectGuess()
+    public int OnCorrectGuess()
     {
         CorrectGuessFX();
         amountOfAppearancesText.SetAmountOfGuessesAndShowText(
-            _spritesFromStage[_currentlySelectedImage].amountOfAppearances,
+            _stickersFromStage[_currentlySelectedSticker].amountOfAppearances,
             true);
         audioSource.PlayOneShot(correctGuessClip);
-        SetTimer(maxTimer);
         int scoreModification = stages[selectedStage].basePoints +
-                                _spritesFromStage[_currentlySelectedImage].amountOfAppearances
+                                _stickersFromStage[_currentlySelectedSticker].amountOfAppearances
                                 + CalculateScoreComboBonus();
         ModifyScore(scoreModification);
         SetCurrentCombo(_currentCombo+1);
+        CheckAmountOfAppearances();
         return scoreModification;
     }
 
@@ -341,7 +310,7 @@ public class GameManager : MonoBehaviour {
     private void GainBonus()
     {
         Debug.Log("gain bonus");
-        ModifyScore(_spritesFromStage[_currentlySelectedImage].amountOfAppearances * bonusMultiplicator);
+        ModifyScore(_stickersFromStage[_currentlySelectedSticker].amountOfAppearances * bonusMultiplicator);
         bonusMultiplicator++;
         audioSource.PlayOneShot(bonusClip);
         lifeCounter.GainLive();
@@ -352,14 +321,15 @@ public class GameManager : MonoBehaviour {
         score += modificationAmount;
         scoreText.text = score.ToString();
         
-    } 
+    }
+  
     private void SetScore(int newScore) {
         score = newScore;
         scoreText.text = score.ToString();
     }
 
     private void LoadImages(string imageSetName) {
-        _spritesFromStage = new Dictionary<int, (Sprite sprite, int amountOfAppearances)>();
+        _stickersFromStage = new Dictionary<int, (Sprite sprite, int amountOfAppearances)>();
         
         string[] splitedImageSetName = imageSetName.Split("_");
         
@@ -369,7 +339,7 @@ public class GameManager : MonoBehaviour {
         int.TryParse(splitedImageSetName[2], out amount);
 
         foreach (var imageID in stages[selectedStage].stickers) {
-            _spritesFromStage.Add(imageID, (GetSpriteFromSetByImageID(imageID), 0));
+            _stickersFromStage.Add(imageID, (GetSpriteFromSetByImageID(imageID), 0));
         }
     }
 
@@ -397,17 +367,17 @@ public class GameManager : MonoBehaviour {
         int nextImageIndex = Random.Range(0, currentlyInGameImages.Count);
         int nextImageID = currentlyInGameImages[nextImageIndex];
 
-        while (_currentlySelectedImage == nextImageID && currentlyInGameImages.Count > 1) {
+        while (_currentlySelectedSticker == nextImageID && currentlyInGameImages.Count > 1) {
             nextImageIndex = Random.Range(0, currentlyInGameImages.Count);
             nextImageID = currentlyInGameImages[nextImageIndex];
         }
         
-        image.sprite = _spritesFromStage[nextImageID].sprite;
+        image.sprite = _stickersFromStage[nextImageID].sprite;
         
-        _currentlySelectedImage = nextImageID;
-        _spritesFromStage[_currentlySelectedImage]= (
-            _spritesFromStage[_currentlySelectedImage].sprite,
-            _spritesFromStage[_currentlySelectedImage].amountOfAppearances+1);
+        _currentlySelectedSticker = nextImageID;
+        _stickersFromStage[_currentlySelectedSticker]= (
+            _stickersFromStage[_currentlySelectedSticker].sprite,
+            _stickersFromStage[_currentlySelectedSticker].amountOfAppearances+1);
         imageIDText.text = (nextImageID+1).ToString();
         // image.sprite = _spritesFromSet[Random.Range(0, _spritesFromSet.Count)].sprite;
     }
@@ -443,31 +413,29 @@ public class GameManager : MonoBehaviour {
             throw new Exception("ImageID not found in spritesFromSet");
         }
     }
-    
-    
-    private void RemoveStickerFromPool()
-    {
-        _spritesFromStage[_currentlySelectedImage] = (
-            _spritesFromStage[_currentlySelectedImage].sprite,
-            0);
-        currentlyInGameImages.Remove(_currentlySelectedImage);
-        // aca se setea si la imagen vuelve al set general o no  
-        _spritesFromStage.Remove(_currentlySelectedImage);
-    }
 
+
+    public void RemoveStickerFromPool()
+    {
+        _stickersFromStage[_currentlySelectedSticker] = (
+            _stickersFromStage[_currentlySelectedSticker].sprite,
+            0);
+        currentlyInGameImages.Remove(_currentlySelectedSticker);
+        // aca se setea si la imagen vuelve al set general o no  
+        _stickersFromStage.Remove(_currentlySelectedSticker);
+    }
     private void Win() {
         audioSource.PlayOneShot(winClip);
         Debug.Log("Win");
         StartCoroutine(EndGame(winClip.length));
     }
-
     private bool AddImages(int amountOfImages) {
         //para agregar una imagen al pool, se mezclan todos los sprites,
         //y se agrega el primer sprite que no este en el pool, al pool
 
         List<(int id, Sprite sprite, int amountOfAppearances)> shuffledSprites =
             new List<(int id, Sprite sprite, int amountOfAppearances)>();
-        foreach (var VARIABLE in _spritesFromStage) {
+        foreach (var VARIABLE in _stickersFromStage) {
             shuffledSprites.Add((VARIABLE.Key, VARIABLE.Value.sprite, VARIABLE.Value.amountOfAppearances));
         }
 
@@ -485,11 +453,10 @@ public class GameManager : MonoBehaviour {
 
         return false;
     }
-
     public IEnumerator EndGame(float delay) {
         
         SaveMatch();
-        buttonReplay.transform.parent.gameObject.SetActive(true);
+        endGameButtons.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
         Debug.Log("Match Ended");
         
@@ -517,9 +484,8 @@ public class GameManager : MonoBehaviour {
     }
 
     private void SaveMatch() {
-        SaveUserData();
+        PersistanceManager.Instance.SaveUserData();
     }
-
     private IEnumerator SetHighScore(int highScoreToSet)
     {
         audioSource.Pause();
@@ -533,7 +499,6 @@ public class GameManager : MonoBehaviour {
         
         highScoreText.text = highScoreToSet.ToString();
     }
-
     public void SetTimer(float timer) {
         this.timer = Mathf.Clamp(timer,0,maxTimer);
         timerText.text = ((int)this.timer).ToString();
@@ -541,29 +506,25 @@ public class GameManager : MonoBehaviour {
         if (this.timer<=1)
         {
             lifeCounter.LoseLive();
-            _spritesFromStage[_currentlySelectedImage] = (
-                _spritesFromStage[_currentlySelectedImage].sprite,
-                _spritesFromStage[_currentlySelectedImage].amountOfAppearances - 1);
+            _stickersFromStage[_currentlySelectedSticker] = (
+                _stickersFromStage[_currentlySelectedSticker].sprite,
+                _stickersFromStage[_currentlySelectedSticker].amountOfAppearances - 1);
             NextTurn();
             SetTimer(maxTimer);
         }
     }
-
     public void Lose()
     {
         Debug.Log("Lose");
         audioSource.PlayOneShot(endGameClip);
         StartCoroutine(EndGame(endGameClip.length));
     }
-
     public void Reset() {
         //if (disableInput) return;
-        selectStageAndDifficultyCanvas.SetActive(false);
-        gameCanvas.SetActive(true);
         SetNumpadByDifficulty(selectedDifficulty);
         bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
         gameEnded = false;
-        buttonReplay.transform.parent.gameObject.SetActive(false);
+        endGameButtons.transform.parent.gameObject.SetActive(false);
         audioSource.Play();
         SetTimer(15);
         SetScore(0);
@@ -575,7 +536,7 @@ public class GameManager : MonoBehaviour {
         currentlyInGameImages = new List<int>();
         AddImages(4);
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion
-        _currentlySelectedImage = 0;
+        _currentlySelectedSticker = 0;
         SetRandomImage();
         disableInput = false;
         _currentMatch = new Match(selectedStage,selectedDifficulty,false);
@@ -586,15 +547,6 @@ public class GameManager : MonoBehaviour {
     public int DifficultyToAmountOfAppearences(int difficulty)
     {
         return (selectedDifficulty + 1)*3;
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha0))
-        {
-            AddClue();
-            AddRemove();
-        }
     }
 
     private void SetNumpadByDifficulty(int difficulty)
@@ -612,64 +564,6 @@ public class GameManager : MonoBehaviour {
         if (gameEnded) return;
         SetTimer(timer - Time.deltaTime);
 
-    }
-    public void MoveItemFromInventaryToMatchInventary(ShopItemType item)
-    {
-        if (inventary.ContainsKey(item))
-        {
-            if (matchInventary.ContainsKey(item))
-            {
-                matchInventary[item] = matchInventary[item]++;
-            }
-            else
-            {
-                matchInventary.Add(item, 1);
-            }
-            inventary[item]--;
-            if (inventary[item] == 0)
-            {
-                inventary.Remove(item);
-            }
-        }
-
-    }
-    public void UseItemFromMatchInventary(ShopItemType item)
-    {
-        if (matchInventary.ContainsKey(item))
-        {
-            Debug.Log($"You uses {item}");
-            matchInventary[item]--;
-            if (matchInventary[item] == 0)
-            {
-                matchInventary.Remove(item);
-            }
-        }
-        else
-        {
-            Debug.Log($"You dont have any {item}");
-        }
-    }
-    public void AddItemToInventary(ShopItemType item)
-    {
-        if (inventary.ContainsKey(item))
-        {
-            inventary[item] = inventary[item]++;
-        }
-        else
-        {
-            inventary.Add(item, 1);
-        }
-    }
-    public void AddUpgrade(ShopItemType item)
-    {
-        if (upgrades.ContainsKey(item))
-        {
-            upgrades[item] = upgrades[item]++;
-        }
-        else
-        {
-            upgrades.Add(item, 1);
-        }
     }
     private IEnumerator Squash(Transform transform, float delay, float amount, float speed)
     {
@@ -722,12 +616,6 @@ public class GameManager : MonoBehaviour {
         SetScoreTexts();
         Reset();
     }
-
-    public void OpenStagesCanvas()
-    {
-        selectStageAndDifficultyCanvas.SetActive(true);
-        gameCanvas.SetActive(false);
-    }
     private List<bool> ParseSavedClears(string allClears) {
         string[] clearedArray = allClears.Split(';');
         List<bool> clears = new List<bool>();
@@ -771,164 +659,6 @@ public class GameManager : MonoBehaviour {
         }
         return highScores;
     }
-    
-  
-
-    private void OnApplicationQuit()
-    {
-        //SaveStages(stages);
-        SaveUserData();
-    }
-    
-  
-    public void SaveStages(Dictionary<int, StageData> stagesToSave)
-    {
-        List<StageData> stageList = new List<StageData>(stagesToSave.Values);
-        string json = JsonConvert.SerializeObject(stageList, Formatting.Indented);
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
-        File.WriteAllText(filePath, json);
-        Debug.Log("Stages saved to " + filePath);
-    }
-
-    public IEnumerator LoadStages()
-    {
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
-        string json;
-        if (!File.Exists(filePath))
-        {
-            Debug.Log("No saved stages found at " + filePath);
-            yield return StartCoroutine(GetJson("stages"));
-        }
-        Debug.Log(filePath);
-        json = File.ReadAllText(filePath);
-
-        // Deserialize the JSON to the intermediate object
-        Serialization<StageData> stageList = JsonConvert.DeserializeObject<Serialization<StageData>>(json);
-        // Después de deserializar
-   
-        if (stageList == null || stageList.items == null)
-        {
-            Debug.LogError("Failed to deserialize stages.");
-        }
-        foreach (var stageData in stageList.items)
-        {
-            stageData.ConvertColorStringToColorValue();
-        }
-        
-        // Convert the list to a dictionary
-        Dictionary<int, StageData> stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
-        Debug.Log("Stages loaded from " + filePath + " stages: " + stages.Count);
-        this.stages = stages;
-        yield return null;
-        InitializeStages();
-    }
-
-
-    public void SaveUserData()
-    {
-        string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
-        string json = JsonConvert.SerializeObject(userData, Formatting.Indented);
-        File.WriteAllText(filePath, json);
-        Debug.Log("UserData saved to " + filePath);
-    }
-    public IEnumerator LoadUserData()
-    {
-        string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
-        if (!File.Exists(filePath))
-        {
-            Debug.Log("No userdata found at " + filePath);
-            yield return StartCoroutine(GetJson("userData"));
-        }
-
-        string json = File.ReadAllText(filePath);
-        UserData userData = JsonConvert.DeserializeObject<UserData>(json);
-
-        if (userData != null)
-        {
-            Debug.Log("UserData loaded from " + filePath + " stages:" + userData.stages.Count);
-        }
-        else
-        {
-            Debug.LogError("Failed to load UserData from " + filePath);
-        }
-        
-        
-        this.userData =  userData;
-        yield return null;
-        yield return StartCoroutine(LoadStages());
-        yield return StartCoroutine(LoadStickerLevels());
-        yield return StartCoroutine(LoadPacks());
-    }
-    public IEnumerator LoadStickerLevels()
-    {
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
-        string json;
-        if (!File.Exists(filePath))
-        {
-            Debug.Log("No saved stages found at " + filePath);
-            yield return StartCoroutine(GetJson("stages"));
-        }
-        Debug.Log(filePath);
-        json = File.ReadAllText(filePath);
-
-        // Parse the JSON into a JObject
-        JObject jsonData = JObject.Parse(json);
-
-        // Deserialize the stickerLevels data
-        JObject stickerLevelsJson = jsonData["stickerLevels"].ToObject<JObject>();
-        Dictionary<int, StickerLevelsData> stickerLevels = new Dictionary<int, StickerLevelsData>();
-
-        foreach (var item in stickerLevelsJson)
-        {
-            int level = int.Parse(item.Key);
-            StickerLevelsData data = item.Value.ToObject<StickerLevelsData>();
-            stickerLevels.Add(level, data);
-        }
-
-        Debug.Log("StickerLevels loaded from " + filePath + " levels: " + stickerLevels.Count);
-
-        // Do whatever you need with the stickerLevels dictionary
-
-        yield return null;
-    }
-
-
-    // Función para cargar los datos de packs
-    public IEnumerator LoadPacks()
-    {
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
-        string json;
-        if (!File.Exists(filePath))
-        {
-            Debug.Log("No saved stages found at " + filePath);
-            yield return StartCoroutine(GetJson("stages"));
-        }
-        Debug.Log(filePath);
-        json = File.ReadAllText(filePath);
-
-        // Parse the JSON into a JObject
-        JObject jsonData = JObject.Parse(json);
-
-        // Extract the "packs" object
-        JObject packsJson = jsonData["packs"].ToObject<JObject>();
-
-        // Create a PacksData object and set its properties
-        PacksData packsData = new PacksData
-        {
-            rareChance = packsJson["rareChance"].Value<float>(),
-            rareAmountOfStickers = packsJson["rareAmountOfStickers"].Value<int>(),
-            legendaryChance = packsJson["legendaryChance"].Value<float>(),
-            legendaryAmountOfStickers = packsJson["legendaryAmountOfStickers"].Value<int>(),
-            stickersPerPack = packsJson["stickersPerPack"].Value<int>()
-        };
-
-        packs = packsData;
-    
-        Debug.Log("Packs loaded from " + filePath);
-        Debug.Log("stickersPerPack on load: " + packs.stickersPerPack);
-        yield return null;
-    }
-
     public int CalculateScoreComboBonus()
     {
         int maxComboBonus = 5;
@@ -939,27 +669,9 @@ public class GameManager : MonoBehaviour {
         }
         return calculatedComboBonus;
     }
-    
-    IEnumerator GetJson(string file_name)
-    {
-        string url = "https://leandromagonza.github.io/MemoGram.Pokemon/" + file_name + ".json";
-        using (UnityWebRequest www = UnityWebRequest.Get(url))
-        {
-            yield return www.SendWebRequest();
-
-            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
-            {
-                Debug.Log(www.error);
-            }
-            else
-            {
-                string filePath = Path.Combine(Application.persistentDataPath, file_name + ".json");
-                File.WriteAllText(filePath, www.downloadHandler.text);
-            }
-        }
+    public Canvas GetGameCanvas() {
+        return gameCanvas.GetComponent<Canvas>();
     }
-
-
 }
 
 public enum ImageSet {

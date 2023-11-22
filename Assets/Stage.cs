@@ -105,8 +105,6 @@ public class StageData
             ColorValue = colorValue;
         }
     }
-
-
 }
 
 [Serializable]
@@ -226,6 +224,8 @@ public class UserData
         }
         return false;
     }
+    
+    
 }
 
 [Serializable]
@@ -280,6 +280,18 @@ public class UserStageData
         
         Debug.Log("Added Match with turns "+currentMatch.turnHistory.Count);
         return firstTimeAchievements;
+    }
+    public bool HasUnlockedStage()
+    {
+        foreach (var imageFromStage in GameManager.Instance.stages[stage].stickers) {
+            //tiene por lo menos una vez la figurita del stage, en sus imageduplicates
+            if (!GameManager.Instance.userData.imageDuplicates.ContainsKey(imageFromStage)
+                ||
+                GameManager.Instance.userData.imageDuplicates[imageFromStage] <= 0) {
+                return  false;
+            }
+        }
+        return true;
     }
 }
 
