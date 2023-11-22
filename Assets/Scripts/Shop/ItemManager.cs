@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public enum ItemID
 {
@@ -31,11 +33,11 @@ public enum ItemID
 public class ItemManager : MonoBehaviour
 {
 
-    public Dictionary<ItemID, int> consumables = new Dictionary<ItemID, int>();
-    public Dictionary<ItemID, int> matchInventory = new Dictionary<ItemID, int>();
-    public Dictionary<ItemID, int> upgrades = new Dictionary<ItemID, int>();
+    public bool validate = true;
+    //public Dictionary<ItemID, int> matchConsumables = new Dictionary<ItemID, int>();
+    public Consumable[] consumables;
+    public Upgrade[] upgrades;
     public static ItemManager Instance;
-
     [Header("Consumable Settings")]
     [SerializeField] private Button buttonClue;
     [SerializeField] private Button buttonRemove;
@@ -51,7 +53,29 @@ public class ItemManager : MonoBehaviour
     [SerializeField] private AudioClip buttonRemoveAudioClip;
     [SerializeField] private AudioClip buttonCutAudioClip;
     [SerializeField] private AudioClip buttonPeekAudioClip;
-
+    private void OnValidate()
+    {
+        if (!validate) return;
+        int breakPoint = 4;
+        List<ItemID> items = new List<ItemID>();
+        upgrades = new Upgrade[items.Count];
+        consumables = new Consumable[breakPoint];
+        foreach (string item in Enum.GetNames(typeof(ItemID)))
+        {
+            ItemID itemID = (ItemID)Enum.Parse(typeof(ItemID), item);
+            items.Add(itemID);
+        }
+        for (int i = 0; i < breakPoint; i++)
+        {
+            consumables[i] = Consumable.GetConsumable(items[i]);
+        }
+        items.RemoveRange(0, breakPoint);
+        upgrades = new Upgrade[items.Count];
+        for (int i = 0; i < items.Count; i++)
+        {
+            upgrades[i] = Upgrade.GetUpgrade(items[i]);
+        }
+    }
     private void Awake()
     {
         Instance = this;
@@ -72,73 +96,95 @@ public class ItemManager : MonoBehaviour
     {
         if ((int)item > 3)
         {
-            AddUpgrade(item);
+            foreach(Upgrade upgrade in upgrades)
+            {
+                if (upgrade.ItemID.Equals(item))
+                {
+                    upgrade.LevelUp();
+                }
+            }
         }
         else
         {
             AddConsumable(item);
         }
     }
+    public Dictionary<ItemID, int> MatchInventory()
+    {
+        Dictionary<ItemID, int> temp_inventory = new Dictionary<ItemID, int>();
+        foreach (Upgrade upgrade in upgrades)
+        {
+            temp_inventory.Add(upgrade.ItemID, upgrade.GetAdditionalItem());
+        }
+        foreach (Consumable item in consumables)
+        {
+            if (temp_inventory.ContainsKey(item.ItemID))
+            {
+                temp_inventory[item.ItemID] += item.Amount;
+            }
+            else
+            {
+                temp_inventory.Add(item.ItemID, item.Amount);
+            }
+        }
+        return temp_inventory;
+    }
 
-    private void AddConsumable(ItemID consumable)
+    private void AddConsumable(ItemID item)
     {
-        if (consumables.ContainsKey(consumable))
+        foreach (Consumable c in consumables)
         {
-            consumables[consumable] += 1;
+            if (c.ItemID.Equals(item))
+                c.AddCurrent(1);
+        }
+        /*
+        if (matchConsumables.ContainsKey(item))
+        {
+            matchConsumables[item] += 1;
         }
         else
         {
-            consumables.Add(consumable, 1);
-        }
+            matchConsumables.Add(item, 1);
+        }*/
     }
-    private void AddUpgrade(ItemID upgrade)
-    {
-        if (upgrades.ContainsKey(upgrade))
-        {
-            upgrades[upgrade] += 1;
-        }
-        else
-        {
-            upgrades.Add(upgrade, 1);
-        }
-    }
+
     public void UseClue()
     {
-        Debug.Log("USE CLUE");
-        var turnSticker = GameManager.Instance.GetCurrentlySelectedSticker();
-        if (!consumables.ContainsKey(ItemID.Clue) || consumables[ItemID.Clue] == 0) return;
-        GameManager.Instance.audioSource.PlayOneShot(buttonClueAudioClip);
-        //anim
-        consumables[ItemID.Clue]--;
-        if (consumables[ItemID.Clue] <= 0)
-        {
-            consumables[ItemID.Clue] = 0;
-        }
-        ValidateItem(ItemID.Clue);
-        int scoreModification = GameManager.Instance.OnCorrectGuess();
+        //Debug.Log("USE CLUE");
+        //var turnSticker = GameManager.Instance.GetCurrentlySelectedSticker();
+        //if (!matchConsumables.ContainsKey(ItemID.Clue) || matchConsumables[ItemID.Clue] <= 0) return;
+        //GameManager.Instance.audioSource.PlayOneShot(buttonClueAudioClip);
+        ////anim
+        //matchConsumables[ItemID.Clue]--;
+        //if (matchConsumables[ItemID.Clue] <= 0)
+        //{
+        //    matchConsumables[ItemID.Clue] = 0;
+        //}
+        //ValidateItem(ItemID.Clue);
+        //int scoreModification = GameManager.Instance.OnCorrectGuess();
 
-        StartCoroutine(GameManager.Instance.FinishProcessingTurnAction(
-            turnSticker.amountOfAppearances,
-            TurnAction.UseClue,
-            scoreModification,
-            turnSticker
-            ));
+        //StartCoroutine(GameManager.Instance.FinishProcessingTurnAction(
+        //    turnSticker.amountOfAppearances,
+        //    TurnAction.UseClue,
+        //    scoreModification,
+        //    turnSticker
+        //    ));
     }
     
     public void UseRemove()
     {
-        Debug.Log("USE REMOVE");
-        if (!consumables.ContainsKey(ItemID.Remove) || consumables[ItemID.Remove] == 0) return;
-        GameManager.Instance.audioSource.PlayOneShot(buttonRemoveAudioClip);
-        //anim
-        consumables[ItemID.Remove]--;
-        if (consumables[ItemID.Remove] <= 0)
-        {
-            consumables[ItemID.Remove] = 0;
-        }
-        ValidateItem(ItemID.Remove);
-        GameManager.Instance.RemoveStickerFromPool();
-        GameManager.Instance.NextTurn();
+        //Debug.Log("USE REMOVE");
+        //if (!matchConsumables.ContainsKey(ItemID.Remove) || matchConsumables[ItemID.Remove] == 0) return;
+        //GameManager.Instance.audioSource.PlayOneShot(buttonRemoveAudioClip);
+        ////anim
+        //matchConsumables[ItemID.Remove]--;
+        //if (matchConsumables[ItemID.Remove] <= 0)
+        //{
+        //    matchConsumables[ItemID.Remove] = 0;
+        //}
+        //ValidateItem(ItemID.Remove);
+        //GameManager.Instance.RemoveStickerFromPool();
+        //GameManager.Instance.NextTurn();
     }
     private void Cut()
     {
@@ -146,48 +192,7 @@ public class ItemManager : MonoBehaviour
     private void Peek()
     {
     }
-    public int GetItemPrice(ItemID item)
-    {
-        switch (item)
-        {
-            case ItemID.Clue:
-                return 100;
-
-
-            case ItemID.Remove:
-                return 100;
-            //case ItemID.Cut:
-            //    break;
-            //case ItemID.Peek:
-            //    break;
-
-            //// Upgrades
-            //case ItemID.ExtraLife:
-            //    break;
-            //case ItemID.ProtectedLife:
-            //    break;
-            //case ItemID.MaxClue:
-            //    break;
-            //case ItemID.BetterClue:
-            //    break;
-            //case ItemID.MaxRemove:
-            //    break;
-            //case ItemID.MaxCut:
-            //    break;
-            //case ItemID.BetterCut:
-            //    break;
-            //case ItemID.BetterPeek:
-            //    break;
-            //case ItemID.Block:
-            //    break;
-            //case ItemID.DeathDefy:
-            //    break;
-
-            default:
-                return 100;
-        }
-
-    }
+   
     public void ValidateItem(ItemID itemId)
     {
         SetInteractable();
@@ -195,25 +200,25 @@ public class ItemManager : MonoBehaviour
     }
     private void SetButtonText()
     {
-        if (buttonTextClue != null && consumables.ContainsKey(ItemID.Clue))
-            buttonTextClue.text = consumables?[ItemID.Clue].ToString();
-        if (buttonTextPeek != null && consumables.ContainsKey(ItemID.Peek))
-            buttonTextPeek.text = consumables?[ItemID.Peek].ToString();
-        if (buttonTextCut != null && consumables.ContainsKey(ItemID.Cut))
-            buttonTextCut.text = consumables?[ItemID.Cut].ToString();
-        if (buttonTextRemove != null && consumables.ContainsKey(ItemID.Remove))
-            buttonTextRemove.text = consumables?[ItemID.Remove].ToString();
+        if (buttonTextClue != null)
+            buttonTextClue.text = consumables[(int)ItemID.Clue].Amount.ToString();
+        if (buttonTextPeek != null)
+            buttonTextPeek.text = consumables[(int)ItemID.Peek].Amount.ToString();
+        if (buttonTextCut != null)
+            buttonTextCut.text = consumables[(int)ItemID.Cut].Amount.ToString();
+        if (buttonTextRemove != null)
+            buttonTextRemove.text = consumables[(int)ItemID.Remove].Amount.ToString();
     }
     private void SetInteractable()
     {
-        if (buttonClue != null && consumables.ContainsKey(ItemID.Clue))
-            buttonClue.interactable = consumables?[ItemID.Clue] > 0;
-        if (buttonRemove != null && consumables.ContainsKey(ItemID.Remove))
-            buttonRemove.interactable = consumables?[ItemID.Remove] > 0;
-        if (buttonCut != null && consumables.ContainsKey(ItemID.Cut))
-            buttonCut.interactable = consumables?[ItemID.Cut] > 0;
-        if (buttonPeek != null && consumables.ContainsKey(ItemID.Clue))
-            buttonPeek.interactable = consumables?[ItemID.Peek] > 0;
+        if (buttonClue != null)
+            buttonClue.interactable = consumables[(int)ItemID.Clue].Amount > 0;
+        if (buttonRemove != null)
+            buttonRemove.interactable = consumables[(int)ItemID.Remove].Amount > 0;
+        if (buttonCut != null)
+            buttonCut.interactable = consumables[(int)ItemID.Cut].Amount > 0;
+        if (buttonPeek != null)
+            buttonPeek.interactable = consumables[(int)ItemID.Peek].Amount > 0;
     }
     public void UseItem(ItemID itemId)
     {
@@ -257,4 +262,402 @@ public class ItemManager : MonoBehaviour
         }
     }
 
+}
+public class ItemPrizes
+{
+    public static int GetItemPrice(ItemID item)
+    {
+        switch (item)
+        {
+            case ItemID.Clue:
+                return 100;
+
+
+            case ItemID.Remove:
+                return 100;
+            //case ItemID.Cut:
+            //    break;
+            //case ItemID.Peek:
+            //    break;
+
+            //// Upgrades
+            //case ItemID.ExtraLife:
+            //    break;
+            //case ItemID.ProtectedLife:
+            //    break;
+            //case ItemID.MaxClue:
+            //    break;
+            //case ItemID.BetterClue:
+            //    break;
+            //case ItemID.MaxRemove:
+            //    break;
+            //case ItemID.MaxCut:
+            //    break;
+            //case ItemID.BetterCut:
+            //    break;
+            //case ItemID.BetterPeek:
+            //    break;
+            //case ItemID.Block:
+            //    break;
+            //case ItemID.DeathDefy:
+            //    break;
+
+            default:
+                return 100;
+        }
+
+    }
+}
+[System.Serializable]
+public class Consumable
+{
+    private int min = 0;
+    [SerializeField] private ItemID itemID;
+    [SerializeField] private int max;
+    [Space]
+    [SerializeField] private int current;
+
+    public ItemID ItemID => itemID; 
+    public int Amount => current;
+    public int ID => (int)itemID;
+    public int MAX => max;
+    public static Consumable GetConsumable(ItemID itemID)
+    {
+        Consumable consumable = new Consumable();
+        switch (itemID)
+        {
+            case ItemID.Clue:
+                consumable = new Consumable()
+                {
+                    itemID = itemID,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+            case ItemID.Remove:
+                consumable = new Consumable()
+                {
+                    itemID = itemID,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+            case ItemID.Cut:
+                consumable = new Consumable()
+                {
+                    itemID = itemID,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+            case ItemID.Peek:
+                consumable = new Consumable()
+                {
+                    itemID = itemID,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+
+            // Upgrades
+            case ItemID.ExtraLife:
+                consumable = new Consumable()
+                {
+                    itemID = itemID,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+            case ItemID.ProtectedLife:
+                consumable = new Consumable()
+                {
+                    itemID = itemID,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+            case ItemID.MaxClue:
+                consumable = new Consumable()
+                {
+                    itemID = itemID,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+            case ItemID.BetterClue:
+                consumable = new Consumable()
+                {
+                    itemID = itemID,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+            case ItemID.MaxRemove:
+                consumable = new Consumable()
+                {
+                    itemID = itemID,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+            case ItemID.MaxCut:
+                consumable = new Consumable()
+                {
+                    itemID = itemID,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+            case ItemID.BetterCut:
+                consumable = new Consumable()
+                {
+                    itemID = itemID,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+            case ItemID.BetterPeek:
+                consumable = new Consumable()
+                {
+                    itemID = itemID,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+            case ItemID.Block:
+                consumable = new Consumable()
+                {
+                    itemID = itemID,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+            case ItemID.DeathDefy:
+                consumable = new Consumable()
+                {
+                    itemID = itemID,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+
+            default:
+                consumable = new Consumable()
+                {
+                    itemID = ItemID.NONE,
+                    current = 0,
+                    max = 1,
+                    min = 0,
+                };
+                break;
+        }
+        return consumable;
+    }
+
+    public void AddCurrent(int value)
+    {
+        current += value;
+    }
+}
+[System.Serializable]
+public class Upgrade
+{
+    [SerializeField] private ItemID itemId;
+    [SerializeField] private int upgradeMaxLevel;
+    [SerializeField] private int valueAddToInitial;
+    [SerializeField] private int valueAddToMax;
+    [Space]
+    [SerializeField] private int upgradeCurrentLevel;
+    public ItemID ItemID => itemId; 
+    public int ID => (int)itemId; 
+    public void LevelUp()
+    {
+        upgradeCurrentLevel++;
+        upgradeCurrentLevel = Mathf.Clamp(upgradeCurrentLevel, 0, upgradeMaxLevel);
+    }
+    public int GetAdditionalMax ()
+    {
+        return valueAddToMax * upgradeCurrentLevel;
+    }
+    public int GetAdditionalItem()
+    {
+        return valueAddToInitial * upgradeCurrentLevel;
+    }
+
+
+    public static Upgrade GetUpgrade(ItemID itemId)
+    {
+        Upgrade upgrade = new Upgrade();
+        switch (itemId)
+        {
+            case ItemID.Clue:
+                upgrade = new Upgrade()
+                {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 2,
+                    upgradeMaxLevel = 3,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+            case ItemID.Remove:
+                upgrade = new Upgrade()
+                {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 2,
+                    upgradeMaxLevel = 3,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+            case ItemID.Cut:
+                upgrade = new Upgrade()
+                {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 2,
+                    upgradeMaxLevel = 3,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+            case ItemID.Peek:
+                upgrade = new Upgrade()
+                {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 2,
+                    upgradeMaxLevel = 3,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+
+            // Upgrades
+            case ItemID.ExtraLife:
+                upgrade = new Upgrade()
+                {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 2,
+                    upgradeMaxLevel = 3,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+            case ItemID.ProtectedLife:
+                upgrade = new Upgrade()
+                {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 2,
+                    upgradeMaxLevel = 3,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+            case ItemID.MaxClue:
+                upgrade = new Upgrade()
+                {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 2,
+                    upgradeMaxLevel = 3,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+            case ItemID.BetterClue:
+                upgrade = new Upgrade()
+                {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 2,
+                    upgradeMaxLevel = 3,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+            case ItemID.MaxRemove:
+                upgrade = new Upgrade()
+                {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 2,
+                    upgradeMaxLevel = 3,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+            case ItemID.MaxCut:
+                upgrade = new Upgrade()
+                {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 2,
+                    upgradeMaxLevel = 3,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+            case ItemID.BetterCut:
+                upgrade = new Upgrade()
+                {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 2,
+                    upgradeMaxLevel = 3,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+            case ItemID.BetterPeek:
+                upgrade = new Upgrade()
+                {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 2,
+                    upgradeMaxLevel = 3,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+            case ItemID.Block:
+                upgrade = new Upgrade()
+                {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 2,
+                    upgradeMaxLevel = 3,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+            case ItemID.DeathDefy:
+                upgrade = new Upgrade()
+                {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 2,
+                    upgradeMaxLevel = 3,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+
+            default:
+                upgrade = new Upgrade()
+                {
+                    itemId = ItemID.NONE,
+                    valueAddToInitial = 0,
+                    valueAddToMax = 0,
+                    upgradeMaxLevel = 0,
+                    upgradeCurrentLevel = 0
+                };
+                break;
+        }
+        return upgrade;
+    }
 }
