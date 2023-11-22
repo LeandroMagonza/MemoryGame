@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviour {
     public ParticleSystem correctGuessParticle;
     public ParticleSystem incorrectGuessParticle;
 
-    public Button buttonReplay;
+    public GameObject endGameButtons;
     public float delayBetweenImages = .72f;
 
     public bool disableInput = false;
@@ -450,7 +450,7 @@ public class GameManager : MonoBehaviour {
     public IEnumerator EndGame(float delay) {
         
         SaveMatch();
-        buttonReplay.transform.parent.gameObject.SetActive(true);
+        endGameButtons.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
         Debug.Log("Match Ended");
         
@@ -520,7 +520,7 @@ public class GameManager : MonoBehaviour {
         SetNumpadByDifficulty(selectedDifficulty);
         bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
         gameEnded = false;
-        buttonReplay.transform.parent.gameObject.SetActive(false);
+        endGameButtons.transform.parent.gameObject.SetActive(false);
         audioSource.Play();
         SetTimer(15);
         SetScore(0);
@@ -612,7 +612,6 @@ public class GameManager : MonoBehaviour {
         SetScoreTexts();
         Reset();
     }
-
     public void OpenStagesCanvas()
     {
         selectStageAndDifficultyCanvas.SetActive(true);
@@ -850,6 +849,9 @@ public class GameManager : MonoBehaviour {
     }
 
 
+    public Canvas GetGameCanvas() {
+        return gameCanvas.GetComponent<Canvas>();
+    }
 }
 
 public enum ImageSet {

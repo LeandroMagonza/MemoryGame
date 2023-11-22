@@ -3,23 +3,25 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-public class DifficultyButton : MonoBehaviour {
+public class DifficultyButton : ChangeCanvasButton {
     public int difficulty;
     public int stage;
     public AchievementStars stars;
 
     public TextMeshProUGUI scoreText;
     // Start is called before the first frame update
-    void Start()
+    public override void Start()
     {
         gameObject.name = "ButtonDifficulty S" + stage+" D"+difficulty;
         GetComponent<Button>().onClick.AddListener(OnClick);
+        this.canvasToSet = GameManager.Instance.GetGameCanvas();
     }
 
-    public void OnClick()
+    public override void OnClick()
     {
         Debug.Log("Clicked difficultyButton "+stage+" "+difficulty);
         GameManager.Instance.SetStageAndDifficulty(stage, difficulty);
+        base.OnClick();
     }
 
     public void SetScore(int score) {
