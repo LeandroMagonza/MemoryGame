@@ -14,7 +14,8 @@ public class ChangeCanvasButton : MonoBehaviour {
     public virtual void OnClick() {
         Debug.Log("Pressed" +name);
         if (canvasToSet ==  null) {
-            throw new Exception("Canvas NotImplementedException set");
+            Debug.Log("Canvas NotImplementedException set");
+            return;
         }
         CanvasManager.Instance.ChangeCanvas(canvasToSet);  
     }

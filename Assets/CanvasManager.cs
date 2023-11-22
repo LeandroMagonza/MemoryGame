@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,16 +25,22 @@ public class CanvasManager : MonoBehaviour
         else if (_instance != this)
             DestroySelf();
     }
-    #endregion
-
-    public List<Canvas> allCanvas;
     private void DestroySelf() {
         if (Application.isPlaying)
             Destroy(this);
         else
             DestroyImmediate(this);
     }
-    
+    #endregion
+
+    public Canvas initialCanvas;
+    public List<Canvas> allCanvas;
+
+    private void Start()
+    {
+        ChangeCanvas(initialCanvas);
+    }
+
 
     public void ChangeCanvas(Canvas canvasToSet) {
         foreach (var VARIABLE in allCanvas) {

@@ -13,10 +13,38 @@ using Random = UnityEngine.Random;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
 using Newtonsoft.Json.Linq;
+using UnityEngine.Serialization;
 
 public class GameManager : MonoBehaviour {
+    #region Singleton
     private static GameManager _instance;
+    public static GameManager Instance {
+        get {
+            if (_instance == null)
+                _instance = FindObjectOfType<GameManager>();
+            if (_instance == null)
+                Debug.LogError("Singleton<" + typeof(GameManager) + "> instance has been not found.");
+            return _instance;
+        }
+    }
+    protected void Awake() {
+        if (_instance == null) {
+            _instance = this as GameManager;
+            audioSource = GetComponent<AudioSource>();
+        }
+        else if (_instance != this)
+            DestroySelf();
+    }
+    private void DestroySelf() {
+        if (Application.isPlaying)
+            Destroy(this);
+        else
+            DestroyImmediate(this);
+    }
+    
 
+    #endregion
+    
     public bool gameEnded = false;
     public LifeCounter lifeCounter;
     public float timer = 3;
@@ -58,8 +86,12 @@ public class GameManager : MonoBehaviour {
 
     public bool disableInput = false;
 
-
-
+    #region PersistanceReferences
+    public UserData userData => PersistanceManager.Instance.userData;
+    public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
+    private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.stickerLevels;
+    public PacksData packs => PersistanceManager.Instance.packs;
+    #endregion
 
     public int currentClues = 0;
     public int maxCluesAmount = 5;
@@ -68,12 +100,7 @@ public class GameManager : MonoBehaviour {
     public int selectedStage = 0;
     public int selectedDifficulty = 0;
 
-    public Dictionary<int, StageData> stages;
-    private Dictionary<int, StickerLevelsData> stickerLevels = new Dictionary<int, StickerLevelsData>();
-    public PacksData packs = new PacksData();
-    
-    public UserData userData = new UserData();
-    public GameObject selectStageAndDifficultyCanvas;
+    [FormerlySerializedAs("selectStageAndDifficultyCanvas")] public GameObject stageHolder;
     public GameObject gameCanvas;
 
     public GameObject numpadRow0;
@@ -87,31 +114,15 @@ public class GameManager : MonoBehaviour {
     public TextMeshProUGUI comboBonusText;
     public TextMeshProUGUI comboText;
 
-    public static GameManager Instance {
-        get {
-            if (_instance == null)
-                _instance = FindObjectOfType<GameManager>();
-            if (_instance == null)
-                Debug.LogError("Singleton<" + typeof(GameManager) + "> instance has been not found.");
-            return _instance;
-        }
-    }
-    protected void Awake() {
-        if (_instance == null) {
-            _instance = this as GameManager;
-            audioSource = GetComponent<AudioSource>();
-        }
-        else if (_instance != this)
-            DestroySelf();
-    }
+    
 
     private void Start()
     {
-        StartCoroutine(LoadUserData());
-        scoreText.text = score.ToString();
+        //scoreText.text = score.ToString();
     }
 
-    private void InitializeStages()
+    //TODO: Esta se va para manager stages o algo asi 
+    public void InitializeStages()
     {
         foreach (var stageIndexAndData in stages)
         {
@@ -127,7 +138,7 @@ public class GameManager : MonoBehaviour {
             //.ToArray().Select((data, index) => new { index, data })
             StageData stageData = stageIndexAndData.Value;
 
-            GameObject stageDisplay = Instantiate(stageDisplayPrefab, selectStageAndDifficultyCanvas.transform);
+            GameObject stageDisplay = Instantiate(stageDisplayPrefab, stageHolder.transform);
             Stage newStage = stageDisplay.GetComponent<Stage>();
             stageData.stageObject = newStage;
 
@@ -162,12 +173,7 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    private void DestroySelf() {
-        if (Application.isPlaying)
-            Destroy(this);
-        else
-            DestroyImmediate(this);
-    }
+
 
     public IEnumerator ProcessTurnAction(int number)
     {
@@ -478,7 +484,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private void SaveMatch() {
-        SaveUserData();
+        PersistanceManager.Instance.SaveUserData();
     }
     private IEnumerator SetHighScore(int highScoreToSet)
     {
@@ -515,8 +521,6 @@ public class GameManager : MonoBehaviour {
     }
     public void Reset() {
         //if (disableInput) return;
-        selectStageAndDifficultyCanvas.SetActive(false);
-        gameCanvas.SetActive(true);
         SetNumpadByDifficulty(selectedDifficulty);
         bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
         gameEnded = false;
@@ -612,11 +616,6 @@ public class GameManager : MonoBehaviour {
         SetScoreTexts();
         Reset();
     }
-    public void OpenStagesCanvas()
-    {
-        selectStageAndDifficultyCanvas.SetActive(true);
-        gameCanvas.SetActive(false);
-    }
     private List<bool> ParseSavedClears(string allClears) {
         string[] clearedArray = allClears.Split(';');
         List<bool> clears = new List<bool>();
@@ -660,164 +659,6 @@ public class GameManager : MonoBehaviour {
         }
         return highScores;
     }
-    
-  
-
-    private void OnApplicationQuit()
-    {
-        //SaveStages(stages);
-        SaveUserData();
-    }
-    
-  
-    public void SaveStages(Dictionary<int, StageData> stagesToSave)
-    {
-        List<StageData> stageList = new List<StageData>(stagesToSave.Values);
-        string json = JsonConvert.SerializeObject(stageList, Formatting.Indented);
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
-        File.WriteAllText(filePath, json);
-        Debug.Log("Stages saved to " + filePath);
-    }
-
-    public IEnumerator LoadStages()
-    {
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
-        string json;
-        if (!File.Exists(filePath))
-        {
-            Debug.Log("No saved stages found at " + filePath);
-            yield return StartCoroutine(GetJson("stages"));
-        }
-        Debug.Log(filePath);
-        json = File.ReadAllText(filePath);
-
-        // Deserialize the JSON to the intermediate object
-        Serialization<StageData> stageList = JsonConvert.DeserializeObject<Serialization<StageData>>(json);
-        // Después de deserializar
-   
-        if (stageList == null || stageList.items == null)
-        {
-            Debug.LogError("Failed to deserialize stages.");
-        }
-        foreach (var stageData in stageList.items)
-        {
-            stageData.ConvertColorStringToColorValue();
-        }
-        
-        // Convert the list to a dictionary
-        Dictionary<int, StageData> stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
-        Debug.Log("Stages loaded from " + filePath + " stages: " + stages.Count);
-        this.stages = stages;
-        yield return null;
-        InitializeStages();
-    }
-
-
-    public void SaveUserData()
-    {
-        string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
-        string json = JsonConvert.SerializeObject(userData, Formatting.Indented);
-        File.WriteAllText(filePath, json);
-        Debug.Log("UserData saved to " + filePath);
-    }
-    public IEnumerator LoadUserData()
-    {
-        string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
-        if (!File.Exists(filePath))
-        {
-            Debug.Log("No userdata found at " + filePath);
-            yield return StartCoroutine(GetJson("userData"));
-        }
-
-        string json = File.ReadAllText(filePath);
-        UserData userData = JsonConvert.DeserializeObject<UserData>(json);
-
-        if (userData != null)
-        {
-            Debug.Log("UserData loaded from " + filePath + " stages:" + userData.stages.Count);
-        }
-        else
-        {
-            Debug.LogError("Failed to load UserData from " + filePath);
-        }
-        
-        
-        this.userData =  userData;
-        yield return null;
-        yield return StartCoroutine(LoadStages());
-        yield return StartCoroutine(LoadStickerLevels());
-        yield return StartCoroutine(LoadPacks());
-    }
-    public IEnumerator LoadStickerLevels()
-    {
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
-        string json;
-        if (!File.Exists(filePath))
-        {
-            Debug.Log("No saved stages found at " + filePath);
-            yield return StartCoroutine(GetJson("stages"));
-        }
-        Debug.Log(filePath);
-        json = File.ReadAllText(filePath);
-
-        // Parse the JSON into a JObject
-        JObject jsonData = JObject.Parse(json);
-
-        // Deserialize the stickerLevels data
-        JObject stickerLevelsJson = jsonData["stickerLevels"].ToObject<JObject>();
-        Dictionary<int, StickerLevelsData> stickerLevels = new Dictionary<int, StickerLevelsData>();
-
-        foreach (var item in stickerLevelsJson)
-        {
-            int level = int.Parse(item.Key);
-            StickerLevelsData data = item.Value.ToObject<StickerLevelsData>();
-            stickerLevels.Add(level, data);
-        }
-
-        Debug.Log("StickerLevels loaded from " + filePath + " levels: " + stickerLevels.Count);
-
-        // Do whatever you need with the stickerLevels dictionary
-
-        yield return null;
-    }
-
-
-    // Función para cargar los datos de packs
-    public IEnumerator LoadPacks()
-    {
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
-        string json;
-        if (!File.Exists(filePath))
-        {
-            Debug.Log("No saved stages found at " + filePath);
-            yield return StartCoroutine(GetJson("stages"));
-        }
-        Debug.Log(filePath);
-        json = File.ReadAllText(filePath);
-
-        // Parse the JSON into a JObject
-        JObject jsonData = JObject.Parse(json);
-
-        // Extract the "packs" object
-        JObject packsJson = jsonData["packs"].ToObject<JObject>();
-
-        // Create a PacksData object and set its properties
-        PacksData packsData = new PacksData
-        {
-            rareChance = packsJson["rareChance"].Value<float>(),
-            rareAmountOfStickers = packsJson["rareAmountOfStickers"].Value<int>(),
-            legendaryChance = packsJson["legendaryChance"].Value<float>(),
-            legendaryAmountOfStickers = packsJson["legendaryAmountOfStickers"].Value<int>(),
-            stickersPerPack = packsJson["stickersPerPack"].Value<int>()
-        };
-
-        packs = packsData;
-    
-        Debug.Log("Packs loaded from " + filePath);
-        Debug.Log("stickersPerPack on load: " + packs.stickersPerPack);
-        yield return null;
-    }
-
     public int CalculateScoreComboBonus()
     {
         int maxComboBonus = 5;
@@ -828,27 +669,6 @@ public class GameManager : MonoBehaviour {
         }
         return calculatedComboBonus;
     }
-    
-    IEnumerator GetJson(string file_name)
-    {
-        string url = "https://leandromagonza.github.io/MemoGram.Pokemon/" + file_name + ".json";
-        using (UnityWebRequest www = UnityWebRequest.Get(url))
-        {
-            yield return www.SendWebRequest();
-
-            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
-            {
-                Debug.Log(www.error);
-            }
-            else
-            {
-                string filePath = Path.Combine(Application.persistentDataPath, file_name + ".json");
-                File.WriteAllText(filePath, www.downloadHandler.text);
-            }
-        }
-    }
-
-
     public Canvas GetGameCanvas() {
         return gameCanvas.GetComponent<Canvas>();
     }
