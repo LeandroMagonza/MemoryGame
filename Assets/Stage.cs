@@ -76,7 +76,8 @@ public class StageData
     public List<int> stickers;
     public Stage stageObject;
     //int = stageID, int = chance de una carta de ese stage, la suma de todos los floats tiene que dar 100
-    public Dictionary<int, int> packOdds = new Dictionary<int, int>(); 
+    public Dictionary<int, int> packOdds = new Dictionary<int, int>();
+    public int packCost;
     [NonSerialized]
     public Color ColorValue; // Propiedad para acceder al valor de color
 
