@@ -89,7 +89,7 @@ public class PackManager : MonoBehaviour {
             
             GameObject stickerGameObject = newSticker.transform.GetComponentInChildren<Image>().gameObject;
             Image imageComponent = stickerGameObject.transform.Find("Image").GetComponent<Image>();
-            imageComponent.sprite = GameManager.Instance.GetSpriteFromSetByImageID(selectedStickerImageID);
+            imageComponent.sprite = StickerManager.Instance.GetStickerDataFromSetByStickerID(GameManager.Instance.imageSetName.ToString(),selectedStickerImageID).sprite;
             
             if (GameManager.Instance.userData.imageDuplicates.ContainsKey(selectedStickerImageID)) {
                 GameManager.Instance.userData.imageDuplicates[selectedStickerImageID]++;

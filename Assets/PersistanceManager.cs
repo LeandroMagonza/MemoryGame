@@ -6,14 +6,17 @@ using UnityEngine;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
 using Newtonsoft.Json.Linq;
-public class  PersistanceManager: MonoBehaviour
+
+public class PersistanceManager : MonoBehaviour
 {
     #region Singleton
-    
+
     private static PersistanceManager _instance;
-    
-    public static PersistanceManager Instance {
-        get {
+
+    public static PersistanceManager Instance
+    {
+        get
+        {
             if (_instance == null)
                 _instance = FindObjectOfType<PersistanceManager>();
             if (_instance == null)
@@ -21,24 +24,32 @@ public class  PersistanceManager: MonoBehaviour
             return _instance;
         }
     }
-    protected void Awake() {
-        if (_instance == null) {
+
+    protected void Awake()
+    {
+        if (_instance == null)
+        {
             _instance = this as PersistanceManager;
         }
         else if (_instance != this)
             DestroySelf();
     }
-    private void DestroySelf() {
+
+    private void DestroySelf()
+    {
         if (Application.isPlaying)
             Destroy(this);
         else
             DestroyImmediate(this);
     }
+
     #endregion
+
     public Dictionary<int, StageData> stages;
     public Dictionary<int, StickerLevelsData> stickerLevels = new Dictionary<int, StickerLevelsData>();
     public PacksData packs = new PacksData();
     public UserData userData;
+
     void Start()
     {
         StartCoroutine(LoadUserData());
@@ -47,14 +58,15 @@ public class  PersistanceManager: MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
+
     private void OnApplicationQuit()
     {
         //SaveStages(stages);
         SaveUserData();
     }
-    
+
     public void SaveStages(Dictionary<int, StageData> stagesToSave)
     {
         List<StageData> stageList = new List<StageData>(stagesToSave.Values);
@@ -63,6 +75,7 @@ public class  PersistanceManager: MonoBehaviour
         File.WriteAllText(filePath, json);
         Debug.Log("Stages saved to " + filePath);
     }
+
     public IEnumerator LoadStages()
     {
         string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
@@ -72,22 +85,24 @@ public class  PersistanceManager: MonoBehaviour
             Debug.Log("No saved stages found at " + filePath);
             yield return StartCoroutine(GetJson("stages"));
         }
+
         Debug.Log(filePath);
         json = File.ReadAllText(filePath);
 
         // Deserialize the JSON to the intermediate object
         Serialization<StageData> stageList = JsonConvert.DeserializeObject<Serialization<StageData>>(json);
         // Después de deserializar
-   
+
         if (stageList == null || stageList.items == null)
         {
             Debug.LogError("Failed to deserialize stages.");
         }
+
         foreach (var stageData in stageList.items)
         {
             stageData.ConvertColorStringToColorValue();
         }
-        
+
         // Convert the list to a dictionary
         Dictionary<int, StageData> stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
         Debug.Log("Stages loaded from " + filePath + " stages: " + stages.Count);
@@ -95,6 +110,7 @@ public class  PersistanceManager: MonoBehaviour
         yield return null;
         GameManager.Instance.InitializeStages();
     }
+
     public void SaveUserData()
     {
         string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
@@ -102,6 +118,7 @@ public class  PersistanceManager: MonoBehaviour
         File.WriteAllText(filePath, json);
         Debug.Log("UserData saved to " + filePath);
     }
+
     public IEnumerator LoadUserData()
     {
         string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
@@ -122,14 +139,15 @@ public class  PersistanceManager: MonoBehaviour
         {
             Debug.LogError("Failed to load UserData from " + filePath);
         }
-        
-        
-        this.userData =  userData;
+
+
+        this.userData = userData;
         yield return null;
         yield return StartCoroutine(LoadStages());
         yield return StartCoroutine(LoadStickerLevels());
         yield return StartCoroutine(LoadPacks());
     }
+
     public IEnumerator LoadStickerLevels()
     {
         string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
@@ -139,6 +157,7 @@ public class  PersistanceManager: MonoBehaviour
             Debug.Log("No saved stages found at " + filePath);
             yield return StartCoroutine(GetJson("stages"));
         }
+
         Debug.Log(filePath);
         json = File.ReadAllText(filePath);
 
@@ -162,6 +181,7 @@ public class  PersistanceManager: MonoBehaviour
 
         yield return null;
     }
+
     // Función para cargar los datos de packs
     public IEnumerator LoadPacks()
     {
@@ -172,6 +192,7 @@ public class  PersistanceManager: MonoBehaviour
             Debug.Log("No saved stages found at " + filePath);
             yield return StartCoroutine(GetJson("stages"));
         }
+
         Debug.Log(filePath);
         json = File.ReadAllText(filePath);
 
@@ -192,11 +213,12 @@ public class  PersistanceManager: MonoBehaviour
         };
 
         packs = packsData;
-    
+
         Debug.Log("Packs loaded from " + filePath);
         Debug.Log("stickersPerPack on load: " + packs.stickersPerPack);
         yield return null;
     }
+
     IEnumerator GetJson(string file_name)
     {
         string url = "https://leandromagonza.github.io/MemoGram.Pokemon/" + file_name + ".json";
@@ -204,7 +226,8 @@ public class  PersistanceManager: MonoBehaviour
         {
             yield return www.SendWebRequest();
 
-            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
+            if (www.result == UnityWebRequest.Result.ConnectionError ||
+                www.result == UnityWebRequest.Result.ProtocolError)
             {
                 Debug.Log(www.error);
             }
@@ -216,3 +239,5 @@ public class  PersistanceManager: MonoBehaviour
         }
     }
 }
+
+   
