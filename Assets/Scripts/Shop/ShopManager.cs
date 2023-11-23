@@ -18,7 +18,8 @@ public class ShopManager : MonoBehaviour
     public Button betterPeek_Upgrade_Button;
     public Button block;
     public Button deathDefy_Upgrade_Button;
-    public void BuyItem(int itemID)
+
+    public void BuyItemConsumable(int itemID)
     {
         ConsumableID item = (ConsumableID)itemID;
         Debug.Log("Added Item:" + item.ToString());
@@ -29,17 +30,34 @@ public class ShopManager : MonoBehaviour
             Debug.Log("Not enough money");        
             return;
         }
-        ProcessItem(item);
+        ProcessConsumable(item);
     }
-    [ContextMenu("Add Money")]
+    public void BuyItemUpgrade(int itemID)
+    {
+        UpgradeID item = (UpgradeID)itemID;
+        Debug.Log("Added Item:" + item.ToString());
+        //int price = ItemPrizes.GetItemPrice(item);
+        bool canBuy = GameManager.Instance.userData.ModifyCoins(-100);
+        if (!canBuy)
+        {
+            Debug.Log("Not enough money");
+            return;
+        }
+        ProcessUpgrade(item);
+    }
     public void AddMoney()
     {
         GameManager.Instance.userData.ModifyCoins(1000);
     }
-    private void ProcessItem(ConsumableID itemId)
+    private void ProcessConsumable(ConsumableID consumableID)
     {
-        Debug.Log($"{itemId} Purchase Successfully");
-        ItemManager.Instance.ProcessAddConsumable(itemId);
+        Debug.Log($"{consumableID} Purchase Successfully");
+        ItemManager.Instance.ProcessAddConsumable(consumableID);
+    }
+    private void ProcessUpgrade(UpgradeID upgradeID)
+    {
+        Debug.Log($"{upgradeID} Purchase Successfully");
+        ItemManager.Instance.ProcessAddUpgrade(upgradeID);
     }
 }
 

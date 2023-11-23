@@ -51,9 +51,27 @@ public class ItemManager : MonoBehaviour
     [SerializeField] private AudioClip buttonRemoveAudioClip;
     [SerializeField] private AudioClip buttonCutAudioClip;
     [SerializeField] private AudioClip buttonPeekAudioClip;
+    private void OnValidate()
+    {
+        if (!validate) return;
+        
+        for (int i = 1; i < Enum.GetNames(typeof(UpgradeID)).Length; i++)
+        {
+            UpgradeID upgradeID = (UpgradeID)i;
+            if (!upgrades.ContainsKey(upgradeID))
+                upgrades.Add(upgradeID, UpgradeData.GetUpgrade(upgradeID));
+        }
+        for (int i = 1; i < Enum.GetNames(typeof(ConsumableID)).Length; i++)
+        {
+            ConsumableID consumableID = (ConsumableID)i;
+            if (!consumables.ContainsKey(consumableID))
+                consumables.Add(consumableID, ConsumableData.GetConsumable(consumableID));
+        }
+    }
     private void Awake()
     {
         Instance = this;
+        Debug.Log(consumables.Count);
     }
    
     public void ProcessAddConsumable(ConsumableID consumableID)
@@ -61,14 +79,12 @@ public class ItemManager : MonoBehaviour
         if ((int)consumableID < 0) return;
         Debug.Log("Added Item:" + nameof(consumableID));
         AddConsumableObject(consumableID);
-        ValidateItem(consumableID);
     }
     public void ProcessAddUpgrade(UpgradeID upgradeID)
     {
         if ((int)upgradeID < 0) return;
         Debug.Log("Added Item:" + nameof(upgradeID));
-       
-        
+        AddUpgradeObject(upgradeID);
     }
     private void AddUpgradeObject(UpgradeID upgradeID)
     {
@@ -78,7 +94,7 @@ public class ItemManager : MonoBehaviour
         }
         else
         {
-            //upgrades.Add(upgradeID,updateda);
+            upgrades.Add(upgradeID,UpgradeData.GetUpgrade(upgradeID));
         }
     }
     private void AddConsumableObject(ConsumableID consumableID)

@@ -39,6 +39,7 @@ public class  PersistanceManager: MonoBehaviour
     public Dictionary<int, StickerLevelsData> stickerLevels = new Dictionary<int, StickerLevelsData>();
     public PacksData packs = new PacksData();
     public UserData userData;
+
     void Start()
     {
         StartCoroutine(LoadUserData());
