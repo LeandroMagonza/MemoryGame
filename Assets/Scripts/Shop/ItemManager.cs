@@ -5,19 +5,17 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UnityEditor.Progress;
 
-public enum ItemID
+public enum ConsumableID
 {
     NONE = -1,
-
-    // Consumables
-
     Clue,
     Remove,
     Cut,
     Peek,
-
-    /// Upgrdes
-
+}
+public enum UpgradeID
+{
+    NONE=-1,
     ExtraLife,
     ProtectedLife,
     MaxClue,
@@ -35,8 +33,8 @@ public class ItemManager : MonoBehaviour
 
     public bool validate = true;
     //public Dictionary<ItemID, int> matchConsumables = new Dictionary<ItemID, int>();
-    public Consumable[] consumables;
-    public Upgrade[] upgrades;
+    public Dictionary<ConsumableID, ConsumableData> consumables = new Dictionary<ConsumableID, ConsumableData>();
+    public Dictionary<UpgradeID, UpgradeData> upgrades = new Dictionary<UpgradeID, UpgradeData>();
     public static ItemManager Instance;
     [Header("Consumable Settings")]
     [SerializeField] private Button buttonClue;
@@ -53,99 +51,66 @@ public class ItemManager : MonoBehaviour
     [SerializeField] private AudioClip buttonRemoveAudioClip;
     [SerializeField] private AudioClip buttonCutAudioClip;
     [SerializeField] private AudioClip buttonPeekAudioClip;
-    private void OnValidate()
-    {
-        if (!validate) return;
-        int breakPoint = 4;
-        List<ItemID> items = new List<ItemID>();
-        upgrades = new Upgrade[items.Count];
-        consumables = new Consumable[breakPoint];
-        foreach (string item in Enum.GetNames(typeof(ItemID)))
-        {
-            ItemID itemID = (ItemID)Enum.Parse(typeof(ItemID), item);
-            items.Add(itemID);
-        }
-        for (int i = 0; i < breakPoint; i++)
-        {
-            consumables[i] = Consumable.GetConsumable(items[i]);
-        }
-        items.RemoveRange(0, breakPoint);
-        upgrades = new Upgrade[items.Count];
-        for (int i = 0; i < items.Count; i++)
-        {
-            upgrades[i] = Upgrade.GetUpgrade(items[i]);
-        }
-    }
     private void Awake()
     {
         Instance = this;
     }
-    private void Start()
+   
+    public void ProcessAddConsumable(ConsumableID consumableID)
     {
-        ValidateItem(ItemID.NONE);
+        if ((int)consumableID < 0) return;
+        Debug.Log("Added Item:" + nameof(consumableID));
+        AddConsumableObject(consumableID);
+        ValidateItem(consumableID);
     }
-    public void AddItem(ItemID item)
+    public void ProcessAddUpgrade(UpgradeID upgradeID)
     {
-        if ((int)item < 0) return;
-        Debug.Log("Added Item:" + nameof(item));
-        AddItemTodictionaries(item);
-        ValidateItem(item);
+        if ((int)upgradeID < 0) return;
+        Debug.Log("Added Item:" + nameof(upgradeID));
+       
+        
     }
-
-    private void AddItemTodictionaries(ItemID item)
+    private void AddUpgradeObject(UpgradeID upgradeID)
     {
-        if ((int)item > 3)
+        if (upgrades.ContainsKey(upgradeID))
         {
-            foreach(Upgrade upgrade in upgrades)
-            {
-                if (upgrade.ItemID.Equals(item))
-                {
-                    upgrade.LevelUp();
-                }
-            }
+            upgrades[upgradeID].LevelUp();
         }
         else
         {
-            AddConsumable(item);
+            //upgrades.Add(upgradeID,updateda);
         }
     }
-    public Dictionary<ItemID, int> MatchInventory()
+    private void AddConsumableObject(ConsumableID consumableID)
     {
-        Dictionary<ItemID, int> temp_inventory = new Dictionary<ItemID, int>();
-        foreach (Upgrade upgrade in upgrades)
+        if (consumables.ContainsKey(consumableID))
         {
-            temp_inventory.Add(upgrade.ItemID, upgrade.GetAdditionalItem());
+            consumables[consumableID].AddCurrent(1);
         }
-        foreach (Consumable item in consumables)
+        else
         {
-            if (temp_inventory.ContainsKey(item.ItemID))
-            {
-                temp_inventory[item.ItemID] += item.Amount;
-            }
-            else
-            {
-                temp_inventory.Add(item.ItemID, item.Amount);
-            }
+            consumables.Add(consumableID, ConsumableData.GetConsumable(consumableID));
         }
+    }
+    public Dictionary<ConsumableData, int> MatchInventory()
+    {
+        Dictionary<ConsumableData, int> temp_inventory = new Dictionary<ConsumableData, int>();
+        //foreach (UpgradeData upgrade in upgrades)
+        //{
+        //    //temp_inventory.Add(upgrade.ItemID, upgrade.GetAdditionalItem());
+        //}
+        //foreach (ConsumableData item in consumables)
+        //{
+        //    if (temp_inventory.ContainsKey(item.ItemID))
+        //    {
+        //        temp_inventory[item.ItemID] += item.Amount;
+        //    }
+        //    else
+        //    {
+        //        temp_inventory.Add(item.ItemID, item.Amount);
+        //    }
+        //}
         return temp_inventory;
-    }
-
-    private void AddConsumable(ItemID item)
-    {
-        foreach (Consumable c in consumables)
-        {
-            if (c.ItemID.Equals(item))
-                c.AddCurrent(1);
-        }
-        /*
-        if (matchConsumables.ContainsKey(item))
-        {
-            matchConsumables[item] += 1;
-        }
-        else
-        {
-            matchConsumables.Add(item, 1);
-        }*/
     }
 
     public void UseClue()
@@ -193,7 +158,7 @@ public class ItemManager : MonoBehaviour
     {
     }
    
-    public void ValidateItem(ItemID itemId)
+    public void ValidateItem(ConsumableID itemId)
     {
         SetInteractable();
         SetButtonText();
@@ -201,33 +166,33 @@ public class ItemManager : MonoBehaviour
     private void SetButtonText()
     {
         if (buttonTextClue != null)
-            buttonTextClue.text = consumables[(int)ItemID.Clue].Amount.ToString();
+            buttonTextClue.text = consumables[ConsumableID.Clue].Amount.ToString();
         if (buttonTextPeek != null)
-            buttonTextPeek.text = consumables[(int)ItemID.Peek].Amount.ToString();
+            buttonTextPeek.text = consumables[ConsumableID.Peek].Amount.ToString();
         if (buttonTextCut != null)
-            buttonTextCut.text = consumables[(int)ItemID.Cut].Amount.ToString();
+            buttonTextCut.text = consumables[ConsumableID.Cut].Amount.ToString();
         if (buttonTextRemove != null)
-            buttonTextRemove.text = consumables[(int)ItemID.Remove].Amount.ToString();
+            buttonTextRemove.text = consumables[ConsumableID.Remove].Amount.ToString();
     }
     private void SetInteractable()
     {
         if (buttonClue != null)
-            buttonClue.interactable = consumables[(int)ItemID.Clue].Amount > 0;
+            buttonClue.interactable = consumables[ConsumableID.Clue].Amount > 0;
         if (buttonRemove != null)
-            buttonRemove.interactable = consumables[(int)ItemID.Remove].Amount > 0;
+            buttonRemove.interactable = consumables[ConsumableID.Remove].Amount > 0;
         if (buttonCut != null)
-            buttonCut.interactable = consumables[(int)ItemID.Cut].Amount > 0;
+            buttonCut.interactable = consumables[ConsumableID.Cut].Amount > 0;
         if (buttonPeek != null)
-            buttonPeek.interactable = consumables[(int)ItemID.Peek].Amount > 0;
+            buttonPeek.interactable = consumables[ConsumableID.Peek].Amount > 0;
     }
-    public void UseItem(ItemID itemId)
+    public void UseItem(ConsumableID itemId)
     {
         switch (itemId)
         {
-            case ItemID.Clue:
+            case ConsumableID.Clue:
                 UseClue();
                 break;
-            case ItemID.Remove:
+            case ConsumableID.Remove:
                 UseRemove();
                 break;
             //case ItemID.Cut:
@@ -265,15 +230,15 @@ public class ItemManager : MonoBehaviour
 }
 public class ItemPrizes
 {
-    public static int GetItemPrice(ItemID item)
+    public static int GetItemPrice(ConsumableID item)
     {
         switch (item)
         {
-            case ItemID.Clue:
+            case ConsumableID.Clue:
                 return 100;
 
 
-            case ItemID.Remove:
+            case ConsumableID.Remove:
                 return 100;
             //case ItemID.Cut:
             //    break;
@@ -309,25 +274,25 @@ public class ItemPrizes
     }
 }
 [System.Serializable]
-public class Consumable
+public class ConsumableData
 {
     private int min = 0;
-    [SerializeField] private ItemID itemID;
+    [SerializeField] private ConsumableID itemID;
     [SerializeField] private int max;
     [Space]
     [SerializeField] private int current;
 
-    public ItemID ItemID => itemID; 
+    public ConsumableID ItemID => itemID; 
     public int Amount => current;
     public int ID => (int)itemID;
     public int MAX => max;
-    public static Consumable GetConsumable(ItemID itemID)
+    public static ConsumableData GetConsumable(ConsumableID itemID)
     {
-        Consumable consumable = new Consumable();
+        ConsumableData consumable = new ConsumableData();
         switch (itemID)
         {
-            case ItemID.Clue:
-                consumable = new Consumable()
+            case ConsumableID.Clue:
+                consumable = new ConsumableData()
                 {
                     itemID = itemID,
                     current = 0,
@@ -335,8 +300,8 @@ public class Consumable
                     min = 0,
                 };
                 break;
-            case ItemID.Remove:
-                consumable = new Consumable()
+            case ConsumableID.Remove:
+                consumable = new ConsumableData()
                 {
                     itemID = itemID,
                     current = 0,
@@ -344,8 +309,8 @@ public class Consumable
                     min = 0,
                 };
                 break;
-            case ItemID.Cut:
-                consumable = new Consumable()
+            case ConsumableID.Cut:
+                consumable = new ConsumableData()
                 {
                     itemID = itemID,
                     current = 0,
@@ -353,112 +318,10 @@ public class Consumable
                     min = 0,
                 };
                 break;
-            case ItemID.Peek:
-                consumable = new Consumable()
+            case ConsumableID.Peek:
+                consumable = new ConsumableData()
                 {
                     itemID = itemID,
-                    current = 0,
-                    max = 1,
-                    min = 0,
-                };
-                break;
-
-            // Upgrades
-            case ItemID.ExtraLife:
-                consumable = new Consumable()
-                {
-                    itemID = itemID,
-                    current = 0,
-                    max = 1,
-                    min = 0,
-                };
-                break;
-            case ItemID.ProtectedLife:
-                consumable = new Consumable()
-                {
-                    itemID = itemID,
-                    current = 0,
-                    max = 1,
-                    min = 0,
-                };
-                break;
-            case ItemID.MaxClue:
-                consumable = new Consumable()
-                {
-                    itemID = itemID,
-                    current = 0,
-                    max = 1,
-                    min = 0,
-                };
-                break;
-            case ItemID.BetterClue:
-                consumable = new Consumable()
-                {
-                    itemID = itemID,
-                    current = 0,
-                    max = 1,
-                    min = 0,
-                };
-                break;
-            case ItemID.MaxRemove:
-                consumable = new Consumable()
-                {
-                    itemID = itemID,
-                    current = 0,
-                    max = 1,
-                    min = 0,
-                };
-                break;
-            case ItemID.MaxCut:
-                consumable = new Consumable()
-                {
-                    itemID = itemID,
-                    current = 0,
-                    max = 1,
-                    min = 0,
-                };
-                break;
-            case ItemID.BetterCut:
-                consumable = new Consumable()
-                {
-                    itemID = itemID,
-                    current = 0,
-                    max = 1,
-                    min = 0,
-                };
-                break;
-            case ItemID.BetterPeek:
-                consumable = new Consumable()
-                {
-                    itemID = itemID,
-                    current = 0,
-                    max = 1,
-                    min = 0,
-                };
-                break;
-            case ItemID.Block:
-                consumable = new Consumable()
-                {
-                    itemID = itemID,
-                    current = 0,
-                    max = 1,
-                    min = 0,
-                };
-                break;
-            case ItemID.DeathDefy:
-                consumable = new Consumable()
-                {
-                    itemID = itemID,
-                    current = 0,
-                    max = 1,
-                    min = 0,
-                };
-                break;
-
-            default:
-                consumable = new Consumable()
-                {
-                    itemID = ItemID.NONE,
                     current = 0,
                     max = 1,
                     min = 0,
@@ -472,24 +335,39 @@ public class Consumable
     {
         current += value;
     }
+    public bool ModifyCurrent(int value)
+    {
+        int newValue = current + value;
+        if (newValue < 0)
+        {
+            return false;
+        }
+        else if (newValue > max)
+        {
+            current = max;
+            return true;
+        }
+        else
+        {
+            current += value;
+            return true;
+        }
+    }
 }
 [System.Serializable]
-public class Upgrade
+public class UpgradeData
 {
-    [SerializeField] private ItemID itemId;
-    [SerializeField] private int upgradeMaxLevel;
-    [SerializeField] private int valueAddToInitial;
-    [SerializeField] private int valueAddToMax;
+    [SerializeField] protected UpgradeID itemId;
+    [SerializeField] protected int valueAddToInitial;
+    [SerializeField] protected int valueAddToMax;
+    [SerializeField] protected int upgradeCurrentLevel;
     [Space]
-    [SerializeField] private int upgradeCurrentLevel;
-    public ItemID ItemID => itemId; 
-    public int ID => (int)itemId; 
-    public void LevelUp()
-    {
-        upgradeCurrentLevel++;
-        upgradeCurrentLevel = Mathf.Clamp(upgradeCurrentLevel, 0, upgradeMaxLevel);
-    }
-    public int GetAdditionalMax ()
+    [SerializeField] protected int[] levelPrizes = new int[] {100,200,1500};
+    [SerializeField] protected List<UpgradeData> nextUpgrades;
+    public UpgradeID ItemID => itemId;
+    public int ID => (int)itemId;
+
+    public int GetAdditionalMax()
     {
         return valueAddToMax * upgradeCurrentLevel;
     }
@@ -497,163 +375,97 @@ public class Upgrade
     {
         return valueAddToInitial * upgradeCurrentLevel;
     }
-
-
-    public static Upgrade GetUpgrade(ItemID itemId)
+    public int GetUpdateCurrentPrice()
     {
-        Upgrade upgrade = new Upgrade();
+        int index = Mathf.Clamp(upgradeCurrentLevel,0, levelPrizes.Length - 1);
+        return levelPrizes[index]; 
+    }
+    public void LevelUp()
+    {
+        upgradeCurrentLevel++;
+        upgradeCurrentLevel = Mathf.Clamp(upgradeCurrentLevel, 0, levelPrizes.Length-1);
+    }
+
+    public static UpgradeData GetUpgrade(UpgradeID itemId)
+    {
+        UpgradeData upgrade = new UpgradeData();
         switch (itemId)
         {
-            case ItemID.Clue:
-                upgrade = new Upgrade()
+            case UpgradeID.MaxClue:
+                upgrade = new UpgradeData()
                 {
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 2,
-                    upgradeMaxLevel = 3,
                     upgradeCurrentLevel = 0
                 };
                 break;
-            case ItemID.Remove:
-                upgrade = new Upgrade()
+            case UpgradeID.MaxRemove:
+                upgrade = new UpgradeData()
                 {
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 2,
-                    upgradeMaxLevel = 3,
                     upgradeCurrentLevel = 0
                 };
                 break;
-            case ItemID.Cut:
-                upgrade = new Upgrade()
+            case UpgradeID.MaxCut:
+                upgrade = new UpgradeData()
                 {
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 2,
-                    upgradeMaxLevel = 3,
-                    upgradeCurrentLevel = 0
-                };
-                break;
-            case ItemID.Peek:
-                upgrade = new Upgrade()
-                {
-                    itemId = itemId,
-                    valueAddToInitial = 1,
-                    valueAddToMax = 2,
-                    upgradeMaxLevel = 3,
                     upgradeCurrentLevel = 0
                 };
                 break;
 
             // Upgrades
-            case ItemID.ExtraLife:
-                upgrade = new Upgrade()
+            case UpgradeID.ExtraLife:
+                upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
-                    valueAddToInitial = 1,
-                    valueAddToMax = 2,
-                    upgradeMaxLevel = 3,
                     upgradeCurrentLevel = 0
                 };
                 break;
-            case ItemID.ProtectedLife:
-                upgrade = new Upgrade()
+            case UpgradeID.ProtectedLife:
+                upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
-                    valueAddToInitial = 1,
-                    valueAddToMax = 2,
-                    upgradeMaxLevel = 3,
                     upgradeCurrentLevel = 0
                 };
                 break;
-            case ItemID.MaxClue:
-                upgrade = new Upgrade()
+            case UpgradeID.BetterClue:
+                upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
-                    valueAddToInitial = 1,
-                    valueAddToMax = 2,
-                    upgradeMaxLevel = 3,
                     upgradeCurrentLevel = 0
                 };
                 break;
-            case ItemID.BetterClue:
-                upgrade = new Upgrade()
+            case UpgradeID.BetterCut:
+                upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
-                    valueAddToInitial = 1,
-                    valueAddToMax = 2,
-                    upgradeMaxLevel = 3,
                     upgradeCurrentLevel = 0
                 };
                 break;
-            case ItemID.MaxRemove:
-                upgrade = new Upgrade()
+            case UpgradeID.BetterPeek:
+                upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
-                    valueAddToInitial = 1,
-                    valueAddToMax = 2,
-                    upgradeMaxLevel = 3,
                     upgradeCurrentLevel = 0
                 };
                 break;
-            case ItemID.MaxCut:
-                upgrade = new Upgrade()
+            case UpgradeID.Block:
+                upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
-                    valueAddToInitial = 1,
-                    valueAddToMax = 2,
-                    upgradeMaxLevel = 3,
                     upgradeCurrentLevel = 0
                 };
                 break;
-            case ItemID.BetterCut:
-                upgrade = new Upgrade()
+            case UpgradeID.DeathDefy:
+                upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
-                    valueAddToInitial = 1,
-                    valueAddToMax = 2,
-                    upgradeMaxLevel = 3,
-                    upgradeCurrentLevel = 0
-                };
-                break;
-            case ItemID.BetterPeek:
-                upgrade = new Upgrade()
-                {
-                    itemId = itemId,
-                    valueAddToInitial = 1,
-                    valueAddToMax = 2,
-                    upgradeMaxLevel = 3,
-                    upgradeCurrentLevel = 0
-                };
-                break;
-            case ItemID.Block:
-                upgrade = new Upgrade()
-                {
-                    itemId = itemId,
-                    valueAddToInitial = 1,
-                    valueAddToMax = 2,
-                    upgradeMaxLevel = 3,
-                    upgradeCurrentLevel = 0
-                };
-                break;
-            case ItemID.DeathDefy:
-                upgrade = new Upgrade()
-                {
-                    itemId = itemId,
-                    valueAddToInitial = 1,
-                    valueAddToMax = 2,
-                    upgradeMaxLevel = 3,
                     upgradeCurrentLevel = 0
                 };
                 break;
 
             default:
-                upgrade = new Upgrade()
+                upgrade = new UpgradeData()
                 {
-                    itemId = ItemID.NONE,
-                    valueAddToInitial = 0,
-                    valueAddToMax = 0,
-                    upgradeMaxLevel = 0,
                     upgradeCurrentLevel = 0
                 };
                 break;

@@ -20,7 +20,7 @@ public class ShopManager : MonoBehaviour
     public Button deathDefy_Upgrade_Button;
     public void BuyItem(int itemID)
     {
-        ItemID item = (ItemID)itemID;
+        ConsumableID item = (ConsumableID)itemID;
         Debug.Log("Added Item:" + item.ToString());
         int price = ItemPrizes.GetItemPrice(item);
         bool canBuy = GameManager.Instance.userData.ModifyCoins(-price);
@@ -36,10 +36,10 @@ public class ShopManager : MonoBehaviour
     {
         GameManager.Instance.userData.ModifyCoins(1000);
     }
-    private void ProcessItem(ItemID itemId)
+    private void ProcessItem(ConsumableID itemId)
     {
         Debug.Log($"{itemId} Purchase Successfully");
-        ItemManager.Instance.AddItem(itemId);
+        ItemManager.Instance.ProcessAddConsumable(itemId);
     }
 }
 
