@@ -51,16 +51,21 @@ public class GameManager : MonoBehaviour {
 
     public TextMeshProUGUI highScoreText; 
     
-    public FadeOut amountOfAppearancesText; 
-    public TextMeshProUGUI imageIDText; 
+    public FadeOut amountOfAppearencesText; 
 
     public ImageSet imageSetName = ImageSet.Landscapes_IMAGES_10;
-    public GameObject imageOnDisplay;
+    
+    //sticker
+    public Sticker stickerDisplay;
+    //public TextMeshProUGUI imageIDText; 
+    //public GameObject imageOnDisplay;
 
-    private int _currentlySelectedSticker;
-    private Dictionary<int,(StickerData stickerData, int amountOfAppearances)> _stickersFromStage = new Dictionary<int, (StickerData stickerData, int amountOfAppearances)>();
+    //stickerData?
+    private StickerData _currentlySelectedSticker;
+    
+    private Dictionary<int,StickerData> _stickersFromStage = new Dictionary<int, StickerData>();
 
-    private List<int> currentlyInGameImages =new List<int>();
+    private List<StickerData> currentlyInGameStickers =new List<StickerData>();
 
     public AudioSource audioSource;
     public AudioClip correctGuessClip;
@@ -81,7 +86,7 @@ public class GameManager : MonoBehaviour {
     #region PersistanceReferences
     public UserData userData => PersistanceManager.Instance.userData;
     public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
-    private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.stickerLevels;
+    private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.StickerLevels;
     public PacksData packs => PersistanceManager.Instance.packs;
     #endregion
 
@@ -108,10 +113,6 @@ public class GameManager : MonoBehaviour {
 
     
 
-    private void Start()
-    {
-        //scoreText.text = score.ToString();
-    }
 
     //TODO: Esta se va para manager stages o algo asi 
     public void InitializeStages()
@@ -170,11 +171,11 @@ public class GameManager : MonoBehaviour {
     public IEnumerator ProcessTurnAction(int number)
     {
         disableInput = true;
-        Debug.Log("Guessed number " + number + ", amount of appearances " + _stickersFromStage[_currentlySelectedSticker].amountOfAppearances);
+        Debug.Log("Guessed number " + number + ", amount of appearances " + _currentlySelectedSticker.amountOfAppearences);
         TurnAction turnAction;
         int scoreModification = 0;
-        var turnSticker = GetCurrentlySelectedSticker();
-        if (number == turnSticker.amountOfAppearances)
+        var turnSticker = _currentlySelectedSticker;
+        if (number == turnSticker.amountOfAppearences)
         {
             Debug.Log("CorrectGuess");
             scoreModification = OnCorrectGuess();
@@ -187,31 +188,25 @@ public class GameManager : MonoBehaviour {
             turnAction = TurnAction.GuessIncorrect;
         }
         //usar el dato del sticker tomado antes de la funcion oncorrectguess
-        yield return FinishProcessingTurnAction(number, turnAction, scoreModification, (turnSticker.stickerData,turnSticker.amountOfAppearances));
+        yield return FinishProcessingTurnAction(number, turnAction, scoreModification, turnSticker);
     }
 
-    public (int stickerID,StickerData stickerData,int amountOfAppearances) GetCurrentlySelectedSticker()
-    {
-        return (_currentlySelectedSticker,
-            _stickersFromStage[_currentlySelectedSticker].stickerData,
-            _stickersFromStage[_currentlySelectedSticker].amountOfAppearances
-            );
-    }
+
     public IEnumerator FinishProcessingTurnAction(int number, TurnAction turnAction,
-        int scoreModification, (StickerData stickerData,int amountOfAppearances) turnSticker)
+        int scoreModification, StickerData stickerData)
     {
         float timerModification = maxTimer - timer;
         SetTimer(maxTimer);
         yield return new WaitForSeconds(delayBetweenImages);
-        SaveTurn(number, timerModification, turnAction, scoreModification, turnSticker);
+        SaveTurn(number, timerModification, turnAction, scoreModification, stickerData);
         if (!gameEnded) NextTurn();
     }
 
-    private void SaveTurn(int number, float timerModification, TurnAction turnAction, int scoreModification,(StickerData stickerData,int amountOfAppearances) turnSticker)
+    private void SaveTurn(int number, float timerModification, TurnAction turnAction, int scoreModification,StickerData stickerData)
     {
         _currentMatch.AddTurn(
-            turnSticker.stickerData.stickerID,
-            turnSticker.amountOfAppearances,
+            stickerData.stickerID,
+            stickerData.amountOfAppearences,
             timerModification,
             number,
             turnAction,
@@ -221,18 +216,18 @@ public class GameManager : MonoBehaviour {
         );
     }
 
-    private void CheckAmountOfAppearances()
+    private void CheckamountOfAppearences()
     {
-        if (_stickersFromStage[_currentlySelectedSticker].amountOfAppearances == bonusOnAmountOfAppearences)
+        if (_currentlySelectedSticker.amountOfAppearences == bonusOnAmountOfAppearences)
         {
-            Debug.Log("Clear: " + _stickersFromStage[_currentlySelectedSticker].stickerData.name);
+            Debug.Log("Clear: " + _currentlySelectedSticker.name);
             GainBonus();
             RemoveStickerFromPool();
         }
     }
     public void NextTurn() {
         turnNumber++;
-        if (currentlyInGameImages.Count < 3)
+        if (currentlyInGameStickers.Count < 3)
         {
             AddImages(1);
         }
@@ -252,14 +247,12 @@ public class GameManager : MonoBehaviour {
     public void OnIncorrectGuess()
     {
         IncorrectGuessFX();
-        amountOfAppearancesText.SetAmountOfGuessesAndShowText(
-            _stickersFromStage[_currentlySelectedSticker].amountOfAppearances,
+        amountOfAppearencesText.SetAmountOfGuessesAndShowText(
+            _currentlySelectedSticker.amountOfAppearences,
             false);
         audioSource.PlayOneShot(incorrectGuessClip);
         lifeCounter.LoseLive();
-        _stickersFromStage[_currentlySelectedSticker] = (
-            _stickersFromStage[_currentlySelectedSticker].stickerData,
-            _stickersFromStage[_currentlySelectedSticker].amountOfAppearances - 1);
+        _currentlySelectedSticker.amountOfAppearences--;
         SetCurrentCombo(0);
     }
 
@@ -274,27 +267,27 @@ public class GameManager : MonoBehaviour {
     public int OnCorrectGuess()
     {
         CorrectGuessFX();
-        amountOfAppearancesText.SetAmountOfGuessesAndShowText(
-            _stickersFromStage[_currentlySelectedSticker].amountOfAppearances,
+        amountOfAppearencesText.SetAmountOfGuessesAndShowText(
+            _currentlySelectedSticker.amountOfAppearences,
             true);
         audioSource.PlayOneShot(correctGuessClip);
         int scoreModification = stages[selectedStage].basePoints +
-                                _stickersFromStage[_currentlySelectedSticker].amountOfAppearances
+                                _currentlySelectedSticker.amountOfAppearences
                                 + CalculateScoreComboBonus();
         ModifyScore(scoreModification);
         SetCurrentCombo(_currentCombo+1);
-        CheckAmountOfAppearances();
+        CheckamountOfAppearences();
         return scoreModification;
     }
 
     private void CorrectGuessFX()
     {
-        StartCoroutine(Squash(imageOnDisplay.transform, .2f, 0.1f, 5));
+        StartCoroutine(Squash(stickerDisplay.spriteHolder.transform, .2f, 0.1f, 5));
         correctGuessParticle.Play();
     }
     private void IncorrectGuessFX()
     {
-        StartCoroutine(Shake(imageOnDisplay.transform, .2f, 5, 80));
+        StartCoroutine(Shake(stickerDisplay.spriteHolder.transform, .2f, 5, 80));
         incorrectGuessParticle.Play();
     }
 
@@ -302,7 +295,7 @@ public class GameManager : MonoBehaviour {
     private void GainBonus()
     {
         Debug.Log("gain bonus");
-        ModifyScore(_stickersFromStage[_currentlySelectedSticker].amountOfAppearances * bonusMultiplicator);
+        ModifyScore(_currentlySelectedSticker.amountOfAppearences * bonusMultiplicator);
         bonusMultiplicator++;
         audioSource.PlayOneShot(bonusClip);
         lifeCounter.GainLive();
@@ -321,7 +314,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private void LoadStickers(string imageSetName) {
-        _stickersFromStage = new Dictionary<int, (StickerData stickerData, int amountOfAppearances)>();
+        _stickersFromStage = new Dictionary<int, StickerData>();
         
         string[] splitedImageSetName = imageSetName.Split("_");
         
@@ -331,45 +324,39 @@ public class GameManager : MonoBehaviour {
         int.TryParse(splitedImageSetName[2], out amount);
 
         foreach (var stickerID in stages[selectedStage].stickers) {
-            _stickersFromStage.Add(stickerID, (StickerManager.Instance.GetStickerDataFromSetByStickerID(imageSetName,stickerID), 0));
+            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(imageSetName, stickerID);
+            stickerData.amountOfAppearences = 0;
+            _stickersFromStage.Add(stickerID, stickerData);
         }
     }
 
 
     
     private void SetRandomImage() {
-        Image image = imageOnDisplay.GetComponent<Image>();
         
-        if (currentlyInGameImages.Count == 0) {
+        if (currentlyInGameStickers.Count == 0) {
             Win();
             return;
         }    
-        int nextImageIndex = Random.Range(0, currentlyInGameImages.Count);
-        int nextImageID = currentlyInGameImages[nextImageIndex];
+        int nextStickerIndex = Random.Range(0, currentlyInGameStickers.Count);
+        StickerData nextSticker = currentlyInGameStickers[nextStickerIndex];
 
-        while (_currentlySelectedSticker == nextImageID && currentlyInGameImages.Count > 1) {
-            nextImageIndex = Random.Range(0, currentlyInGameImages.Count);
-            nextImageID = currentlyInGameImages[nextImageIndex];
+        while (_currentlySelectedSticker == nextSticker && currentlyInGameStickers.Count > 1) {
+            nextStickerIndex = Random.Range(0, currentlyInGameStickers.Count);
+            nextSticker = currentlyInGameStickers[nextStickerIndex];
         }
         
-        image.sprite = _stickersFromStage[nextImageID].stickerData.sprite;
+        stickerDisplay.SetStickerData(nextSticker);
         
-        _currentlySelectedSticker = nextImageID;
-        _stickersFromStage[_currentlySelectedSticker]= (
-            _stickersFromStage[_currentlySelectedSticker].stickerData,
-            _stickersFromStage[_currentlySelectedSticker].amountOfAppearances+1);
-        imageIDText.text = (nextImageID+1).ToString();
-        // image.sprite = _spritesFromSet[Random.Range(0, _spritesFromSet.Count)].sprite;
+        _currentlySelectedSticker = nextSticker;
+        _currentlySelectedSticker.amountOfAppearences++;
     }
 
-    public void RemoveStickerFromPool()
-    {
-        _stickersFromStage[_currentlySelectedSticker] = (
-            _stickersFromStage[_currentlySelectedSticker].stickerData,
-            0);
-        currentlyInGameImages.Remove(_currentlySelectedSticker);
+    public void RemoveStickerFromPool() {
+        _currentlySelectedSticker.amountOfAppearences = 0;
+        currentlyInGameStickers.Remove(_currentlySelectedSticker);
         // aca se setea si la imagen vuelve al set general o no  
-        _stickersFromStage.Remove(_currentlySelectedSticker);
+        _stickersFromStage.Remove(_currentlySelectedSticker.stickerID);
     }
     private void Win() {
         audioSource.PlayOneShot(winClip);
@@ -380,17 +367,17 @@ public class GameManager : MonoBehaviour {
         //para agregar una imagen al pool, se mezclan todos los sprites,
         //y se agrega el primer sprite que no este en el pool, al pool
 
-        List<(int id, StickerData stickerData, int amountOfAppearances)> shuffledSprites =
-            new List<(int id, StickerData stickerData, int amountOfAppearances)>();
-        foreach (var VARIABLE in _stickersFromStage) {
-            shuffledSprites.Add((VARIABLE.Key, VARIABLE.Value.stickerData, VARIABLE.Value.amountOfAppearances));
+        List<StickerData> shuffledStickers =
+            new List<StickerData >();
+        foreach (var sticker in _stickersFromStage) {
+            shuffledStickers.Add(sticker.Value);
         }
 
-        shuffledSprites.Shuffle();
+        shuffledStickers.Shuffle();
 
-        foreach (var sprite in shuffledSprites) {
-            if (!currentlyInGameImages.Contains(sprite.id)) {
-                currentlyInGameImages.Add(sprite.id);
+        foreach (var sticker in shuffledStickers) {
+            if (!currentlyInGameStickers.Contains(sticker)) {
+                currentlyInGameStickers.Add(sticker);
                 amountOfImages--;
                 if (amountOfImages == 0) {
                     return true;
@@ -453,9 +440,7 @@ public class GameManager : MonoBehaviour {
         if (this.timer<=1)
         {
             lifeCounter.LoseLive();
-            _stickersFromStage[_currentlySelectedSticker] = (
-                _stickersFromStage[_currentlySelectedSticker].stickerData,
-                _stickersFromStage[_currentlySelectedSticker].amountOfAppearances - 1);
+            _currentlySelectedSticker.amountOfAppearences--;
             NextTurn();
             SetTimer(maxTimer);
         }
@@ -468,6 +453,11 @@ public class GameManager : MonoBehaviour {
     }
     public void Reset() {
         //if (disableInput) return;
+        if (stickerDisplay == null) {
+            stickerDisplay = StickerManager.Instance.GetSticker();
+        }
+        stickerDisplay.ConfigureForGame();
+        
         SetNumpadByDifficulty(selectedDifficulty);
         bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
         gameEnded = false;
@@ -480,10 +470,10 @@ public class GameManager : MonoBehaviour {
         bonusMultiplicator = 1;
         lifeCounter.ResetLives();
         LoadStickers(imageSetName.ToString());
-        currentlyInGameImages = new List<int>();
+        currentlyInGameStickers = new List<StickerData>();
         AddImages(4);
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion
-        _currentlySelectedSticker = 0;
+        _currentlySelectedSticker = null;
         SetRandomImage();
         disableInput = false;
         _currentMatch = new Match(selectedStage,selectedDifficulty,false);

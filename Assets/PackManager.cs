@@ -57,10 +57,13 @@ public class PackManager : MonoBehaviour {
         
         //destruyo todas las figuras que haya anteriores
         for (int i = stickerHolder.transform.childCount - 1; i >= 0; i--) {
-            Destroy(stickerHolder.transform.GetChild(i).gameObject);
+            StickerManager.Instance.RecycleSticker(stickerHolder.transform.GetChild(i).GetComponent<Sticker>());
+            stickerHolder.transform.GetChild(i).gameObject.transform.parent = null;
         }
         
         Debug.Log("stickers per pack "+GameManager.Instance.packs.stickersPerPack);
+
+        List<int> gainedStickers = new List<int>();
         for (int stickerNumber = 0; stickerNumber < GameManager.Instance.packs.stickersPerPack; stickerNumber++) {
             Debug.Log("stickerNumber "+stickerNumber);
             //int rarityRandomizer = Random.Range(0, 101);
@@ -69,27 +72,23 @@ public class PackManager : MonoBehaviour {
             //sumar rare / legendary amount si correspoende
             
             int stickerStageRandomizer = Random.Range(0, 101);
-            int acumulator = 0;
+            int accumulator = 0;
             int stickerStage = 0;
             foreach (var VARIABLE in GameManager.Instance.stages[packStage].packOdds){
                 stickerStage = VARIABLE.Key;
-                acumulator += GameManager.Instance.stages[packStage].packOdds[VARIABLE.Key];
-                if (acumulator > stickerStageRandomizer) {
+                accumulator += GameManager.Instance.stages[packStage].packOdds[VARIABLE.Key];
+                if (accumulator > stickerStageRandomizer) {
                     break;
                 }
             }
             Debug.Log("sticker randomizer "+stickerStageRandomizer+" stage "+stickerStage);
-            Debug.Log("set has "+GameManager.Instance.stages[stickerStage].stickers.Count+" stickerstickers");
+            Debug.Log("set has "+GameManager.Instance.stages[stickerStage].stickers.Count+" stickerStickers");
             int selectedStickerIndex = Random.Range(0, GameManager.Instance.stages[stickerStage].stickers.Count);
             Debug.Log("selected sticker from index "+selectedStickerIndex);
             int selectedStickerImageID = GameManager.Instance.stages[stickerStage].stickers[selectedStickerIndex];
             Debug.Log("corresponds to imageID "+selectedStickerImageID);
             
-            GameObject newSticker = Instantiate(stickerPrefab, stickerHolder.transform);
-            
-            GameObject stickerGameObject = newSticker.transform.GetComponentInChildren<Image>().gameObject;
-            Image imageComponent = stickerGameObject.transform.Find("Image").GetComponent<Image>();
-            imageComponent.sprite = StickerManager.Instance.GetStickerDataFromSetByStickerID(GameManager.Instance.imageSetName.ToString(),selectedStickerImageID).sprite;
+            gainedStickers.Add(selectedStickerImageID);
             
             if (GameManager.Instance.userData.imageDuplicates.ContainsKey(selectedStickerImageID)) {
                 GameManager.Instance.userData.imageDuplicates[selectedStickerImageID]++;
@@ -97,7 +96,17 @@ public class PackManager : MonoBehaviour {
             else {
                 GameManager.Instance.userData.imageDuplicates.Add(selectedStickerImageID,1);
             }
-            
+
+        }
+        foreach (var stickerID in gainedStickers) {
+            Sticker newSticker = StickerManager.Instance.GetSticker();
+            newSticker.transform.SetParent(stickerHolder.transform);
+            //Instantiate(stickerPrefab, stickerHolder.transform);
+            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(GameManager.Instance.imageSetName.ToString(),stickerID);
+            Debug.Log(stickerData.color);
+            newSticker.SetStickerData(stickerData);
+            newSticker.ConfigureForPack();
+            newSticker.transform.localScale = Vector3.one;
         }
         GameManager.Instance.UpdateAchievementAndUnlockedLevels();
         GameManager.Instance.disableInput = false;

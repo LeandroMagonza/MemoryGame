@@ -46,7 +46,14 @@ public class PersistanceManager : MonoBehaviour
     #endregion
 
     public Dictionary<int, StageData> stages;
-    public Dictionary<int, StickerLevelsData> stickerLevels = new Dictionary<int, StickerLevelsData>();
+    private Dictionary<int, StickerLevelsData> stickerLevels = new Dictionary<int, StickerLevelsData>();
+
+    public Dictionary<int, StickerLevelsData> StickerLevels
+    {
+        get { return stickerLevels; }
+        private set { stickerLevels = value; }
+    }
+    
     public PacksData packs = new PacksData();
     public UserData userData;
 
@@ -166,8 +173,7 @@ public class PersistanceManager : MonoBehaviour
 
         // Deserialize the stickerLevels data
         JObject stickerLevelsJson = jsonData["stickerLevels"].ToObject<JObject>();
-        Dictionary<int, StickerLevelsData> stickerLevels = new Dictionary<int, StickerLevelsData>();
-
+        stickerLevels = new Dictionary<int, StickerLevelsData>();
         foreach (var item in stickerLevelsJson)
         {
             int level = int.Parse(item.Key);

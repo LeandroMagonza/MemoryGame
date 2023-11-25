@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using Unity.VisualScripting;
 using UnityEngine;
-
+using ColorUtility = UnityEngine.ColorUtility;
 public class StickerManager : MonoBehaviour
 {
     #region Singleton
@@ -33,8 +35,9 @@ public class StickerManager : MonoBehaviour
     }
     #endregion
 
-    private Sticker stickerPrefab;
-    private List<Sticker> _stickerPool;
+    public Sticker stickerPrefab;
+    private List<Sticker> _stickerPool = new List<Sticker>();
+    private Dictionary<int, (string name, string type, Color color)> stickersAdditionalData = new Dictionary<int, (string, string, Color)>();
 
     // Update is called once per frame
     public Sticker GetSticker()
@@ -51,7 +54,7 @@ public class StickerManager : MonoBehaviour
         return stickerToReturn;
     }
 
-    public void ReturnSticker(Sticker stickerToReturn)
+    public void RecycleSticker(Sticker stickerToReturn)
     {
         _stickerPool.Add(stickerToReturn);
     }
@@ -79,17 +82,23 @@ public class StickerManager : MonoBehaviour
         }
 
         Debug.Log("PATH: " + path);
-        if (loadedSprite != null)
-        {
+        if (loadedSprite != null) {
+
+            int amountOfDulpicates = 0;
+            if (PersistanceManager.Instance.userData.imageDuplicates.ContainsKey(stickerID)) {
+                amountOfDulpicates = PersistanceManager.Instance.userData.imageDuplicates[stickerID];
+            }
+
+            var additionalData = GetStickerAdditionalData(stickerID+1);
             return new StickerData(
                 stickerID,
                 loadedSprite,
-                PersistanceManager.Instance.userData.imageDuplicates[stickerID],
-                GetStickerLevelByAmountOfDuplicates(PersistanceManager.Instance.userData.imageDuplicates[stickerID]),
+                amountOfDulpicates,
+                GetStickerLevelByAmountOfDuplicates(amountOfDulpicates),
                 //sacar estos datos de csv pokemonlist, cambiar nombre y hacerlo generico para todos, algo como stickersadditionalinfo
-                "name",
-                Color.white,
-                "type"
+                additionalData.name,
+                additionalData.color,
+                additionalData.type
             );
         }
         else {
@@ -111,13 +120,57 @@ public class StickerManager : MonoBehaviour
     }
     public int GetStickerLevelByAmountOfDuplicates(int amountOfDuplicates)
     {
+        Debug.Log("GetStickerLevelByAmountOfDuplicates");
+        Debug.Log("amount of duplicates "+amountOfDuplicates);
         int level = 0;
-        foreach (var VARIABLE in PersistanceManager.Instance.stickerLevels)
+        Debug.Log("stikcerlevels count "+PersistanceManager.Instance.StickerLevels.Count);
+        foreach (var VARIABLE in PersistanceManager.Instance.StickerLevels)
         {
+            
+            Debug.Log("level "+VARIABLE.Key+" duplicates required "+VARIABLE.Value.amountRequired);
             if (amountOfDuplicates < VARIABLE.Value.amountRequired) break;
             level = VARIABLE.Key;
         }
+        Debug.Log("resulitng level "+level);
         return level;
+    }
+    private void ReadAdditionalDataCSV()
+    {
+        TextAsset csvData = Resources.Load<TextAsset>(GameManager.Instance.imageSetName+"/"+"additionalInfo");
+
+        string[] lines = csvData.text.Split('\n');
+
+        for (int i = 1; i < lines.Length; i++) // Empieza en 1 para omitir la cabecera
+        {
+            string[] fields = lines[i].Split(',');
+            int id = int.Parse(fields[0]);
+            string name = fields[1];
+            string type = fields[2];
+            Color color = Color.white;
+            Debug.Log("color unparsed " + fields[3]);
+            if (ColorUtility.TryParseHtmlString(fields[3], out Color colorValue))
+            {
+                color = colorValue;
+            }
+            stickersAdditionalData.Add(id, (name, type, color));
+        }
+    }
+        
+    public (string name, string type, Color color) GetStickerAdditionalData(int id)
+    {
+        if (stickersAdditionalData.Count == 0) {
+            ReadAdditionalDataCSV();
+        }
+        
+        if (stickersAdditionalData.TryGetValue(id, out var data))
+        {
+            return data;
+        }
+        else
+        {
+            Debug.LogError("ID no encontrado: " + id);
+            return (null, null, new Color());
+        }
     }
 }
 
@@ -131,7 +184,9 @@ public class StickerData
     public string name;
     public Color color;
     public string type;
-
+    
+    //Just for game
+    public int amountOfAppearences;
     public StickerData(int stickerID, Sprite sprite, int amountOfDuplicates, int level, string name, Color color, string type)
     {
         this.stickerID = stickerID;
@@ -142,7 +197,7 @@ public class StickerData
         this.color = color;
         this.type = type;
     }
-        
+    
 
 }
 
