@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviour {
     public int turnNumber = 1;
     public int bonusOnAmountOfAppearences = 9;
     public int bonusMultiplicator = 1;
-
+ 
     public TextMeshProUGUI highScoreText; 
     
     public FadeOut amountOfAppearencesText; 
@@ -353,7 +353,7 @@ public class GameManager : MonoBehaviour {
     }
 
     public void RemoveStickerFromPool() {
-        _currentlySelectedSticker.amountOfAppearences = 0;
+        //_currentlySelectedSticker.amountOfAppearences = 0;
         currentlyInGameStickers.Remove(_currentlySelectedSticker);
         // aca se setea si la imagen vuelve al set general o no  
         _stickersFromStage.Remove(_currentlySelectedSticker.stickerID);
@@ -461,6 +461,7 @@ public class GameManager : MonoBehaviour {
         SetNumpadByDifficulty(selectedDifficulty);
         bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
         gameEnded = false;
+        stickerDisplay.gameObject.SetActive(true);
         endGameButtons.transform.parent.gameObject.SetActive(false);
         audioSource.Play();
         SetTimer(15);

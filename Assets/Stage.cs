@@ -143,12 +143,17 @@ public class Match
         List<int> clearedImages = new();
         int maxLives = turnHistory[0].remainingLives;
         bool lostLife = false;
+        Debug.Log("Ending match with turns:"+turnHistory.Count);
         foreach (var turn in turnHistory) {
             score += turn.scoreModification;
             amountOfTurns ++;
+            Debug.Log("turnNumber: "+amountOfTurns);
+            Debug.Log("turn.amountOfAppearences == GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)");
+            Debug.Log(turn.amountOfAppearences +"=="+ GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) +"&& ("+turn.action +"=="+ TurnAction.GuessCorrect +"||"+turn.action+" == "+TurnAction.UseClue+")");
+            Debug.Log(turn.amountOfAppearences == GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue));
             if (turn.amountOfAppearences == GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)) {
                 clearedImages.Add(turn.imageID);
-                Debug.Log("Ädding clearedImages");
+                Debug.Log("Ädding clearedImages stickerID"+turn.imageID);
             }
 
             if (turn.remainingLives < maxLives)
