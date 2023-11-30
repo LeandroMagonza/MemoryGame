@@ -19,5 +19,8 @@ public class ChangeCanvasButton : MonoBehaviour {
         }
         CanvasManager.Instance.ChangeCanvas(canvasToSet);  
     }
+    public void PlayOneShotOnManager(AudioClip clip) {
+        GameManager.Instance.audioSource.PlayOneShot(clip);
+    }
 
 }
