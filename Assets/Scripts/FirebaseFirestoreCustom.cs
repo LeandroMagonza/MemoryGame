@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Firebase;
 using Firebase.Extensions;
 using Firebase.Firestore;
+using Newtonsoft.Json;
 using UnityEngine;
 
 #if (UNITY_IOS || UNITY_TVOS)
@@ -60,6 +62,10 @@ public class FirebaseFirestoreCustom : MonoBehaviour {
     }
 
     private static string DictToString(IDictionary<string, object> d) {
+        if (d == null)
+        {
+            return "{}";
+        }
         return "{ " + d
             .Select(kv => "(" + kv.Key + ", " + kv.Value + ")")
             .Aggregate("", (current, next) => current + next + ", ") + "}";
@@ -137,6 +143,7 @@ public class FirebaseFirestoreCustom : MonoBehaviour {
     public void UpdateDoc(Dictionary<string, object> data) {
         StartCoroutine(UpdateDoc(GetDocumentReference(), data));
     }
+
     
     private IEnumerator UpdateDoc(DocumentReference doc, IDictionary<string, object> data) {
         Task updateTask = doc.UpdateAsync(data);
@@ -153,6 +160,32 @@ public class FirebaseFirestoreCustom : MonoBehaviour {
         } else {
             fieldContents = "Error";
         }
+    }
+
+    public void SaveJson(string jsonString)
+    {
+        FirebaseFirestore db = FirebaseFirestore.DefaultInstance;
+        DocumentReference docRef = db.Collection(collectionPath).Document();
+        
+
+        string content = File.ReadAllText(Path.Combine(Application.persistentDataPath, "userData.json"));
+        Dictionary<string, object> data = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
+
+        docRef.SetAsync(data).ContinueWith(task => {
+            if (task.IsCompleted)
+            {
+                if (task.IsFaulted)
+                {
+                    Debug.Log("error completed");
+                    return;
+                }
+                Debug.Log("Documento guardado exitosamente");
+            }
+            else
+            {
+                Debug.LogError("Error al guardar documento: " + task.Exception);
+            }
+        });
     }
 }
 
