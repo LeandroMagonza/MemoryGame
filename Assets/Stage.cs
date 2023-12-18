@@ -198,7 +198,8 @@ public class UserData
     public int coins;
     public List<UserStageData> stages;
     public Dictionary<int,int> imageDuplicates = new Dictionary<int, int>();
-    //upgrades, inventario
+    public Dictionary<ConsumableID, ConsumableData> consumables = new Dictionary<ConsumableID, ConsumableData>();
+    public Dictionary<UpgradeID, UpgradeData> upgrades = new Dictionary<UpgradeID, UpgradeData>();
     //historial de compras
 
     public UserStageData GetUserStageData(int stage,int difficulty)
@@ -223,8 +224,276 @@ public class UserData
         }
         return false;
     }
-    
-    
+    public void AddUpgradeObject(UpgradeID upgradeID)
+    {
+        if (upgrades.ContainsKey(upgradeID))
+        {
+            upgrades[upgradeID].LevelUp();
+        }
+        else
+        {
+            upgrades.Add(upgradeID, UpgradeData.GetUpgrade(upgradeID));
+            upgrades[upgradeID].LevelUp();
+        }
+    }
+    public void AddConsumableObject(ConsumableID consumableID)
+    {
+        if (consumables.ContainsKey(consumableID))
+        {
+            consumables[consumableID].AddCurrent(1);
+        }
+        else
+        {
+            consumables.Add(consumableID, ConsumableData.GetConsumable(consumableID));
+            consumables[consumableID].AddCurrent(1);
+        }
+    }
+    public void modifyConsumableObject(ConsumableID consumableID, int amount)
+    {
+        if (consumables.ContainsKey(consumableID))
+        {
+            consumables[consumableID].AddCurrent(amount);
+        }
+    }
+   
+
+    public Dictionary<ConsumableID, int> GetMatchInventory()
+    {
+        Dictionary<ConsumableID, int> temp_inventory = new Dictionary<ConsumableID, int>();
+        ConsumableID clue = ConsumableID.Clue;
+        ConsumableID remove = ConsumableID.Remove;
+        ConsumableID cut = ConsumableID.Cut;
+        ConsumableID peek = ConsumableID.Peek;
+
+        int maxClue = 0;
+        int maxRemove = 0;
+        int maxCut = 0;
+        int maxPeek = 0;
+
+        foreach (UpgradeData upgrade in upgrades.Values)
+        {
+            switch (upgrade.itemId)
+            {
+                case UpgradeID.MaxClue:
+                    if (!temp_inventory.ContainsKey(clue))
+                    {
+                        temp_inventory.Add(clue, upgrade.GetAdditionalItem());
+                    }
+                    else
+                    {
+                        temp_inventory[clue] += upgrade.GetAdditionalItem();
+                    }
+                    maxClue += upgrade.GetAdditionalMax();
+                    break;
+                case UpgradeID.MaxRemove:
+                    if (!temp_inventory.ContainsKey(remove))
+                    {
+                        temp_inventory.Add(remove, upgrade.GetAdditionalItem());
+                    }
+                    else
+                    {
+                        temp_inventory[remove] += upgrade.GetAdditionalItem();
+                    }
+                    maxRemove += upgrade.GetAdditionalMax();
+                    break;
+                case UpgradeID.MaxCut:
+                    if (!temp_inventory.ContainsKey(cut))
+                    {
+                        temp_inventory.Add(cut, upgrade.GetAdditionalItem());
+                    }
+                    else
+                    {
+                        temp_inventory[cut] += upgrade.GetAdditionalItem();
+                    }
+                    maxCut += upgrade.GetAdditionalMax();
+                    break;
+                case UpgradeID.BetterPeek:
+                    if (!temp_inventory.ContainsKey(peek))
+                    {
+                        temp_inventory.Add(peek, upgrade.GetAdditionalItem());
+                    }
+                    else
+                    {
+                        temp_inventory[peek] += upgrade.GetAdditionalItem();
+                    }
+                    maxPeek += upgrade.GetAdditionalMax();
+                    break;
+                case UpgradeID.BetterClue:
+
+                    break;
+                case UpgradeID.BetterCut:
+                    break;
+                case UpgradeID.Block:
+                    break;
+                case UpgradeID.DeathDefy:
+                    break;
+                case UpgradeID.ExtraLife:
+                    break;
+
+                case UpgradeID.ProtectedLife:
+                    break;
+                case UpgradeID.NONE:
+                    break;
+                default:
+                    break;
+            }
+        }
+        foreach (ConsumableData consumableData in consumables.Values)
+        {
+            switch (consumableData.itemID)
+            {
+                case ConsumableID.Clue:
+                    if (!temp_inventory.ContainsKey(clue))
+                    {
+                        temp_inventory.Add(consumableData.itemID, consumableData.current);
+                    }
+                    else
+                    {
+                        temp_inventory[consumableData.itemID] += consumableData.current;
+                    }
+                    maxClue += consumableData.max;
+                    break;
+                case ConsumableID.Remove:
+                    if (!temp_inventory.ContainsKey(remove))
+                    {
+                        temp_inventory.Add(consumableData.itemID, consumableData.current);
+                    }
+                    else
+                    {
+                        temp_inventory[consumableData.itemID] += consumableData.current;
+                    }
+                    maxRemove += consumableData.max;
+                    break;
+                case ConsumableID.Cut:
+                    if (!temp_inventory.ContainsKey(cut))
+                    {
+                        temp_inventory.Add(consumableData.itemID, consumableData.current);
+                    }
+                    else
+                    {
+                        temp_inventory[consumableData.itemID] += consumableData.current;
+                    }
+                    maxCut += consumableData.max;
+                    break;
+                case ConsumableID.Peek:
+                    if (!temp_inventory.ContainsKey(peek))
+                    {
+                        temp_inventory.Add(consumableData.itemID, consumableData.current);
+                    }
+                    else
+                    {
+                        temp_inventory[consumableData.itemID] += consumableData.current;
+                    }
+                    break;
+                case ConsumableID.NONE:
+                    break;
+                default:
+                    break;
+            }
+
+
+        }
+
+        if (temp_inventory.Count > 0)
+        {
+            if (temp_inventory.ContainsKey(clue))
+            {
+                temp_inventory[clue] = Mathf.Clamp(temp_inventory[clue], 0, maxClue);
+            }
+            if (temp_inventory.ContainsKey(remove))
+            {
+                temp_inventory[remove] = Mathf.Clamp(temp_inventory[remove], 0, maxRemove);
+            }
+            if (temp_inventory.ContainsKey(cut))
+            {
+                temp_inventory[cut] = Mathf.Clamp(temp_inventory[cut], 0, maxCut);
+            }
+            if (temp_inventory.ContainsKey(peek))
+            {
+                temp_inventory[peek] = Mathf.Clamp(temp_inventory[peek], 0, maxPeek);
+            }
+        }
+        Debug.Log("tempCount" + temp_inventory.Count);
+        return temp_inventory;
+    }
+
+    public Dictionary<ConsumableID, int> GetAditionalValueData()
+    {
+        Dictionary<ConsumableID, int> temp_inventory = new Dictionary<ConsumableID, int>();
+        ConsumableID clue = ConsumableID.Clue;
+        ConsumableID remove = ConsumableID.Remove;
+        ConsumableID cut = ConsumableID.Cut;
+        ConsumableID peek = ConsumableID.Peek;
+
+        foreach (UpgradeData upgrade in upgrades.Values)
+        {
+            switch (upgrade.itemId)
+            {
+                case UpgradeID.MaxClue:
+                    if (!temp_inventory.ContainsKey(clue))
+                    {
+                        temp_inventory.Add(clue, upgrade.GetAdditionalItem());
+                    }
+                    else
+                    {
+                        temp_inventory[clue] += upgrade.GetAdditionalItem();
+                    }
+                    break;
+                case UpgradeID.MaxRemove:
+                    if (!temp_inventory.ContainsKey(remove))
+                    {
+                        temp_inventory.Add(remove, upgrade.GetAdditionalItem());
+                    }
+                    else
+                    {
+                        temp_inventory[remove] += upgrade.GetAdditionalItem();
+                    }
+                    break;
+                case UpgradeID.MaxCut:
+                    if (!temp_inventory.ContainsKey(cut))
+                    {
+                        temp_inventory.Add(cut, upgrade.GetAdditionalItem());
+                    }
+                    else
+                    {
+                        temp_inventory[cut] += upgrade.GetAdditionalItem();
+                    }
+                    break;
+                case UpgradeID.BetterPeek:
+                    if (!temp_inventory.ContainsKey(peek))
+                    {
+                        temp_inventory.Add(peek, upgrade.GetAdditionalItem());
+                    }
+                    else
+                    {
+                        temp_inventory[peek] += upgrade.GetAdditionalItem();
+                    }
+                    break;
+                case UpgradeID.BetterClue:
+
+                    break;
+                case UpgradeID.BetterCut:
+                    break;
+                case UpgradeID.Block:
+                    break;
+                case UpgradeID.DeathDefy:
+                    break;
+                case UpgradeID.ExtraLife:
+                    break;
+
+                case UpgradeID.ProtectedLife:
+                    break;
+                case UpgradeID.NONE:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        Debug.Log("tempCount"+temp_inventory.Count);
+        return temp_inventory;
+    }
+
 }
 
 [Serializable]

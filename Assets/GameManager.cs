@@ -90,6 +90,9 @@ public class GameManager : MonoBehaviour {
     public UserData userData => PersistanceManager.Instance.userData;
     public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
     private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.stickerLevels;
+    public Dictionary<ConsumableID, int> matchInventory = new Dictionary<ConsumableID, int>();
+    public Dictionary<ConsumableID, int> initialInventory = new Dictionary<ConsumableID, int>();
+    public Dictionary<ConsumableID, int> aditionalConsumables = new Dictionary<ConsumableID, int>();
     public PacksData packs => PersistanceManager.Instance.packs;
     #endregion
 
@@ -484,6 +487,26 @@ public class GameManager : MonoBehaviour {
     }
 
     private void SaveMatch() {
+        for (int i = 0; i < matchInventory.Count; i++)
+        {
+            int ti = 0;
+            if (initialInventory.ContainsKey((ConsumableID)i))
+                ti = initialInventory[(ConsumableID)i];
+
+            int b = 0;
+            if (aditionalConsumables.ContainsKey((ConsumableID)i))
+                b = aditionalConsumables[(ConsumableID)i];
+
+            int tf = 0;
+            if (matchInventory.ContainsKey((ConsumableID)i))
+                tf = matchInventory[(ConsumableID)i];
+            int ci = ti - b; 
+            int value = ci - tf;
+            Debug.Log("ti: "+ti+ " - b: "+ b + " = ci: " + ci);
+            Debug.Log("CI: "+ci+ " - tf: "+ tf + " = " + value);
+            if (value > 0)
+                userData.modifyConsumableObject((ConsumableID)i, -value);
+        }
         PersistanceManager.Instance.SaveUserData();
     }
     private IEnumerator SetHighScore(int highScoreToSet)
@@ -671,6 +694,16 @@ public class GameManager : MonoBehaviour {
     }
     public Canvas GetGameCanvas() {
         return gameCanvas.GetComponent<Canvas>();
+    }
+
+    public void SetMatchInventory()
+    {
+        matchInventory = userData.GetMatchInventory();
+        initialInventory = new Dictionary<ConsumableID, int>(matchInventory);
+        aditionalConsumables = userData.GetAditionalValueData();
+        Debug.Log("Match Set Inventory:" + matchInventory.Count);
+        Debug.Log("Match Set Initials:" + initialInventory.Count);
+        Debug.Log("Match Set Aditionals:" + aditionalConsumables.Count);
     }
 }
 
