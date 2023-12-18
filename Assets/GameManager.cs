@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviour {
     
     public FadeOut amountOfAppearencesText; 
 
-    public ImageSet imageSetName = ImageSet.Landscapes_IMAGES_10;
+    
     
     //sticker
     public Sticker stickerDisplay;
@@ -94,72 +94,27 @@ public class GameManager : MonoBehaviour {
     public int maxCluesAmount = 5;
     public int currentRemoves = 0;
     public int maxRemovesAmount = 5;
-    public int selectedStage = 0;
-    public int selectedDifficulty = 0;
-
-    [FormerlySerializedAs("selectStageAndDifficultyCanvas")] public GameObject stageHolder;
+    
     public GameObject gameCanvas;
 
     public GameObject numpadRow0;
     public GameObject numpadRow1;
     public GameObject numpadRow2;
 
-    public GameObject stageDisplayPrefab;
-
     private Match _currentMatch;
     private int _currentCombo = 0;
     public TextMeshProUGUI comboBonusText;
     public TextMeshProUGUI comboText;
 
+    public int selectedStage => StageManager.Instance.selectedStage;
+    public int selectedDifficulty => StageManager.Instance.selectedDifficulty;
     
 
 
     //TODO: Esta se va para manager stages o algo asi 
-    public void InitializeStages()
-    {
-        foreach (var stageIndexAndData in stages)
-        {
-            //stages = LoadStages();
-            foreach (var stage in stages.Values)
-            {
-                if (ColorUtility.TryParseHtmlString("#" + stage.color, out Color colorValue))
-                {
-                    stage.ColorValue = colorValue;
-                }
-            }
+    
 
-            //.ToArray().Select((data, index) => new { index, data })
-            StageData stageData = stageIndexAndData.Value;
-
-            GameObject stageDisplay = Instantiate(stageDisplayPrefab, stageHolder.transform);
-            Stage newStage = stageDisplay.GetComponent<Stage>();
-            stageData.stageObject = newStage;
-
-
-            newStage.name = stageData.title;
-            newStage.SetTitle(stageData.title);
-            newStage.SetColor(stageData.ColorValue);
-            newStage.SetStage(stageData.stageID);
-
-            for (int difficulty = 0; difficulty < 3; difficulty++)
-            {
-                if (userData.GetUserStageData(stageData.stageID, difficulty) is not null)
-                {
-                    newStage.SetScore(difficulty, userData.GetUserStageData(stageData.stageID, difficulty).highScore);
-                    StartCoroutine(newStage.difficultyButtons[difficulty]
-                        .SetAchievements(userData.GetUserStageData(stageData.stageID, difficulty).achievements, 0f));
-                }
-                else
-                {
-                    newStage.SetScore(difficulty, 0);
-                }
-            }
-        }
-
-        SetScoreTexts();
-    }
-
-    private void SetScoreTexts() {
+    public void SetScoreTexts() {
         if (userData.GetUserStageData(selectedStage, selectedDifficulty) is not null) {
             scoreText.text = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore.ToString();
             highScoreText.text = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore.ToString();
@@ -453,6 +408,7 @@ public class GameManager : MonoBehaviour {
     }
     public void Reset() {
         //if (disableInput) return;
+        Instance.SetScoreTexts();
         if (stickerDisplay == null) {
             stickerDisplay = StickerManager.Instance.GetSticker();
         }
@@ -470,7 +426,7 @@ public class GameManager : MonoBehaviour {
         SetCurrentCombo(0);
         bonusMultiplicator = 1;
         lifeCounter.ResetLives();
-        LoadStickers(imageSetName.ToString());
+        LoadStickers(StageManager.Instance.stickerSetName.ToString());
         currentlyInGameStickers = new List<StickerData>();
         AddImages(4);
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion
@@ -547,13 +503,7 @@ public class GameManager : MonoBehaviour {
         StopCoroutine(Shake(transform, delay: 0, amount: 0, speed: 0));
     }
 
-    public void SetStageAndDifficulty(int stage, int difficulty)
-    {
-        selectedDifficulty = difficulty;
-        selectedStage = stage;
-        SetScoreTexts();
-        Reset();
-    }
+
     private List<bool> ParseSavedClears(string allClears) {
         string[] clearedArray = allClears.Split(';');
         List<bool> clears = new List<bool>();

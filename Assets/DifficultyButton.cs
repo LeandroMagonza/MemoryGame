@@ -20,8 +20,9 @@ public class DifficultyButton : ChangeCanvasButton {
     public override void OnClick()
     {
         Debug.Log("Clicked difficultyButton "+stage+" "+difficulty);
-        GameManager.Instance.SetStageAndDifficulty(stage, difficulty);
+        StageManager.Instance.SetStageAndDifficulty(stage, difficulty);
         base.OnClick();
+        GameManager.Instance.Reset();
     }
 
     public void SetScore(int score) {

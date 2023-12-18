@@ -102,7 +102,7 @@ public class PackManager : MonoBehaviour {
             Sticker newSticker = StickerManager.Instance.GetSticker();
             newSticker.transform.SetParent(stickerHolder.transform);
             //Instantiate(stickerPrefab, stickerHolder.transform);
-            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(GameManager.Instance.imageSetName.ToString(),stickerID);
+            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(StageManager.Instance.stickerSetName.ToString(),stickerID);
             Debug.Log(stickerData.color);
             newSticker.SetStickerData(stickerData);
             newSticker.ConfigureForPack();

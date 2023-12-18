@@ -9,7 +9,7 @@ public class Sticker : MonoBehaviour
     private StickerData currentStickerData;
     
     public Image spriteHolder;
-    public TextMeshProUGUI name;
+    public new TextMeshProUGUI name;
     public Image expBar;
     public Image bonus;
     public TextMeshProUGUI level;
@@ -111,6 +111,7 @@ public class Sticker : MonoBehaviour
     }
 
     public void ConfigureForPack() {
+        spriteHolder.color = Color.white;
         DisplayFrame(true);
         DisplayLevel(true);
         DisplayLevelStickerProgressAmount(true);
@@ -119,10 +120,22 @@ public class Sticker : MonoBehaviour
         DisplayBonus(false);
     }
     public void ConfigureForGame() {
+        spriteHolder.color = Color.white;
         DisplayFrame(false);
         DisplayLevel(false);
         DisplayLevelStickerProgressAmount(false);
         DisplayName(true);
+        DisplayExpBar(false);
+        DisplayBonus(true);
+    }
+
+    public void ConfigureLocked() {
+        spriteHolder.color = Color.black;
+        DisplayFrame(true);
+        DisplayLevel(false);
+        DisplayLevelStickerProgressAmount(true);
+        DisplayName(true);
+        name.text = "??????";
         DisplayExpBar(false);
         DisplayBonus(true);
     }

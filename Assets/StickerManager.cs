@@ -59,7 +59,7 @@ public class StickerManager : MonoBehaviour
         _stickerPool.Add(stickerToReturn);
     }
     public StickerData GetStickerDataFromSetByStickerID(string imageSetName,int stickerID) {
-        string[] splitedImageSetName = imageSetName.ToString().Split("_");
+        string[] splitedImageSetName = imageSetName.Split("_");
         
         string name = splitedImageSetName[0];
         string type = splitedImageSetName[1];
@@ -136,7 +136,7 @@ public class StickerManager : MonoBehaviour
     }
     private void ReadAdditionalDataCSV()
     {
-        TextAsset csvData = Resources.Load<TextAsset>(GameManager.Instance.imageSetName+"/"+"additionalInfo");
+        TextAsset csvData = Resources.Load<TextAsset>(StageManager.Instance.stickerSetName+"/"+"additionalInfo");
 
         string[] lines = csvData.text.Split('\n');
 

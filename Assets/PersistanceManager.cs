@@ -115,7 +115,7 @@ public class PersistanceManager : MonoBehaviour
         Debug.Log("Stages loaded from " + filePath + " stages: " + stages.Count);
         this.stages = stages;
         yield return null;
-        GameManager.Instance.InitializeStages();
+        StageManager.Instance.InitializeStages();
     }
 
     public void SaveUserData()

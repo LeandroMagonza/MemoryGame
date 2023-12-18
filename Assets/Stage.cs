@@ -62,6 +62,10 @@ public class Stage : MonoBehaviour
             difficultyButton.UpdateDifficultyUnlocked();
         }
     }
+
+    public void OpenStickerPanel() {
+        StageManager.Instance.OpenStickerPanel(stage);
+    }
     
 }
 
