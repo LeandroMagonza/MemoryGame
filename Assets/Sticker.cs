@@ -119,12 +119,20 @@ public class Sticker : MonoBehaviour
         DisplayExpBar(true);
         DisplayBonus(false);
     }
-    public void ConfigureForGame() {
+    public void ConfigureForGame(GameMode gameMode) {
+        switch (gameMode)
+        {
+            case GameMode.MEMORY:
+                DisplayName(true);
+                break;
+            case GameMode.QUIZ:
+                DisplayName(false);
+                break;
+        }
         spriteHolder.color = Color.white;
         DisplayFrame(false);
         DisplayLevel(false);
         DisplayLevelStickerProgressAmount(false);
-        DisplayName(true);
         DisplayExpBar(false);
         DisplayBonus(true);
     }

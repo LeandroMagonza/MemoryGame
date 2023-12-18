@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 public class NumpadButton : MonoBehaviour {
+    // en numpad el number es la cantidad de apariciones, en en quiz option pad es el numero de opcion a elegir, el indice en quizoptions
     public int number;
     private TextMeshProUGUI _numberText; 
     // Start is called before the first frame update
@@ -12,7 +13,7 @@ public class NumpadButton : MonoBehaviour {
         
         //_numberText = GetComponentInChildren<TextMeshProUGUI>();
         _numberText = transform.Find("TextNumpad").GetComponent<TextMeshProUGUI>();
-        _numberText.text = number.ToString();
+        SetText(number.ToString());
         gameObject.name = "NumpadButtonN " + number;
         GetComponent<Button>().onClick.AddListener(OnClick);
     }
@@ -24,5 +25,10 @@ public class NumpadButton : MonoBehaviour {
         }
        Debug.Log("Clicked number "+number);
        StartCoroutine(GameManager.Instance.ProcessTurnAction(number));
+    }
+
+    public void SetText(string textToSet)
+    {
+        _numberText.text = textToSet;
     }
 }

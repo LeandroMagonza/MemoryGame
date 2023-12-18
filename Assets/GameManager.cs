@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,6 +25,12 @@ public class GameManager : MonoBehaviour {
         if (_instance == null) {
             _instance = this as GameManager;
             audioSource = GetComponent<AudioSource>();
+
+            quizOptions = new List<(string, NumpadButton)>();
+            foreach (Transform option in quizOptionPad.transform)
+            {
+                quizOptions.Add(("EMPTY",option.GetComponent<NumpadButton>()));
+            }
         }
         else if (_instance != this)
             DestroySelf();
@@ -37,7 +44,12 @@ public class GameManager : MonoBehaviour {
     
 
     #endregion
-    
+
+    public GameObject numpad;
+    public GameObject quizOptionPad;
+    public List<(string optionName, NumpadButton numpadButton)> quizOptions = new List<(string optionName, NumpadButton numpadButton)>();
+        
+    public GameMode currentGameMode = GameMode.QUIZ;
     public bool gameEnded = false;
     public LifeCounter lifeCounter;
     public float timer = 3;
@@ -130,7 +142,8 @@ public class GameManager : MonoBehaviour {
         TurnAction turnAction;
         int scoreModification = 0;
         var turnSticker = _currentlySelectedSticker;
-        if (number == turnSticker.amountOfAppearences)
+        
+        if (number == GetCorrectGuess(turnSticker))
         {
             Debug.Log("CorrectGuess");
             scoreModification = OnCorrectGuess();
@@ -146,6 +159,18 @@ public class GameManager : MonoBehaviour {
         yield return FinishProcessingTurnAction(number, turnAction, scoreModification, turnSticker);
     }
 
+    public int GetCorrectGuess(StickerData turnSticker)
+    {
+        switch (currentGameMode)
+        {
+            case GameMode.MEMORY:
+                return turnSticker.amountOfAppearences;
+            case GameMode.QUIZ:
+                return quizOptions[0].numpadButton.number;
+            default:
+                return -1;
+        }
+    }
 
     public IEnumerator FinishProcessingTurnAction(int number, TurnAction turnAction,
         int scoreModification, StickerData stickerData)
@@ -304,6 +329,34 @@ public class GameManager : MonoBehaviour {
         stickerDisplay.SetStickerData(nextSticker);
         
         _currentlySelectedSticker = nextSticker;
+        if (currentGameMode == GameMode.QUIZ)
+        {
+            quizOptions.Shuffle();
+
+            /*foreach (var VARIABLE in quizOptions)
+            {
+                VARIABLE.Item2.SetActive(false);
+            }*/
+            
+            quizOptions[0].numpadButton.gameObject.SetActive(true);
+            quizOptions[0].numpadButton.SetText(_currentlySelectedSticker.name);
+            quizOptions[0] = (_currentlySelectedSticker.name,quizOptions[0].Item2);
+            
+            int amountOfQuizOptions = 5;
+            
+            List<KeyValuePair<int, StickerData>> listForRandomOptions = _stickersFromStage.ToList();
+            listForRandomOptions.Shuffle();
+            
+            //TODO: obtener otras posibles opciones al azar
+            for (int optionNumber = 1; optionNumber < amountOfQuizOptions; optionNumber++)
+            {
+                quizOptions[optionNumber].numpadButton.gameObject.SetActive(true);
+                quizOptions[optionNumber] = (listForRandomOptions[optionNumber].Value.name,quizOptions[optionNumber].Item2);
+                quizOptions[optionNumber].numpadButton.SetText(listForRandomOptions[optionNumber].Value.name);
+            }
+
+        }
+        
         _currentlySelectedSticker.amountOfAppearences++;
     }
 
@@ -408,11 +461,24 @@ public class GameManager : MonoBehaviour {
     }
     public void Reset() {
         //if (disableInput) return;
+
+        switch (currentGameMode)
+        {
+            case GameMode.MEMORY:
+                numpad.SetActive(true);
+                quizOptionPad.SetActive(false);
+                break;
+            case GameMode.QUIZ:
+                numpad.SetActive(false);
+                quizOptionPad.SetActive(true);
+                break;
+        }
+        
         Instance.SetScoreTexts();
         if (stickerDisplay == null) {
             stickerDisplay = StickerManager.Instance.GetSticker();
         }
-        stickerDisplay.ConfigureForGame();
+        stickerDisplay.ConfigureForGame(currentGameMode);
         
         SetNumpadByDifficulty(selectedDifficulty);
         bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
@@ -430,6 +496,7 @@ public class GameManager : MonoBehaviour {
         currentlyInGameStickers = new List<StickerData>();
         AddImages(4);
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion
+        //TODO: recordar para que era el comentario de arriba, poirque capaz esta arreglado ya y no me acuerdo
         _currentlySelectedSticker = null;
         SetRandomImage();
         disableInput = false;
@@ -596,4 +663,10 @@ public class Serialization<T>
     {
         this.items = items;
     }
+}
+
+public enum GameMode
+{
+    MEMORY,
+    QUIZ
 }
