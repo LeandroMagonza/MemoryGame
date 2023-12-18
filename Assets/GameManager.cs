@@ -293,18 +293,11 @@ public class GameManager : MonoBehaviour {
         scoreText.text = score.ToString();
     }
 
-    private void LoadStickers(string imageSetName) {
+    private void LoadStickers(ImageSet imageSet) {
         _stickersFromStage = new Dictionary<int, StickerData>();
-        
-        string[] splitedImageSetName = imageSetName.Split("_");
-        
-        string name = splitedImageSetName[0];
-        string type = splitedImageSetName[1];
-        int amount;
-        int.TryParse(splitedImageSetName[2], out amount);
 
         foreach (var stickerID in stages[selectedStage].stickers) {
-            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(imageSetName, stickerID);
+            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(imageSet, stickerID);
             stickerData.amountOfAppearences = 0;
             _stickersFromStage.Add(stickerID, stickerData);
         }
@@ -492,7 +485,7 @@ public class GameManager : MonoBehaviour {
         SetCurrentCombo(0);
         bonusMultiplicator = 1;
         lifeCounter.ResetLives();
-        LoadStickers(StageManager.Instance.stickerSetName.ToString());
+        LoadStickers(StageManager.Instance.stickerSetName);
         currentlyInGameStickers = new List<StickerData>();
         AddImages(4);
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion

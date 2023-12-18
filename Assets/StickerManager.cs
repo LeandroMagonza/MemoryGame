@@ -39,6 +39,9 @@ public class StickerManager : MonoBehaviour
     private List<Sticker> _stickerPool = new List<Sticker>();
     private Dictionary<int, (string name, string type, Color color)> stickersAdditionalData = new Dictionary<int, (string, string, Color)>();
 
+    private ImageSet? currentLoadedSetName = null;
+    private Dictionary<int,StickerData> currentLoadedSetStickerData = new Dictionary<int, StickerData>();
+
     // Update is called once per frame
     public Sticker GetSticker()
     {
@@ -58,20 +61,47 @@ public class StickerManager : MonoBehaviour
     {
         _stickerPool.Add(stickerToReturn);
     }
-    public StickerData GetStickerDataFromSetByStickerID(string imageSetName,int stickerID) {
+    public StickerData GetStickerDataFromSetByStickerID(ImageSet imageSet,int stickerID)
+    {
+        if (currentLoadedSetName != imageSet)
+        {
+            currentLoadedSetName = imageSet;
+            LoadAllStickersFromSet(imageSet);
+        }
+
+        return currentLoadedSetStickerData[stickerID];
+        
+    }
+    public void LoadAllStickersFromSet(ImageSet setToLoad)
+    {
+            
+        string imageSetName = setToLoad.ToString();
         string[] splitedImageSetName = imageSetName.Split("_");
         
         string name = splitedImageSetName[0];
         string type = splitedImageSetName[1];
-        int amount;
-        int.TryParse(splitedImageSetName[2], out amount);
-        
+        int totalStickersInSet;
+        int.TryParse(splitedImageSetName[2], out totalStickersInSet);
+
+        //TODO: Segurir modificacndo esta funcion para que lea todos los stickers del set de una y los guarde al principio, en vez de guardarkis cuando se cambia el stage
+        for (int loadingStickerID = 0; loadingStickerID < totalStickersInSet; loadingStickerID++)
+        {
+            
+        }
+
         string path;
         Sprite loadedSprite = null;
         switch (type) {
             case "SPRITESHEET":
                 path = imageSetName + "/" + name;
-                loadedSprite = Load(path, name + "_" + stickerID);
+                //loadedSprite = Load(path, name + "_" + stickerID);
+                Sprite[] all = Resources.LoadAll<Sprite>(path);
+
+                foreach (var s in all)
+                {
+        
+                }
+                
                 break;
             case "IMAGES":
                 path = imageSetName + "/(" + stickerID + ")";
@@ -80,6 +110,7 @@ public class StickerManager : MonoBehaviour
             default:
                 throw new Exception("INVALID IMAGESET TYPE");
         }
+
 
         Debug.Log("PATH: " + path);
         if (loadedSprite != null) {
@@ -105,6 +136,7 @@ public class StickerManager : MonoBehaviour
             throw new Exception("ImageID not found in spritesFromSet");
         }
     }
+    
     public Sprite Load(string resourcePath, string spriteName)
     {
         Sprite[] all = Resources.LoadAll<Sprite>(resourcePath);
