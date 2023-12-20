@@ -6,9 +6,9 @@ using UnityEngine.UI;
 public class NumpadButton : MonoBehaviour {
     // en numpad el number es la cantidad de apariciones, en en quiz option pad es el numero de opcion a elegir, el indice en quizoptions
     public int number;
-    private TextMeshProUGUI _numberText; 
+    public TextMeshProUGUI _numberText; 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         
         //_numberText = GetComponentInChildren<TextMeshProUGUI>();

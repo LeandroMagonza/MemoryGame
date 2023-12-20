@@ -78,14 +78,16 @@ public class PersistanceManager : MonoBehaviour
     {
         List<StageData> stageList = new List<StageData>(stagesToSave.Values);
         string json = JsonConvert.SerializeObject(stageList, Formatting.Indented);
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        string setName = StageManager.Instance.stickerSetName.ToString();
+        string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
         File.WriteAllText(filePath, json);
         Debug.Log("Stages saved to " + filePath);
     }
 
     public IEnumerator LoadStages()
     {
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        string setName = StageManager.Instance.stickerSetName.ToString();
+        string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
         string json;
         if (!File.Exists(filePath))
         {
@@ -120,7 +122,12 @@ public class PersistanceManager : MonoBehaviour
 
     public void SaveUserData()
     {
-        string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
+        if (userData.imageDuplicates.Count == 0)
+        {
+            return;
+        }
+        string setName = StageManager.Instance.stickerSetName.ToString();
+        string filePath = Path.Combine(Application.persistentDataPath, setName, "userData.json");
         string json = JsonConvert.SerializeObject(userData, Formatting.Indented);
         File.WriteAllText(filePath, json);
         Debug.Log("UserData saved to " + filePath);
@@ -128,7 +135,8 @@ public class PersistanceManager : MonoBehaviour
 
     public IEnumerator LoadUserData()
     {
-        string filePath = Path.Combine(Application.persistentDataPath, "userData.json");
+        string setName = StageManager.Instance.stickerSetName.ToString();
+        string filePath = Path.Combine(Application.persistentDataPath, setName, "userData.json");
         if (!File.Exists(filePath))
         {
             Debug.Log("No userdata found at " + filePath);
@@ -157,7 +165,8 @@ public class PersistanceManager : MonoBehaviour
 
     public IEnumerator LoadStickerLevels()
     {
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        string setName = StageManager.Instance.stickerSetName.ToString();
+        string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
         string json;
         if (!File.Exists(filePath))
         {
@@ -191,7 +200,8 @@ public class PersistanceManager : MonoBehaviour
     // Función para cargar los datos de packs
     public IEnumerator LoadPacks()
     {
-        string filePath = Path.Combine(Application.persistentDataPath, "stages.json");
+        string setName = StageManager.Instance.stickerSetName.ToString();
+        string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
         string json;
         if (!File.Exists(filePath))
         {
@@ -227,7 +237,8 @@ public class PersistanceManager : MonoBehaviour
 
     IEnumerator GetJson(string file_name)
     {
-        string url = "https://leandromagonza.github.io/MemoGram.Pokemon/" + file_name + ".json";
+        string setName = StageManager.Instance.stickerSetName.ToString();
+        string url = "https://leandromagonza.github.io/"+setName+"/" + file_name + ".json";
         using (UnityWebRequest www = UnityWebRequest.Get(url))
         {
             yield return www.SendWebRequest();
@@ -239,7 +250,7 @@ public class PersistanceManager : MonoBehaviour
             }
             else
             {
-                string filePath = Path.Combine(Application.persistentDataPath, file_name + ".json");
+                string filePath = Path.Combine(Application.persistentDataPath, setName, file_name + ".json");
                 File.WriteAllText(filePath, www.downloadHandler.text);
             }
         }

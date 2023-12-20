@@ -40,7 +40,7 @@ public class StickerManager : MonoBehaviour
     private Dictionary<int, (string name, string type, Color color)> stickersAdditionalData = new Dictionary<int, (string, string, Color)>();
 
     private ImageSet? currentLoadedSetName = null;
-    private Dictionary<int,StickerData> currentLoadedSetStickerData = new Dictionary<int, StickerData>();
+    public Dictionary<int,StickerData> currentLoadedSetStickerData = new Dictionary<int, StickerData>();
 
     // Update is called once per frame
     public Sticker GetSticker()
@@ -74,7 +74,9 @@ public class StickerManager : MonoBehaviour
     }
     public void LoadAllStickersFromSet(ImageSet setToLoad)
     {
-            
+
+        currentLoadedSetStickerData = new Dictionary<int, StickerData>();
+        
         string imageSetName = setToLoad.ToString();
         string[] splitedImageSetName = imageSetName.Split("_");
         
@@ -83,29 +85,42 @@ public class StickerManager : MonoBehaviour
         int totalStickersInSet;
         int.TryParse(splitedImageSetName[2], out totalStickersInSet);
 
-        //TODO: Segurir modificacndo esta funcion para que lea todos los stickers del set de una y los guarde al principio, en vez de guardarkis cuando se cambia el stage
-        for (int loadingStickerID = 0; loadingStickerID < totalStickersInSet; loadingStickerID++)
-        {
-            
-        }
-
-        string path;
+        string path = "";
         Sprite loadedSprite = null;
+        int loadingStickerID;
+        
         switch (type) {
             case "SPRITESHEET":
                 path = imageSetName + "/" + name;
                 //loadedSprite = Load(path, name + "_" + stickerID);
-                Sprite[] all = Resources.LoadAll<Sprite>(path);
-
-                foreach (var s in all)
+                Sprite[] allSprites = Resources.LoadAll<Sprite>(path);
+                if (allSprites == null) throw new Exception("Sprites not found"); 
+                loadingStickerID = 0;
+                /*foreach (var s in allSprites)
                 {
-        
+                    currentLoadedSetStickerData.Add(loadingStickerID,AssembleStickerData(loadingStickerID, s));
+                    loadingStickerID++;
+                }*/
+                Debug.Log(imageSetName+" has this many strpites "+allSprites.Length);
+                for (loadingStickerID = 0; loadingStickerID < totalStickersInSet; loadingStickerID++)
+                {
+                    
+                    currentLoadedSetStickerData.Add(loadingStickerID,AssembleStickerData(loadingStickerID, allSprites[loadingStickerID]));
+            
                 }
                 
                 break;
             case "IMAGES":
-                path = imageSetName + "/(" + stickerID + ")";
-                loadedSprite = Resources.Load<Sprite>(path);
+                for (loadingStickerID = 0; loadingStickerID < totalStickersInSet; loadingStickerID++)
+                {
+                    path = imageSetName + "/(" + loadingStickerID + ")";
+                    loadedSprite = Resources.Load<Sprite>(path);
+                    
+                    if (loadedSprite == null) throw new Exception("ImageID not found in spritesFromSet"); 
+                    
+                    currentLoadedSetStickerData.Add(loadingStickerID,AssembleStickerData(loadingStickerID, loadedSprite));
+            
+                }
                 break;
             default:
                 throw new Exception("INVALID IMAGESET TYPE");
@@ -113,43 +128,30 @@ public class StickerManager : MonoBehaviour
 
 
         Debug.Log("PATH: " + path);
-        if (loadedSprite != null) {
+        
+    }
 
-            int amountOfDulpicates = 0;
-            if (PersistanceManager.Instance.userData.imageDuplicates.ContainsKey(stickerID)) {
-                amountOfDulpicates = PersistanceManager.Instance.userData.imageDuplicates[stickerID];
-            }
+    public StickerData AssembleStickerData(int stickerID, Sprite sprite)
+    {
+        int amountOfDulpicates = 0;
+        if (PersistanceManager.Instance.userData.imageDuplicates.ContainsKey(stickerID)) {
+            amountOfDulpicates = PersistanceManager.Instance.userData.imageDuplicates[stickerID];
+        }
 
-            var additionalData = GetStickerAdditionalData(stickerID+1);
-            return new StickerData(
-                stickerID,
-                loadedSprite,
-                amountOfDulpicates,
-                GetStickerLevelByAmountOfDuplicates(amountOfDulpicates),
-                //sacar estos datos de csv pokemonlist, cambiar nombre y hacerlo generico para todos, algo como stickersadditionalinfo
-                additionalData.name,
-                additionalData.color,
-                additionalData.type
-            );
-        }
-        else {
-            throw new Exception("ImageID not found in spritesFromSet");
-        }
+        var additionalData = GetStickerAdditionalData(stickerID+1);
+        return new StickerData(
+            stickerID,
+            sprite,
+            amountOfDulpicates,
+            GetStickerLevelByAmountOfDuplicates(amountOfDulpicates),
+            //sacar estos datos de csv pokemonlist, cambiar nombre y hacerlo generico para todos, algo como stickersadditionalinfo
+            additionalData.name,
+            additionalData.color,
+            additionalData.type
+        );
     }
     
-    public Sprite Load(string resourcePath, string spriteName)
-    {
-        Sprite[] all = Resources.LoadAll<Sprite>(resourcePath);
 
-        foreach (var s in all)
-        {
-            if (s.name == spriteName)
-            {
-                return s;
-            }
-        }
-        return null;
-    }
     public int GetStickerLevelByAmountOfDuplicates(int amountOfDuplicates)
     {
         Debug.Log("GetStickerLevelByAmountOfDuplicates");
@@ -201,7 +203,7 @@ public class StickerManager : MonoBehaviour
         else
         {
             Debug.LogError("ID no encontrado: " + id);
-            return (null, null, new Color());
+            return ("null", null, new Color());
         }
     }
 }

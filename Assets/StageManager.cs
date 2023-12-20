@@ -104,7 +104,7 @@ public class StageManager : MonoBehaviour
         stickerHolder.transform.GetComponentsInChildren<Sticker>();
         foreach (var stickerID in stages[stage].stickers) {
             Sticker display = StickerManager.Instance.GetSticker();
-            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(stickerSetName.ToString(),stickerID);
+            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(stickerSetName,stickerID);
             display.SetStickerData(stickerData);
             if (stickerData.amountOfDuplicates == 0) {
                 display.ConfigureLocked();

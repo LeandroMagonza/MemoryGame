@@ -26,10 +26,10 @@ public class GameManager : MonoBehaviour {
             _instance = this as GameManager;
             audioSource = GetComponent<AudioSource>();
 
-            quizOptions = new List<(string, NumpadButton)>();
+            quizOptionButtons = new List<(string, NumpadButton)>();
             foreach (Transform option in quizOptionPad.transform)
             {
-                quizOptions.Add(("EMPTY",option.GetComponent<NumpadButton>()));
+                quizOptionButtons.Add(("EMPTY",option.GetComponent<NumpadButton>()));
             }
         }
         else if (_instance != this)
@@ -47,7 +47,7 @@ public class GameManager : MonoBehaviour {
 
     public GameObject numpad;
     public GameObject quizOptionPad;
-    public List<(string optionName, NumpadButton numpadButton)> quizOptions = new List<(string optionName, NumpadButton numpadButton)>();
+    public List<(string optionName, NumpadButton numpadButton)> quizOptionButtons = new List<(string optionName, NumpadButton numpadButton)>();
         
     public GameMode currentGameMode = GameMode.QUIZ;
     public bool gameEnded = false;
@@ -166,7 +166,7 @@ public class GameManager : MonoBehaviour {
             case GameMode.MEMORY:
                 return turnSticker.amountOfAppearences;
             case GameMode.QUIZ:
-                return quizOptions[0].numpadButton.number;
+                return quizOptionButtons[0].numpadButton.number;
             default:
                 return -1;
         }
@@ -324,28 +324,45 @@ public class GameManager : MonoBehaviour {
         _currentlySelectedSticker = nextSticker;
         if (currentGameMode == GameMode.QUIZ)
         {
-            quizOptions.Shuffle();
+            quizOptionButtons.Shuffle();
 
-            /*foreach (var VARIABLE in quizOptions)
+            foreach (var VARIABLE in quizOptionButtons)
             {
-                VARIABLE.Item2.SetActive(false);
-            }*/
+                VARIABLE.numpadButton.gameObject.SetActive(false);
+            }
             
-            quizOptions[0].numpadButton.gameObject.SetActive(true);
-            quizOptions[0].numpadButton.SetText(_currentlySelectedSticker.name);
-            quizOptions[0] = (_currentlySelectedSticker.name,quizOptions[0].Item2);
-            
-            int amountOfQuizOptions = 5;
-            
-            List<KeyValuePair<int, StickerData>> listForRandomOptions = _stickersFromStage.ToList();
+            quizOptionButtons[0].numpadButton.gameObject.SetActive(true);
+            quizOptionButtons[0].numpadButton.SetText(_currentlySelectedSticker.name);
+            quizOptionButtons[0].numpadButton.transform.GetChild(1).GetComponent<Image>().sprite =
+                _currentlySelectedSticker.sprite;
+            quizOptionButtons[0] = (_currentlySelectedSticker.name,quizOptionButtons[0].numpadButton);
+
+            int amountOfQuizOptions = 3;
+            bool limitOptionsToStage = true;
+            List <StickerData> listForRandomOptions = new List<StickerData>();
+            foreach (var VARIABLE in StickerManager.Instance.currentLoadedSetStickerData.ToList())
+            {
+                bool isStickerInStage = stages[selectedStage].stickers.Contains(VARIABLE.Value.stickerID);
+                if (VARIABLE.Value.stickerID != _currentlySelectedSticker.stickerID &&
+                    ((limitOptionsToStage && isStickerInStage) || !limitOptionsToStage)
+                    )
+                {
+                    listForRandomOptions.Add(VARIABLE.Value);
+                }
+            }
+
             listForRandomOptions.Shuffle();
             
-            //TODO: obtener otras posibles opciones al azar
             for (int optionNumber = 1; optionNumber < amountOfQuizOptions; optionNumber++)
             {
-                quizOptions[optionNumber].numpadButton.gameObject.SetActive(true);
-                quizOptions[optionNumber] = (listForRandomOptions[optionNumber].Value.name,quizOptions[optionNumber].Item2);
-                quizOptions[optionNumber].numpadButton.SetText(listForRandomOptions[optionNumber].Value.name);
+                if (optionNumber-1 >= listForRandomOptions.Count)
+                {
+                    break;
+                }
+                quizOptionButtons[optionNumber].numpadButton.gameObject.SetActive(true);
+                quizOptionButtons[optionNumber] = (listForRandomOptions[optionNumber-1].name,quizOptionButtons[optionNumber].numpadButton);
+                quizOptionButtons[optionNumber].numpadButton.SetText(listForRandomOptions[optionNumber-1].name);
+                quizOptionButtons[optionNumber].numpadButton.transform.Find("Image").GetComponent<Image>().sprite = listForRandomOptions[optionNumber-1].sprite;
             }
 
         }
@@ -624,7 +641,8 @@ public class GameManager : MonoBehaviour {
 
 public enum ImageSet {
     Pokemons_SPRITESHEET_151,
-    Landscapes_IMAGES_10
+    Landscapes_IMAGES_10,
+    AnatomyFractures_SPRITESHEET_10
 }
 
 public enum ShopItemType
