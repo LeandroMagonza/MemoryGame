@@ -57,6 +57,6 @@ public class BuyPackButtonTest : MonoBehaviour {
         {
             number.color = Color.white;
         }
-        numbers[packNumber].color = Color.yellow;
+        numbers[packNumber].color = new Color(1f, 0.5f, 0);
     }
 }
