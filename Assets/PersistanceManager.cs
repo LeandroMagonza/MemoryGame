@@ -238,7 +238,7 @@ public class PersistanceManager : MonoBehaviour
     IEnumerator GetJson(string file_name)
     {
         string setName = StageManager.Instance.stickerSetName.ToString();
-        string url = "https://leandromagonza.github.io/"+setName+"/" + file_name + ".json";
+        string url = "https://leandromagonza.github.io/MemoGram/"+setName+"/" + file_name + ".json";
         using (UnityWebRequest www = UnityWebRequest.Get(url))
         {
             yield return www.SendWebRequest();
@@ -246,7 +246,7 @@ public class PersistanceManager : MonoBehaviour
             if (www.result == UnityWebRequest.Result.ConnectionError ||
                 www.result == UnityWebRequest.Result.ProtocolError)
             {
-                Debug.Log(www.error);
+                Debug.Log(www.error + url);
             }
             else
             {

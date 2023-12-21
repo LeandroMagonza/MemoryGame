@@ -39,6 +39,7 @@ public class Stage : MonoBehaviour
         foreach (var difficultyButton in difficultyButtons)
         {
             difficultyButton.SetStage(stage);
+            difficultyButton.SetImageSet(GameManager.Instance.stages[stage].imageSet);
             difficulty++;
         }
         UpdateDifficultyUnlockedAndAmountOfStickersUnlocked();
@@ -82,6 +83,7 @@ public class StageData
     //int = stageID, int = chance de una carta de ese stage, la suma de todos los floats tiene que dar 100
     public Dictionary<int, int> packOdds = new Dictionary<int, int>();
     public int packCost;
+    public ImageSet imageSet;
     [NonSerialized]
     public Color ColorValue; // Propiedad para acceder al valor de color
 
@@ -91,7 +93,7 @@ public class StageData
     }
 
     // Constructor con parámetros
-    public StageData(int stageID, string title, int basePoints, Color color, List<int> stickers)
+    public StageData(int stageID, string title, int basePoints, Color color, List<int> stickers, ImageSet imageSet)
     {
         this.stageID = stageID;
         this.title = title;
@@ -99,6 +101,7 @@ public class StageData
         this.ColorValue = color;
         this.color = ColorUtility.ToHtmlStringRGBA(color);
         this.stickers = stickers;
+        this.imageSet = imageSet;
     }
 
     // Método para convertir el string hexadecimal a Color después de la deserialización

@@ -7,7 +7,7 @@ public class DifficultyButton : ChangeCanvasButton {
     public int difficulty;
     public int stage;
     public AchievementStars stars;
-
+    public ImageSet imageSet;
     public TextMeshProUGUI scoreText;
     // Start is called before the first frame update
     public override void Start()
@@ -32,6 +32,11 @@ public class DifficultyButton : ChangeCanvasButton {
     public void SetStage(int stage) {
         this.stage = stage;
         gameObject.name = "ButtonDifficulty S" + stage+" D"+difficulty;
+    }
+
+    public void SetImageSet(ImageSet imageSet)
+    {
+        this.imageSet = imageSet;
     }
 
     public void UpdateDifficultyUnlocked() {
