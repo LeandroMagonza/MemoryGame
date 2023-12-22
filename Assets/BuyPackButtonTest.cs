@@ -7,6 +7,9 @@ public class BuyPackButtonTest : MonoBehaviour {
     public int packNumber;
     public int maxPackNumber = 4;
     public TextMeshProUGUI[] numbers;
+    public TextMeshProUGUI stickerCostDisplay;
+    public TextMeshProUGUI stickerSelectedDisplay;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -58,5 +61,7 @@ public class BuyPackButtonTest : MonoBehaviour {
             number.color = Color.white;
         }
         numbers[packNumber].color = new Color(1f, 0.5f, 0);
+        stickerCostDisplay.text = "BUY\n"+(100 * packNumber + 100).ToString();
+        stickerSelectedDisplay.text = "Current Pack Selected: "+ packNumber.ToString();
     }
 }

@@ -174,6 +174,11 @@ public class UpgradeData
                     valueAddToInitial = 1,
                     valueAddToMax = 2,
                     currentLevel = 0,
+                    levelPrizes = new int[] { 200, 500, 1500 },
+                    upgradeRequired = new Dictionary<UpgradeID, int>()
+                    {
+                        { UpgradeID.MaxClue, 2 }
+                    }
                 };
                 break;
 

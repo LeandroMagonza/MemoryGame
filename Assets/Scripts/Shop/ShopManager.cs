@@ -1,10 +1,17 @@
+using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ShopManager : MonoBehaviour
 {
+    public GameObject consumablePanel;
+    public GameObject consumableTittle;
+    public GameObject upgradePanel;
+    public GameObject upgradeTittle;
     public TextMeshProUGUI moneyDisplay;
+
     [Header("Consumables")]
     public Button clue_Consumable_Button;
     public TextMeshProUGUI clue_consumable_price_text;
@@ -57,10 +64,20 @@ public class ShopManager : MonoBehaviour
     public Button deathDefy_Upgrade_Button;
     private void OnEnable()
     {
+        EnableShopCanvas();
         UpdateMoneyDisplay();
         UpdateConsumableButtonsUI();
         UpdateUpgradeButtonsIU();
     }
+
+    private void EnableShopCanvas()
+    {
+        consumablePanel.SetActive(true);
+        consumableTittle.SetActive(true);
+        upgradePanel.SetActive(false);
+        upgradeTittle.SetActive(false);
+    }
+
     public void BuyItemConsumable(int itemID)
     {
         ConsumableID item = (ConsumableID)itemID;
@@ -185,28 +202,59 @@ public class ShopManager : MonoBehaviour
     }
     private void UpdateUpgradeButtonsIU()
     {
-        UserData data = GameManager.Instance.userData;
         if (maxClue_Upgrade_Button != null)
         {
-            maxClue_Upgrade_Button.interactable = true;
+            SetUpgradeButton(maxClue_Upgrade_Button, maxClue_upgrade_amount_text, maxClue_upgrade_price_text, UpgradeID.MaxClue);
+        }
+        if (maxCut_Upgrade_Button != null)
+        {
+            SetUpgradeButton(maxCut_Upgrade_Button, maxClue_upgrade_amount_text, maxCut_upgrade_price_text, UpgradeID.MaxCut);
+        }
+    }
 
-            if (data.upgrades.ContainsKey(UpgradeID.MaxClue))
+    private void SetUpgradeButton(Button button, TextMeshProUGUI amount, TextMeshProUGUI price, UpgradeID upgradeID)
+    {
+        UserData data = GameManager.Instance.userData;
+
+        if (data.upgrades.ContainsKey(upgradeID))
+        {
+            if (data.upgrades[upgradeID].upgradeRequired.Count > 0)
             {
-                
-                maxClue_upgrade_amount_text.text = data.upgrades[UpgradeID.MaxClue].currentLevel.ToString();
-                maxClue_upgrade_price_text.text = data.upgrades[UpgradeID.MaxClue].GetPrice().ToString();
-
-                if (data.upgrades[UpgradeID.MaxClue].IsMaxLevel())
+                for (int i = 0; i < data.upgrades[upgradeID].upgradeRequired.Count; i++)
                 {
-                    maxClue_Upgrade_Button.interactable = false;
+                    if (IsUpgradeHasRequiered(upgradeID, i))
+                    {
+                        if (data.upgrades[(UpgradeID)i].currentLevel >= data.upgrades[upgradeID].upgradeRequired[(UpgradeID)i])
+                        {
+                            Debug.Log("HAS");
+                            button.interactable = true;
+                        }
+                    }
                 }
             }
             else
             {
-                maxClue_upgrade_amount_text.text = "0";
-                maxClue_upgrade_price_text.text = UpgradeData.GetUpgrade(UpgradeID.MaxClue).GetPrice().ToString();
+                            Debug.Log("Dont HAS");
+                button.interactable = true;
+            }
+            amount.text = data.upgrades[upgradeID].currentLevel.ToString();
+            price.text = data.upgrades[upgradeID].GetPrice().ToString();
+
+            if (data.upgrades[upgradeID].IsMaxLevel())
+            {
+                button.interactable = false;
             }
         }
+        else
+        {
+            amount.text = "0";
+            price.text = UpgradeData.GetUpgrade(upgradeID).GetPrice().ToString();
+        }
+    }
+
+    private bool IsUpgradeHasRequiered(UpgradeID upgrade, int i)
+    {
+        return GameManager.Instance.userData.upgrades.ContainsKey((UpgradeID)GameManager.Instance.userData.upgrades[upgrade].upgradeRequired[(UpgradeID)i]);
     }
 }
 
