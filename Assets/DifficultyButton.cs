@@ -45,19 +45,15 @@ public class DifficultyButton : ChangeCanvasButton {
         //stage condicion de tener el ultimo nivel del stage anterior pasado
         //GameManager.Instance.userData.GetUserStageData(stage-1, 2) is null ||
         //GameManager.Instance.userData.GetUserStageData(stage-1, 2).achievements.Contains(Achievement.ClearedEveryImage)
-        if (
-            //condicion stage
-            (
-                GameManager.Instance.userData.GetUserStageData(stage, difficulty).HasUnlockedStage()
-            )
-            &&
-            //condicion dificultad
-            (
-                GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null ||
-            GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1).achievements.Contains(Achievement.ClearedEveryImage)
-                )
-            
-        )
+        
+        // Debug.Log("GameManager.Instance.userData.GetUserStageData(stage, difficulty).HasUnlockedStage() "+GameManager.Instance.userData.GetUserStageData(stage, difficulty).HasUnlockedStage());
+        // Debug.Log("GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null "+GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null );
+        // Debug.Log("GameManager.Instance.userData.GetUserStageData(stage, difficulty  - 1).achievements.Contains(Achievement.ClearedEveryImage) stage "+stage+" dif "+difficulty+GameManager.Instance.userData.GetUserStageData(stage, difficulty  - 1).achievements.Contains(Achievement.ClearedEveryImage));
+        bool conditionStage = GameManager.Instance.userData.GetUserStageData(stage, difficulty).HasUnlockedStage();
+        bool conditionDifficulty = GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null ||
+                                   GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1).achievements
+                                       .Contains(Achievement.ClearedEveryImage);
+        if (conditionStage && conditionDifficulty)
         {
             GetComponent<Button>().interactable = true;
         }
