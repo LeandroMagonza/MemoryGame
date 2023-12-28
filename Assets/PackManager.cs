@@ -63,7 +63,7 @@ public class PackManager : MonoBehaviour {
         
         Debug.Log("stickers per pack "+GameManager.Instance.packs.stickersPerPack);
 
-        List<int> gainedStickers = new List<int>();
+        List< (int stickerID,StickerSet stickerSet)> gainedStickers = new List<(int stickerID, StickerSet stickerSet)>();
         for (int stickerNumber = 0; stickerNumber < GameManager.Instance.packs.stickersPerPack; stickerNumber++) {
             Debug.Log("stickerNumber "+stickerNumber);
             //int rarityRandomizer = Random.Range(0, 101);
@@ -88,7 +88,7 @@ public class PackManager : MonoBehaviour {
             int selectedStickerImageID = GameManager.Instance.stages[stickerStage].stickers[selectedStickerIndex];
             Debug.Log("corresponds to imageID "+selectedStickerImageID);
             
-            gainedStickers.Add(selectedStickerImageID);
+            gainedStickers.Add((selectedStickerImageID, GameManager.Instance.stages[stickerStage].stickerSet));
             
             if (GameManager.Instance.userData.imageDuplicates.ContainsKey(selectedStickerImageID)) {
                 GameManager.Instance.userData.imageDuplicates[selectedStickerImageID]++;
@@ -98,11 +98,11 @@ public class PackManager : MonoBehaviour {
             }
 
         }
-        foreach (var stickerID in gainedStickers) {
-            Sticker newSticker = StickerManager.Instance.GetSticker();
+        foreach (var sticker in gainedStickers) {
+            Sticker newSticker = StickerManager.Instance.GetStickerHolder();
             newSticker.transform.SetParent(stickerHolder.transform);
-            //Instantiate(stickerPrefab, stickerHolder.transform);
-            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(StageManager.Instance.stickerSetName,stickerID);
+            //Instantiate(stickerHolderPrefab, stickerHolder.transform);
+            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(sticker.stickerSet,sticker.stickerID);
             Debug.Log(stickerData.color);
             newSticker.SetStickerData(stickerData);
             newSticker.ConfigureForPack();

@@ -2,8 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 using ColorUtility = UnityEngine.ColorUtility;
 public class StickerManager : MonoBehaviour
 {
@@ -35,20 +37,20 @@ public class StickerManager : MonoBehaviour
     }
     #endregion
 
-    public Sticker stickerPrefab;
+    [FormerlySerializedAs("stickerPrefab")] public Sticker stickerHolderPrefab;
     private List<Sticker> _stickerPool = new List<Sticker>();
-    private Dictionary<int, (string name, string type, Color color)> stickersAdditionalData = new Dictionary<int, (string, string, Color)>();
+    private Dictionary<StickerSet,Dictionary<int, (string name, string type, Color color)>> stickersAdditionalData = new Dictionary<StickerSet, Dictionary<int, (string name, string type, Color color)>>();
 
-    private ImageSet? currentLoadedSetName = null;
-    public Dictionary<int,StickerData> currentLoadedSetStickerData = new Dictionary<int, StickerData>();
+    private StickerSet? currentLoadedSetName = null;
+    public Dictionary<StickerSet,Dictionary<int,StickerData>> currentLoadedSetStickerData = new Dictionary<StickerSet, Dictionary<int, StickerData>>();
 
     // Update is called once per frame
-    public Sticker GetSticker()
+    public Sticker GetStickerHolder()
     {
         if (_stickerPool.Count == 0)
         {
-            //Create stickerPrefab
-            return Instantiate(stickerPrefab, transform);
+            //Create stickerHolderPrefab
+            return Instantiate(stickerHolderPrefab, transform);
         }
 
         Sticker stickerToReturn = _stickerPool[0];
@@ -61,21 +63,20 @@ public class StickerManager : MonoBehaviour
     {
         _stickerPool.Add(stickerToReturn);
     }
-    public StickerData GetStickerDataFromSetByStickerID(ImageSet imageSet,int stickerID)
+    public StickerData GetStickerDataFromSetByStickerID(StickerSet stickerSet,int stickerID)
     {
-        if (currentLoadedSetName != imageSet)
+        if (!currentLoadedSetStickerData.ContainsKey(stickerSet))
         {
-            currentLoadedSetName = imageSet;
-            LoadAllStickersFromSet(imageSet);
+            LoadAllStickersFromSet(stickerSet);
         }
 
-        return currentLoadedSetStickerData[stickerID];
+        return currentLoadedSetStickerData[stickerSet][stickerID];
         
     }
-    public void LoadAllStickersFromSet(ImageSet setToLoad)
+    public void LoadAllStickersFromSet(StickerSet setToLoad)
     {
-
-        currentLoadedSetStickerData = new Dictionary<int, StickerData>();
+        var dictionary = new Dictionary<int, StickerData>();
+        currentLoadedSetStickerData.Add(setToLoad, dictionary);
         
         string imageSetName = setToLoad.ToString();
         string[] splitedImageSetName = imageSetName.Split("_");
@@ -105,7 +106,7 @@ public class StickerManager : MonoBehaviour
                 for (loadingStickerID = 0; loadingStickerID < totalStickersInSet; loadingStickerID++)
                 {
                     
-                    currentLoadedSetStickerData.Add(loadingStickerID,AssembleStickerData(loadingStickerID, allSprites[loadingStickerID]));
+                    dictionary.Add(loadingStickerID,AssembleStickerData(setToLoad, loadingStickerID, allSprites[loadingStickerID]));
             
                 }
                 
@@ -118,7 +119,7 @@ public class StickerManager : MonoBehaviour
                     
                     if (loadedSprite == null) throw new Exception("ImageID not found in spritesFromSet"); 
                     
-                    currentLoadedSetStickerData.Add(loadingStickerID,AssembleStickerData(loadingStickerID, loadedSprite));
+                    dictionary.Add(loadingStickerID,AssembleStickerData(setToLoad, loadingStickerID, loadedSprite));
             
                 }
                 break;
@@ -131,14 +132,14 @@ public class StickerManager : MonoBehaviour
         
     }
 
-    public StickerData AssembleStickerData(int stickerID, Sprite sprite)
+    public StickerData AssembleStickerData(StickerSet stickerSet, int stickerID, Sprite sprite)
     {
         int amountOfDulpicates = 0;
         if (PersistanceManager.Instance.userData.imageDuplicates.ContainsKey(stickerID)) {
             amountOfDulpicates = PersistanceManager.Instance.userData.imageDuplicates[stickerID];
         }
 
-        var additionalData = GetStickerAdditionalData(stickerID+1);
+        var additionalData = GetStickerAdditionalData(stickerSet, stickerID+1);
         return new StickerData(
             stickerID,
             sprite,
@@ -168,9 +169,13 @@ public class StickerManager : MonoBehaviour
         Debug.Log("resulitng level "+level);
         return level;
     }
-    private void ReadAdditionalDataCSV()
-    {
-        TextAsset csvData = Resources.Load<TextAsset>(StageManager.Instance.stickerSetName+"/"+"additionalInfo");
+    private void ReadAdditionalDataCSV(StickerSet stickerSet)
+    {            
+        if (!stickersAdditionalData.ContainsKey(stickerSet))
+        {
+            stickersAdditionalData.Add(stickerSet,new Dictionary<int, (string name, string type, Color color)>());
+        }
+        TextAsset csvData = Resources.Load<TextAsset>(stickerSet.ToString()+"/"+"additionalInfo");
 
         string[] lines = csvData.text.Split('\n');
 
@@ -186,17 +191,19 @@ public class StickerManager : MonoBehaviour
             {
                 color = colorValue;
             }
-            stickersAdditionalData.Add(id, (name, type, color));
+
+
+            stickersAdditionalData[stickerSet].Add(id, (name, type, color));
         }
     }
         
-    public (string name, string type, Color color) GetStickerAdditionalData(int id)
+    public (string name, string type, Color color) GetStickerAdditionalData(StickerSet stickerSet, int id)
     {
         if (stickersAdditionalData.Count == 0) {
-            ReadAdditionalDataCSV();
+            ReadAdditionalDataCSV(stickerSet);
         }
         
-        if (stickersAdditionalData.TryGetValue(id, out var data))
+        if (stickersAdditionalData[stickerSet].TryGetValue(id, out var data))
         {
             return data;
         }

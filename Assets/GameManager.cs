@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Mono.Cecil.Cil;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -47,6 +48,7 @@ public class GameManager : MonoBehaviour {
 
     public GameObject numpad;
     public GameObject quizOptionPad;
+    public bool limitOptionsToStage = true;
     public List<(string optionName, NumpadButton numpadButton)> quizOptionButtons = new List<(string optionName, NumpadButton numpadButton)>();
         
     public GameMode currentGameMode = GameMode.QUIZ;
@@ -293,11 +295,11 @@ public class GameManager : MonoBehaviour {
         scoreText.text = score.ToString();
     }
 
-    private void LoadStickers(ImageSet imageSet) {
+    private void LoadStickers(StickerSet stickerSet) {
         _stickersFromStage = new Dictionary<int, StickerData>();
 
         foreach (var stickerID in stages[selectedStage].stickers) {
-            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(imageSet, stickerID);
+            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(stickerSet, stickerID);
             stickerData.amountOfAppearences = 0;
             _stickersFromStage.Add(stickerID, stickerData);
         }
@@ -330,20 +332,22 @@ public class GameManager : MonoBehaviour {
             {
                 VARIABLE.numpadButton.gameObject.SetActive(false);
             }
-            
+
             quizOptionButtons[0].numpadButton.gameObject.SetActive(true);
             quizOptionButtons[0].numpadButton.SetText(_currentlySelectedSticker.name);
             quizOptionButtons[0].numpadButton.transform.GetChild(1).GetComponent<Image>().sprite =
                 _currentlySelectedSticker.sprite;
-            quizOptionButtons[0] = (_currentlySelectedSticker.name,quizOptionButtons[0].numpadButton);
+            quizOptionButtons[0] = (_currentlySelectedSticker.name, quizOptionButtons[0].numpadButton);
 
             int amountOfQuizOptions = 3;
-            bool limitOptionsToStage = true;
-            List <StickerData> listForRandomOptions = new List<StickerData>();
-            foreach (var VARIABLE in StickerManager.Instance.currentLoadedSetStickerData.ToList())
+            
+            List<StickerData> listForRandomOptions = new List<StickerData>();
+
+            foreach (var VARIABLE in StickerManager.Instance.currentLoadedSetStickerData[stages[selectedStage].stickerSet].ToList())
             {
                 bool isStickerInStage = stages[selectedStage].stickers.Contains(VARIABLE.Value.stickerID);
                 if (VARIABLE.Value.stickerID != _currentlySelectedSticker.stickerID &&
+                    VARIABLE.Value.name.ToUpper() != _currentlySelectedSticker.name.ToUpper() &&
                     ((limitOptionsToStage && isStickerInStage) || !limitOptionsToStage)
                     )
                 {
@@ -486,7 +490,7 @@ public class GameManager : MonoBehaviour {
         
         Instance.SetScoreTexts();
         if (stickerDisplay == null) {
-            stickerDisplay = StickerManager.Instance.GetSticker();
+            stickerDisplay = StickerManager.Instance.GetStickerHolder();
         }
         stickerDisplay.ConfigureForGame(currentGameMode);
         
@@ -502,7 +506,7 @@ public class GameManager : MonoBehaviour {
         SetCurrentCombo(0);
         bonusMultiplicator = 1;
         lifeCounter.ResetLives();
-        LoadStickers(StageManager.Instance.stickerSetName);
+        LoadStickers(stages[selectedStage].stickerSet);
         currentlyInGameStickers = new List<StickerData>();
         AddImages(4);
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion
@@ -639,7 +643,7 @@ public class GameManager : MonoBehaviour {
     }
 }
 
-public enum ImageSet {
+public enum StickerSet {
     Pokemons_SPRITESHEET_151,
     Landscapes_IMAGES_10,
     AnatomyFractures_SPRITESHEET_10

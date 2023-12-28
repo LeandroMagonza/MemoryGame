@@ -78,7 +78,7 @@ public class PersistanceManager : MonoBehaviour
     {
         List<StageData> stageList = new List<StageData>(stagesToSave.Values);
         string json = JsonConvert.SerializeObject(stageList, Formatting.Indented);
-        string setName = StageManager.Instance.stickerSetName.ToString();
+        string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
         File.WriteAllText(filePath, json);
         Debug.Log("Stages saved to " + filePath);
@@ -86,7 +86,7 @@ public class PersistanceManager : MonoBehaviour
 
     public IEnumerator LoadStages()
     {
-        string setName = StageManager.Instance.stickerSetName.ToString();
+        string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
         string json;
         if (!File.Exists(filePath))
@@ -126,7 +126,7 @@ public class PersistanceManager : MonoBehaviour
         {
             return;
         }
-        string setName = StageManager.Instance.stickerSetName.ToString();
+        string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, "userData.json");
         string json = JsonConvert.SerializeObject(userData, Formatting.Indented);
         File.WriteAllText(filePath, json);
@@ -135,7 +135,7 @@ public class PersistanceManager : MonoBehaviour
 
     public IEnumerator LoadUserData()
     {
-        string setName = StageManager.Instance.stickerSetName.ToString();
+        string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, "userData.json");
         if (!File.Exists(filePath))
         {
@@ -165,7 +165,7 @@ public class PersistanceManager : MonoBehaviour
 
     public IEnumerator LoadStickerLevels()
     {
-        string setName = StageManager.Instance.stickerSetName.ToString();
+        string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
         string json;
         if (!File.Exists(filePath))
@@ -200,7 +200,7 @@ public class PersistanceManager : MonoBehaviour
     // Función para cargar los datos de packs
     public IEnumerator LoadPacks()
     {
-        string setName = StageManager.Instance.stickerSetName.ToString();
+        string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
         string json;
         if (!File.Exists(filePath))
@@ -237,7 +237,7 @@ public class PersistanceManager : MonoBehaviour
 
     IEnumerator GetJson(string file_name)
     {
-        string setName = StageManager.Instance.stickerSetName.ToString();
+        string setName = StageManager.Instance.gameVersion.ToString();
         string url = "https://leandromagonza.github.io/MemoGram/"+setName+"/" + file_name + ".json";
         using (UnityWebRequest www = UnityWebRequest.Get(url))
         {

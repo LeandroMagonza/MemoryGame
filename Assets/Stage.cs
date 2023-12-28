@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Mime;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using ColorUtility = UnityEngine.ColorUtility;
 
@@ -32,14 +34,14 @@ public class Stage : MonoBehaviour
     public void SetScore(int difficulty, int score) {
         difficultyButtons[difficulty].SetScore(score);
     }
-    public void SetStage(int stage)
+    public void SetStage(int stage, StickerSet stickerSet)
     {
         this.stage = stage;
         int difficulty = 0;
         foreach (var difficultyButton in difficultyButtons)
         {
             difficultyButton.SetStage(stage);
-            difficultyButton.SetImageSet(GameManager.Instance.stages[stage].imageSet);
+            difficultyButton.SetImageSet(stickerSet);
             difficulty++;
         }
         UpdateDifficultyUnlockedAndAmountOfStickersUnlocked();
@@ -83,7 +85,7 @@ public class StageData
     //int = stageID, int = chance de una carta de ese stage, la suma de todos los floats tiene que dar 100
     public Dictionary<int, int> packOdds = new Dictionary<int, int>();
     public int packCost;
-    public ImageSet imageSet;
+    [FormerlySerializedAs("imageSet")] public StickerSet stickerSet;
     [NonSerialized]
     public Color ColorValue; // Propiedad para acceder al valor de color
 
@@ -93,7 +95,7 @@ public class StageData
     }
 
     // Constructor con parámetros
-    public StageData(int stageID, string title, int basePoints, Color color, List<int> stickers, ImageSet imageSet)
+    public StageData(int stageID, string title, int basePoints, Color color, List<int> stickers, StickerSet stickerSet)
     {
         this.stageID = stageID;
         this.title = title;
@@ -101,7 +103,7 @@ public class StageData
         this.ColorValue = color;
         this.color = ColorUtility.ToHtmlStringRGBA(color);
         this.stickers = stickers;
-        this.imageSet = imageSet;
+        this.stickerSet = stickerSet;
     }
 
     // Método para convertir el string hexadecimal a Color después de la deserialización
@@ -216,14 +218,25 @@ public class UserData
 
     public UserStageData GetUserStageData(int stage,int difficulty)
     {
+        if (stage < 0 || difficulty < 0 )
+        {
+            return null;
+        }
+        UserStageData userStageData = null;
         foreach (var VARIABLE in stages)
         {
             if (VARIABLE.stage == stage && VARIABLE.difficulty == difficulty)
             {
-                return VARIABLE;
+                userStageData = VARIABLE;
+                return userStageData;
             }
         }
-        return null;
+
+        //if (userStageData is null)
+        userStageData = new UserStageData(stage, difficulty); 
+        stages.Add(userStageData);
+        
+        return userStageData;
     }
 
     public bool ModifyCoins(int modificationAmount)
@@ -245,13 +258,18 @@ public class UserStageData
 {
     public int stage;
     public int difficulty;
-    public List<int> clearedImages;
-    public int highScore;
+    public List<int> clearedImages = new List<int>();
+    public int highScore = 0;
     [JsonProperty (ItemConverterType = typeof(StringEnumConverter))]
-    public List<Achievement> achievements;
+    public List<Achievement> achievements = new List<Achievement>();
     
-    public List<Match> matches;
+    public List<Match> matches = new List<Match>();
 
+    public UserStageData(int stage, int difficulty)
+    {
+        this.stage = stage;
+        this.difficulty = difficulty;
+    }
     public List<Achievement> AddMatch(Match currentMatch)
     {
         List<Achievement> firstTimeAchievements = new List<Achievement>();

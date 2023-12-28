@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class StageManager : MonoBehaviour
 {
@@ -33,7 +34,6 @@ public class StageManager : MonoBehaviour
     #endregion
     
     public GameObject stageHolder;
-    public ImageSet stickerSetName = ImageSet.Landscapes_IMAGES_10;
     public int selectedStage = 0;
     public int selectedDifficulty = 0;
     public GameObject stageDisplayPrefab;
@@ -42,7 +42,8 @@ public class StageManager : MonoBehaviour
     public GameObject stickerPanel;
     public UserData userData => PersistanceManager.Instance.userData;
     public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
-    
+    public StickerSet gameVersion;
+
     public void InitializeStages()
     {
         foreach (var stageIndexAndData in stages)
@@ -67,7 +68,7 @@ public class StageManager : MonoBehaviour
             newStage.name = stageData.title;
             newStage.SetTitle(stageData.title);
             newStage.SetColor(stageData.ColorValue);
-            newStage.SetStage(stageData.stageID);
+            newStage.SetStage(stageData.stageID,stageData.stickerSet);
 
             for (int difficulty = 0; difficulty < 3; difficulty++)
             {
@@ -86,25 +87,20 @@ public class StageManager : MonoBehaviour
 
         GameManager.Instance.SetScoreTexts();
     }
-    public void SetStageAndDifficulty(int stage, int difficulty)
+    public void SetStageAndDifficulty(int stage, int difficulty, StickerSet stickerSetName)
     {
         selectedDifficulty = difficulty;
         selectedStage = stage;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public void OpenStickerPanel(int stage) {
         CloseStickerPanel();
         
         stickerHolder.transform.GetComponentsInChildren<Sticker>();
         foreach (var stickerID in stages[stage].stickers) {
-            Sticker display = StickerManager.Instance.GetSticker();
-            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(stickerSetName,stickerID);
+            Sticker display = StickerManager.Instance.GetStickerHolder();
+            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(stages[stage].stickerSet,stickerID);
             display.SetStickerData(stickerData);
             if (stickerData.amountOfDuplicates == 0) {
                 display.ConfigureLocked();
