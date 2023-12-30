@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil.Cil;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using ColorUtility = UnityEngine.ColorUtility;
@@ -122,7 +123,6 @@ public class GameManager : MonoBehaviour {
 
     public int selectedStage => StageManager.Instance.selectedStage;
     public int selectedDifficulty => StageManager.Instance.selectedDifficulty;
-    
 
 
     //TODO: Esta se va para manager stages o algo asi 
@@ -295,11 +295,13 @@ public class GameManager : MonoBehaviour {
         scoreText.text = score.ToString();
     }
 
-    private void LoadStickers(StickerSet stickerSet) {
+    private void LoadStickers() {
+
         _stickersFromStage = new Dictionary<int, StickerData>();
+        Debug.Log("Loading stickers for stage "+stages[selectedStage].stageID+", name "+stages[selectedStage].title+" from set "+ stages[selectedStage].stickerSet);
 
         foreach (var stickerID in stages[selectedStage].stickers) {
-            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(stickerSet, stickerID);
+            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(stages[selectedStage].stickerSet, stickerID);
             stickerData.amountOfAppearences = 0;
             _stickersFromStage.Add(stickerID, stickerData);
         }
@@ -506,7 +508,7 @@ public class GameManager : MonoBehaviour {
         SetCurrentCombo(0);
         bonusMultiplicator = 1;
         lifeCounter.ResetLives();
-        LoadStickers(stages[selectedStage].stickerSet);
+        LoadStickers();
         currentlyInGameStickers = new List<StickerData>();
         AddImages(4);
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion

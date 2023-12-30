@@ -15467,12 +15467,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stageHolder: {fileID: 1103987003}
-  stickerSetName: 2
   selectedStage: 0
   selectedDifficulty: 0
   stageDisplayPrefab: {fileID: 6108995386304073878, guid: b8805c56b6efd6b40baba3ec43159715, type: 3}
   stickerHolder: {fileID: 790969828}
   stickerPanel: {fileID: 689241859}
+  gameVersion: 2
 --- !u!4 &902236706
 Transform:
   m_ObjectHideFlags: 0
@@ -16086,6 +16086,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   numpad: {fileID: 883607699}
   quizOptionPad: {fileID: 1651867745}
+  limitOptionsToStage: 1
   currentGameMode: 1
   gameEnded: 1
   lifeCounter: {fileID: 1636331682}
@@ -22461,7 +22462,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdee82ef178319e4682b124005b259aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stickerPrefab: {fileID: 3084881283432234228, guid: eb9d401e946ffda48a82cb54ff3b4b37, type: 3}
+  stickerHolderPrefab: {fileID: 3084881283432234228, guid: eb9d401e946ffda48a82cb54ff3b4b37, type: 3}
 --- !u!4 &1787177109
 Transform:
   m_ObjectHideFlags: 0

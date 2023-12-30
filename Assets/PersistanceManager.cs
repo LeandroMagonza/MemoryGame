@@ -61,13 +61,6 @@ public class PersistanceManager : MonoBehaviour
     {
         StartCoroutine(LoadUserData());
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     private void OnApplicationQuit()
     {
         //SaveStages(stages);
@@ -110,6 +103,7 @@ public class PersistanceManager : MonoBehaviour
         foreach (var stageData in stageList.items)
         {
             stageData.ConvertColorStringToColorValue();
+            Debug.Log(stageData.stickerSet);
         }
 
         // Convert the list to a dictionary

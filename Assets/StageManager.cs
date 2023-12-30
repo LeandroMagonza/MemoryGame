@@ -68,7 +68,7 @@ public class StageManager : MonoBehaviour
             newStage.name = stageData.title;
             newStage.SetTitle(stageData.title);
             newStage.SetColor(stageData.ColorValue);
-            newStage.SetStage(stageData.stageID,stageData.stickerSet);
+            newStage.SetStage(stageData.stageID);
 
             for (int difficulty = 0; difficulty < 3; difficulty++)
             {
@@ -87,7 +87,7 @@ public class StageManager : MonoBehaviour
 
         GameManager.Instance.SetScoreTexts();
     }
-    public void SetStageAndDifficulty(int stage, int difficulty, StickerSet stickerSetName)
+    public void SetStageAndDifficulty(int stage, int difficulty)
     {
         selectedDifficulty = difficulty;
         selectedStage = stage;

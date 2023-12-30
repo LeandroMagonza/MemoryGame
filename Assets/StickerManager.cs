@@ -135,8 +135,8 @@ public class StickerManager : MonoBehaviour
     public StickerData AssembleStickerData(StickerSet stickerSet, int stickerID, Sprite sprite)
     {
         int amountOfDulpicates = 0;
-        if (PersistanceManager.Instance.userData.imageDuplicates.ContainsKey(stickerID)) {
-            amountOfDulpicates = PersistanceManager.Instance.userData.imageDuplicates[stickerID];
+        if (PersistanceManager.Instance.userData.imageDuplicates.ContainsKey((stickerSet,stickerID))) {
+            amountOfDulpicates = PersistanceManager.Instance.userData.imageDuplicates[(stickerSet,stickerID)];
         }
 
         var additionalData = GetStickerAdditionalData(stickerSet, stickerID+1);
@@ -199,7 +199,7 @@ public class StickerManager : MonoBehaviour
         
     public (string name, string type, Color color) GetStickerAdditionalData(StickerSet stickerSet, int id)
     {
-        if (stickersAdditionalData.Count == 0) {
+        if (!stickersAdditionalData.ContainsKey(stickerSet)) {
             ReadAdditionalDataCSV(stickerSet);
         }
         

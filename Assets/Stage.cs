@@ -34,14 +34,13 @@ public class Stage : MonoBehaviour
     public void SetScore(int difficulty, int score) {
         difficultyButtons[difficulty].SetScore(score);
     }
-    public void SetStage(int stage, StickerSet stickerSet)
+    public void SetStage(int stage)
     {
         this.stage = stage;
         int difficulty = 0;
         foreach (var difficultyButton in difficultyButtons)
         {
             difficultyButton.SetStage(stage);
-            difficultyButton.SetImageSet(stickerSet);
             difficulty++;
         }
         UpdateDifficultyUnlockedAndAmountOfStickersUnlocked();
@@ -52,9 +51,9 @@ public class Stage : MonoBehaviour
         
         foreach (var stickerFromStage in GameManager.Instance.stages[stage].stickers) {
             //tiene por lo menos una vez la figurita del stage, en sus imageduplicates
-            if (GameManager.Instance.userData.imageDuplicates.ContainsKey(stickerFromStage)
+            if (GameManager.Instance.userData.imageDuplicates.ContainsKey((GameManager.Instance.stages[stage].stickerSet,stickerFromStage))
                 &&
-                GameManager.Instance.userData.imageDuplicates[stickerFromStage] > 0) {
+                GameManager.Instance.userData.imageDuplicates[(GameManager.Instance.stages[stage].stickerSet,stickerFromStage)] > 0) {
                 unlockedStickers.Add(stickerFromStage);
             }
         }
@@ -212,7 +211,7 @@ public class UserData
     public int id;
     public int coins;
     public List<UserStageData> stages;
-    public Dictionary<int,int> imageDuplicates = new Dictionary<int, int>();
+    public Dictionary<(StickerSet,int),int> imageDuplicates = new Dictionary<(StickerSet, int), int>();
     //upgrades, inventario
     //historial de compras
 
@@ -315,9 +314,9 @@ public class UserStageData
     {
         foreach (var imageFromStage in GameManager.Instance.stages[stage].stickers) {
             //tiene por lo menos una vez la figurita del stage, en sus imageduplicates
-            if (!GameManager.Instance.userData.imageDuplicates.ContainsKey(imageFromStage)
+            if (!GameManager.Instance.userData.imageDuplicates.ContainsKey((GameManager.Instance.stages[stage].stickerSet,imageFromStage))
                 ||
-                GameManager.Instance.userData.imageDuplicates[imageFromStage] <= 0) {
+                GameManager.Instance.userData.imageDuplicates[(GameManager.Instance.stages[stage].stickerSet,imageFromStage)] <= 0) {
                 return  false;
             }
         }

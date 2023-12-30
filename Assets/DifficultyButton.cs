@@ -8,7 +8,6 @@ public class DifficultyButton : ChangeCanvasButton {
     public int difficulty;
     public int stage;
     public AchievementStars stars;
-    [FormerlySerializedAs("imageSet")] public StickerSet stickerSet;
     public TextMeshProUGUI scoreText;
     // Start is called before the first frame update
     public override void Start()
@@ -21,7 +20,7 @@ public class DifficultyButton : ChangeCanvasButton {
     public override void OnClick()
     {
         Debug.Log("Clicked difficultyButton "+stage+" "+difficulty);
-        StageManager.Instance.SetStageAndDifficulty(stage, difficulty, stickerSet);
+        StageManager.Instance.SetStageAndDifficulty(stage, difficulty);
         base.OnClick();
         GameManager.Instance.Reset();
     }
@@ -33,11 +32,6 @@ public class DifficultyButton : ChangeCanvasButton {
     public void SetStage(int stage) {
         this.stage = stage;
         gameObject.name = "ButtonDifficulty S" + stage+" D"+difficulty;
-    }
-
-    public void SetImageSet(StickerSet stickerSet)
-    {
-        this.stickerSet = stickerSet;
     }
 
     public void UpdateDifficultyUnlocked() {

@@ -90,11 +90,11 @@ public class PackManager : MonoBehaviour {
             
             gainedStickers.Add((selectedStickerImageID, GameManager.Instance.stages[stickerStage].stickerSet));
             
-            if (GameManager.Instance.userData.imageDuplicates.ContainsKey(selectedStickerImageID)) {
-                GameManager.Instance.userData.imageDuplicates[selectedStickerImageID]++;
+            if (GameManager.Instance.userData.imageDuplicates.ContainsKey((GameManager.Instance.stages[stickerStage].stickerSet, selectedStickerImageID))) {
+                GameManager.Instance.userData.imageDuplicates[(GameManager.Instance.stages[stickerStage].stickerSet, selectedStickerImageID)]++;
             }
             else {
-                GameManager.Instance.userData.imageDuplicates.Add(selectedStickerImageID,1);
+                GameManager.Instance.userData.imageDuplicates.Add((GameManager.Instance.stages[stickerStage].stickerSet, selectedStickerImageID),1);
             }
 
         }
