@@ -84,7 +84,7 @@ public class GameCanvas : MonoBehaviour
                 buttonTextRemove.text = "0";
             }
         }
-        SetNumpadButtons(GameManager.GetCurrentlySelectedSticker().stickerID);
+        SetNumpadButtons(GameManager.GetCurrentlySelectedSticker());
     }
     private void SetInteractable()
     {
@@ -136,24 +136,28 @@ public class GameCanvas : MonoBehaviour
         }
     }
 
-    private void SetNumpadButtons(int ID)
+    private void SetNumpadButtons((StickerData sticker, StickerMatchData matchData) stickerData)
     {
         ResetNumUIButtons();
-        if (GameManager.currentlyInGameImages.ContainsKey(ID))
+        
+        //BetterClue
+        if (stickerData.matchData.lastClueAppearenceNumber != null)
         {
-            if (GameManager.currentlyInGameImages[ID].activeTurnApply != null)
+            CustomDebugger.Log("active turn sticker" + stickerData.matchData.lastClueAppearenceNumber);
+            numpadButtons[(int)stickerData.matchData.lastClueAppearenceNumber].GetComponentInChildren<TextMeshProUGUI>().color = Color.green;
+            for (int i = 0; i <= (int)stickerData.matchData.lastClueAppearenceNumber ; i++)
             {
-                Debug.Log("active turn sticker" + GameManager.currentlyInGameImages[ID].activeTurnApply);
-                numpadButtons[(int)GameManager.currentlyInGameImages[ID].activeTurnApply].GetComponentInChildren<TextMeshProUGUI>().color = Color.green;
-            }
-            if (GameManager.currentlyInGameImages[ID].affectedValues.Count > 0)
-            {
-                for (int i = 0; i < GameManager.currentlyInGameImages[ID].affectedValues.Count; i++)
-                {
-                    numpadButtons[GameManager.currentlyInGameImages[ID].affectedValues[i]].interactable = false;
-                }
+                numpadButtons[i].interactable = false;
             }
         }
+        //Cut
+        foreach (var i in stickerData.matchData.cutNumbers)
+        {
+            numpadButtons[i].GetComponentInChildren<TextMeshProUGUI>().color = Color.red;
+            numpadButtons[i].interactable = false;
+        }
+
+
     }
 
     public void ResetNumUIButtons()
@@ -183,7 +187,7 @@ public class GameCanvas : MonoBehaviour
         Debug.Log("NumPAD_Buttons Count: "+ numpadButtons.Count);
     }
 
-    private (int, Sprite, int) USE(ConsumableID ID)
+    private (StickerData sticker, StickerMatchData matchData) USE(ConsumableID ID)
     {
         Debug.Log("USE: "+  ID.ToString());
         var turnSticker = GameManager.GetCurrentlySelectedSticker();
@@ -199,13 +203,13 @@ public class GameCanvas : MonoBehaviour
         return (turnSticker);
     }
 
-    private void SaveAction((int stickerID,Sprite sprite,int amountOfAppearances) turnSticker, int scoreModification)
+    private void SaveAction((StickerData sticker, StickerMatchData matchData) turnSticker, int scoreModification)
     {
         StartCoroutine(GameManager.FinishProcessingTurnAction(
-        turnSticker.amountOfAppearances,
+        turnSticker.sticker.amountOfAppearences,
         TurnAction.UseClue,
         scoreModification,
-        turnSticker
+        turnSticker.sticker
         ));
     }
     public void UseClue()
@@ -219,12 +223,11 @@ public class GameCanvas : MonoBehaviour
     public void UseBetterClue()
     {
         var turnSticker = USE(ConsumableID.Clue);
-        int id = GameManager.GetCurrentlySelectedSticker().stickerID;
-        int amountOfAppears = GameManager.GetCurrentlySelectedSticker().amountOfAppearances;
-
+        int amountOfAppears = GameManager.GetCurrentlySelectedSticker().sticker.amountOfAppearences;
+        // por que crea uno nuevo?
         StickerMatchData stickerData = new StickerMatchData();
         stickerData.AddBetterClueEffect(amountOfAppears);
-        GameManager.currentlyInGameImages[id] = stickerData;
+        GameManager.currentlyInGameStickers[GameManager.GetCurrentlySelectedSticker().sticker] = stickerData;
         UpdateUI();
         int scoreModification = GameManager.OnCorrectGuess();
         SaveAction(turnSticker, scoreModification);
@@ -240,11 +243,10 @@ public class GameCanvas : MonoBehaviour
     public void UseCut()
     {
         var turnSticker = USE(ConsumableID.Cut);
-        int id = GameManager.GetCurrentlySelectedSticker().stickerID;
-        int amountOfAppears = GameManager.GetCurrentlySelectedSticker().amountOfAppearances;
+        int amountOfAppears = GameManager.GetCurrentlySelectedSticker().sticker.amountOfAppearences;
         StickerMatchData stickerData = new StickerMatchData();
         stickerData.AddCutEffect(amountOfAppears, GameManager.selectedDifficulty);
-        GameManager.currentlyInGameImages[id] = stickerData;
+        GameManager.currentlyInGameStickers[GameManager.GetCurrentlySelectedSticker().sticker] = stickerData;
         UpdateUI();
     }
     public void UsePeek()

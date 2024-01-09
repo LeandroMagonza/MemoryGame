@@ -26,6 +26,11 @@ public static class CustomDebugger
         //disabledCategories.Add(DebugCategory.SAVE);
         initialized = true;
     }
+
+    public static void LogError(object message)
+    {
+        Debug.LogError(message);
+    }
 }
 
 public enum DebugCategory

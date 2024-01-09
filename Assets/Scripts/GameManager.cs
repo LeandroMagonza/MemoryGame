@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour {
             if (_instance == null)
                 _instance = FindObjectOfType<GameManager>();
             if (_instance == null)
-                CustomDebugger.LogError("Singleton<" + typeof(GameManager) + "> instance has been not found.");
+                Debug.LogError("Singleton<" + typeof(GameManager) + "> instance has been not found.");
             return _instance;
         }
     }
@@ -80,8 +80,7 @@ public class GameManager : MonoBehaviour {
     
     private Dictionary<int,StickerData> _stickersFromStage = new Dictionary<int, StickerData>();
 
-    public Dictionary<int, StickerMatchData> currentlyInGameImages = new Dictionary<int, StickerMatchData>();
-    public List<(StickerData sticker,StickerMatchData matchData)> currentlyInGameStickers = new List<(StickerData sticker,StickerMatchData matchData)>();
+    public Dictionary<StickerData,StickerMatchData> currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
 
     public AudioSource audioSource;
     public AudioClip correctGuessClip;
@@ -102,7 +101,7 @@ public class GameManager : MonoBehaviour {
     #region PersistanceReferences
     public UserData userData => PersistanceManager.Instance.userData;
     public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
-    private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.stickerLevels;
+    private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.StickerLevels;
     public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> matchInventory = new Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)>();
     public PacksData packs => PersistanceManager.Instance.packs;
     #endregion
@@ -160,7 +159,7 @@ public class GameManager : MonoBehaviour {
         else
         {
             CustomDebugger.Log("IncorrectGuess");
-            int magnitude = number - turnSticker.amountOfAppearances;
+            int magnitude = number - turnSticker.amountOfAppearences;
             deathDefyMagnitude = Mathf.Abs(magnitude);
             OnIncorrectGuess();
             turnAction = TurnAction.GuessIncorrect;
@@ -206,7 +205,7 @@ public class GameManager : MonoBehaviour {
         );
     }
 
-    private void CheckamountOfAppearences()
+    private void CheckAmountOfAppearences()
     {
         if (_currentlySelectedSticker.amountOfAppearences == bonusOnAmountOfAppearences)
         {
@@ -225,11 +224,11 @@ public class GameManager : MonoBehaviour {
         {
             AddImages(turnNumber / 10);
         }
-        if (currentlyInGameImages.ContainsKey(_currentlySelectedSticker))
+        if (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
         {
-            if (currentlyInGameImages[_currentlySelectedSticker].activeTurnApply == null && currentlyInGameImages[_currentlySelectedSticker].affectedValues.Count > 0)
+            if (currentlyInGameStickers[_currentlySelectedSticker].lastClueAppearenceNumber == null && currentlyInGameStickers[_currentlySelectedSticker].cutNumbers.Count > 0)
             {
-                currentlyInGameImages[_currentlySelectedSticker].affectedValues = new List<int>();
+                currentlyInGameStickers[_currentlySelectedSticker].cutNumbers = new List<int>();
             }
         }
         SetRandomImage();
@@ -247,7 +246,7 @@ public class GameManager : MonoBehaviour {
             _currentlySelectedSticker.amountOfAppearences,
             false);
         audioSource.PlayOneShot(incorrectGuessClip);
-        lifeCounter.LoseLive();
+
         _currentlySelectedSticker.amountOfAppearences--;
         bool DeathDefy = GetDeathDefy(deathDefyMagnitude);
         lifeCounter.LoseLive(ref protectedLife, DeathDefy);
@@ -288,7 +287,10 @@ public class GameManager : MonoBehaviour {
                                 + CalculateScoreComboBonus();
         ModifyScore(scoreModification);
         SetCurrentCombo(_currentCombo+1);
-        CheckamountOfAppearences();
+        //Reset blocked and cut numbers for next appearence
+        currentlyInGameStickers[_currentlySelectedSticker].blockedNumbers = new List<int>();
+        currentlyInGameStickers[_currentlySelectedSticker].cutNumbers = new List<int>();
+        CheckAmountOfAppearences();
         return scoreModification;
     }
 
@@ -346,11 +348,11 @@ public class GameManager : MonoBehaviour {
             return;
         }    
         int nextStickerIndex = Random.Range(0, currentlyInGameStickers.Count);
-        StickerData nextSticker = currentlyInGameStickers[nextStickerIndex];
+        StickerData nextSticker = currentlyInGameStickers.Keys.ToList()[nextStickerIndex];
 
         while (_currentlySelectedSticker == nextSticker && currentlyInGameStickers.Count > 1) {
             nextStickerIndex = Random.Range(0, currentlyInGameStickers.Count);
-            nextSticker = currentlyInGameStickers[nextStickerIndex];
+            nextSticker = currentlyInGameStickers.Keys.ToList()[nextStickerIndex];
         }
         
         stickerDisplay.SetStickerData(nextSticker);
@@ -430,8 +432,8 @@ public class GameManager : MonoBehaviour {
         shuffledStickers.Shuffle();
 
         foreach (var sticker in shuffledStickers) {
-            if (!currentlyInGameStickers.Contains(sticker)) {
-                currentlyInGameStickers.Add((sticker,new StickerMatchData()));
+            if (!currentlyInGameStickers.ContainsKey(sticker)) {
+                currentlyInGameStickers.Add(sticker,new StickerMatchData());
                 amountOfImages--;
                 if (amountOfImages == 0) {
                     return true;
@@ -549,7 +551,7 @@ public class GameManager : MonoBehaviour {
         bonusMultiplicator = 1;
         lifeCounter.ResetLives();
         LoadStickers();
-        currentlyInGameStickers = new List<(StickerData,StickerMatchData)>();
+        currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
         AddImages(4);
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion
         //TODO: recordar para que era el comentario de arriba, poirque capaz esta arreglado ya y no me acuerdo
@@ -688,6 +690,11 @@ public class GameManager : MonoBehaviour {
     public void SetMatchInventory()
     {
         matchInventory = userData.GetMatchInventory();
+    }
+
+    public (StickerData sticker,StickerMatchData matchData) GetCurrentlySelectedSticker()
+    {
+        return (_currentlySelectedSticker, currentlyInGameStickers[_currentlySelectedSticker]);
     }
 }
 

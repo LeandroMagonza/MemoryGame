@@ -50,6 +50,7 @@ public class LifeCounter : MonoBehaviour
     }
     public void LoseLive(ref bool protectedLife, bool deathDefy) 
     {
+        //TODO: Chequear tema de que corazones aparecen, etc
         if (protectedLife)
             protectedLife = false;
         else if (!deathDefy)

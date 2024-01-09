@@ -539,7 +539,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 106826625}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -6574,7 +6574,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &330909372
 GameObject:
@@ -6606,7 +6606,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &330909374
 MonoBehaviour:
@@ -11979,6 +11979,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   packNumber: 0
+  maxPackNumber: 4
+  numbers: []
+  stickerCostDisplay: {fileID: 0}
+  stickerSelectedDisplay: {fileID: 0}
 --- !u!224 &410943682 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6881186438950080302, guid: eb9d401e946ffda48a82cb54ff3b4b37, type: 3}
@@ -15486,7 +15490,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 14
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &925779449
 PrefabInstance:
@@ -16123,6 +16127,8 @@ MonoBehaviour:
   numpadRow2: {fileID: 2135603258}
   comboBonusText: {fileID: 648746962}
   comboText: {fileID: 1121805667}
+  protectedLife: 0
+  deathDefy: 0
 --- !u!4 &1079194499
 Transform:
   m_ObjectHideFlags: 0
@@ -17451,7 +17457,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1603681116}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: ItemManager, Assembly-CSharp
         m_MethodName: UseRemove
         m_Mode: 1
@@ -20115,132 +20121,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1598616786}
   m_CullTransparentMesh: 1
---- !u!1 &1603681115
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1603681117}
-  - component: {fileID: 1603681116}
-  m_Layer: 0
-  m_Name: ItemManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1603681116
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1603681115}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0a61d54042615948ac2b6c46d1e814d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  validate: 1
-  consumables:
-  - itemID: 0
-    max: 1
-    current: 0
-  - itemID: 1
-    max: 1
-    current: 0
-  - itemID: 2
-    max: 1
-    current: 0
-  - itemID: 3
-    max: 1
-    current: 0
-  upgrades:
-  - itemId: 4
-    upgradeMaxLevel: 3
-    valueAddToInitial: 1
-    valueAddToMax: 2
-    upgradeCurrentLevel: 0
-  - itemId: 5
-    upgradeMaxLevel: 3
-    valueAddToInitial: 1
-    valueAddToMax: 2
-    upgradeCurrentLevel: 0
-  - itemId: 6
-    upgradeMaxLevel: 3
-    valueAddToInitial: 1
-    valueAddToMax: 2
-    upgradeCurrentLevel: 0
-  - itemId: 7
-    upgradeMaxLevel: 3
-    valueAddToInitial: 1
-    valueAddToMax: 2
-    upgradeCurrentLevel: 0
-  - itemId: 8
-    upgradeMaxLevel: 3
-    valueAddToInitial: 1
-    valueAddToMax: 2
-    upgradeCurrentLevel: 0
-  - itemId: 9
-    upgradeMaxLevel: 3
-    valueAddToInitial: 1
-    valueAddToMax: 2
-    upgradeCurrentLevel: 0
-  - itemId: 10
-    upgradeMaxLevel: 3
-    valueAddToInitial: 1
-    valueAddToMax: 2
-    upgradeCurrentLevel: 0
-  - itemId: 11
-    upgradeMaxLevel: 3
-    valueAddToInitial: 1
-    valueAddToMax: 2
-    upgradeCurrentLevel: 0
-  - itemId: 12
-    upgradeMaxLevel: 3
-    valueAddToInitial: 1
-    valueAddToMax: 2
-    upgradeCurrentLevel: 0
-  - itemId: 13
-    upgradeMaxLevel: 3
-    valueAddToInitial: 1
-    valueAddToMax: 2
-    upgradeCurrentLevel: 0
-  - itemId: -1
-    upgradeMaxLevel: 0
-    valueAddToInitial: 0
-    valueAddToMax: 0
-    upgradeCurrentLevel: 0
-  buttonClue: {fileID: 1612607760}
-  buttonRemove: {fileID: 1244338488}
-  buttonCut: {fileID: 0}
-  buttonPeek: {fileID: 0}
-  buttonTextClue: {fileID: 900080962}
-  buttonTextRemove: {fileID: 1387719791}
-  buttonTextPeek: {fileID: 0}
-  buttonTextCut: {fileID: 0}
-  buttonClueAudioClip: {fileID: 0}
-  buttonRemoveAudioClip: {fileID: 0}
-  buttonCutAudioClip: {fileID: 0}
-  buttonPeekAudioClip: {fileID: 0}
---- !u!4 &1603681117
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1603681115}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.17652035, y: -1.6214985, z: 0.024074592}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 10
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1612607758
 GameObject:
   m_ObjectHideFlags: 0
@@ -20326,7 +20206,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1603681116}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: ItemManager, Assembly-CSharp
         m_MethodName: UseClue
         m_Mode: 1
@@ -20476,7 +20356,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa1153a5a723af64e870d6046f0b89fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  heartPrefab: {fileID: 6950419497658983372, guid: 4a477a5804ba89145b9bf45fee8f26db, type: 3}
+  lifeCounterContainer: {fileID: 1636331680}
   lives: 3
+  heartCount: 3
   hearts:
   - {fileID: 106826625}
   - {fileID: 1598616786}
@@ -22476,7 +22359,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 13
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1813305210
 GameObject:
@@ -25412,6 +25295,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6cc134d8e782bb49802c8cc56bef234, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startObject: {fileID: 0}
+  target: {fileID: 0}
+  lineRenderer: {fileID: 0}
 --- !u!120 &2259018522507058439
 LineRenderer:
   m_ObjectHideFlags: 0
@@ -26081,20 +25967,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc5202609c8f7d74a850327820ed4dfa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clue_Consumable_Button: {fileID: 2259018523095197504}
-  betterClue_Consumable_Button: {fileID: 0}
-  remove_Consumable_Button: {fileID: 2259018522248573972}
-  cut_Consumable_Button: {fileID: 2259018523095197504}
-  peek_Consumable_Button: {fileID: 0}
-  extraLife_Upgrade_Button: {fileID: 0}
-  protectedLife: {fileID: 0}
-  maxClue_Upgrade_Button: {fileID: 0}
-  maxRemove_Upgrade_Button: {fileID: 0}
-  maxCut_Upgrade_Button: {fileID: 0}
-  betterCut_Upgrade_Button: {fileID: 0}
-  betterPeek_Upgrade_Button: {fileID: 0}
-  block: {fileID: 0}
-  deathDefy_Upgrade_Button: {fileID: 0}
+  consumablePanel: {fileID: 0}
+  consumableTittle: {fileID: 0}
+  upgradePanel: {fileID: 0}
+  upgradeTittle: {fileID: 0}
+  moneyDisplay: {fileID: 0}
+  shopButtons: []
 --- !u!224 &2259018522974848472
 RectTransform:
   m_ObjectHideFlags: 0
