@@ -11,57 +11,31 @@ public class ShopManager : MonoBehaviour
     public GameObject upgradePanel;
     public GameObject upgradeTittle;
     public TextMeshProUGUI moneyDisplay;
+    public ShopButton[] shopButtons;
 
-    [Header("Consumables")]
-    public Button clue_Consumable_Button;
-    public TextMeshProUGUI clue_consumable_price_text;
-    public TextMeshProUGUI clue_consumable_description_text;
-    public TextMeshProUGUI clue_consumable_amount_text;
-    [Space]
-    public Button remove_Consumable_Button;
-    public TextMeshProUGUI remove_consumable_price_text;
-    public TextMeshProUGUI remove_consumable_description_text;
-    public TextMeshProUGUI remove_consumable_amount_text;
-    [Space]
-    public Button cut_Consumable_Button;
-    public TextMeshProUGUI cut_consumable_price_text;
-    public TextMeshProUGUI cut_consumable_description_text;
-    public TextMeshProUGUI cut_consumable_amount_text;
-    [Space]
-    public Button peek_Consumable_Button;
-    public TextMeshProUGUI peek_consumable_price_text;
-    public TextMeshProUGUI peek_consumable_description_text;
-    public TextMeshProUGUI peek_consumable_amount_text;
-    [Space]
-    [Header("Upgrades")]
-    public Button maxClue_Upgrade_Button;
-    public TextMeshProUGUI maxClue_upgrade_price_text;
-    public TextMeshProUGUI maxClue_upgrade_amount_text;
-    [Space]
+    private Dictionary<ConsumableID, ConsumableButton> shopConsumableButtons = new Dictionary<ConsumableID, ConsumableButton>();
+    private Dictionary<UpgradeID, UpgradeButton> shopUpgradeButtons = new Dictionary<UpgradeID, UpgradeButton>();
 
-    public Button maxRemove_Upgrade_Button;
-    public TextMeshProUGUI maxRemove_upgrade_price_text;
-    public TextMeshProUGUI maxRemove_upgrade_amount_text;
-    [Space]
+    public UserData userData => PersistanceManager.Instance.userData;
 
-    public Button maxCut_Upgrade_Button;
-    public TextMeshProUGUI maxCut_upgrade_price_text;
-    public TextMeshProUGUI maxCut_upgrade_amount_text;
-    [Space]
-
-    public Button betterPeek_Upgrade_Button;
-    public TextMeshProUGUI betterPeek_upgrade_price_text;
-    public TextMeshProUGUI betterPeek_upgrade_amount_text;
-    [Space]
-
-    public Button betterClue_Upgrade_Button;
-    public Button betterCut_Upgrade_Button;
-    public Button extraLife_Upgrade_Button;
-    [Space]
-
-    public Button protectedLife;
-    public Button block;
-    public Button deathDefy_Upgrade_Button;
+    private void Awake()
+    {
+        foreach (ShopButton button in shopButtons)
+        {
+            if (button is ConsumableButton)
+            {
+                ConsumableButton consumable = (ConsumableButton)button;
+                if (!shopConsumableButtons.ContainsKey(consumable.ID))
+                    shopConsumableButtons.Add(consumable.ID, consumable);
+            }
+            else if (button is UpgradeButton) 
+            {
+                UpgradeButton upgrade = (UpgradeButton)button;
+                if (!shopUpgradeButtons.ContainsKey(upgrade.ID)) 
+                    shopUpgradeButtons.Add(upgrade.ID, upgrade);
+            }
+        }
+    }
     private void OnEnable()
     {
         EnableShopCanvas();
@@ -85,8 +59,8 @@ public class ShopManager : MonoBehaviour
         int price = ConsumableData.GetConsumable(ConsumableID.Clue).price;
         bool canBuy = GameManager.Instance.userData.ModifyCoins(-price);
         if (!canBuy)
-        {   
-            Debug.Log("Not enough money");        
+        {
+            Debug.Log("Not enough money");
             return;
         }
         if (itemID < 0) return;
@@ -103,19 +77,23 @@ public class ShopManager : MonoBehaviour
     {
         UpgradeID item = (UpgradeID)itemID;
         Debug.Log("Added Item:" + item.ToString());
-        int price = UpgradeData.GetUpgrade(item).GetPrice();
-        if (GameManager.Instance.userData.upgrades.ContainsKey(item))
-            price = GameManager.Instance.userData.upgrades[item].GetPrice();
+        int currentLevel = 0;
+        if (userData.upgrades.ContainsKey(item))
+        {
+            currentLevel = userData.upgrades[item];
+        }
+
+        int price = UpgradeData.GetUpgrade(item).GetPrice(currentLevel);
+        
         bool canBuy = GameManager.Instance.userData.ModifyCoins(-price);
         if (!canBuy)
         {
             Debug.Log("Not enough money");
             return;
         }
-        if (itemID < 0) return;
-        UpgradeID upgradeID = (UpgradeID)itemID;
-        Debug.Log("Added Item:" + nameof(upgradeID));
-        GameManager.Instance.userData.AddUpgradeObject(upgradeID);
+
+        Debug.Log("Added Item:" + nameof(itemID));
+        GameManager.Instance.userData.AddUpgradeObject(item);
         PersistanceManager.Instance.SaveUserData();
         UpdateMoneyDisplay();
         UpdateConsumableButtonsUI();
@@ -135,126 +113,68 @@ public class ShopManager : MonoBehaviour
 
     private void UpdateConsumableButtonsUI()
     {
-        UserData data = GameManager.Instance.userData;
-        if (clue_Consumable_Button != null)
+        foreach (var item in shopConsumableButtons)
         {
-            if (data.consumables.ContainsKey(ConsumableID.Clue))
-            {
-                clue_consumable_amount_text.text = "Owned: " + data.consumables[ConsumableID.Clue].current.ToString();
-                clue_consumable_price_text.text = "BUY\n$" + data.consumables[ConsumableID.Clue].price.ToString();
-                clue_consumable_description_text.text = data.consumables[ConsumableID.Clue].description;
-            }
-            else
-            {
-                clue_consumable_amount_text.text = "Owned: 0";
-                clue_consumable_price_text.text = "BUY\n$" + ConsumableData.GetConsumable(ConsumableID.Clue).price.ToString();
-                clue_consumable_description_text.text = ConsumableData.GetConsumable(ConsumableID.Clue).description;
-            }
-        }
-        if (remove_Consumable_Button != null)
-        {
-            if (data.consumables.ContainsKey(ConsumableID.Remove))
-            {
-                remove_consumable_amount_text.text = "Owned: " + data.consumables[ConsumableID.Remove].current.ToString();
-                remove_consumable_price_text.text = "BUY\n$" + data.consumables[ConsumableID.Remove].price.ToString();
-                remove_consumable_description_text.text = data.consumables[ConsumableID.Remove].description;
-            }   
-            else
-            {   
-                remove_consumable_amount_text.text = "Owned: 0";
-                remove_consumable_price_text.text = "BUY\n$" + ConsumableData.GetConsumable(ConsumableID.Remove).price.ToString();
-                remove_consumable_description_text.text = ConsumableData.GetConsumable(ConsumableID.Remove).description;
-
-            }
-        }
-        if (cut_Consumable_Button != null)
-        {
-            if (data.consumables.ContainsKey(ConsumableID.Cut))
-            {
-                cut_consumable_amount_text.text = "Owned: " + data.consumables[ConsumableID.Cut].current.ToString();
-                cut_consumable_price_text.text = "BUY\n$" + data.consumables[ConsumableID.Cut].price.ToString();
-                cut_consumable_description_text.text = data.consumables[ConsumableID.Cut].description;
-            }
-            else
-            {   
-                cut_consumable_amount_text.text = "Owned: 0";
-                cut_consumable_price_text.text = "BUY\n$" + ConsumableData.GetConsumable(ConsumableID.Cut).price.ToString();
-                cut_consumable_description_text.text = ConsumableData.GetConsumable(ConsumableID.Cut).description;
-
-            }
-        }
-        if (peek_Consumable_Button != null)
-        {
-            if (data.consumables.ContainsKey(ConsumableID.Peek))
-            {
-                peek_consumable_amount_text.text = "Owned: " + data.consumables[ConsumableID.Peek].current.ToString();
-                peek_consumable_price_text.text = "BUY\n$" + data.consumables[ConsumableID.Peek].price.ToString();
-                peek_consumable_description_text.text = data.consumables[ConsumableID.Peek].description;
-            }   
-            else
-            {   
-                peek_consumable_amount_text.text = "Owned: 0";
-                peek_consumable_price_text.text = "BUY\n$" + ConsumableData.GetConsumable(ConsumableID.Peek).price.ToString();
-                peek_consumable_description_text.text = ConsumableData.GetConsumable(ConsumableID.Peek).description;
-
-            }
-        }
-    }
-    private void UpdateUpgradeButtonsIU()
-    {
-        if (maxClue_Upgrade_Button != null)
-        {
-            SetUpgradeButton(maxClue_Upgrade_Button, maxClue_upgrade_amount_text, maxClue_upgrade_price_text, UpgradeID.MaxClue);
-        }
-        if (maxCut_Upgrade_Button != null)
-        {
-            SetUpgradeButton(maxCut_Upgrade_Button, maxClue_upgrade_amount_text, maxCut_upgrade_price_text, UpgradeID.MaxCut);
+            SetConsumableButton(item.Key);
         }
     }
 
-    private void SetUpgradeButton(Button button, TextMeshProUGUI amount, TextMeshProUGUI price, UpgradeID upgradeID)
+    private void SetConsumableButton(ConsumableID consumableID)
     {
-        UserData data = GameManager.Instance.userData;
-
-        if (data.upgrades.ContainsKey(upgradeID))
+        ShopButton shopButton = shopConsumableButtons[consumableID];
+        if (userData.consumables.ContainsKey(consumableID))
         {
-            if (data.upgrades[upgradeID].upgradeRequired.Count > 0)
-            {
-                for (int i = 0; i < data.upgrades[upgradeID].upgradeRequired.Count; i++)
-                {
-                    if (IsUpgradeHasRequiered(upgradeID, i))
-                    {
-                        if (data.upgrades[(UpgradeID)i].currentLevel >= data.upgrades[upgradeID].upgradeRequired[(UpgradeID)i])
-                        {
-                            Debug.Log("HAS");
-                            button.interactable = true;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                            Debug.Log("Dont HAS");
-                button.interactable = true;
-            }
-            amount.text = data.upgrades[upgradeID].currentLevel.ToString();
-            price.text = data.upgrades[upgradeID].GetPrice().ToString();
-
-            if (data.upgrades[upgradeID].IsMaxLevel())
-            {
-                button.interactable = false;
-            }
+            shopButton.currentText.text = "Owned: " + userData.consumables[consumableID].ToString();
         }
         else
         {
-            amount.text = "0";
-            price.text = UpgradeData.GetUpgrade(upgradeID).GetPrice().ToString();
+            shopButton.currentText.text = "Owned: 0";
         }
+
+        shopButton.priceText.text = "BUY\n$" + ConsumableData.GetConsumable(consumableID).price.ToString();
+        shopButton.descriptionText.text  = ConsumableData.GetConsumable(consumableID).description;
+
     }
 
-    private bool IsUpgradeHasRequiered(UpgradeID upgrade, int i)
+    
+    private void UpdateUpgradeButtonsIU()
     {
-        return GameManager.Instance.userData.upgrades.ContainsKey((UpgradeID)GameManager.Instance.userData.upgrades[upgrade].upgradeRequired[(UpgradeID)i]);
+        foreach (var item in shopUpgradeButtons)
+        {
+            SetUpgradeButton(item.Key);
+        }
+       
+    }
+
+    private void SetUpgradeButton(UpgradeID upgradeID)
+    {
+
+        int currentLevel = 0;
+
+        if (userData.upgrades.ContainsKey(upgradeID))
+        {
+            currentLevel = userData.upgrades[upgradeID];       
+        }
+        bool isMaxLevel = UpgradeData.GetUpgrade(upgradeID).IsMaxLevel(currentLevel);
+
+        bool requirementsMet = true;
+
+        foreach (var requirement in UpgradeData.GetUpgrade(upgradeID).upgradeRequired)
+        {
+            UpgradeID requirementID = requirement.Key;
+            int requirementLevel = requirement.Value;
+
+            if (!userData.upgrades.ContainsKey(requirementID) || userData.upgrades[requirementID] < requirementLevel)
+            {
+                requirementsMet = false;
+                break;
+            }
+        }
+        shopUpgradeButtons[upgradeID].button.interactable = requirementsMet && !isMaxLevel;
+
+        shopUpgradeButtons[upgradeID].currentText.text = currentLevel.ToString();
+        shopUpgradeButtons[upgradeID].priceText.text = UpgradeData.GetUpgrade(upgradeID).GetPrice(currentLevel).ToString();
+        shopUpgradeButtons[upgradeID].descriptionText.text = UpgradeData.GetUpgrade(upgradeID).description;
     }
 }
 

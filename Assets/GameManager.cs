@@ -1,19 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using TMPro;
-using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using ColorUtility = UnityEngine.ColorUtility;
 using Random = UnityEngine.Random;
-using Newtonsoft.Json;
-using UnityEngine.Networking;
-using Newtonsoft.Json.Linq;
 using UnityEngine.Serialization;
+using System.Xml;
 
 public class GameManager : MonoBehaviour {
     #region Singleton
@@ -68,7 +63,7 @@ public class GameManager : MonoBehaviour {
     private int _currentlySelectedSticker;
     private Dictionary<int,(Sprite sprite, int amountOfAppearances)> _stickersFromStage = new Dictionary<int, (Sprite sprite, int amountOfAppearances)>();
 
-    private List<int> currentlyInGameImages =new List<int>();
+    public Dictionary<int, StickerMatchData> currentlyInGameImages =new Dictionary<int, StickerMatchData>();
 
     public AudioSource audioSource;
     public AudioClip correctGuessClip;
@@ -90,9 +85,7 @@ public class GameManager : MonoBehaviour {
     public UserData userData => PersistanceManager.Instance.userData;
     public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
     private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.stickerLevels;
-    public Dictionary<ConsumableID, int> matchInventory = new Dictionary<ConsumableID, int>();
-    public Dictionary<ConsumableID, int> initialInventory = new Dictionary<ConsumableID, int>();
-    public Dictionary<ConsumableID, int> aditionalConsumables = new Dictionary<ConsumableID, int>();
+    public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> matchInventory = new Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)>();
     public PacksData packs => PersistanceManager.Instance.packs;
     #endregion
 
@@ -117,7 +110,9 @@ public class GameManager : MonoBehaviour {
     public TextMeshProUGUI comboBonusText;
     public TextMeshProUGUI comboText;
 
-    
+    public bool protectedLife = false;
+    public bool deathDefy = false;
+    private int deathDefyMagnitude = 0;
 
     private void Start()
     {
@@ -193,7 +188,10 @@ public class GameManager : MonoBehaviour {
         }
         else
         {
+
             Debug.Log("IncorrectGuess");
+            int magnitude = number - turnSticker.amountOfAppearances;
+            deathDefyMagnitude = Mathf.Abs(magnitude);
             OnIncorrectGuess();
             turnAction = TurnAction.GuessIncorrect;
         }
@@ -251,14 +249,20 @@ public class GameManager : MonoBehaviour {
         {
             AddImages(turnNumber / 10);
         }
+        if (currentlyInGameImages.ContainsKey(_currentlySelectedSticker))
+        {
+            if (currentlyInGameImages[_currentlySelectedSticker].activeTurnApply == null && currentlyInGameImages[_currentlySelectedSticker].affectedValues.Count > 0)
+            {
+                currentlyInGameImages[_currentlySelectedSticker].affectedValues = new List<int>();
+            }
+        }
         SetRandomImage();
         disableInput = false;
-
     }
 
 
 
-   
+
 
     public void OnIncorrectGuess()
     {
@@ -267,11 +271,25 @@ public class GameManager : MonoBehaviour {
             _stickersFromStage[_currentlySelectedSticker].amountOfAppearances,
             false);
         audioSource.PlayOneShot(incorrectGuessClip);
-        lifeCounter.LoseLive();
+        bool DeathDefy = GetDeathDefy(deathDefyMagnitude);
+        lifeCounter.LoseLive(ref protectedLife, DeathDefy);
         _stickersFromStage[_currentlySelectedSticker] = (
             _stickersFromStage[_currentlySelectedSticker].sprite,
             _stickersFromStage[_currentlySelectedSticker].amountOfAppearances - 1);
         SetCurrentCombo(0);
+    }
+
+    private bool GetDeathDefy(float magnitude)
+    {
+        bool canDefyDeath = false;
+        if (magnitude <= 1) 
+        {
+            canDefyDeath = true;
+        }
+        bool DeathDefy = lifeCounter.lives == 1 && deathDefy && canDefyDeath;
+        if (DeathDefy)
+            deathDefy = false;
+        return DeathDefy;
     }
 
     public void SetCurrentCombo(int newCurrentComboAmount)
@@ -359,24 +377,50 @@ public class GameManager : MonoBehaviour {
         }
         return null;
     }
-    
+    public int GetKeyIndexValue(Dictionary<int, StickerMatchData> dictionary, int key)
+    {
+        return dictionary.Keys.ToList()[key];
+    }
     private void SetRandomImage() {
         Image image = imageOnDisplay.GetComponent<Image>();
         
         if (currentlyInGameImages.Count == 0) {
             Win();
             return;
-        }    
+        }
         int nextImageIndex = Random.Range(0, currentlyInGameImages.Count);
-        int nextImageID = currentlyInGameImages[nextImageIndex];
+        int nextImageID = currentlyInGameImages.Keys.ToList<int>()[nextImageIndex];
 
         while (_currentlySelectedSticker == nextImageID && currentlyInGameImages.Count > 1) {
             nextImageIndex = Random.Range(0, currentlyInGameImages.Count);
-            nextImageID = currentlyInGameImages[nextImageIndex];
+            nextImageID = currentlyInGameImages.Keys.ToList<int>()[nextImageIndex];
         }
         
-        image.sprite = _stickersFromStage[nextImageID].sprite;
-        
+        image.sprite = _stickersFromStage[nextImageID].sprite; 
+       
+
+
+
+
+
+       
+        /*
+
+        int nextImageIndex = Random.Range(0, currentlyInGameImages.Count);
+        int nextImageID = GetKeyIndexValue(currentlyInGameImages, nextImageIndex);
+            Debug.Log("next image INDEX: " + nextImageIndex);
+            Debug.Log("next image ID: " + nextImageID);
+        while (_currentlySelectedSticker == nextImageIndex && currentlyInGameImages.Count > 1) {
+            nextImageIndex = Random.Range(0, currentlyInGameImages.Count);
+            nextImageID = GetKeyIndexValue(currentlyInGameImages, nextImageIndex);
+            Debug.Log("next image INDEX: " + nextImageIndex);
+            Debug.Log("next image ID: " + nextImageID);
+        }
+        for (int i = 0; i < _stickersFromStage.Count; i++)
+        {
+            Debug.Log("_stickers from stage: "+ _stickersFromStage.Keys.ToList().IndexOf(i));
+        }*/
+
         _currentlySelectedSticker = nextImageID;
         _stickersFromStage[_currentlySelectedSticker]= (
             _stickersFromStage[_currentlySelectedSticker].sprite,
@@ -445,8 +489,8 @@ public class GameManager : MonoBehaviour {
         shuffledSprites.Shuffle();
 
         foreach (var sprite in shuffledSprites) {
-            if (!currentlyInGameImages.Contains(sprite.id)) {
-                currentlyInGameImages.Add(sprite.id);
+            if (!currentlyInGameImages.ContainsKey(sprite.id)) {
+                currentlyInGameImages.Add(sprite.id, new StickerMatchData());
                 amountOfImages--;
                 if (amountOfImages == 0) {
                     return true;
@@ -487,25 +531,13 @@ public class GameManager : MonoBehaviour {
     }
 
     private void SaveMatch() {
-        for (int i = 0; i < matchInventory.Count; i++)
+
+
+        foreach (ConsumableID consumable in matchInventory.Keys)
         {
-            int ti = 0;
-            if (initialInventory.ContainsKey((ConsumableID)i))
-                ti = initialInventory[(ConsumableID)i];
-
-            int b = 0;
-            if (aditionalConsumables.ContainsKey((ConsumableID)i))
-                b = aditionalConsumables[(ConsumableID)i];
-
-            int tf = 0;
-            if (matchInventory.ContainsKey((ConsumableID)i))
-                tf = matchInventory[(ConsumableID)i];
-            int ci = ti - b; 
-            int value = ci - tf;
-            Debug.Log("ti: "+ti+ " - b: "+ b + " = ci: " + ci);
-            Debug.Log("CI: "+ci+ " - tf: "+ tf + " = " + value);
-            if (value > 0)
-                userData.modifyConsumableObject((ConsumableID)i, -value);
+            int result = matchInventory[consumable].initial.consumableValue - matchInventory[consumable].current;
+            if (result > 0)
+                userData.modifyConsumableObject(consumable, -result);
         }
         PersistanceManager.Instance.SaveUserData();
     }
@@ -528,7 +560,7 @@ public class GameManager : MonoBehaviour {
         
         if (this.timer<=1)
         {
-            lifeCounter.LoseLive();
+            lifeCounter.LoseLive(ref protectedLife, false);
             _stickersFromStage[_currentlySelectedSticker] = (
                 _stickersFromStage[_currentlySelectedSticker].sprite,
                 _stickersFromStage[_currentlySelectedSticker].amountOfAppearances - 1);
@@ -544,6 +576,8 @@ public class GameManager : MonoBehaviour {
     }
     public void Reset() {
         //if (disableInput) return;
+        protectedLife = userData.upgrades.ContainsKey(UpgradeID.ProtectedLife) && userData.upgrades[UpgradeID.ProtectedLife] > 0;
+        deathDefy = userData.upgrades.ContainsKey(UpgradeID.DeathDefy) && userData.upgrades[UpgradeID.DeathDefy] > 0;
         SetNumpadByDifficulty(selectedDifficulty);
         bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
         gameEnded = false;
@@ -556,7 +590,7 @@ public class GameManager : MonoBehaviour {
         bonusMultiplicator = 1;
         lifeCounter.ResetLives();
         LoadImages(imageSetName.ToString());
-        currentlyInGameImages = new List<int>();
+        currentlyInGameImages = new Dictionary<int, StickerMatchData>();
         AddImages(4);
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion
         _currentlySelectedSticker = 0;
@@ -699,11 +733,6 @@ public class GameManager : MonoBehaviour {
     public void SetMatchInventory()
     {
         matchInventory = userData.GetMatchInventory();
-        initialInventory = new Dictionary<ConsumableID, int>(matchInventory);
-        aditionalConsumables = userData.GetAditionalValueData();
-        Debug.Log("Match Set Inventory:" + matchInventory.Count);
-        Debug.Log("Match Set Initials:" + initialInventory.Count);
-        Debug.Log("Match Set Aditionals:" + aditionalConsumables.Count);
     }
 }
 

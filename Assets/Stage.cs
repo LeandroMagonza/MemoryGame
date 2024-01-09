@@ -197,12 +197,12 @@ public class UserData
     public int id;
     public int coins;
     public List<UserStageData> stages;
-    public Dictionary<int,int> imageDuplicates = new Dictionary<int, int>();
-    public Dictionary<ConsumableID, ConsumableData> consumables = new Dictionary<ConsumableID, ConsumableData>();
-    public Dictionary<UpgradeID, UpgradeData> upgrades = new Dictionary<UpgradeID, UpgradeData>();
+    public Dictionary<int, int> imageDuplicates = new Dictionary<int, int>();
+    public Dictionary<ConsumableID, int> consumables = new Dictionary<ConsumableID, int>();
+    public Dictionary<UpgradeID, int> upgrades = new Dictionary<UpgradeID, int>();
     //historial de compras
 
-    public UserStageData GetUserStageData(int stage,int difficulty)
+    public UserStageData GetUserStageData(int stage, int difficulty)
     {
         foreach (var VARIABLE in stages)
         {
@@ -217,7 +217,7 @@ public class UserData
     public bool ModifyCoins(int modificationAmount)
     {
         modificationAmount += coins;
-        if (modificationAmount >= 0 )
+        if (modificationAmount >= 0)
         {
             coins = modificationAmount;
             return true;
@@ -228,273 +228,78 @@ public class UserData
     {
         if (upgrades.ContainsKey(upgradeID))
         {
-            upgrades[upgradeID].LevelUp();
+            upgrades[upgradeID]++;
         }
         else
         {
-            upgrades.Add(upgradeID, UpgradeData.GetUpgrade(upgradeID));
-            upgrades[upgradeID].LevelUp();
+            upgrades.Add(upgradeID, 1);
         }
     }
     public void AddConsumableObject(ConsumableID consumableID)
     {
         if (consumables.ContainsKey(consumableID))
         {
-            consumables[consumableID].AddCurrent(1);
+            consumables[consumableID]++;
         }
         else
         {
-            consumables.Add(consumableID, ConsumableData.GetConsumable(consumableID));
-            consumables[consumableID].AddCurrent(1);
+            consumables.Add(consumableID, 1);
         }
     }
     public void modifyConsumableObject(ConsumableID consumableID, int amount)
     {
         if (consumables.ContainsKey(consumableID))
         {
-            consumables[consumableID].AddCurrent(amount);
+            consumables[consumableID] += amount;
         }
     }
-   
 
-    public Dictionary<ConsumableID, int> GetMatchInventory()
+
+    public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> GetMatchInventory()
     {
-        Dictionary<ConsumableID, int> temp_inventory = new Dictionary<ConsumableID, int>();
-        ConsumableID clue = ConsumableID.Clue;
-        ConsumableID remove = ConsumableID.Remove;
-        ConsumableID cut = ConsumableID.Cut;
-        ConsumableID peek = ConsumableID.Peek;
+        Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> temp_inventory = new Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)>();
 
-        int maxClue = 0;
-        int maxRemove = 0;
-        int maxCut = 0;
-        int maxPeek = 0;
+        Dictionary<ConsumableID, UpgradeID> upgradeRelation = new Dictionary<ConsumableID, UpgradeID>() {
+            {ConsumableID.Clue, UpgradeID.MaxClue },
+            {ConsumableID.Remove, UpgradeID.MaxRemove },
+            {ConsumableID.Cut, UpgradeID.MaxCut },
+            {ConsumableID.Peek, UpgradeID.MaxPeek }
+        };
 
-        foreach (UpgradeData upgrade in upgrades.Values)
+        foreach (var item in upgradeRelation)
         {
-            switch (upgrade.itemId)
-            {
-                case UpgradeID.MaxClue:
-                    if (!temp_inventory.ContainsKey(clue))
-                    {
-                        temp_inventory.Add(clue, upgrade.GetAdditionalItem());
-                    }
-                    else
-                    {
-                        temp_inventory[clue] += upgrade.GetAdditionalItem();
-                    }
-                    maxClue += upgrade.GetAdditionalMax();
-                    break;
-                case UpgradeID.MaxRemove:
-                    if (!temp_inventory.ContainsKey(remove))
-                    {
-                        temp_inventory.Add(remove, upgrade.GetAdditionalItem());
-                    }
-                    else
-                    {
-                        temp_inventory[remove] += upgrade.GetAdditionalItem();
-                    }
-                    maxRemove += upgrade.GetAdditionalMax();
-                    break;
-                case UpgradeID.MaxCut:
-                    if (!temp_inventory.ContainsKey(cut))
-                    {
-                        temp_inventory.Add(cut, upgrade.GetAdditionalItem());
-                    }
-                    else
-                    {
-                        temp_inventory[cut] += upgrade.GetAdditionalItem();
-                    }
-                    maxCut += upgrade.GetAdditionalMax();
-                    break;
-                case UpgradeID.BetterPeek:
-                    if (!temp_inventory.ContainsKey(peek))
-                    {
-                        temp_inventory.Add(peek, upgrade.GetAdditionalItem());
-                    }
-                    else
-                    {
-                        temp_inventory[peek] += upgrade.GetAdditionalItem();
-                    }
-                    maxPeek += upgrade.GetAdditionalMax();
-                    break;
-                case UpgradeID.BetterClue:
+            ConsumableID consumableID = item.Key;
+            UpgradeID upgradeID = item.Value;
 
-                    break;
-                case UpgradeID.BetterCut:
-                    break;
-                case UpgradeID.Block:
-                    break;
-                case UpgradeID.DeathDefy:
-                    break;
-                case UpgradeID.ExtraLife:
-                    break;
-
-                case UpgradeID.ProtectedLife:
-                    break;
-                case UpgradeID.NONE:
-                    break;
-                default:
-                    break;
-            }
-        }
-        foreach (ConsumableData consumableData in consumables.Values)
-        {
-            switch (consumableData.itemID)
+            int currentLevel = 0;
+            if (PersistanceManager.Instance.userData.upgrades.ContainsKey(upgradeID))
             {
-                case ConsumableID.Clue:
-                    if (!temp_inventory.ContainsKey(clue))
-                    {
-                        temp_inventory.Add(consumableData.itemID, consumableData.current);
-                    }
-                    else
-                    {
-                        temp_inventory[consumableData.itemID] += consumableData.current;
-                    }
-                    maxClue += consumableData.max;
-                    break;
-                case ConsumableID.Remove:
-                    if (!temp_inventory.ContainsKey(remove))
-                    {
-                        temp_inventory.Add(consumableData.itemID, consumableData.current);
-                    }
-                    else
-                    {
-                        temp_inventory[consumableData.itemID] += consumableData.current;
-                    }
-                    maxRemove += consumableData.max;
-                    break;
-                case ConsumableID.Cut:
-                    if (!temp_inventory.ContainsKey(cut))
-                    {
-                        temp_inventory.Add(consumableData.itemID, consumableData.current);
-                    }
-                    else
-                    {
-                        temp_inventory[consumableData.itemID] += consumableData.current;
-                    }
-                    maxCut += consumableData.max;
-                    break;
-                case ConsumableID.Peek:
-                    if (!temp_inventory.ContainsKey(peek))
-                    {
-                        temp_inventory.Add(consumableData.itemID, consumableData.current);
-                    }
-                    else
-                    {
-                        temp_inventory[consumableData.itemID] += consumableData.current;
-                    }
-                    break;
-                case ConsumableID.NONE:
-                    break;
-                default:
-                    break;
+                currentLevel = PersistanceManager.Instance.userData.upgrades[upgradeID];
             }
 
-
+            int max = ConsumableData.GetConsumable(consumableID).max + UpgradeData.GetUpgrade(upgradeID).GetAdditionalMax(currentLevel);
+            int baseValue = UpgradeData.GetUpgrade(upgradeID).GetAdditionalItem(currentLevel);
+            int initialValue = 0;
+            if (PersistanceManager.Instance.userData.consumables.ContainsKey(consumableID))
+            {
+                initialValue += PersistanceManager.Instance.userData.consumables[consumableID];
+            }
+            int total = initialValue + baseValue;
+            total = Mathf.Clamp(total, 0, max);
+            temp_inventory.Add(consumableID, (total, max, (baseValue, initialValue)));
         }
 
-        if (temp_inventory.Count > 0)
-        {
-            if (temp_inventory.ContainsKey(clue))
-            {
-                temp_inventory[clue] = Mathf.Clamp(temp_inventory[clue], 0, maxClue);
-            }
-            if (temp_inventory.ContainsKey(remove))
-            {
-                temp_inventory[remove] = Mathf.Clamp(temp_inventory[remove], 0, maxRemove);
-            }
-            if (temp_inventory.ContainsKey(cut))
-            {
-                temp_inventory[cut] = Mathf.Clamp(temp_inventory[cut], 0, maxCut);
-            }
-            if (temp_inventory.ContainsKey(peek))
-            {
-                temp_inventory[peek] = Mathf.Clamp(temp_inventory[peek], 0, maxPeek);
-            }
-        }
+        //temp_inventory[ConsumableID.Clue];
+        //;
+        //PersistanceManager.Instance.userData.upgrades.[UpgradeID.MaxClue];
+
+
+
         Debug.Log("tempCount" + temp_inventory.Count);
         return temp_inventory;
     }
-
-    public Dictionary<ConsumableID, int> GetAditionalValueData()
-    {
-        Dictionary<ConsumableID, int> temp_inventory = new Dictionary<ConsumableID, int>();
-        ConsumableID clue = ConsumableID.Clue;
-        ConsumableID remove = ConsumableID.Remove;
-        ConsumableID cut = ConsumableID.Cut;
-        ConsumableID peek = ConsumableID.Peek;
-
-        foreach (UpgradeData upgrade in upgrades.Values)
-        {
-            switch (upgrade.itemId)
-            {
-                case UpgradeID.MaxClue:
-                    if (!temp_inventory.ContainsKey(clue))
-                    {
-                        temp_inventory.Add(clue, upgrade.GetAdditionalItem());
-                    }
-                    else
-                    {
-                        temp_inventory[clue] += upgrade.GetAdditionalItem();
-                    }
-                    break;
-                case UpgradeID.MaxRemove:
-                    if (!temp_inventory.ContainsKey(remove))
-                    {
-                        temp_inventory.Add(remove, upgrade.GetAdditionalItem());
-                    }
-                    else
-                    {
-                        temp_inventory[remove] += upgrade.GetAdditionalItem();
-                    }
-                    break;
-                case UpgradeID.MaxCut:
-                    if (!temp_inventory.ContainsKey(cut))
-                    {
-                        temp_inventory.Add(cut, upgrade.GetAdditionalItem());
-                    }
-                    else
-                    {
-                        temp_inventory[cut] += upgrade.GetAdditionalItem();
-                    }
-                    break;
-                case UpgradeID.BetterPeek:
-                    if (!temp_inventory.ContainsKey(peek))
-                    {
-                        temp_inventory.Add(peek, upgrade.GetAdditionalItem());
-                    }
-                    else
-                    {
-                        temp_inventory[peek] += upgrade.GetAdditionalItem();
-                    }
-                    break;
-                case UpgradeID.BetterClue:
-
-                    break;
-                case UpgradeID.BetterCut:
-                    break;
-                case UpgradeID.Block:
-                    break;
-                case UpgradeID.DeathDefy:
-                    break;
-                case UpgradeID.ExtraLife:
-                    break;
-
-                case UpgradeID.ProtectedLife:
-                    break;
-                case UpgradeID.NONE:
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        Debug.Log("tempCount"+temp_inventory.Count);
-        return temp_inventory;
-    }
-
 }
+    
 
 [Serializable]
 public class UserStageData

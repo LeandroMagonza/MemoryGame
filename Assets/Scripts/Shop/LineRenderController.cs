@@ -3,14 +3,26 @@ using UnityEngine;
 [RequireComponent(typeof(LineRenderer))]
 public class LineRenderController : MonoBehaviour
 {
-    private LineRenderer lineRenderer;
-    private void Start()
+    public RectTransform startObject;
+    public RectTransform target;
+    public LineRenderer lineRenderer;
+
+    void Start()
     {
         lineRenderer = GetComponent<LineRenderer>();
-        lineRenderer.positionCount = transform.childCount;
-        for (int i = 0; i < transform.childCount; i++)
+        SetLineRendererPositions();
+    }
+
+
+    void SetLineRendererPositions()
+    {
+        if (startObject != null && target != null && lineRenderer != null)
         {
-            lineRenderer.SetPosition(i, transform.GetChild(i).position);
+            Vector3 startPoint = Camera.main.WorldToScreenPoint(startObject.position);
+            Vector3 endPoint = Camera.main.WorldToScreenPoint(target.position);
+
+            lineRenderer.SetPosition(0, startPoint);
+            lineRenderer.SetPosition(1, endPoint);
         }
     }
 }
