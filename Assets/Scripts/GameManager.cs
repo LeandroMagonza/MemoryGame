@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil.Cil;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using ColorUtility = UnityEngine.ColorUtility;
 using Random = UnityEngine.Random;
 using UnityEngine.Serialization;
+using System.Xml;
 
 public class GameManager : MonoBehaviour {
     #region Singleton
@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour {
             if (_instance == null)
                 _instance = FindObjectOfType<GameManager>();
             if (_instance == null)
-                Debug.LogError("Singleton<" + typeof(GameManager) + "> instance has been not found.");
+                CustomDebugger.LogError("Singleton<" + typeof(GameManager) + "> instance has been not found.");
             return _instance;
         }
     }
@@ -80,7 +80,8 @@ public class GameManager : MonoBehaviour {
     
     private Dictionary<int,StickerData> _stickersFromStage = new Dictionary<int, StickerData>();
 
-    private List<StickerData> currentlyInGameStickers =new List<StickerData>();
+    public Dictionary<int, StickerMatchData> currentlyInGameImages = new Dictionary<int, StickerMatchData>();
+    public List<(StickerData sticker,StickerMatchData matchData)> currentlyInGameStickers = new List<(StickerData sticker,StickerMatchData matchData)>();
 
     public AudioSource audioSource;
     public AudioClip correctGuessClip;
@@ -101,7 +102,8 @@ public class GameManager : MonoBehaviour {
     #region PersistanceReferences
     public UserData userData => PersistanceManager.Instance.userData;
     public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
-    private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.StickerLevels;
+    private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.stickerLevels;
+    public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> matchInventory = new Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)>();
     public PacksData packs => PersistanceManager.Instance.packs;
     #endregion
 
@@ -123,6 +125,10 @@ public class GameManager : MonoBehaviour {
 
     public int selectedStage => StageManager.Instance.selectedStage;
     public int selectedDifficulty => StageManager.Instance.selectedDifficulty;
+
+    public bool protectedLife = false;
+    public bool deathDefy = false;
+    private int deathDefyMagnitude = 0;
 
 
     //TODO: Esta se va para manager stages o algo asi 
@@ -154,6 +160,8 @@ public class GameManager : MonoBehaviour {
         else
         {
             CustomDebugger.Log("IncorrectGuess");
+            int magnitude = number - turnSticker.amountOfAppearances;
+            deathDefyMagnitude = Mathf.Abs(magnitude);
             OnIncorrectGuess();
             turnAction = TurnAction.GuessIncorrect;
         }
@@ -217,14 +225,20 @@ public class GameManager : MonoBehaviour {
         {
             AddImages(turnNumber / 10);
         }
+        if (currentlyInGameImages.ContainsKey(_currentlySelectedSticker))
+        {
+            if (currentlyInGameImages[_currentlySelectedSticker].activeTurnApply == null && currentlyInGameImages[_currentlySelectedSticker].affectedValues.Count > 0)
+            {
+                currentlyInGameImages[_currentlySelectedSticker].affectedValues = new List<int>();
+            }
+        }
         SetRandomImage();
         disableInput = false;
-
     }
 
 
 
-   
+
 
     public void OnIncorrectGuess()
     {
@@ -235,7 +249,23 @@ public class GameManager : MonoBehaviour {
         audioSource.PlayOneShot(incorrectGuessClip);
         lifeCounter.LoseLive();
         _currentlySelectedSticker.amountOfAppearences--;
+        bool DeathDefy = GetDeathDefy(deathDefyMagnitude);
+        lifeCounter.LoseLive(ref protectedLife, DeathDefy);
+
         SetCurrentCombo(0);
+    }
+
+    private bool GetDeathDefy(float magnitude)
+    {
+        bool canDefyDeath = false;
+        if (magnitude <= 1) 
+        {
+            canDefyDeath = true;
+        }
+        bool DeathDefy = lifeCounter.lives == 1 && deathDefy && canDefyDeath;
+        if (DeathDefy)
+            deathDefy = false;
+        return DeathDefy;
     }
 
     public void SetCurrentCombo(int newCurrentComboAmount)
@@ -401,7 +431,7 @@ public class GameManager : MonoBehaviour {
 
         foreach (var sticker in shuffledStickers) {
             if (!currentlyInGameStickers.Contains(sticker)) {
-                currentlyInGameStickers.Add(sticker);
+                currentlyInGameStickers.Add((sticker,new StickerMatchData()));
                 amountOfImages--;
                 if (amountOfImages == 0) {
                     return true;
@@ -442,6 +472,14 @@ public class GameManager : MonoBehaviour {
     }
 
     private void SaveMatch() {
+
+
+        foreach (ConsumableID consumable in matchInventory.Keys)
+        {
+            int result = matchInventory[consumable].initial.consumableValue - matchInventory[consumable].current;
+            if (result > 0)
+                userData.modifyConsumableObject(consumable, -result);
+        }
         PersistanceManager.Instance.SaveUserData();
     }
     private IEnumerator SetHighScore(int highScoreToSet)
@@ -463,7 +501,7 @@ public class GameManager : MonoBehaviour {
         
         if (this.timer<=1)
         {
-            lifeCounter.LoseLive();
+            lifeCounter.LoseLive(ref protectedLife, false);
             _currentlySelectedSticker.amountOfAppearences--;
             NextTurn();
             SetTimer(maxTimer);
@@ -496,6 +534,8 @@ public class GameManager : MonoBehaviour {
         }
         stickerDisplay.ConfigureForGame(currentGameMode);
         
+        protectedLife = userData.upgrades.ContainsKey(UpgradeID.ProtectedLife) && userData.upgrades[UpgradeID.ProtectedLife] > 0;
+        deathDefy = userData.upgrades.ContainsKey(UpgradeID.DeathDefy) && userData.upgrades[UpgradeID.DeathDefy] > 0;
         SetNumpadByDifficulty(selectedDifficulty);
         bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
         gameEnded = false;
@@ -509,7 +549,7 @@ public class GameManager : MonoBehaviour {
         bonusMultiplicator = 1;
         lifeCounter.ResetLives();
         LoadStickers();
-        currentlyInGameStickers = new List<StickerData>();
+        currentlyInGameStickers = new List<(StickerData,StickerMatchData)>();
         AddImages(4);
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion
         //TODO: recordar para que era el comentario de arriba, poirque capaz esta arreglado ya y no me acuerdo
@@ -600,12 +640,12 @@ public class GameManager : MonoBehaviour {
             }
             else
             {
-                Debug.LogError("No se pudo convertir el string a bool: " + clear);
+                CustomDebugger.LogError("No se pudo convertir el string a bool: " + clear);
             }
         }
         // modificar para recibir tambien cantidad de imagenes en pack?
         // if (clears.Count != 3) {
-        //     Debug.LogError("Cantidad incorrecta de clears " + allClears);
+        //     CustomDebugger.LogError("Cantidad incorrecta de clears " + allClears);
         // }
         return clears;
     }
@@ -622,12 +662,12 @@ public class GameManager : MonoBehaviour {
             }
             else
             {
-                Debug.LogError("No se pudo convertir el string a entero: " + score);
+                CustomDebugger.LogError("No se pudo convertir el string a entero: " + score);
             }
         }
 
         if (highScores.Count != 3) {
-                Debug.LogError("Cantidad incorrecta de puntajes " + allScores);
+                CustomDebugger.LogError("Cantidad incorrecta de puntajes " + allScores);
         }
         return highScores;
     }
@@ -643,6 +683,11 @@ public class GameManager : MonoBehaviour {
     }
     public Canvas GetGameCanvas() {
         return gameCanvas.GetComponent<Canvas>();
+    }
+
+    public void SetMatchInventory()
+    {
+        matchInventory = userData.GetMatchInventory();
     }
 }
 

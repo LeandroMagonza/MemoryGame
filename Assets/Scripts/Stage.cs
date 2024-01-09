@@ -217,9 +217,11 @@ public class UserData
 
     [JsonProperty("imageDuplicates")] public List<DuplicateEntry> readStickerDuplicates = new List<DuplicateEntry>();
     //upgrades, inventario
+    public Dictionary<ConsumableID, int> consumables = new Dictionary<ConsumableID, int>();
+    public Dictionary<UpgradeID, int> upgrades = new Dictionary<UpgradeID, int>();
     //historial de compras
 
-    public UserStageData GetUserStageData(int stage,int difficulty)
+    public UserStageData GetUserStageData(int stage, int difficulty)
     {
         if (stage < 0 || difficulty < 0 )
         {
@@ -251,16 +253,89 @@ public class UserData
     public bool ModifyCoins(int modificationAmount)
     {
         modificationAmount += coins;
-        if (modificationAmount >= 0 )
+        if (modificationAmount >= 0)
         {
             coins = modificationAmount;
             return true;
         }
         return false;
     }
-    
-    
+    public void AddUpgradeObject(UpgradeID upgradeID)
+    {
+        if (upgrades.ContainsKey(upgradeID))
+        {
+            upgrades[upgradeID]++;
+        }
+        else
+        {
+            upgrades.Add(upgradeID, 1);
+        }
+    }
+    public void AddConsumableObject(ConsumableID consumableID)
+    {
+        if (consumables.ContainsKey(consumableID))
+        {
+            consumables[consumableID]++;
+        }
+        else
+        {
+            consumables.Add(consumableID, 1);
+        }
+    }
+    public void modifyConsumableObject(ConsumableID consumableID, int amount)
+    {
+        if (consumables.ContainsKey(consumableID))
+        {
+            consumables[consumableID] += amount;
+        }
+    }
+
+
+    public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> GetMatchInventory()
+    {
+        Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> temp_inventory = new Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)>();
+
+        Dictionary<ConsumableID, UpgradeID> upgradeRelation = new Dictionary<ConsumableID, UpgradeID>() {
+            {ConsumableID.Clue, UpgradeID.MaxClue },
+            {ConsumableID.Remove, UpgradeID.MaxRemove },
+            {ConsumableID.Cut, UpgradeID.MaxCut },
+            {ConsumableID.Peek, UpgradeID.MaxPeek }
+        };
+
+        foreach (var item in upgradeRelation)
+        {
+            ConsumableID consumableID = item.Key;
+            UpgradeID upgradeID = item.Value;
+
+            int currentLevel = 0;
+            if (PersistanceManager.Instance.userData.upgrades.ContainsKey(upgradeID))
+            {
+                currentLevel = PersistanceManager.Instance.userData.upgrades[upgradeID];
+            }
+
+            int max = ConsumableData.GetConsumable(consumableID).max + UpgradeData.GetUpgrade(upgradeID).GetAdditionalMax(currentLevel);
+            int baseValue = UpgradeData.GetUpgrade(upgradeID).GetAdditionalItem(currentLevel);
+            int initialValue = 0;
+            if (PersistanceManager.Instance.userData.consumables.ContainsKey(consumableID))
+            {
+                initialValue += PersistanceManager.Instance.userData.consumables[consumableID];
+            }
+            int total = initialValue + baseValue;
+            total = Mathf.Clamp(total, 0, max);
+            temp_inventory.Add(consumableID, (total, max, (baseValue, initialValue)));
+        }
+
+        //temp_inventory[ConsumableID.Clue];
+        //;
+        //PersistanceManager.Instance.userData.upgrades.[UpgradeID.MaxClue];
+
+
+
+        CustomDebugger.Log("tempCount" + temp_inventory.Count);
+        return temp_inventory;
+    }
 }
+    
 
 [Serializable]
 public class UserStageData
