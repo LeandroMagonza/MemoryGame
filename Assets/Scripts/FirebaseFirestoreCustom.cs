@@ -54,7 +54,7 @@ public class FirebaseFirestoreCustom : MonoBehaviour {
     // Cancel the currently running operation.
     protected void CancelOperation() {
         if (!operationInProgress || cancellationTokenSource == null) return;
-        Debug.Log("*** Cancelling operation *** ...");
+        CustomDebugger.Log("*** Cancelling operation *** ...");
         cancellationTokenSource.Cancel();
         cancellationTokenSource = null;
     }
@@ -175,9 +175,9 @@ class WaitForTaskCompletion : CustomYieldInstruction {
     public override bool keepWaiting {
         get {
             if (task.IsCompleted) {
-                Debug.Log("task completed");
+                CustomDebugger.Log("task completed");
                 if (task.IsFaulted) {
-                    Debug.Log("task faulted");
+                    CustomDebugger.Log("task faulted");
                 }
 
                 return false;

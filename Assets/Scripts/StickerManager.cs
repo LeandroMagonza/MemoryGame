@@ -102,7 +102,7 @@ public class StickerManager : MonoBehaviour
                     currentLoadedSetStickerData.Add(loadingStickerID,AssembleStickerData(loadingStickerID, s));
                     loadingStickerID++;
                 }*/
-                Debug.Log(imageSetName+" has this many strpites "+allSprites.Length);
+                CustomDebugger.Log(imageSetName+" has this many strpites "+allSprites.Length);
                 for (loadingStickerID = 0; loadingStickerID < totalStickersInSet; loadingStickerID++)
                 {
                     
@@ -128,15 +128,15 @@ public class StickerManager : MonoBehaviour
         }
 
 
-        Debug.Log("PATH: " + path);
+        CustomDebugger.Log("PATH: " + path);
         
     }
 
     public StickerData AssembleStickerData(StickerSet stickerSet, int stickerID, Sprite sprite)
     {
         int amountOfDulpicates = 0;
-        if (PersistanceManager.Instance.userData.imageDuplicates.ContainsKey((stickerSet,stickerID))) {
-            amountOfDulpicates = PersistanceManager.Instance.userData.imageDuplicates[(stickerSet,stickerID)];
+        if (PersistanceManager.Instance.userData.stickerDuplicates.ContainsKey((stickerSet,stickerID))) {
+            amountOfDulpicates = PersistanceManager.Instance.userData.stickerDuplicates[(stickerSet,stickerID)];
         }
 
         var additionalData = GetStickerAdditionalData(stickerSet, stickerID+1);
@@ -155,18 +155,18 @@ public class StickerManager : MonoBehaviour
 
     public int GetStickerLevelByAmountOfDuplicates(int amountOfDuplicates)
     {
-        Debug.Log("GetStickerLevelByAmountOfDuplicates");
-        Debug.Log("amount of duplicates "+amountOfDuplicates);
+        CustomDebugger.Log("GetStickerLevelByAmountOfDuplicates");
+        CustomDebugger.Log("amount of duplicates "+amountOfDuplicates);
         int level = 0;
-        Debug.Log("stikcerlevels count "+PersistanceManager.Instance.StickerLevels.Count);
+        CustomDebugger.Log("stikcerlevels count "+PersistanceManager.Instance.StickerLevels.Count);
         foreach (var VARIABLE in PersistanceManager.Instance.StickerLevels)
         {
             
-            Debug.Log("level "+VARIABLE.Key+" duplicates required "+VARIABLE.Value.amountRequired);
+            CustomDebugger.Log("level "+VARIABLE.Key+" duplicates required "+VARIABLE.Value.amountRequired);
             if (amountOfDuplicates < VARIABLE.Value.amountRequired) break;
             level = VARIABLE.Key;
         }
-        Debug.Log("resulitng level "+level);
+        CustomDebugger.Log("resulitng level "+level);
         return level;
     }
     private void ReadAdditionalDataCSV(StickerSet stickerSet)
@@ -186,7 +186,7 @@ public class StickerManager : MonoBehaviour
             string name = fields[1];
             string type = fields[2];
             Color color = Color.white;
-            Debug.Log("color unparsed " + fields[3]);
+            CustomDebugger.Log("color unparsed " + fields[3]);
             if (ColorUtility.TryParseHtmlString(fields[3], out Color colorValue))
             {
                 color = colorValue;

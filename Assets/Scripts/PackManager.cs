@@ -48,7 +48,7 @@ public class PackManager : MonoBehaviour {
         bool canBuyPack = GameManager.Instance.userData.ModifyCoins(packCost);
         if (!canBuyPack)
         {
-            Debug.Log("Dont Have enough coins for pack");
+            CustomDebugger.Log("Dont Have enough coins for pack");
             GameManager.Instance.disableInput = false;
             yield break;
         }
@@ -61,11 +61,11 @@ public class PackManager : MonoBehaviour {
             stickerHolder.transform.GetChild(i).gameObject.transform.parent = null;
         }
         
-        Debug.Log("stickers per pack "+GameManager.Instance.packs.stickersPerPack);
+        CustomDebugger.Log("stickers per pack "+GameManager.Instance.packs.stickersPerPack);
 
         List< (int stickerID,StickerSet stickerSet)> gainedStickers = new List<(int stickerID, StickerSet stickerSet)>();
         for (int stickerNumber = 0; stickerNumber < GameManager.Instance.packs.stickersPerPack; stickerNumber++) {
-            Debug.Log("stickerNumber "+stickerNumber);
+            CustomDebugger.Log("stickerNumber "+stickerNumber);
             //int rarityRandomizer = Random.Range(0, 101);
             
             //rarity para despues, normal, raro legendario en instance packs legendary y rare chance
@@ -81,20 +81,20 @@ public class PackManager : MonoBehaviour {
                     break;
                 }
             }
-            Debug.Log("sticker randomizer "+stickerStageRandomizer+" stage "+stickerStage);
-            Debug.Log("set has "+GameManager.Instance.stages[stickerStage].stickers.Count+" stickerStickers");
+            CustomDebugger.Log("sticker randomizer "+stickerStageRandomizer+" stage "+stickerStage);
+            CustomDebugger.Log("set has "+GameManager.Instance.stages[stickerStage].stickers.Count+" stickerStickers");
             int selectedStickerIndex = Random.Range(0, GameManager.Instance.stages[stickerStage].stickers.Count);
-            Debug.Log("selected sticker from index "+selectedStickerIndex);
+            CustomDebugger.Log("selected sticker from index "+selectedStickerIndex);
             int selectedStickerImageID = GameManager.Instance.stages[stickerStage].stickers[selectedStickerIndex];
-            Debug.Log("corresponds to imageID "+selectedStickerImageID);
+            CustomDebugger.Log("corresponds to imageID "+selectedStickerImageID);
             
             gainedStickers.Add((selectedStickerImageID, GameManager.Instance.stages[stickerStage].stickerSet));
             
-            if (GameManager.Instance.userData.imageDuplicates.ContainsKey((GameManager.Instance.stages[stickerStage].stickerSet, selectedStickerImageID))) {
-                GameManager.Instance.userData.imageDuplicates[(GameManager.Instance.stages[stickerStage].stickerSet, selectedStickerImageID)]++;
+            if (GameManager.Instance.userData.stickerDuplicates.ContainsKey((GameManager.Instance.stages[stickerStage].stickerSet, selectedStickerImageID))) {
+                GameManager.Instance.userData.stickerDuplicates[(GameManager.Instance.stages[stickerStage].stickerSet, selectedStickerImageID)]++;
             }
             else {
-                GameManager.Instance.userData.imageDuplicates.Add((GameManager.Instance.stages[stickerStage].stickerSet, selectedStickerImageID),1);
+                GameManager.Instance.userData.stickerDuplicates.Add((GameManager.Instance.stages[stickerStage].stickerSet, selectedStickerImageID),1);
             }
 
         }
@@ -103,7 +103,7 @@ public class PackManager : MonoBehaviour {
             newSticker.transform.SetParent(stickerHolder.transform);
             //Instantiate(stickerHolderPrefab, stickerHolder.transform);
             StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(sticker.stickerSet,sticker.stickerID);
-            Debug.Log(stickerData.color);
+            CustomDebugger.Log(stickerData.color);
             newSticker.SetStickerData(stickerData);
             newSticker.ConfigureForPack();
             newSticker.transform.localScale = Vector3.one;

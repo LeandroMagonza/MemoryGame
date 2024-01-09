@@ -23,7 +23,7 @@ public class NumpadButton : MonoBehaviour {
         if (GameManager.Instance.gameEnded || GameManager.Instance.disableInput) {
             return;
         }
-       Debug.Log("Clicked number "+number);
+       CustomDebugger.Log("Clicked number "+number);
        StartCoroutine(GameManager.Instance.ProcessTurnAction(number));
     }
 

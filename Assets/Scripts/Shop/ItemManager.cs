@@ -87,7 +87,7 @@ public class ItemManager : MonoBehaviour
     public void AddItem(ItemID item)
     {
         if ((int)item < 0) return;
-        Debug.Log("Added Item:" + nameof(item));
+        CustomDebugger.Log("Added Item:" + nameof(item));
         AddItemTodictionaries(item);
         ValidateItem(item);
     }
@@ -150,7 +150,7 @@ public class ItemManager : MonoBehaviour
 
     public void UseClue()
     {
-        //Debug.Log("USE CLUE");
+        //CustomDebugger.Log("USE CLUE");
         //var turnSticker = GameManager.Instance.GetCurrentlySelectedSticker();
         //if (!matchConsumables.ContainsKey(ItemID.Clue) || matchConsumables[ItemID.Clue] <= 0) return;
         //GameManager.Instance.audioSource.PlayOneShot(buttonClueAudioClip);
@@ -173,7 +173,7 @@ public class ItemManager : MonoBehaviour
     
     public void UseRemove()
     {
-        //Debug.Log("USE REMOVE");
+        //CustomDebugger.Log("USE REMOVE");
         //if (!matchConsumables.ContainsKey(ItemID.Remove) || matchConsumables[ItemID.Remove] == 0) return;
         //GameManager.Instance.audioSource.PlayOneShot(buttonRemoveAudioClip);
         ////anim

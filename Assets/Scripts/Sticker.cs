@@ -18,7 +18,7 @@ public class Sticker : MonoBehaviour
 
     public void SetStickerData(StickerData stickerDataToSet)
     {
-        Debug.Log("Setting Sticker data for stickerID "+stickerDataToSet.stickerID);
+        CustomDebugger.Log("Setting Sticker data for stickerID "+stickerDataToSet.stickerID);
         currentStickerData = stickerDataToSet;
         SetName(stickerDataToSet);
         SetExpBar(stickerDataToSet);
@@ -49,30 +49,30 @@ public class Sticker : MonoBehaviour
             duplicatesForCurrentLevel = PersistanceManager.Instance.StickerLevels[stickerDataToSet.level].amountRequired;
         }
         
-        Debug.Log("stickerDataToSet.amountOfDuplicates "+stickerDataToSet.amountOfDuplicates);
-        Debug.Log("duplicates for this level "+duplicatesForCurrentLevel);
-        Debug.Log("duplicates on this sticker "+stickerDataToSet.amountOfDuplicates);
-        Debug.Log("stickerDataLevel "+stickerDataToSet.level);
+        CustomDebugger.Log("stickerDataToSet.amountOfDuplicates "+stickerDataToSet.amountOfDuplicates);
+        CustomDebugger.Log("duplicates for this level "+duplicatesForCurrentLevel);
+        CustomDebugger.Log("duplicates on this sticker "+stickerDataToSet.amountOfDuplicates);
+        CustomDebugger.Log("stickerDataLevel "+stickerDataToSet.level);
         int levelExpCurrent = stickerDataToSet.amountOfDuplicates - duplicatesForCurrentLevel;
         int levelExpTotal;
         
         if (PersistanceManager.Instance.StickerLevels.ContainsKey(stickerDataToSet.level + 1)) {
             levelExpTotal = PersistanceManager.Instance.StickerLevels[stickerDataToSet.level + 1].amountRequired -
                             duplicatesForCurrentLevel;
-            Debug.Log("duplicates for next level"+PersistanceManager.Instance.StickerLevels[stickerDataToSet.level + 1].amountRequired);
+            CustomDebugger.Log("duplicates for next level"+PersistanceManager.Instance.StickerLevels[stickerDataToSet.level + 1].amountRequired);
         }
         else {
             levelExpTotal = -1;
         }
-        Debug.Log("levelExpCurrent"+levelExpCurrent);
-        Debug.Log("levelExpTotal"+levelExpTotal);
+        CustomDebugger.Log("levelExpCurrent"+levelExpCurrent);
+        CustomDebugger.Log("levelExpTotal"+levelExpTotal);
         if (levelExpTotal == -1) {
             expBar.fillAmount = 1;
             expBar.color = Color.green;
             DisplayLevelStickerProgressAmount(false);
         }
         else {
-            Debug.Log("fill amount "+(float)levelExpCurrent / levelExpTotal);
+            CustomDebugger.Log("fill amount "+(float)levelExpCurrent / levelExpTotal);
             expBar.fillAmount = (float)levelExpCurrent / levelExpTotal;
             expBar.color = Color.yellow;
             levelStickerCurrent.text = levelExpCurrent.ToString();
@@ -148,3 +148,4 @@ public class Sticker : MonoBehaviour
         DisplayBonus(true);
     }
 }
+

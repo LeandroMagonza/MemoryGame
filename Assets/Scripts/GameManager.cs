@@ -140,20 +140,20 @@ public class GameManager : MonoBehaviour {
     public IEnumerator ProcessTurnAction(int number)
     {
         disableInput = true;
-        Debug.Log("Guessed number " + number + ", amount of appearances " + _currentlySelectedSticker.amountOfAppearences);
+        CustomDebugger.Log("Guessed number " + number + ", amount of appearances " + _currentlySelectedSticker.amountOfAppearences);
         TurnAction turnAction;
         int scoreModification = 0;
         var turnSticker = _currentlySelectedSticker;
         
         if (number == GetCorrectGuess(turnSticker))
         {
-            Debug.Log("CorrectGuess");
+            CustomDebugger.Log("CorrectGuess");
             scoreModification = OnCorrectGuess();
             turnAction = TurnAction.GuessCorrect;
         }
         else
         {
-            Debug.Log("IncorrectGuess");
+            CustomDebugger.Log("IncorrectGuess");
             OnIncorrectGuess();
             turnAction = TurnAction.GuessIncorrect;
         }
@@ -202,7 +202,7 @@ public class GameManager : MonoBehaviour {
     {
         if (_currentlySelectedSticker.amountOfAppearences == bonusOnAmountOfAppearences)
         {
-            Debug.Log("Clear: " + _currentlySelectedSticker.name);
+            CustomDebugger.Log("Clear: " + _currentlySelectedSticker.name);
             GainBonus();
             RemoveStickerFromPool();
         }
@@ -276,7 +276,7 @@ public class GameManager : MonoBehaviour {
     [ContextMenu("GainBonus")]
     private void GainBonus()
     {
-        Debug.Log("gain bonus");
+        CustomDebugger.Log("gain bonus");
         ModifyScore(_currentlySelectedSticker.amountOfAppearences * bonusMultiplicator);
         bonusMultiplicator++;
         audioSource.PlayOneShot(bonusClip);
@@ -298,7 +298,7 @@ public class GameManager : MonoBehaviour {
     private void LoadStickers() {
 
         _stickersFromStage = new Dictionary<int, StickerData>();
-        Debug.Log("Loading stickers for stage "+stages[selectedStage].stageID+", name "+stages[selectedStage].title+" from set "+ stages[selectedStage].stickerSet);
+        CustomDebugger.Log("Loading stickers for stage "+stages[selectedStage].stageID+", name "+stages[selectedStage].title+" from set "+ stages[selectedStage].stickerSet);
 
         foreach (var stickerID in stages[selectedStage].stickers) {
             StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(stages[selectedStage].stickerSet, stickerID);
@@ -384,7 +384,7 @@ public class GameManager : MonoBehaviour {
     }
     private void Win() {
         audioSource.PlayOneShot(winClip);
-        Debug.Log("Win");
+        CustomDebugger.Log("Win");
         StartCoroutine(EndGame(winClip.length));
     }
     private bool AddImages(int amountOfImages) {
@@ -416,7 +416,7 @@ public class GameManager : MonoBehaviour {
         SaveMatch();
         endGameButtons.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
-        Debug.Log("Match Ended");
+        CustomDebugger.Log("Match Ended");
         
         if (userData.GetUserStageData(selectedStage, selectedDifficulty).highScore < score)
         {
@@ -471,7 +471,7 @@ public class GameManager : MonoBehaviour {
     }
     public void Lose()
     {
-        Debug.Log("Lose");
+        CustomDebugger.Log("Lose");
         audioSource.PlayOneShot(endGameClip);
         StartCoroutine(EndGame(endGameClip.length));
     }
@@ -513,6 +513,7 @@ public class GameManager : MonoBehaviour {
         AddImages(4);
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion
         //TODO: recordar para que era el comentario de arriba, poirque capaz esta arreglado ya y no me acuerdo
+        //TODO: JAJAJ
         _currentlySelectedSticker = null;
         SetRandomImage();
         disableInput = false;
@@ -648,7 +649,8 @@ public class GameManager : MonoBehaviour {
 public enum StickerSet {
     Pokemons_SPRITESHEET_151,
     Landscapes_IMAGES_10,
-    AnatomyFractures_SPRITESHEET_10
+    AnatomyFractures_SPRITESHEET_10,
+    AnatomyBones_SPRITESHEET_10
 }
 
 public enum ShopItemType

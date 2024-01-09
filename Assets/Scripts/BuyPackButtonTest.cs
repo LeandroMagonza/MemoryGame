@@ -14,10 +14,10 @@ public class BuyPackButtonTest : MonoBehaviour {
     public void OnClick()
     {
         if (GameManager.Instance.disableInput) {
-            Debug.Log("ïnput is disabled");
+            CustomDebugger.Log("ïnput is disabled");
             return;
         }
-        Debug.Log("open pack number "+packNumber);
+        CustomDebugger.Log("open pack number "+packNumber);
         StartCoroutine(PackManager.Instance.OpenPack(packNumber));
     }
 }

@@ -12,9 +12,9 @@ public class ChangeCanvasButton : MonoBehaviour {
     }
 
     public virtual void OnClick() {
-        Debug.Log("Pressed" +name);
+        CustomDebugger.Log("Pressed" +name);
         if (canvasToSet ==  null) {
-            Debug.Log("Canvas NotImplementedException set");
+            CustomDebugger.Log("Canvas NotImplementedException set");
             return;
         }
         CanvasManager.Instance.ChangeCanvas(canvasToSet);  

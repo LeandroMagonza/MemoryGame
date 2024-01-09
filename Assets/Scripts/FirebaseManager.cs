@@ -41,7 +41,7 @@ public class FirebaseManager : MonoBehaviour {
         firestoreFirebase.ReadDoc();
         // TODO: wait for read to complete
         yield return new WaitForSeconds(2);
-        Debug.Log("read completed");
-        Debug.Log(firestoreFirebase.fieldContents);
+        CustomDebugger.Log("read completed");
+        CustomDebugger.Log(firestoreFirebase.fieldContents);
     }
 }

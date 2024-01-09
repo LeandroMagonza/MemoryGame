@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -74,7 +75,7 @@ public class PersistanceManager : MonoBehaviour
         string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
         File.WriteAllText(filePath, json);
-        Debug.Log("Stages saved to " + filePath);
+        CustomDebugger.Log("Stages saved to " + filePath);
     }
 
     public IEnumerator LoadStages()
@@ -84,11 +85,11 @@ public class PersistanceManager : MonoBehaviour
         string json;
         if (!File.Exists(filePath))
         {
-            Debug.Log("No saved stages found at " + filePath);
+            CustomDebugger.Log("No saved stages found at " + filePath,DebugCategory.LOAD);
             yield return StartCoroutine(GetJson("stages"));
         }
 
-        Debug.Log(filePath);
+        CustomDebugger.Log(filePath,DebugCategory.LOAD);
         json = File.ReadAllText(filePath);
 
         // Deserialize the JSON to the intermediate object
@@ -103,12 +104,12 @@ public class PersistanceManager : MonoBehaviour
         foreach (var stageData in stageList.items)
         {
             stageData.ConvertColorStringToColorValue();
-            Debug.Log(stageData.stickerSet);
+            CustomDebugger.Log("Found stage:"+stageData.stickerSet+" stage:"+stageData.title,DebugCategory.LOAD);
         }
 
         // Convert the list to a dictionary
         Dictionary<int, StageData> stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
-        Debug.Log("Stages loaded from " + filePath + " stages: " + stages.Count);
+        CustomDebugger.Log("Stages loaded from " + filePath + " stages: " + stages.Count);
         this.stages = stages;
         yield return null;
         StageManager.Instance.InitializeStages();
@@ -116,7 +117,7 @@ public class PersistanceManager : MonoBehaviour
 
     public void SaveUserData()
     {
-        if (userData.imageDuplicates.Count == 0)
+        if (userData.stickerDuplicates.Count == 0)
         {
             return;
         }
@@ -124,7 +125,7 @@ public class PersistanceManager : MonoBehaviour
         string filePath = Path.Combine(Application.persistentDataPath, setName, "userData.json");
         string json = JsonConvert.SerializeObject(userData, Formatting.Indented);
         File.WriteAllText(filePath, json);
-        Debug.Log("UserData saved to " + filePath);
+        CustomDebugger.Log("UserData saved to " + filePath);
     }
 
     public IEnumerator LoadUserData()
@@ -133,16 +134,23 @@ public class PersistanceManager : MonoBehaviour
         string filePath = Path.Combine(Application.persistentDataPath, setName, "userData.json");
         if (!File.Exists(filePath))
         {
-            Debug.Log("No userdata found at " + filePath);
+            CustomDebugger.Log("No userdata found at " + filePath);
             yield return StartCoroutine(GetJson("userData"));
         }
 
         string json = File.ReadAllText(filePath);
+        // Define la configuración del JsonSerializer con tu convertidor personalizado
+        //JsonSerializerSettings settings = new JsonSerializerSettings();
+        //settings.Converters.Add(new StickerSetConverter());
+
+        // Deserializa el JSON utilizando los ajustes
         UserData userData = JsonConvert.DeserializeObject<UserData>(json);
 
+
         if (userData != null)
-        {
-            Debug.Log("UserData loaded from " + filePath + " stages:" + userData.stages.Count);
+        { 
+            userData.ConvertListToDictionary();
+            CustomDebugger.Log("UserData loaded from " + filePath + " stages:" + userData.stages.Count,DebugCategory.LOAD);
         }
         else
         {
@@ -164,11 +172,11 @@ public class PersistanceManager : MonoBehaviour
         string json;
         if (!File.Exists(filePath))
         {
-            Debug.Log("No saved stages found at " + filePath);
+            CustomDebugger.Log("No saved stages found at " + filePath);
             yield return StartCoroutine(GetJson("stages"));
         }
 
-        Debug.Log(filePath);
+        CustomDebugger.Log(filePath);
         json = File.ReadAllText(filePath);
 
         // Parse the JSON into a JObject
@@ -184,7 +192,7 @@ public class PersistanceManager : MonoBehaviour
             stickerLevels.Add(level, data);
         }
 
-        Debug.Log("StickerLevels loaded from " + filePath + " levels: " + stickerLevels.Count);
+        CustomDebugger.Log("StickerLevels loaded from " + filePath + " levels: " + stickerLevels.Count);
 
         // Do whatever you need with the stickerLevels dictionary
 
@@ -199,11 +207,11 @@ public class PersistanceManager : MonoBehaviour
         string json;
         if (!File.Exists(filePath))
         {
-            Debug.Log("No saved stages found at " + filePath);
+            CustomDebugger.Log("No saved stages found at " + filePath);
             yield return StartCoroutine(GetJson("stages"));
         }
 
-        Debug.Log(filePath);
+        CustomDebugger.Log(filePath);
         json = File.ReadAllText(filePath);
 
         // Parse the JSON into a JObject
@@ -224,8 +232,8 @@ public class PersistanceManager : MonoBehaviour
 
         packs = packsData;
 
-        Debug.Log("Packs loaded from " + filePath);
-        Debug.Log("stickersPerPack on load: " + packs.stickersPerPack);
+        CustomDebugger.Log("Packs loaded from " + filePath);
+        CustomDebugger.Log("stickersPerPack on load: " + packs.stickersPerPack);
         yield return null;
     }
 
@@ -240,7 +248,7 @@ public class PersistanceManager : MonoBehaviour
             if (www.result == UnityWebRequest.Result.ConnectionError ||
                 www.result == UnityWebRequest.Result.ProtocolError)
             {
-                Debug.Log(www.error + url);
+                CustomDebugger.Log(www.error + url);
             }
             else
             {
@@ -252,3 +260,30 @@ public class PersistanceManager : MonoBehaviour
 }
 
    
+public class StickerSetConverter : JsonConverter
+{
+    public override bool CanConvert(Type objectType)
+    {
+        return objectType == typeof(StickerSet);
+    }
+
+    public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+    {
+        string enumString = (string)reader.Value;
+        
+        // Aquí puedes manejar casos especiales o conversiones de nombres si es necesario
+        if (Enum.TryParse<StickerSet>(enumString, out var result))
+        {
+            return result;
+        }
+        
+        throw new JsonSerializationException($"Error al convertir el valor '{enumString}' a StickerSet enum.");
+    }
+
+    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    {
+        // Implementa esto si también necesitas escribir el JSON desde el enum
+        string enumString = value.ToString();
+        writer.WriteValue(enumString);
+    }
+}

@@ -21,12 +21,12 @@ public class ShopManager : MonoBehaviour
     public void BuyItem(int itemID)
     {
         ItemID item = (ItemID)itemID;
-        Debug.Log("Added Item:" + item.ToString());
+        CustomDebugger.Log("Added Item:" + item.ToString());
         int price = ItemPrizes.GetItemPrice(item);
         bool canBuy = GameManager.Instance.userData.ModifyCoins(-price);
         if (!canBuy)
         {   
-            Debug.Log("Not enough money");        
+            CustomDebugger.Log("Not enough money");        
             return;
         }
         ProcessItem(item);
@@ -38,7 +38,7 @@ public class ShopManager : MonoBehaviour
     }
     private void ProcessItem(ItemID itemId)
     {
-        Debug.Log($"{itemId} Purchase Successfully");
+        CustomDebugger.Log($"{itemId} Purchase Successfully");
         ItemManager.Instance.AddItem(itemId);
     }
 }

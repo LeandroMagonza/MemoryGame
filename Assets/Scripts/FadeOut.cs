@@ -32,7 +32,7 @@ public class FadeOut : MonoBehaviour
             textToFadeOut.color.a - fadeSpeed * Time.deltaTime
         );
         if (textToFadeOut.color.a*10 % 10 == 0) {
-            Debug.Log(textToFadeOut.color.a);
+            CustomDebugger.Log(textToFadeOut.color.a);
         }
     }
 }

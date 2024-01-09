@@ -19,7 +19,7 @@ public class DifficultyButton : ChangeCanvasButton {
 
     public override void OnClick()
     {
-        Debug.Log("Clicked difficultyButton "+stage+" "+difficulty);
+        CustomDebugger.Log("Clicked difficultyButton "+stage+" "+difficulty);
         StageManager.Instance.SetStageAndDifficulty(stage, difficulty);
         base.OnClick();
         GameManager.Instance.Reset();
@@ -35,24 +35,24 @@ public class DifficultyButton : ChangeCanvasButton {
     }
 
     public void UpdateDifficultyUnlocked() {
-        //Debug.Log("Called updatedifficulty in" + (stage, difficulty));
+        //CustomDebugger.Log("Called updatedifficulty in" + (stage, difficulty));
        
         //stage condicion de tener el ultimo nivel del stage anterior pasado
         //GameManager.Instance.userData.GetUserStageData(stage-1, 2) is null ||
         //GameManager.Instance.userData.GetUserStageData(stage-1, 2).achievements.Contains(Achievement.ClearedEveryImage)
         
-        /*Debug.Log("GameManager.Instance.userData.GetUserStageData(stage, difficulty).HasUnlockedStage() stage "+stage+" dif "+difficulty+" "+GameManager.Instance.userData.GetUserStageData(stage, difficulty).HasUnlockedStage());
-        Debug.Log("GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null stage "+stage+" dif "+difficulty+" "+GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null );
-        Debug.Log("GameManager.Instance.userData.GetUserStageData(stage, difficulty  - 1).achievements.Contains(Achievement.ClearedEveryImage) stage "+stage+" dif "+
+        /*CustomDebugger.Log("GameManager.Instance.userData.GetUserStageData(stage, difficulty).HasUnlockedStage() stage "+stage+" dif "+difficulty+" "+GameManager.Instance.userData.GetUserStageData(stage, difficulty).HasUnlockedStage());
+        CustomDebugger.Log("GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null stage "+stage+" dif "+difficulty+" "+GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null );
+        CustomDebugger.Log("GameManager.Instance.userData.GetUserStageData(stage, difficulty  - 1).achievements.Contains(Achievement.ClearedEveryImage) stage "+stage+" dif "+
                   (difficulty - 1)+" "+GameManager.Instance.userData.GetUserStageData(stage, difficulty  - 1).achievements.Contains(Achievement.ClearedEveryImage));*/
-        Debug.Log("button name "+ name);
+        CustomDebugger.Log("button name "+ name);
         // por que no encuentra el stage en userdata
         bool conditionStage = GameManager.Instance.userData.GetUserStageData(stage, difficulty).HasUnlockedStage();
         bool conditionDifficulty = GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null ||
                                    GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1).achievements
                                        .Contains(Achievement.ClearedEveryImage);
-        Debug.Log("conditionStage " + conditionStage);
-        Debug.Log("conditionDifficulty " + conditionDifficulty);
+        CustomDebugger.Log("conditionStage " + conditionStage);
+        CustomDebugger.Log("conditionDifficulty " + conditionDifficulty);
         if (conditionStage && conditionDifficulty)
         {
             GetComponent<Button>().interactable = true;

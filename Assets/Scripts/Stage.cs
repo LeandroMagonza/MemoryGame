@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Mime;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using TMPro;
@@ -51,9 +51,9 @@ public class Stage : MonoBehaviour
         
         foreach (var stickerFromStage in GameManager.Instance.stages[stage].stickers) {
             //tiene por lo menos una vez la figurita del stage, en sus imageduplicates
-            if (GameManager.Instance.userData.imageDuplicates.ContainsKey((GameManager.Instance.stages[stage].stickerSet,stickerFromStage))
+            if (GameManager.Instance.userData.stickerDuplicates.ContainsKey((GameManager.Instance.stages[stage].stickerSet,stickerFromStage))
                 &&
-                GameManager.Instance.userData.imageDuplicates[(GameManager.Instance.stages[stage].stickerSet,stickerFromStage)] > 0) {
+                GameManager.Instance.userData.stickerDuplicates[(GameManager.Instance.stages[stage].stickerSet,stickerFromStage)] > 0) {
                 unlockedStickers.Add(stickerFromStage);
             }
         }
@@ -151,17 +151,17 @@ public class Match
         List<int> clearedImages = new();
         int maxLives = turnHistory[0].remainingLives;
         bool lostLife = false;
-        Debug.Log("Ending match with turns:"+turnHistory.Count);
+        CustomDebugger.Log("Ending match with turns:"+turnHistory.Count);
         foreach (var turn in turnHistory) {
             score += turn.scoreModification;
             amountOfTurns ++;
-            Debug.Log("turnNumber: "+amountOfTurns);
-            Debug.Log("turn.amountOfAppearences == GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)");
-            Debug.Log(turn.amountOfAppearences +"=="+ GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) +"&& ("+turn.action +"=="+ TurnAction.GuessCorrect +"||"+turn.action+" == "+TurnAction.UseClue+")");
-            Debug.Log(turn.amountOfAppearences == GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue));
+            CustomDebugger.Log("turnNumber: "+amountOfTurns);
+            CustomDebugger.Log("turn.amountOfAppearences == GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)");
+            CustomDebugger.Log(turn.amountOfAppearences +"=="+ GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) +"&& ("+turn.action +"=="+ TurnAction.GuessCorrect +"||"+turn.action+" == "+TurnAction.UseClue+")");
+            CustomDebugger.Log(turn.amountOfAppearences == GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue));
             if (turn.amountOfAppearences == GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)) {
                 clearedImages.Add(turn.imageID);
-                Debug.Log("Ädding clearedImages stickerID"+turn.imageID);
+                CustomDebugger.Log("Ädding clearedImages stickerID"+turn.imageID);
             }
 
             if (turn.remainingLives < maxLives)
@@ -170,7 +170,7 @@ public class Match
             }
         }
         
-        Debug.Log("clearedImages " +clearedImages.Count);
+        CustomDebugger.Log("clearedImages " +clearedImages.Count);
         List<Achievement> achievementsFullFilled = new List<Achievement>();
         date = DateTime.Now;
         if (!lostLife) achievementsFullFilled.Add(Achievement.ClearedStageNoMistakes);
@@ -211,7 +211,11 @@ public class UserData
     public int id;
     public int coins;
     public List<UserStageData> stages;
-    public Dictionary<(StickerSet,int),int> imageDuplicates = new Dictionary<(StickerSet, int), int>();
+    
+    [JsonIgnore] // Ignora esta propiedad durante la deserialización
+    public Dictionary<(StickerSet,int),int> stickerDuplicates = new Dictionary<(StickerSet, int), int>();
+
+    [JsonProperty("imageDuplicates")] public List<DuplicateEntry> readStickerDuplicates = new List<DuplicateEntry>();
     //upgrades, inventario
     //historial de compras
 
@@ -237,7 +241,13 @@ public class UserData
         
         return userStageData;
     }
-
+    public void ConvertListToDictionary()
+    {
+        stickerDuplicates = readStickerDuplicates.ToDictionary(
+            entry => (entry.Key.StickerSet, entry.Key.StickerID),
+            entry => entry.Value
+        );
+    }
     public bool ModifyCoins(int modificationAmount)
     {
         modificationAmount += coins;
@@ -278,28 +288,28 @@ public class UserStageData
         foreach (var clearedImageID in matchResult.clearedImages) {
             if ( !clearedImages.Contains(clearedImageID)) clearedImages.Add(clearedImageID); 
         }
-        Debug.Log("-------------------Achievement ClearedStage----------------------");
-        Debug.Log("amountOfImagesInStage == matchResult.clearedImages.Count");
-        Debug.Log(amountOfImagesInStage +" == "+ matchResult.clearedImages.Count);
-        Debug.Log(amountOfImagesInStage == matchResult.clearedImages.Count);
-        Debug.Log("---------------------------------------------------------");
+        CustomDebugger.Log("-------------------Achievement ClearedStage----------------------");
+        CustomDebugger.Log("amountOfImagesInStage == matchResult.clearedImages.Count");
+        CustomDebugger.Log(amountOfImagesInStage +" == "+ matchResult.clearedImages.Count);
+        CustomDebugger.Log(amountOfImagesInStage == matchResult.clearedImages.Count);
+        CustomDebugger.Log("---------------------------------------------------------");
         
         if (amountOfImagesInStage == matchResult.clearedImages.Count)
         {
             matchResult.achievementsFullfilled.Add(Achievement.ClearedStage);
         }
-        Debug.Log("-------------------Achievement ClearedEveryImage----------------------");
-        Debug.Log("amountOfImagesInStage == clearedImages.Count");
-        Debug.Log(amountOfImagesInStage +" == "+ clearedImages.Count);
-        Debug.Log(amountOfImagesInStage == clearedImages.Count);
-        Debug.Log("---------------------------------------------------------");
+        CustomDebugger.Log("-------------------Achievement ClearedEveryImage----------------------");
+        CustomDebugger.Log("amountOfImagesInStage == clearedImages.Count");
+        CustomDebugger.Log(amountOfImagesInStage +" == "+ clearedImages.Count);
+        CustomDebugger.Log(amountOfImagesInStage == clearedImages.Count);
+        CustomDebugger.Log("---------------------------------------------------------");
         if (amountOfImagesInStage == clearedImages.Count)
         {
             matchResult.achievementsFullfilled.Add(Achievement.ClearedEveryImage);
         }
-        Debug.Log("achievements fullfilled count"+matchResult.achievementsFullfilled.Count);
+        CustomDebugger.Log("achievements fullfilled count"+matchResult.achievementsFullfilled.Count);
         foreach (var fullfilledAchievement in matchResult.achievementsFullfilled) {
-            Debug.Log("achievement fullfilled "+fullfilledAchievement);
+            CustomDebugger.Log("achievement fullfilled "+fullfilledAchievement);
             if (!achievements.Contains(fullfilledAchievement))
             {
                 achievements.Add(fullfilledAchievement);
@@ -307,16 +317,16 @@ public class UserStageData
             } 
         }
         
-        Debug.Log("Added Match with turns "+currentMatch.turnHistory.Count);
+        CustomDebugger.Log("Added Match with turns "+currentMatch.turnHistory.Count);
         return firstTimeAchievements;
     }
     public bool HasUnlockedStage()
     {
         foreach (var imageFromStage in GameManager.Instance.stages[stage].stickers) {
             //tiene por lo menos una vez la figurita del stage, en sus imageduplicates
-            if (!GameManager.Instance.userData.imageDuplicates.ContainsKey((GameManager.Instance.stages[stage].stickerSet,imageFromStage))
+            if (!GameManager.Instance.userData.stickerDuplicates.ContainsKey((GameManager.Instance.stages[stage].stickerSet,imageFromStage))
                 ||
-                GameManager.Instance.userData.imageDuplicates[(GameManager.Instance.stages[stage].stickerSet,imageFromStage)] <= 0) {
+                GameManager.Instance.userData.stickerDuplicates[(GameManager.Instance.stages[stage].stickerSet,imageFromStage)] <= 0) {
                 return  false;
             }
         }
@@ -324,7 +334,18 @@ public class UserStageData
     }
 }
 
-// Otras clases...
+public class StickerKey
+{
+    [JsonConverter(typeof(StickerSetConverter))]
+    public StickerSet StickerSet { get; set; }
+    public int StickerID { get; set; }
+}
+
+public class DuplicateEntry
+{
+    public StickerKey Key { get; set; }
+    public int Value { get; set; }
+}
 
 [JsonConverter(typeof(StringEnumConverter))]
 public enum TurnAction {
