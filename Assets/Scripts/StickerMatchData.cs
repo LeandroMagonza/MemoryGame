@@ -15,10 +15,15 @@ public class StickerMatchData
     }
     public void AddCutEffect(int correctNumber, int difficulty)
     {
-        int options = GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) -
-                      (int)lastClueAppearenceNumber;
-        cutNumbers = new List<int>();
+        int lastClue = 1;
         int iterator = 0;
+        if (lastClueAppearenceNumber is not null)
+        {
+            lastClue = (int)lastClueAppearenceNumber;
+        }
+        int options = GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) -
+                      lastClue;
+        cutNumbers = new List<int>();
 
         switch (options)
         {
@@ -36,12 +41,17 @@ public class StickerMatchData
                 break;
             
         }
-        while (iterator > 0)
+
+        while (iterator >= 0)
         {
-            int random = Random.Range((int)lastClueAppearenceNumber+1, GameManager.Instance.DifficultyToAmountOfAppearences(difficulty)+1);
-            if (random == correctNumber) continue;
-            cutNumbers.Add(random);
-            iterator--;
+            int random = Random.Range(lastClue, GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) +1 );
+            Debug.Log($"Random: {random} Correct: {correctNumber}");
+            if (random != correctNumber && !cutNumbers.Contains(random))
+            {
+                cutNumbers.Add(random);
+                iterator--;
+            }
+            Debug.Log("iterator: "+iterator);
         }
     }
 

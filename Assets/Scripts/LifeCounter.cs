@@ -13,17 +13,16 @@ public class LifeCounter : MonoBehaviour
 
     public List<GameObject> hearts;
     // Start is called before the first frame update
-    private void Start()
+    public void Start()
     {
         SetLives();
         UpdateHearts();
+        if (GameManager.Instance.userData.upgrades.ContainsKey(UpgradeID.ProtectedLife) && GameManager.Instance.userData.upgrades[UpgradeID.ProtectedLife] > 0)
+        {
+            ProtectHearts();
+        }
     }
 
-
-    public void AddHeart()
-    {
-        heartCount++;
-    }
     public void SetProtectLifeColor()
     {
         int heartIndex = 0;
@@ -40,19 +39,40 @@ public class LifeCounter : MonoBehaviour
             heartIndex++;
         }
     }
+
     public void SetLives()
     {
-        for (int i = heartCount -1 ; i >= 0; i--)
+        int add = 0;
+        if (GameManager.Instance.userData.upgrades.ContainsKey(UpgradeID.ExtraLife))
+            add = GameManager.Instance.userData.upgrades[UpgradeID.ExtraLife];
+        int index = heartCount - 1 + add;
+        if (index + 1 != hearts.Count)
         {
-            var heart = Instantiate(heartPrefab, lifeCounterContainer);
-            hearts.Add(heart);
+            if (hearts.Count > 0)
+            {
+                List<GameObject> list = new List<GameObject>(hearts);
+                hearts = new List<GameObject>();
+                foreach(GameObject gameObject in list)
+                {
+                    Destroy(gameObject.gameObject);
+                }
+            }
+            for (int i = index; i >= 0; i--)
+            {
+                var heart = Instantiate(heartPrefab, lifeCounterContainer);
+                hearts.Add(heart);
+            }
         }
+
+        
     }
     public void LoseLive(ref bool protectedLife, bool deathDefy) 
     {
         //TODO: Chequear tema de que corazones aparecen, etc
         if (protectedLife)
+        {
             protectedLife = false;
+        }
         else if (!deathDefy)
             lives--;
         UpdateHearts();
@@ -73,10 +93,28 @@ public class LifeCounter : MonoBehaviour
             heartIndex++;
         }
     }
-
+    public void ProtectHearts()
+    {
+        int heartIndex = 0;
+        foreach (var heart in hearts)
+        {
+            if (heartIndex >= lives)
+            {
+                heart.GetComponent<Image>().color = Color.black;
+            }
+            else
+            {
+                heart.GetComponent<Image>().color = Color.cyan;
+            }
+            heartIndex++;
+        }
+    }
     public void ResetLives() {
-        lives = heartCount;
-        UpdateHearts();
+        int add = 0;
+        if (GameManager.Instance.userData.upgrades.ContainsKey(UpgradeID.ExtraLife))
+            add = GameManager.Instance.userData.upgrades[UpgradeID.ExtraLife];
+        lives = heartCount + add;
+        Start();
     }
 
     public void GainLive() {
@@ -89,7 +127,10 @@ public class LifeCounter : MonoBehaviour
 
     private Color GetHeartColor(int heartIndex)
     {
-        float lerp = 1 / (float)heartCount;
+        int add = 0;
+        if (GameManager.Instance.userData.upgrades.ContainsKey(UpgradeID.ExtraLife))
+            add = GameManager.Instance.userData.upgrades[UpgradeID.ExtraLife];
+        float lerp = 1 / (float)(heartCount + add);
         lerp *= heartIndex;
         float halfWay = lerp / 2; 
         Color c = Color.white;

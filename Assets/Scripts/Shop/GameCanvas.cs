@@ -1,30 +1,66 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+[System.Serializable]
+public struct ConsumableButtonData
+{
+    [SerializeField] public string name;
+    [SerializeField] public ConsumableID ID;
+    [SerializeField] public Button button;
+    [SerializeField] public TextMeshProUGUI text;
+    [SerializeField] public AudioClip audioClip;
+
+    public void SetButtonText(ConsumableID consumableID)
+    {
+        if (text != null)
+        {
+
+            if (GameManager.Instance.matchInventory.ContainsKey(consumableID))
+            {
+                text.text = GameManager.Instance.matchInventory[consumableID].current.ToString();
+            }
+            else
+            {
+                Debug.Log("not implemented");
+                text.text = "0";
+            }
+        }
+        else
+        {
+        }
+
+    }
+    public void SetInteractable(ConsumableID consumableID)
+    {
+        if (button != null)
+        {
+            if (GameManager.Instance.matchInventory.ContainsKey(consumableID))
+            {
+
+                button.interactable = GameManager.Instance.matchInventory[consumableID].current > 0;
+            }
+            else
+            {
+                button.interactable = false;
+            }
+        }
+    }
+}
 public class GameCanvas : MonoBehaviour
 {
-    [Header("Consumable Settings")]
-    [SerializeField] private Button buttonClue;
-    [SerializeField] private Button buttonRemove;
-    [SerializeField] private Button buttonCut;
-    [SerializeField] private Button buttonPeek;
-
-    [SerializeField] private TextMeshProUGUI buttonTextClue;
-    [SerializeField] private TextMeshProUGUI buttonTextRemove;
-    [SerializeField] private TextMeshProUGUI buttonTextPeek;
-    [SerializeField] private TextMeshProUGUI buttonTextCut;
-
-    [SerializeField] private AudioClip buttonClueAudioClip;
-    [SerializeField] private AudioClip buttonRemoveAudioClip;
-    [SerializeField] private AudioClip buttonCutAudioClip;
-    [SerializeField] private AudioClip buttonPeekAudioClip;
-
+    public ConsumableButtonData[] buttons;
     private GameManager GameManager => GameManager.Instance;
-
-    private Dictionary <int, Button> numpadButtons = new Dictionary<int, Button>();
+    public static GameCanvas Instance;
+    private Dictionary<int, Button> numpadButtons = new Dictionary<int, Button>();
+    private void Awake()
+    {
+        if (Instance == null)
+            Instance = this;
+    }
     private void OnEnable()
     {
         GameManager.SetMatchInventory();
@@ -32,140 +68,63 @@ public class GameCanvas : MonoBehaviour
         UpdateUI();
     }
 
-    private void UpdateUI()
+    public void UpdateUI()
     {
         SetButtonText();
-        SetInteractable();
     }
 
     private void SetButtonText()
     {
-        if (buttonTextClue != null)
+        for (int i = 0; i < buttons.Length; i++)
         {
-            if (GameManager.matchInventory.ContainsKey(ConsumableID.Clue))
+            for (int j = 0; j < Enum.GetNames(typeof(ConsumableID)).Length; j++)
             {
-                buttonTextClue.text = GameManager.matchInventory[ConsumableID.Clue].current.ToString();
-            }
-            else
-            {
-                buttonTextClue.text = "0";
-            }
-        }
-        if (buttonTextPeek != null)
-        {
-            if (GameManager.matchInventory.ContainsKey(ConsumableID.Peek))
-            {
-                buttonTextPeek.text = GameManager.matchInventory[ConsumableID.Peek].current.ToString();
-            }
-            else
-            {
-                buttonTextPeek.text = "0";
-            }
-        }
-        if (buttonTextCut != null)
-        {
-            if (GameManager.matchInventory.ContainsKey(ConsumableID.Cut))
-            { 
-                buttonTextCut.text = GameManager.matchInventory[ConsumableID.Cut].current.ToString(); 
-            }
-            else
-            {
-                buttonTextCut.text = "0";
-            }
-        }
-        if (buttonTextRemove != null)
-        {
-            if (GameManager.matchInventory.ContainsKey(ConsumableID.Remove))
-            {
-                buttonTextRemove.text = GameManager.matchInventory[ConsumableID.Remove].current.ToString();
-            }
-            else
-            {
-                buttonTextRemove.text = "0";
+                if (buttons[i].ID == (ConsumableID)j)
+                {
+                    buttons[i].SetButtonText((ConsumableID)j);
+                    buttons[i].SetInteractable((ConsumableID)j);
+                }
             }
         }
         SetNumpadButtons(GameManager.GetCurrentlySelectedSticker());
     }
-    private void SetInteractable()
-    {
-        if (buttonClue != null)
-        {
-            if (GameManager.matchInventory.ContainsKey(ConsumableID.Clue))
-            {
 
-                buttonClue.interactable = GameManager.matchInventory[ConsumableID.Clue].current > 0;
-            }
-            else
-            {
-                buttonClue.interactable = false;
-            }
-        }
-        if (buttonRemove != null)
-        {
-            if (GameManager.matchInventory.ContainsKey(ConsumableID.Remove))
-            {
-
-                buttonRemove.interactable = GameManager.matchInventory[ConsumableID.Remove].current > 0;
-            }
-            else
-            {
-                buttonRemove.interactable = false;
-            }
-        }
-        if (buttonCut != null)
-        {
-            if (GameManager.matchInventory.ContainsKey(ConsumableID.Cut))
-            {
-                buttonCut.interactable = GameManager.matchInventory[ConsumableID.Cut].current > 0;
-            }
-            else
-            {
-                buttonCut.interactable = false;
-            }
-        }
-        if (buttonPeek != null)
-        {
-            if (GameManager.matchInventory.ContainsKey(ConsumableID.Peek))
-            {
-                buttonPeek.interactable = GameManager.matchInventory[ConsumableID.Peek].current > 0;
-            }
-            else
-            {
-                buttonPeek.interactable = false;
-            }
-        }
-    }
 
     private void SetNumpadButtons((StickerData sticker, StickerMatchData matchData) stickerData)
     {
         ResetNumUIButtons();
-        
+        if (stickerData.matchData == null || stickerData.sticker == null) return;
         //BetterClue
         if (stickerData.matchData.lastClueAppearenceNumber != null)
         {
             CustomDebugger.Log("active turn sticker" + stickerData.matchData.lastClueAppearenceNumber);
             numpadButtons[(int)stickerData.matchData.lastClueAppearenceNumber].GetComponentInChildren<TextMeshProUGUI>().color = Color.green;
-            for (int i = 0; i <= (int)stickerData.matchData.lastClueAppearenceNumber ; i++)
+            for (int i = 1; i <= (int)stickerData.matchData.lastClueAppearenceNumber; i++)
             {
                 numpadButtons[i].interactable = false;
             }
         }
-        //Cut
-        foreach (var i in stickerData.matchData.cutNumbers)
+        if (stickerData.matchData.cutNumbers.Count > 0)
         {
-            numpadButtons[i].GetComponentInChildren<TextMeshProUGUI>().color = Color.red;
-            numpadButtons[i].interactable = false;
+            //Cut
+            for (int i = 1; i < stickerData.matchData.cutNumbers.Count; i++)
+            {
+                Debug.Log($"stickerData.matchData.cutNumbers: {stickerData.matchData.cutNumbers.Count} number: {i} contains: {stickerData.matchData.cutNumbers.Contains(i)}");
+                numpadButtons[stickerData.matchData.cutNumbers[i]].GetComponentInChildren<TextMeshProUGUI>().color = Color.red;
+                numpadButtons[stickerData.matchData.cutNumbers[i]].interactable = false;
+            }
         }
-
-
     }
 
     public void ResetNumUIButtons()
     {
-        foreach (int button in numpadButtons.Keys)
+        if (numpadButtons.Count > 0)
         {
-            numpadButtons[button].interactable = true;
-            numpadButtons[button].GetComponentInChildren<TextMeshProUGUI>().color = Color.white;
+            for (int i = 1; i <= numpadButtons.Count; i++)
+            {
+                numpadButtons[i].interactable = true;
+                numpadButtons[i].GetComponentInChildren<TextMeshProUGUI>().color = Color.white;
+            }
         }
     }
 
@@ -174,7 +133,7 @@ public class GameCanvas : MonoBehaviour
         Debug.Log("NumPAD_ROW_Buttons Lenght: " + rows.Length);
         for (int i = 0; i < rows.Length; i++)
         {
-            for (int j = 0; j< rows[i].transform.childCount; j++)
+            for (int j = 0; j < rows[i].transform.childCount; j++)
             {
                 Button button = rows[i].transform.GetChild(j).GetComponent<Button>();
                 NumpadButton numpadButton = button.GetComponent<NumpadButton>();
@@ -184,15 +143,15 @@ public class GameCanvas : MonoBehaviour
                 }
             }
         }
-        Debug.Log("NumPAD_Buttons Count: "+ numpadButtons.Count);
+        Debug.Log("NumPAD_Buttons Count: " + numpadButtons.Count);
     }
 
     private (StickerData sticker, StickerMatchData matchData) USE(ConsumableID ID)
     {
-        Debug.Log("USE: "+  ID.ToString());
+        Debug.Log("USE: " + ID.ToString());
         var turnSticker = GameManager.GetCurrentlySelectedSticker();
         if (!GameManager.matchInventory.ContainsKey(ID) || GameManager.matchInventory[ID].current <= 0) return (turnSticker);
-        GameManager.audioSource.PlayOneShot(buttonClueAudioClip);
+        GameManager.audioSource.PlayOneShot(buttons[(int)ID].audioClip);
         //anim
         var consumable = GameManager.matchInventory[ID];
         GameManager.matchInventory[ID] = (consumable.current - 1, consumable.max, consumable.initial);
@@ -214,30 +173,34 @@ public class GameCanvas : MonoBehaviour
     }
     public void UseClue()
     {
+        Debug.Log("Common");
+
         var turnSticker = USE(ConsumableID.Clue);
-        UpdateUI();
         int scoreModification = GameManager.OnCorrectGuess();
+        UpdateUI();
         SaveAction(turnSticker, scoreModification);
     }
     [ContextMenu("USE Better Clue")]
     public void UseBetterClue()
     {
+        Debug.Log("Better");
+
         var turnSticker = USE(ConsumableID.Clue);
         int amountOfAppears = GameManager.GetCurrentlySelectedSticker().sticker.amountOfAppearences;
         // por que crea uno nuevo?
         StickerMatchData stickerData = new StickerMatchData();
         stickerData.AddBetterClueEffect(amountOfAppears);
         GameManager.currentlyInGameStickers[GameManager.GetCurrentlySelectedSticker().sticker] = stickerData;
-        UpdateUI();
         int scoreModification = GameManager.OnCorrectGuess();
+        UpdateUI();
         SaveAction(turnSticker, scoreModification);
     }
     public void UseRemove()
     {
         var turnSticker = USE(ConsumableID.Remove);
-        UpdateUI();
         GameManager.RemoveStickerFromPool();
         GameManager.NextTurn();
+        UpdateUI();
     }
     [ContextMenu("USECUT")]
     public void UseCut()
@@ -253,12 +216,18 @@ public class GameCanvas : MonoBehaviour
     {
     }
 
-    public void UseItem(ConsumableID itemId)
+    public void UseItem(int ID)
     {
-        switch (itemId)
+        ConsumableID itemID = (ConsumableID)ID;
+        switch (itemID)
         {
             case ConsumableID.Clue:
-                UseClue();
+                Debug.Log(GameManager.userData.upgrades.ContainsKey(UpgradeID.BetterClue));
+                Debug.Log(GameManager.userData.upgrades[UpgradeID.BetterClue]);
+                if (GameManager.userData.upgrades.ContainsKey(UpgradeID.BetterClue) && GameManager.userData.upgrades[UpgradeID.BetterClue] > 0)
+                    UseBetterClue();
+                else
+                    UseClue();
                 break;
             case ConsumableID.Remove:
                 UseRemove();
