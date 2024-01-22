@@ -20,11 +20,13 @@ public enum UpgradeID
     ProtectedLife,
     MaxClue,
     BetterClue,
+
     MaxRemove,
     MaxCut,
     BetterCut,
     MaxPeek,
     Block,
+
     DeathDefy
 }
 
