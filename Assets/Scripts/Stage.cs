@@ -115,7 +115,7 @@ public class StageData
     }
 }
 
-[Serializable]
+//[JsonConverter(typeof(StringEnumConverter))]
 public enum Achievement {
     ClearedEveryImage,
     ClearedStage,
@@ -344,8 +344,11 @@ public class UserStageData
     public int difficulty;
     public List<int> clearedImages = new List<int>();
     public int highScore = 0;
-    [JsonProperty (ItemConverterType = typeof(StringEnumConverter))]
+    //[JsonProperty (ItemConverterType = typeof(StringEnumConverter))]
+    [JsonIgnore]
     public List<Achievement> achievements = new List<Achievement>();
+    [JsonProperty("achievements")]
+    public List<string> achievementsUnparsed = new List<string>();
     
     public List<Match> matches = new List<Match>();
 
@@ -422,7 +425,7 @@ public class DuplicateEntry
     public int Value { get; set; }
 }
 
-[JsonConverter(typeof(StringEnumConverter))]
+//[JsonConverter(typeof(StringEnumConverter))]
 public enum TurnAction {
     GuessCorrect,
     GuessIncorrect,

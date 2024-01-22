@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Threading.Tasks;
 using Firebase;
 using Firebase.Auth;
@@ -118,4 +118,4 @@ public class FirebaseAuthCustom : MonoBehaviour {
 
         return complete;
     }
-}
+}*/

@@ -3,7 +3,6 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
 
 public enum ConsumableID
 {
@@ -30,7 +29,7 @@ public enum UpgradeID
 }
 
 
-[System.Serializable]
+[System.Serializable] 
 public class ConsumableData
 {
     public ConsumableID itemID;
