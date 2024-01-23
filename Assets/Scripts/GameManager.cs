@@ -2,14 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Mono.Cecil.Cil;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using ColorUtility = UnityEngine.ColorUtility;
 using Random = UnityEngine.Random;
-using UnityEngine.Serialization;
-using System.Xml;
+
+
+//revisar el cut tal vez el continue cambia el valor del iterador
 
 public class GameManager : MonoBehaviour {
     #region Singleton
@@ -122,6 +121,8 @@ public class GameManager : MonoBehaviour {
     public TextMeshProUGUI comboBonusText;
     public TextMeshProUGUI comboText;
 
+
+    public GameCanvas GameCanvas => GameCanvas.Instance;
     public int selectedStage => StageManager.Instance.selectedStage;
     public int selectedDifficulty => StageManager.Instance.selectedDifficulty;
 
@@ -232,6 +233,7 @@ public class GameManager : MonoBehaviour {
             }
         }
         SetRandomImage();
+        GameCanvas.UpdateUI();
         disableInput = false;
     }
 
@@ -288,8 +290,11 @@ public class GameManager : MonoBehaviour {
         ModifyScore(scoreModification);
         SetCurrentCombo(_currentCombo+1);
         //Reset blocked and cut numbers for next appearence
-        currentlyInGameStickers[_currentlySelectedSticker].blockedNumbers = new List<int>();
-        currentlyInGameStickers[_currentlySelectedSticker].cutNumbers = new List<int>();
+        if (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
+        {
+            currentlyInGameStickers[_currentlySelectedSticker].blockedNumbers = new List<int>();
+            currentlyInGameStickers[_currentlySelectedSticker].cutNumbers = new List<int>();
+        }
         CheckAmountOfAppearences();
         return scoreModification;
     }
@@ -677,8 +682,13 @@ public class GameManager : MonoBehaviour {
     {
         int maxComboBonus = 5;
         int calculatedComboBonus = (int)Math.Floor(((float)_currentCombo / 2));
-        if (calculatedComboBonus > maxComboBonus)
+        if (calculatedComboBonus >= maxComboBonus)
         {
+            if (userData.upgrades.ContainsKey(UpgradeID.ProtectedLife) && userData.upgrades[UpgradeID.ProtectedLife] > 0)
+            {
+                protectedLife = true;
+                lifeCounter.ProtectHearts();
+            }
             calculatedComboBonus = maxComboBonus;
         }
         return calculatedComboBonus;
@@ -694,10 +704,13 @@ public class GameManager : MonoBehaviour {
 
     public (StickerData sticker,StickerMatchData matchData) GetCurrentlySelectedSticker()
     {
+        if (_currentlySelectedSticker is null)
+        {
+            return (null, null);
+        } 
         return (_currentlySelectedSticker, currentlyInGameStickers[_currentlySelectedSticker]);
     }
 }
-
 public enum StickerSet {
     Pokemons_SPRITESHEET_151,
     Landscapes_IMAGES_10,

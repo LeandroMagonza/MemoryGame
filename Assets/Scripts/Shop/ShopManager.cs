@@ -103,7 +103,7 @@ public class ShopManager : MonoBehaviour
     [ContextMenu("AddMoney")]
     public void AddMoney()
     {
-        GameManager.Instance.userData.ModifyCoins(10000);
+        GameManager.Instance.userData.ModifyCoins(1000000);
         UpdateMoneyDisplay();
     }
     private void UpdateMoneyDisplay()
@@ -136,7 +136,7 @@ public class ShopManager : MonoBehaviour
 
     }
 
-    
+    [ContextMenu("UpdateUpgrade")]
     private void UpdateUpgradeButtonsIU()
     {
         foreach (var item in shopUpgradeButtons)
@@ -170,8 +170,8 @@ public class ShopManager : MonoBehaviour
                 break;
             }
         }
-        shopUpgradeButtons[upgradeID].button.interactable = requirementsMet && !isMaxLevel;
 
+        shopUpgradeButtons[upgradeID].button.interactable = requirementsMet && !isMaxLevel;
         shopUpgradeButtons[upgradeID].currentText.text = currentLevel.ToString();
         shopUpgradeButtons[upgradeID].priceText.text = UpgradeData.GetUpgrade(upgradeID).GetPrice(currentLevel).ToString();
         shopUpgradeButtons[upgradeID].descriptionText.text = UpgradeData.GetUpgrade(upgradeID).description;

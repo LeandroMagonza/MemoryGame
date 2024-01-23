@@ -270,6 +270,11 @@ public class UserData
         {
             upgrades.Add(upgradeID, 1);
         }
+
+        if (upgradeID == UpgradeID.ExtraLife)
+        {
+            GameManager.Instance.lifeCounter.Start();
+        }
     }
     public void AddConsumableObject(ConsumableID consumableID)
     {
