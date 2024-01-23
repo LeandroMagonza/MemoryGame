@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -189,7 +190,12 @@ public class GameManager : MonoBehaviour {
         SetTimer(maxTimer);
         yield return new WaitForSeconds(delayBetweenImages);
         SaveTurn(number, timerModification, turnAction, scoreModification, stickerData);
-        if (!gameEnded) NextTurn();
+        if (currentlyInGameStickers.Count == 0) {
+            Win();
+        }
+        else {
+            NextTurn();
+        }
     }
 
     private void SaveTurn(int number, float timerModification, TurnAction turnAction, int scoreModification,StickerData stickerData)
@@ -348,10 +354,7 @@ public class GameManager : MonoBehaviour {
     
     private void SetRandomImage() {
         
-        if (currentlyInGameStickers.Count == 0) {
-            Win();
-            return;
-        }    
+         
         int nextStickerIndex = Random.Range(0, currentlyInGameStickers.Count);
         StickerData nextSticker = currentlyInGameStickers.Keys.ToList()[nextStickerIndex];
 

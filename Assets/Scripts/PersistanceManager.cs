@@ -131,16 +131,17 @@ public class PersistanceManager : MonoBehaviour
 
     public void SaveUserData()
     {
-        if (userData.stickerDuplicates.Count == 0)
-        {
-            return;
-        }
+
         string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, "userData.json");
-        string json = JsonConvert.SerializeObject(userData, Formatting.Indented);
+
+        // Utilizar SerializeUserData para serializar los datos
+        string json = SerializeUserData(userData);
+    
         File.WriteAllText(filePath, json);
         CustomDebugger.Log("UserData saved to " + filePath);
     }
+
     public IEnumerator LoadUserData()
     {
         string setName = StageManager.Instance.gameVersion.ToString();
@@ -158,7 +159,7 @@ public class PersistanceManager : MonoBehaviour
         }
         else if (dataLocation == DataLocation.ResourcesFolder)
         {
-            TextAsset file = Resources.Load<TextAsset>("Storage/"+setName+"/userData");
+            TextAsset file = Resources.Load<TextAsset>("Storage/" + setName + "/userData");
             if (file == null)
             {
                 Debug.LogError("No userdata found in Resources.");
@@ -172,7 +173,8 @@ public class PersistanceManager : MonoBehaviour
             yield break;
         }
 
-        UserData userData = JsonConvert.DeserializeObject<UserData>(json);
+        // Utilizar DeserializeUserData para deserializar los datos
+        UserData userData = DeserializeUserData(json);
         if (userData != null)
         {
             userData.ConvertListToDictionary();
@@ -189,6 +191,7 @@ public class PersistanceManager : MonoBehaviour
         yield return StartCoroutine(LoadStickerLevels());
         yield return StartCoroutine(LoadPacks());
     }
+
     public string SerializeUserData(UserData userData)
     {
         // Clonar userData para no modificar el original
