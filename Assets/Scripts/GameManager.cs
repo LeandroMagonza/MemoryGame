@@ -453,7 +453,7 @@ public class GameManager : MonoBehaviour {
     }
     public IEnumerator EndGame(float delay) {
         
-        SaveMatch();
+        
         endGameButtons.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
         CustomDebugger.Log("Match Ended");
@@ -472,6 +472,7 @@ public class GameManager : MonoBehaviour {
         UpdateAchievementAndUnlockedLevels();
         //animationScore
         userData.coins += score;
+        SaveMatch();
     }
 
     public void UpdateAchievementAndUnlockedLevels()
@@ -710,7 +711,11 @@ public class GameManager : MonoBehaviour {
         if (_currentlySelectedSticker is null)
         {
             return (null, null);
-        } 
+        }
+
+        if (!currentlyInGameStickers.ContainsKey(_currentlySelectedSticker)) {
+            return (_currentlySelectedSticker, null);
+        }
         return (_currentlySelectedSticker, currentlyInGameStickers[_currentlySelectedSticker]);
     }
 }

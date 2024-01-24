@@ -25,7 +25,7 @@ public struct ConsumableButtonData
             }
             else
             {
-                Debug.Log("not implemented");
+                CustomDebugger.Log("not implemented");
                 text.text = "0";
             }
         }
@@ -109,7 +109,7 @@ public class GameCanvas : MonoBehaviour
             //Cut
             for (int i = 1; i < stickerData.matchData.cutNumbers.Count; i++)
             {
-                Debug.Log($"stickerData.matchData.cutNumbers: {stickerData.matchData.cutNumbers.Count} number: {i} contains: {stickerData.matchData.cutNumbers.Contains(i)}");
+                CustomDebugger.Log($"stickerData.matchData.cutNumbers: {stickerData.matchData.cutNumbers.Count} number: {i} contains: {stickerData.matchData.cutNumbers.Contains(i)}");
                 numpadButtons[stickerData.matchData.cutNumbers[i]].GetComponentInChildren<TextMeshProUGUI>().color = Color.red;
                 numpadButtons[stickerData.matchData.cutNumbers[i]].interactable = false;
             }
@@ -130,7 +130,7 @@ public class GameCanvas : MonoBehaviour
 
     private void AssignNumpadButtons(params GameObject[] rows)
     {
-        Debug.Log("NumPAD_ROW_Buttons Lenght: " + rows.Length);
+        CustomDebugger.Log("NumPAD_ROW_Buttons Lenght: " + rows.Length);
         for (int i = 0; i < rows.Length; i++)
         {
             for (int j = 0; j < rows[i].transform.childCount; j++)
@@ -143,12 +143,12 @@ public class GameCanvas : MonoBehaviour
                 }
             }
         }
-        Debug.Log("NumPAD_Buttons Count: " + numpadButtons.Count);
+        CustomDebugger.Log("NumPAD_Buttons Count: " + numpadButtons.Count);
     }
 
     private (StickerData sticker, StickerMatchData matchData) USE(ConsumableID ID)
     {
-        Debug.Log("USE: " + ID.ToString());
+        CustomDebugger.Log("USE: " + ID.ToString());
         var turnSticker = GameManager.GetCurrentlySelectedSticker();
         if (!GameManager.matchInventory.ContainsKey(ID) || GameManager.matchInventory[ID].current <= 0) return (turnSticker);
         GameManager.audioSource.PlayOneShot(buttons[(int)ID].audioClip);
@@ -173,7 +173,7 @@ public class GameCanvas : MonoBehaviour
     }
     public void UseClue()
     {
-        Debug.Log("Common");
+        CustomDebugger.Log("Common");
 
         var turnSticker = USE(ConsumableID.Clue);
         int scoreModification = GameManager.OnCorrectGuess();
@@ -183,7 +183,7 @@ public class GameCanvas : MonoBehaviour
     [ContextMenu("USE Better Clue")]
     public void UseBetterClue()
     {
-        Debug.Log("Better");
+        CustomDebugger.Log("Better");
 
         var turnSticker = USE(ConsumableID.Clue);
         int amountOfAppears = GameManager.GetCurrentlySelectedSticker().sticker.amountOfAppearences;
@@ -222,8 +222,8 @@ public class GameCanvas : MonoBehaviour
         switch (itemID)
         {
             case ConsumableID.Clue:
-                Debug.Log(GameManager.userData.upgrades.ContainsKey(UpgradeID.BetterClue));
-                Debug.Log(GameManager.userData.upgrades[UpgradeID.BetterClue]);
+                CustomDebugger.Log(GameManager.userData.upgrades.ContainsKey(UpgradeID.BetterClue));
+//                CustomDebugger.Log(GameManager.userData.upgrades[UpgradeID.BetterClue]);
                 if (GameManager.userData.upgrades.ContainsKey(UpgradeID.BetterClue) && GameManager.userData.upgrades[UpgradeID.BetterClue] > 0)
                     UseBetterClue();
                 else

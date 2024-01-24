@@ -84,7 +84,7 @@ public class PersistanceManager : MonoBehaviour
         string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
         string json;
-
+        CustomDebugger.Log(filePath);
         if (dataLocation == DataLocation.LocalStorage)
         {
             if (!File.Exists(filePath))
@@ -123,7 +123,7 @@ public class PersistanceManager : MonoBehaviour
         }
 
         this.stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
-        Debug.Log("Stages loaded, stages count: " + stages.Count);
+        CustomDebugger.Log("Stages loaded, stages count: " + stages.Count);
         yield return null;
         StageManager.Instance.InitializeStages();
     }
@@ -178,7 +178,7 @@ public class PersistanceManager : MonoBehaviour
         if (userData != null)
         {
             userData.ConvertListToDictionary();
-            Debug.Log("UserData loaded, stages count: " + userData.stages.Count);
+            CustomDebugger.Log("UserData loaded, stages count: " + userData.stages.Count);
         }
         else
         {
@@ -195,17 +195,20 @@ public class PersistanceManager : MonoBehaviour
     public string SerializeUserData(UserData userData)
     {
         // Clonar userData para no modificar el original
-        UserData userDataClone = JsonConvert.DeserializeObject<UserData>(JsonConvert.SerializeObject(userData));
 
         // Convertir enums a strings antes de serializar
-        foreach (var stageData in userDataClone.stages)
+        foreach (var stageData in userData.stages)
         {
+            CustomDebugger.Log("stage "+stageData.stage+" has achievements: "+stageData.achievements.Count);
+            CustomDebugger.Log("stage "+stageData.stage+" has achievementsUnparsed: "+stageData.achievements.Count);
             stageData.achievementsUnparsed = stageData.achievements
                 .Select(a => a.ToString())
                 .ToList();
+            CustomDebugger.Log("stage "+stageData.stage+" has achievements: "+stageData.achievements.Count);
+            CustomDebugger.Log("stage "+stageData.stage+" has achievementsUnparsed: "+stageData.achievements.Count);
         }
 
-        return JsonConvert.SerializeObject(userDataClone);
+        return JsonConvert.SerializeObject(userData);
     }
 
     public UserData DeserializeUserData(string json)
@@ -323,7 +326,7 @@ public class PersistanceManager : MonoBehaviour
             
                 // Escribe el texto en el archivo
                 File.WriteAllText(filePath, www.downloadHandler.text);
-                Debug.Log("File saved to " + filePath);
+                CustomDebugger.Log("File saved to " + filePath);
             }
         }
     }
