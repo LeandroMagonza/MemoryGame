@@ -46,10 +46,10 @@ public class ShopManager : MonoBehaviour
 
     private void EnableShopCanvas()
     {
-        consumablePanel.SetActive(true);
-        consumableTittle.SetActive(true);
-        upgradePanel.SetActive(false);
-        upgradeTittle.SetActive(false);
+        consumablePanel.SetActive(false);
+        consumableTittle.SetActive(false);
+        upgradePanel.SetActive(true);
+        upgradeTittle.SetActive(true);
     }
 
     public void BuyItemConsumable(int itemID)

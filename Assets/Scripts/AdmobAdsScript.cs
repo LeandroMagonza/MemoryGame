@@ -6,16 +6,15 @@ using Newtonsoft.Json.Linq;
 
 public class AdmobAdsScript : MonoBehaviour
 {
-    public TextMeshProUGUI totalCoinsTxt;
 
     public string appId = "ca-app-pub-1385093244148841~5602672977";
 
 
 #if UNITY_ANDROID
-    string bannerId = "ca-app-pub-1385093244148841/2952458907";
-    string interId = "ca-app-pub-3940256099942544/1033173712";
-    string rewardedId = "ca-app-pub-3940256099942544/5224354917";
-    string nativeId = "ca-app-pub-3940256099942544/2247696110";
+    //[SerializeField] string bannerId = "ca-app-pub-1385093244148841/2952458907";
+    [SerializeField] string interId = "ca-app-pub-3940256099942544/1033173712";
+    //[SerializeField] string rewardedId = "ca-app-pub-3940256099942544/5224354917";
+    //[SerializeField] string nativeId = "ca-app-pub-3940256099942544/2247696110";
 
 #elif UNITY_IPHONE
     string bannerId = "ca-app-pub-3940256099942544/2934735716";
@@ -33,13 +32,14 @@ public class AdmobAdsScript : MonoBehaviour
     private void Start()
     {
         MobileAds.RaiseAdEventsOnUnityMainThread = true;
-        MobileAds.Initialize(initStatus => {
+        MobileAds.Initialize(initStatus =>
+        {
 
             print("Ads Initialised !!");
 
         });
     }
-
+    /*
     #region Banner
 
     public void LoadBannerAd()
@@ -123,7 +123,7 @@ public class AdmobAdsScript : MonoBehaviour
         }
     }
     #endregion
-
+    */
     #region Interstitial
 
     public void LoadInterstitialAd()
@@ -200,9 +200,9 @@ public class AdmobAdsScript : MonoBehaviour
                            "with error : " + error);
         };
     }
-
+}
     #endregion
-
+    /*
     #region Rewarded
 
     public void LoadRewardedAd()
@@ -290,4 +290,4 @@ public class AdmobAdsScript : MonoBehaviour
 
     
 
-}
+}*/

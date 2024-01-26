@@ -140,7 +140,7 @@ public class UpgradeData
                     valueAddToInitial = 1,
                     valueAddToMax = 2,
                     description = "Extra Remove:",
-                    levelPrices = new int[] { 500, 1000, 2000 },
+                    levelPrices = new int[] { 2500 },
                 };
                 break;
             case UpgradeID.MaxCut:
@@ -187,7 +187,7 @@ public class UpgradeData
                     valueAddToInitial = 1,
                     valueAddToMax = 0,
                     description = "Better Clue",
-                    levelPrices = new int[] { 2500 },
+                    levelPrices = new int[] { 1500 },
                     upgradeRequired = new Dictionary<UpgradeID, int>()
                     {
                         { UpgradeID.MaxClue, 1 }
