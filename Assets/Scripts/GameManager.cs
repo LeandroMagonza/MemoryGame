@@ -147,12 +147,12 @@ public class GameManager : MonoBehaviour {
     public IEnumerator ProcessTurnAction(int number)
     {
         disableInput = true;
-        CustomDebugger.Log("Guessed number " + number + ", amount of appearances " + _currentlySelectedSticker.amountOfAppearences);
+        CustomDebugger.Log("Guessed number " + number + ", amount of appearances " + currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences);
         TurnAction turnAction;
         int scoreModification = 0;
         var turnSticker = _currentlySelectedSticker;
         
-        if (number == GetCorrectGuess(turnSticker))
+        if (number == GetCorrectGuess(turnSticker,currentlyInGameStickers[_currentlySelectedSticker]))
         {
             CustomDebugger.Log("CorrectGuess");
             scoreModification = OnCorrectGuess();
@@ -161,21 +161,21 @@ public class GameManager : MonoBehaviour {
         else
         {
             CustomDebugger.Log("IncorrectGuess");
-            int magnitude = number - turnSticker.amountOfAppearences;
+            int magnitude = number - currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences;
             deathDefyMagnitude = Mathf.Abs(magnitude);
             OnIncorrectGuess();
             turnAction = TurnAction.GuessIncorrect;
         }
         //usar el dato del sticker tomado antes de la funcion oncorrectguess
-        yield return FinishProcessingTurnAction(number, turnAction, scoreModification, turnSticker);
+        yield return FinishProcessingTurnAction(number, turnAction, scoreModification, turnSticker,currentlyInGameStickers[_currentlySelectedSticker]);
     }
 
-    public int GetCorrectGuess(StickerData turnSticker)
+    public int GetCorrectGuess(StickerData turnSticker,StickerMatchData stickerMatchData)
     {
         switch (currentGameMode)
         {
             case GameMode.MEMORY:
-                return turnSticker.amountOfAppearences;
+                return stickerMatchData.amountOfAppearences;
             case GameMode.QUIZ:
                 return quizOptionButtons[0].numpadButton.number;
             default:
@@ -184,12 +184,12 @@ public class GameManager : MonoBehaviour {
     }
 
     public IEnumerator FinishProcessingTurnAction(int number, TurnAction turnAction,
-        int scoreModification, StickerData stickerData)
+        int scoreModification, StickerData stickerData, StickerMatchData stickerMatchData)
     {
         float timerModification = maxTimer - timer;
         SetTimer(maxTimer);
         yield return new WaitForSeconds(delayBetweenImages);
-        SaveTurn(number, timerModification, turnAction, scoreModification, stickerData);
+        SaveTurn(number, timerModification, turnAction, scoreModification, stickerData, stickerMatchData);
         if (currentlyInGameStickers.Count == 0) {
             Win();
         }
@@ -198,11 +198,11 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    private void SaveTurn(int number, float timerModification, TurnAction turnAction, int scoreModification,StickerData stickerData)
+    private void SaveTurn(int number, float timerModification, TurnAction turnAction, int scoreModification,StickerData stickerData,StickerMatchData stickerMatchData)
     {
         _currentMatch.AddTurn(
             stickerData.stickerID,
-            stickerData.amountOfAppearences,
+            stickerMatchData.amountOfAppearences,
             timerModification,
             number,
             turnAction,
@@ -214,7 +214,7 @@ public class GameManager : MonoBehaviour {
 
     private void CheckAmountOfAppearences()
     {
-        if (_currentlySelectedSticker.amountOfAppearences == bonusOnAmountOfAppearences)
+        if (currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences == bonusOnAmountOfAppearences)
         {
             CustomDebugger.Log("Clear: " + _currentlySelectedSticker.name);
             GainBonus();
@@ -251,11 +251,11 @@ public class GameManager : MonoBehaviour {
     {
         IncorrectGuessFX();
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
-            _currentlySelectedSticker.amountOfAppearences,
+            currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             false);
         audioSource.PlayOneShot(incorrectGuessClip);
 
-        _currentlySelectedSticker.amountOfAppearences--;
+        currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
         bool DeathDefy = GetDeathDefy(deathDefyMagnitude);
         lifeCounter.LoseLive(ref protectedLife, DeathDefy);
 
@@ -287,11 +287,11 @@ public class GameManager : MonoBehaviour {
     {
         CorrectGuessFX();
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
-            _currentlySelectedSticker.amountOfAppearences,
+            currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             true);
         audioSource.PlayOneShot(correctGuessClip);
         int scoreModification = stages[selectedStage].basePoints +
-                                _currentlySelectedSticker.amountOfAppearences
+                                currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences
                                 + CalculateScoreComboBonus();
         ModifyScore(scoreModification);
         SetCurrentCombo(_currentCombo+1);
@@ -320,7 +320,7 @@ public class GameManager : MonoBehaviour {
     private void GainBonus()
     {
         CustomDebugger.Log("gain bonus");
-        ModifyScore(_currentlySelectedSticker.amountOfAppearences * bonusMultiplicator);
+        ModifyScore(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences * bonusMultiplicator);
         bonusMultiplicator++;
         audioSource.PlayOneShot(bonusClip);
         lifeCounter.GainLive();
@@ -345,7 +345,6 @@ public class GameManager : MonoBehaviour {
 
         foreach (var stickerID in stages[selectedStage].stickers) {
             StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(stages[selectedStage].stickerSet, stickerID);
-            stickerData.amountOfAppearences = 0;
             _stickersFromStage.Add(stickerID, stickerData);
         }
     }
@@ -413,11 +412,11 @@ public class GameManager : MonoBehaviour {
 
         }
         
-        _currentlySelectedSticker.amountOfAppearences++;
+        currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences++;
     }
 
     public void RemoveStickerFromPool() {
-        //_currentlySelectedSticker.amountOfAppearences = 0;
+        //currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences = 0;
         currentlyInGameStickers.Remove(_currentlySelectedSticker);
         // aca se setea si la imagen vuelve al set general o no  
         _stickersFromStage.Remove(_currentlySelectedSticker.stickerID);
@@ -513,7 +512,7 @@ public class GameManager : MonoBehaviour {
         if (this.timer<=1)
         {
             lifeCounter.LoseLive(ref protectedLife, false);
-            _currentlySelectedSticker.amountOfAppearences--;
+            currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
             NextTurn();
             SetTimer(maxTimer);
         }

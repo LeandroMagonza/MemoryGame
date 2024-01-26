@@ -215,7 +215,7 @@ public class UserData
     [JsonIgnore] // Ignora esta propiedad durante la deserialización
     public Dictionary<(StickerSet,int),int> stickerDuplicates = new Dictionary<(StickerSet, int), int>();
 
-    [JsonProperty("imageDuplicates")] public List<DuplicateEntry> readStickerDuplicates = new List<DuplicateEntry>();
+    public List<DuplicateEntry> readStickerDuplicates = new List<DuplicateEntry>();
     //upgrades, inventario
     public Dictionary<ConsumableID, int> consumables = new Dictionary<ConsumableID, int>();
     public Dictionary<UpgradeID, int> upgrades = new Dictionary<UpgradeID, int>();
@@ -243,12 +243,32 @@ public class UserData
         
         return userStageData;
     }
-    public void ConvertListToDictionary()
+    public void ConvertStickerListToDictionary()
     {
+        CustomDebugger.Log("stickers read "+readStickerDuplicates.Count);
+        foreach (var VARIABLE in readStickerDuplicates)
+        {
+            CustomDebugger.Log((VARIABLE.Key).ToString()+ (VARIABLE.Value),DebugCategory.STICKERLOAD);
+        }
         stickerDuplicates = readStickerDuplicates.ToDictionary(
             entry => (entry.Key.StickerSet, entry.Key.StickerID),
             entry => entry.Value
         );
+        CustomDebugger.Log("stickers read "+stickerDuplicates.Count);
+    }    
+    public void ConvertStickerDictionaryToList()
+    {
+        readStickerDuplicates = new List<DuplicateEntry>();
+        foreach (var stickerDuplicate in stickerDuplicates)
+        {
+            DuplicateEntry newDuplicateEntry = new DuplicateEntry();
+            StickerKey stickerKey = new StickerKey();
+            stickerKey.StickerSet = stickerDuplicate.Key.Item1;
+            stickerKey.StickerID = stickerDuplicate.Key.Item2;
+            newDuplicateEntry.Key = stickerKey;
+            newDuplicateEntry.Value = stickerDuplicate.Value;
+            readStickerDuplicates.Add(newDuplicateEntry); 
+        }
     }
     public bool ModifyCoins(int modificationAmount)
     {

@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class StickerMatchData
 {
+    public int amountOfAppearences = 0;
     //BetterClue
     public int? lastClueAppearenceNumber = null;
     //Cut?

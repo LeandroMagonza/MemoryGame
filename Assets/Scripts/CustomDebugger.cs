@@ -21,7 +21,7 @@ public static class CustomDebugger
 
     private static void Initialize()
     {
-        disabledCategories.Add(DebugCategory.GENERAL);
+        //disabledCategories.Add(DebugCategory.GENERAL);
         //disabledCategories.Add(DebugCategory.LOAD);
         //disabledCategories.Add(DebugCategory.SAVE);
         initialized = true;
@@ -38,4 +38,5 @@ public enum DebugCategory
     GENERAL,
     LOAD,
     SAVE,
+    STICKERLOAD
 }

@@ -131,12 +131,12 @@ public class PersistanceManager : MonoBehaviour
 
     public void SaveUserData()
     {
-
+        userData.ConvertStickerDictionaryToList();
         string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, "userData.json");
-
+        
         // Utilizar SerializeUserData para serializar los datos
-        string json = SerializeUserData(userData);
+        string json = SerializeUserData();
     
         File.WriteAllText(filePath, json);
         CustomDebugger.Log("UserData saved to " + filePath);
@@ -177,7 +177,7 @@ public class PersistanceManager : MonoBehaviour
         UserData userData = DeserializeUserData(json);
         if (userData != null)
         {
-            userData.ConvertListToDictionary();
+            userData.ConvertStickerListToDictionary();
             CustomDebugger.Log("UserData loaded, stages count: " + userData.stages.Count);
         }
         else
@@ -192,21 +192,23 @@ public class PersistanceManager : MonoBehaviour
         yield return StartCoroutine(LoadPacks());
     }
 
-    public string SerializeUserData(UserData userData)
+    public string SerializeUserData()
     {
         // Clonar userData para no modificar el original
 
         // Convertir enums a strings antes de serializar
+//        userData.stickerDuplicates;
         foreach (var stageData in userData.stages)
         {
-            CustomDebugger.Log("stage "+stageData.stage+" has achievements: "+stageData.achievements.Count);
-            CustomDebugger.Log("stage "+stageData.stage+" has achievementsUnparsed: "+stageData.achievements.Count);
+            //CustomDebugger.Log("stage "+stageData.stage+" has achievements: "+stageData.achievements.Count);
+            //CustomDebugger.Log("stage "+stageData.stage+" has achievementsUnparsed: "+stageData.achievements.Count);
             stageData.achievementsUnparsed = stageData.achievements
                 .Select(a => a.ToString())
                 .ToList();
-            CustomDebugger.Log("stage "+stageData.stage+" has achievements: "+stageData.achievements.Count);
-            CustomDebugger.Log("stage "+stageData.stage+" has achievementsUnparsed: "+stageData.achievements.Count);
+            //CustomDebugger.Log("stage "+stageData.stage+" has achievements: "+stageData.achievements.Count);
+            //CustomDebugger.Log("stage "+stageData.stage+" has achievementsUnparsed: "+stageData.achievements.Count);
         }
+        
 
         return JsonConvert.SerializeObject(userData);
     }
@@ -329,6 +331,16 @@ public class PersistanceManager : MonoBehaviour
                 CustomDebugger.Log("File saved to " + filePath);
             }
         }
+    }
+
+    public int GetStickerDuplicates(StickerSet stickerSet,int stickerID)
+    {
+        if (userData.stickerDuplicates.ContainsKey((stickerSet,stickerID)))
+        {
+            return userData.stickerDuplicates[(stickerSet, stickerID)];
+        }
+
+        return 0;
     }
 
 }

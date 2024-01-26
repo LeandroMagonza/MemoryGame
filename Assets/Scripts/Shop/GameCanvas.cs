@@ -165,10 +165,11 @@ public class GameCanvas : MonoBehaviour
     private void SaveAction((StickerData sticker, StickerMatchData matchData) turnSticker, int scoreModification)
     {
         StartCoroutine(GameManager.FinishProcessingTurnAction(
-        turnSticker.sticker.amountOfAppearences,
+        turnSticker.matchData.amountOfAppearences,
         TurnAction.UseClue,
         scoreModification,
-        turnSticker.sticker
+        turnSticker.sticker,
+        turnSticker.matchData
         ));
     }
     public void UseClue()
@@ -186,7 +187,7 @@ public class GameCanvas : MonoBehaviour
         CustomDebugger.Log("Better");
 
         var turnSticker = USE(ConsumableID.Clue);
-        int amountOfAppears = GameManager.GetCurrentlySelectedSticker().sticker.amountOfAppearences;
+        int amountOfAppears = GameManager.GetCurrentlySelectedSticker().matchData.amountOfAppearences;
         // por que crea uno nuevo?
         StickerMatchData stickerData = new StickerMatchData();
         stickerData.AddBetterClueEffect(amountOfAppears);
@@ -206,10 +207,8 @@ public class GameCanvas : MonoBehaviour
     public void UseCut()
     {
         var turnSticker = USE(ConsumableID.Cut);
-        int amountOfAppears = GameManager.GetCurrentlySelectedSticker().sticker.amountOfAppearences;
-        StickerMatchData stickerData = new StickerMatchData();
-        stickerData.AddCutEffect(amountOfAppears, GameManager.selectedDifficulty);
-        GameManager.currentlyInGameStickers[GameManager.GetCurrentlySelectedSticker().sticker] = stickerData;
+        int amountOfAppears = turnSticker.matchData.amountOfAppearences;
+        turnSticker.matchData.AddCutEffect(amountOfAppears, GameManager.selectedDifficulty);
         UpdateUI();
     }
     public void UsePeek()

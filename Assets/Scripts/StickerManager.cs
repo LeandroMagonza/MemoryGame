@@ -143,8 +143,7 @@ public class StickerManager : MonoBehaviour
         return new StickerData(
             stickerID,
             sprite,
-            amountOfDulpicates,
-            GetStickerLevelByAmountOfDuplicates(amountOfDulpicates),
+            stickerSet,
             //sacar estos datos de csv pokemonlist, cambiar nombre y hacerlo generico para todos, algo como stickersadditionalinfo
             additionalData.name,
             additionalData.color,
@@ -220,24 +219,22 @@ public class StickerData
 {
     public int stickerID;
     public Sprite sprite;
-    public int amountOfDuplicates;
-    public int level;
+    public int amountOfDuplicates => PersistanceManager.Instance.GetStickerDuplicates(stickerSet,stickerID);
+    public int level => StickerManager.Instance.GetStickerLevelByAmountOfDuplicates(amountOfDuplicates);
     public string name;
     public Color color;
     public string type;
-    
-    //Just for game
-    public int amountOfAppearences;
-    public StickerData(int stickerID, Sprite sprite, int amountOfDuplicates, int level, string name, Color color, string type)
+    public StickerSet stickerSet;
+
+    public StickerData(int stickerID, Sprite sprite, StickerSet stickerSet,  string name, Color color, string type)
     {
         this.stickerID = stickerID;
         this.sprite = sprite;
-        this.amountOfDuplicates = amountOfDuplicates;
-        this.level = level;
         this.name = name;
         this.color = color;
         this.type = type;
     }
+
     
 
 }
