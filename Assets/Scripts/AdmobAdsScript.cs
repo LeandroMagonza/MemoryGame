@@ -34,9 +34,8 @@ public class AdmobAdsScript : MonoBehaviour
         MobileAds.RaiseAdEventsOnUnityMainThread = true;
         MobileAds.Initialize(initStatus =>
         {
-
             print("Ads Initialised !!");
-
+            LoadInterstitialAd();
         });
     }
     /*
@@ -126,6 +125,7 @@ public class AdmobAdsScript : MonoBehaviour
     */
     #region Interstitial
 
+    
     public void LoadInterstitialAd()
     {
 
@@ -152,6 +152,7 @@ public class AdmobAdsScript : MonoBehaviour
         });
 
     }
+    [ContextMenu("ShowInterstitialAd")]
     public void ShowInterstitialAd()
     {
 
