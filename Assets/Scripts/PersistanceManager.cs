@@ -131,6 +131,10 @@ public class PersistanceManager : MonoBehaviour
 
     public void SaveUserData()
     {
+        if (userData.stickerDuplicates.Count == 0)
+        {
+            throw new Exception("Sticker duplicates was empty, user data save aborted");
+        }
         userData.ConvertStickerDictionaryToList();
         string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, "userData.json");
@@ -306,6 +310,16 @@ public class PersistanceManager : MonoBehaviour
     {
         string setName = StageManager.Instance.gameVersion.ToString();
         string url = "https://leandromagonza.github.io/MemoGram/" + setName + "/" + file_name + ".json";
+
+        // Construye la ruta completa del directorio donde se guardará el archivo
+        string directoryPath = Path.Combine(Application.persistentDataPath, setName);
+
+        // Verifica si el directorio existe; si no, créalo
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+        }
+
         using (UnityWebRequest www = UnityWebRequest.Get(url))
         {
             yield return www.SendWebRequest();
@@ -317,21 +331,16 @@ public class PersistanceManager : MonoBehaviour
             }
             else
             {
-                // Construye la ruta completa del directorio donde se guardará el archivo
-                string directoryPath = Path.Combine(Application.persistentDataPath, setName);
-            
-                // Asegúrate de que el directorio existe
-                Directory.CreateDirectory(directoryPath);
-            
                 // Construye la ruta completa del archivo, incluyendo el nombre del archivo
                 string filePath = Path.Combine(directoryPath, file_name + ".json");
-            
+        
                 // Escribe el texto en el archivo
                 File.WriteAllText(filePath, www.downloadHandler.text);
-                CustomDebugger.Log("File saved to " + filePath);
+                Debug.Log("File saved to " + filePath);
             }
         }
     }
+
 
     public int GetStickerDuplicates(StickerSet stickerSet,int stickerID)
     {

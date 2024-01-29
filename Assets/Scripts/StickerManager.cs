@@ -65,16 +65,33 @@ public class StickerManager : MonoBehaviour
     }
     public StickerData GetStickerDataFromSetByStickerID(StickerSet stickerSet,int stickerID)
     {
+        
         if (!currentLoadedSetStickerData.ContainsKey(stickerSet))
         {
+            //TODO: fix Problema ACA
             LoadAllStickersFromSet(stickerSet);
         }
+        if (!currentLoadedSetStickerData.ContainsKey(stickerSet) || currentLoadedSetStickerData[stickerSet] is null || currentLoadedSetStickerData[stickerSet].Count == 0)
+        {
+            throw new Exception("Failed to load sticker set " + stickerSet);
+        }
 
+        if (!currentLoadedSetStickerData[stickerSet].ContainsKey(stickerID))
+        {
+            CustomDebugger.Log(stickerID + " not found in sticker set " + stickerSet,DebugCategory.STICKERLOAD);
+            string stickersetcontents = "";
+            foreach (var IDAndStickerData in currentLoadedSetStickerData[stickerSet])
+            {
+                stickersetcontents += "(" + IDAndStickerData.Key + ", " + IDAndStickerData.Value.name + ");\n";
+            }
+            CustomDebugger.Log(stickersetcontents,DebugCategory.STICKERLOAD);
+        }
         return currentLoadedSetStickerData[stickerSet][stickerID];
         
     }
     public void LoadAllStickersFromSet(StickerSet setToLoad)
     {
+        CustomDebugger.Log("LoadAllStickersFromSet "+setToLoad,DebugCategory.STICKERLOAD);
         var dictionary = new Dictionary<int, StickerData>();
         currentLoadedSetStickerData.Add(setToLoad, dictionary);
         
@@ -96,12 +113,7 @@ public class StickerManager : MonoBehaviour
                 //loadedSprite = Load(path, name + "_" + stickerID);
                 Sprite[] allSprites = Resources.LoadAll<Sprite>(path);
                 if (allSprites == null) throw new Exception("Sprites not found"); 
-                loadingStickerID = 0;
-                /*foreach (var s in allSprites)
-                {
-                    currentLoadedSetStickerData.Add(loadingStickerID,AssembleStickerData(loadingStickerID, s));
-                    loadingStickerID++;
-                }*/
+       
                 CustomDebugger.Log(imageSetName+" has this many strpites "+allSprites.Length);
                 for (loadingStickerID = 0; loadingStickerID < totalStickersInSet; loadingStickerID++)
                 {
@@ -112,12 +124,27 @@ public class StickerManager : MonoBehaviour
                 
                 break;
             case "IMAGES":
+                //this check is basically to see if the sticker list starts at 0 or starts at 1
                 for (loadingStickerID = 0; loadingStickerID < totalStickersInSet; loadingStickerID++)
                 {
                     path = imageSetName + "/(" + loadingStickerID + ")";
                     loadedSprite = Resources.Load<Sprite>(path);
                     
-                    if (loadedSprite == null) throw new Exception("ImageID not found in spritesFromSet"); 
+                    if (loadedSprite == null)
+                    {
+                        //Debug.LogError("ImageID not found in spritesFromSet with parentheses '(name)' ");
+                        path = imageSetName + "/" + loadingStickerID ;
+                        loadedSprite = Resources.Load<Sprite>(path);
+                        if (loadedSprite == null && loadingStickerID != 0)
+                        {
+                            throw new Exception("ImageID "+loadingStickerID+" not found in spritesFromSet "+imageSetName+" at path "+path);
+                        }
+                        else
+                        {
+                            // si es == a 0  y no se encuentra puede ser que la lista de imagenes empieze en 1 
+                            continue;
+                        }
+                    } 
                     
                     dictionary.Add(loadingStickerID,AssembleStickerData(setToLoad, loadingStickerID, loadedSprite));
             

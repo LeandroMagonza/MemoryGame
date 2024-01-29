@@ -293,6 +293,7 @@ public class GameManager : MonoBehaviour {
         audioSource.PlayOneShot(correctGuessClip);
         int scoreModification = stages[selectedStage].basePoints +
                                 currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences
+                                + (_currentlySelectedSticker.level - 1)
                                 + CalculateScoreComboBonus();
         ModifyScore(scoreModification);
         SetCurrentCombo(_currentCombo+1);
@@ -723,7 +724,8 @@ public enum StickerSet {
     Pokemons_SPRITESHEET_151,
     Landscapes_IMAGES_10,
     AnatomyFractures_SPRITESHEET_10,
-    AnatomyBones_SPRITESHEET_10
+    AnatomyBones_SPRITESHEET_10,
+    WorldFlags_IMAGES_51
 }
 
 public enum ShopItemType
