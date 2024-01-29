@@ -456,30 +456,30 @@ public class GameManager : MonoBehaviour {
     }
     public IEnumerator EndGame(float delay) {
 
+
+        endGameButtons.transform.parent.gameObject.SetActive(true);
+        gameEnded = true;
+        CustomDebugger.Log("Match Ended");
         endMatchTime = Time.time;
-        Debug.Log("start: " + startMatchTime + " end: " + endMatchTime);
+        float elapsedTime = endMatchTime - startMatchTime;
+        elapsedBufferTime += elapsedTime;
+
+        yield return new WaitForSeconds(0.2f);
+
         if (elapsedBufferTime > timeToIntersticial)
         {
             AdmobAdsScript.Instance.ShowInterstitialAd();
             elapsedBufferTime = 0;
-            
         }
-        else
-        {
-            float elapsedTime = endMatchTime - startMatchTime;
-            Debug.Log(elapsedTime);
-            elapsedBufferTime += elapsedTime;
-        }
-        endGameButtons.transform.parent.gameObject.SetActive(true);
-        gameEnded = true;
-        CustomDebugger.Log("Match Ended");
-        
+
         if (userData.GetUserStageData(selectedStage, selectedDifficulty).highScore < score)
         {
             yield return StartCoroutine(SetHighScore(score));
         }
         
         yield return new WaitForSeconds(delay);
+
+       
         //animation achievements
         var firstTimeAchievements = userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
         
@@ -555,6 +555,7 @@ public class GameManager : MonoBehaviour {
         }
         startMatchTime = Time.time;
         endMatchTime = 0;
+        AdmobAdsScript.Instance.LoadInterstitialAd();
         Instance.SetScoreTexts();
         if (stickerDisplay == null) {
             stickerDisplay = StickerManager.Instance.GetStickerHolder();

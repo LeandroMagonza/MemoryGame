@@ -157,6 +157,8 @@ public class ShopManager : MonoBehaviour
         }
         bool isMaxLevel = UpgradeData.GetUpgrade(upgradeID).IsMaxLevel(currentLevel);
 
+        int max = UpgradeData.GetUpgrade(upgradeID).GetMaxLevel();
+
         bool requirementsMet = true;
 
         foreach (var requirement in UpgradeData.GetUpgrade(upgradeID).upgradeRequired)
@@ -170,10 +172,10 @@ public class ShopManager : MonoBehaviour
                 break;
             }
         }
-
+        string price = isMaxLevel ? "---" : UpgradeData.GetUpgrade(upgradeID).GetPrice(currentLevel).ToString();
         shopUpgradeButtons[upgradeID].button.interactable = requirementsMet && !isMaxLevel;
-        shopUpgradeButtons[upgradeID].currentText.text = currentLevel.ToString();
-        shopUpgradeButtons[upgradeID].priceText.text = UpgradeData.GetUpgrade(upgradeID).GetPrice(currentLevel).ToString();
+        shopUpgradeButtons[upgradeID].currentText.text = currentLevel.ToString() + "/" + max;
+        shopUpgradeButtons[upgradeID].priceText.text = price;
         shopUpgradeButtons[upgradeID].descriptionText.text = UpgradeData.GetUpgrade(upgradeID).description;
     }
 }

@@ -42,6 +42,7 @@ public class AdmobAdsScript : MonoBehaviour
         {
             print("Ads Initialised !!");
             LoadInterstitialAd();
+
         });
     }
     /*

@@ -93,7 +93,10 @@ public class UpgradeData
     public int[] levelPrices = new int[] { 100, 200, 1500 };
     public Dictionary<UpgradeID, int> upgradeRequired = new Dictionary<UpgradeID, int>();
     public int ID => (int)itemId;
-
+    public int GetMaxLevel()
+    {
+        return levelPrices.Length;
+    }
     public int GetAdditionalMax(int currentLevel)
     {
         return valueAddToMax * currentLevel;
