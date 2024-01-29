@@ -131,7 +131,10 @@ public class GameManager : MonoBehaviour {
     public bool deathDefy = false;
     private int deathDefyMagnitude = 0;
 
-
+    public float timeToIntersticial = 1;
+    private float elapsedBufferTime = 0;
+    private float startMatchTime = 0;
+    private float endMatchTime = 0;
     //TODO: Esta se va para manager stages o algo asi 
     
 
@@ -451,8 +454,21 @@ public class GameManager : MonoBehaviour {
         return false;
     }
     public IEnumerator EndGame(float delay) {
-        
-        
+
+        endMatchTime = Time.time;
+        Debug.Log("start: " + startMatchTime + " end: " + endMatchTime);
+        if (elapsedBufferTime > timeToIntersticial)
+        {
+            AdmobAdsScript.Instance.ShowInterstitialAd();
+            elapsedBufferTime = 0;
+            
+        }
+        else
+        {
+            float elapsedTime = endMatchTime - startMatchTime;
+            Debug.Log(elapsedTime);
+            elapsedBufferTime += elapsedTime;
+        }
         endGameButtons.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
         CustomDebugger.Log("Match Ended");
@@ -525,7 +541,6 @@ public class GameManager : MonoBehaviour {
     }
     public void Reset() {
         //if (disableInput) return;
-
         switch (currentGameMode)
         {
             case GameMode.MEMORY:
@@ -537,7 +552,8 @@ public class GameManager : MonoBehaviour {
                 quizOptionPad.SetActive(true);
                 break;
         }
-        
+        startMatchTime = Time.time;
+        endMatchTime = 0;
         Instance.SetScoreTexts();
         if (stickerDisplay == null) {
             stickerDisplay = StickerManager.Instance.GetStickerHolder();

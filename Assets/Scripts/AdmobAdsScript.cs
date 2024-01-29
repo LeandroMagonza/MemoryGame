@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 public class AdmobAdsScript : MonoBehaviour
 {
-
+    public static AdmobAdsScript Instance;
     public string appId = "ca-app-pub-1385093244148841~5602672977";
 
 
@@ -28,7 +28,13 @@ public class AdmobAdsScript : MonoBehaviour
     InterstitialAd interstitialAd;
     RewardedAd rewardedAd;
 
-
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+    }
     private void Start()
     {
         MobileAds.RaiseAdEventsOnUnityMainThread = true;
@@ -152,6 +158,7 @@ public class AdmobAdsScript : MonoBehaviour
         });
 
     }
+
     [ContextMenu("ShowInterstitialAd")]
     public void ShowInterstitialAd()
     {
