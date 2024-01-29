@@ -147,12 +147,13 @@ public class GameManager : MonoBehaviour {
     public IEnumerator ProcessTurnAction(int number)
     {
         disableInput = true;
-        CustomDebugger.Log("Guessed number " + number + ", amount of appearances " + currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences);
+        StickerMatchData currentStickerMatchData = currentlyInGameStickers[_currentlySelectedSticker];
+        CustomDebugger.Log("Guessed number " + number + ", amount of appearances " + currentStickerMatchData.amountOfAppearences);
         TurnAction turnAction;
         int scoreModification = 0;
         var turnSticker = _currentlySelectedSticker;
         
-        if (number == GetCorrectGuess(turnSticker,currentlyInGameStickers[_currentlySelectedSticker]))
+        if (number == GetCorrectGuess(turnSticker,currentStickerMatchData))
         {
             CustomDebugger.Log("CorrectGuess");
             scoreModification = OnCorrectGuess();
@@ -161,13 +162,13 @@ public class GameManager : MonoBehaviour {
         else
         {
             CustomDebugger.Log("IncorrectGuess");
-            int magnitude = number - currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences;
+            int magnitude = number - currentStickerMatchData.amountOfAppearences;
             deathDefyMagnitude = Mathf.Abs(magnitude);
             OnIncorrectGuess();
             turnAction = TurnAction.GuessIncorrect;
         }
         //usar el dato del sticker tomado antes de la funcion oncorrectguess
-        yield return FinishProcessingTurnAction(number, turnAction, scoreModification, turnSticker,currentlyInGameStickers[_currentlySelectedSticker]);
+        yield return FinishProcessingTurnAction(number, turnAction, scoreModification, turnSticker,currentStickerMatchData);
     }
 
     public int GetCorrectGuess(StickerData turnSticker,StickerMatchData stickerMatchData)
