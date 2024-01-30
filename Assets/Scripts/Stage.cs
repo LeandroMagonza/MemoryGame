@@ -321,10 +321,10 @@ public class UserData
         Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> temp_inventory = new Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)>();
 
         Dictionary<ConsumableID, UpgradeID> upgradeRelation = new Dictionary<ConsumableID, UpgradeID>() {
-            {ConsumableID.Clue, UpgradeID.MaxClue },
-            {ConsumableID.Remove, UpgradeID.MaxRemove },
-            {ConsumableID.Cut, UpgradeID.MaxCut },
-            {ConsumableID.Peek, UpgradeID.MaxPeek }
+            {ConsumableID.Clue, UpgradeID.ExtraClue },
+            {ConsumableID.Remove, UpgradeID.ExtraRemove },
+            {ConsumableID.Cut, UpgradeID.ExtraCut },
+            {ConsumableID.Peek, UpgradeID.ExtraPeek }
         };
 
         foreach (var item in upgradeRelation)

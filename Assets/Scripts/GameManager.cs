@@ -562,7 +562,7 @@ public class GameManager : MonoBehaviour {
         }
         stickerDisplay.ConfigureForGame(currentGameMode);
         
-        protectedLife = userData.upgrades.ContainsKey(UpgradeID.ProtectedLife) && userData.upgrades[UpgradeID.ProtectedLife] > 0;
+        protectedLife = userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0;
         deathDefy = userData.upgrades.ContainsKey(UpgradeID.DeathDefy) && userData.upgrades[UpgradeID.DeathDefy] > 0;
         SetNumpadByDifficulty(selectedDifficulty);
         bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
@@ -705,7 +705,7 @@ public class GameManager : MonoBehaviour {
         int calculatedComboBonus = (int)Math.Floor(((float)_currentCombo / 2));
         if (calculatedComboBonus >= maxComboBonus)
         {
-            if (userData.upgrades.ContainsKey(UpgradeID.ProtectedLife) && userData.upgrades[UpgradeID.ProtectedLife] > 0)
+            if (userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0)
             {
                 protectedLife = true;
                 lifeCounter.ProtectHearts();

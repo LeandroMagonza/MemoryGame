@@ -17,7 +17,7 @@ public class LifeCounter : MonoBehaviour
     {
         SetLives();
         UpdateHearts();
-        if (GameManager.Instance.userData.upgrades.ContainsKey(UpgradeID.ProtectedLife) && GameManager.Instance.userData.upgrades[UpgradeID.ProtectedLife] > 0)
+        if (GameManager.Instance.userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && GameManager.Instance.userData.upgrades[UpgradeID.LifeProtector] > 0)
         {
             ProtectHearts();
         }

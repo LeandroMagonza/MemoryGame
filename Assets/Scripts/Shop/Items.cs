@@ -16,15 +16,15 @@ public enum UpgradeID
 {
     NONE=-1,
     ExtraLife,
-    ProtectedLife,
-    MaxClue,
+    LifeProtector,
+    ExtraClue,
     BetterClue,
 
-    MaxRemove,
-    MaxCut,
+    ExtraRemove,
+    ExtraCut,
     BetterCut,
-    MaxPeek,
-    Block,
+    ExtraPeek,
+    BlockChoise,
 
     DeathDefy
 }
@@ -125,33 +125,33 @@ public class UpgradeData
         UpgradeData upgrade = new UpgradeData();
         switch (itemId)
         {
-            case UpgradeID.MaxClue:
+            case UpgradeID.ExtraClue:
                 upgrade = new UpgradeData()
                 {
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 2,
-                    description = "Extra Clue:",
+                    description = "EXTRA CLUE\n",
                     levelPrices = new int[] { 200, 400, 1200 },
                 };
                 break;
-            case UpgradeID.MaxRemove:
+            case UpgradeID.ExtraRemove:
                 upgrade = new UpgradeData()
                 {
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 2,
-                    description = "Extra Remove:",
+                    description = "EXTRA REMOVE\n",
                     levelPrices = new int[] { 2500 },
                 };
                 break;
-            case UpgradeID.MaxCut:
+            case UpgradeID.ExtraCut:
                 upgrade = new UpgradeData()
                 {
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 2,
-                    description = "Extra Cut:",
+                    description = "EXTRA CUT\n",
                     levelPrices = new int[] { 300, 700, 1500 },
 
                 };
@@ -164,17 +164,17 @@ public class UpgradeData
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 0,
-                    description = "Extra Life:",
+                    description = "EXTRA LIFE\n",
                     levelPrices = new int[] { 1000,2000,3000},
                 };
                 break;
-            case UpgradeID.ProtectedLife:
+            case UpgradeID.LifeProtector:
                 upgrade = new UpgradeData()
                 {
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 0,
-                    description = "Life Protector:",
+                    description = "LIFE PROTECTOR\n",
                     levelPrices = new int[] {2500},
                     upgradeRequired = new Dictionary<UpgradeID, int>()
                     {
@@ -188,11 +188,11 @@ public class UpgradeData
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 0,
-                    description = "Better Clue",
+                    description = "BETTER CLUE\n",
                     levelPrices = new int[] { 1500 },
                     upgradeRequired = new Dictionary<UpgradeID, int>()
                     {
-                        { UpgradeID.MaxClue, 1 }
+                        { UpgradeID.ExtraClue, 1 }
                     }
                 };
                 break;
@@ -202,16 +202,16 @@ public class UpgradeData
                     levelPrices = new int[] { 3000 },
                 };
                 break;
-            case UpgradeID.MaxPeek:
+            case UpgradeID.ExtraPeek:
                 upgrade = new UpgradeData()
                 {
                     levelPrices = new int[] { 3000 },
                 };
                 break;
-            case UpgradeID.Block:
+            case UpgradeID.BlockChoise:
                 upgrade = new UpgradeData()
                 {
-                    description = "Block",
+                    description = "BLOCK CHOISE\n",
                     levelPrices = new int[] { 3000 },
                 };
                 break;
@@ -221,11 +221,11 @@ public class UpgradeData
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 0,
-                    description = "Death Defy",
+                    description = "DEATH DEFY\n",
                     levelPrices = new int[] { 3000 },
                     upgradeRequired = new Dictionary<UpgradeID, int>()
                     {
-                        { UpgradeID.ProtectedLife, 1 }
+                        { UpgradeID.LifeProtector, 1 }
                     }
                 };
                 break;

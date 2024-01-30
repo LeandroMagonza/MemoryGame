@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,12 +13,13 @@ public class ShopManager : MonoBehaviour
     public GameObject upgradeTittle;
     public TextMeshProUGUI moneyDisplay;
     public ShopButton[] shopButtons;
-
+    public Animator animatorMessage;
     private Dictionary<ConsumableID, ConsumableButton> shopConsumableButtons = new Dictionary<ConsumableID, ConsumableButton>();
     private Dictionary<UpgradeID, UpgradeButton> shopUpgradeButtons = new Dictionary<UpgradeID, UpgradeButton>();
 
     public UserData userData => PersistanceManager.Instance.userData;
     private const string _lock = "Ω\n▀";
+    private const string _max = "MAX";
     private void Awake()
     {
         foreach (ShopButton button in shopButtons)
@@ -60,7 +62,10 @@ public class ShopManager : MonoBehaviour
         bool canBuy = GameManager.Instance.userData.ModifyCoins(-price);
         if (!canBuy)
         {
-            CustomDebugger.Log("Not enough money");
+            string message = "Not enough money";
+            animatorMessage.GetComponentInChildren<TextMeshProUGUI>().text = message;
+            animatorMessage.SetTrigger("play");
+            CustomDebugger.Log(message);
             return;
         }
         if (itemID < 0) return;
@@ -88,7 +93,10 @@ public class ShopManager : MonoBehaviour
         bool canBuy = GameManager.Instance.userData.ModifyCoins(-price);
         if (!canBuy)
         {
-            CustomDebugger.Log("Not enough money");
+            string message = "Not enough money";
+            animatorMessage.GetComponentInChildren<TextMeshProUGUI>().text = message;
+            animatorMessage.SetTrigger("play");
+            CustomDebugger.Log(message);
             return;
         }
 
@@ -180,7 +188,9 @@ public class ShopManager : MonoBehaviour
                 break;
             }
         }
-        string price = isMaxLevel && !requirementsMet ? _lock : UpgradeData.GetUpgrade(upgradeID).GetPrice(currentLevel).ToString();
+        string price = UpgradeData.GetUpgrade(upgradeID).GetPrice(currentLevel).ToString();
+        price = !requirementsMet ? _lock : price;
+        price = isMaxLevel ? _max : price;
         
         string description = UpgradeData.GetUpgrade(upgradeID).description;
         if (!requirementsMet)
@@ -188,9 +198,10 @@ public class ShopManager : MonoBehaviour
             string requirementData = "\n you need \n";
             foreach(string upgrade in requirementList.Keys)
             {
-                requirementData += upgrade.ToString() + " " + requirementList[upgrade].ToString() + "\n";
+                string upgradeNameFormatted = Regex.Replace(upgrade.ToString(), "([a-z])([A-Z])", "$1 $2");
+                requirementData += upgradeNameFormatted + " " + requirementList[upgrade].ToString() + "\n";
             }
-            description += requirementData;
+            description += requirementData; 
         }
         shopUpgradeButtons[upgradeID].button.interactable = requirementsMet && !isMaxLevel;
         shopUpgradeButtons[upgradeID].currentText.text = currentLevel.ToString() + "/" + max;
