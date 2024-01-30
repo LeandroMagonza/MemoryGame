@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -17,7 +17,7 @@ public class ShopManager : MonoBehaviour
     private Dictionary<UpgradeID, UpgradeButton> shopUpgradeButtons = new Dictionary<UpgradeID, UpgradeButton>();
 
     public UserData userData => PersistanceManager.Instance.userData;
-
+    private const string _lock = "Ω\n▀";
     private void Awake()
     {
         foreach (ShopButton button in shopButtons)
@@ -160,7 +160,15 @@ public class ShopManager : MonoBehaviour
         int max = UpgradeData.GetUpgrade(upgradeID).GetMaxLevel();
 
         bool requirementsMet = true;
-
+        
+        Dictionary<string, string> requirementList = new Dictionary<string, string>();
+        foreach (var requirement in UpgradeData.GetUpgrade(upgradeID).upgradeRequired)
+        {
+            if (!requirementList.ContainsKey(requirement.Key.ToString()))
+            {
+                requirementList.Add(requirement.Key.ToString(), requirement.Value.ToString());
+            }
+        }
         foreach (var requirement in UpgradeData.GetUpgrade(upgradeID).upgradeRequired)
         {
             UpgradeID requirementID = requirement.Key;
@@ -172,11 +180,22 @@ public class ShopManager : MonoBehaviour
                 break;
             }
         }
-        string price = isMaxLevel ? "---" : UpgradeData.GetUpgrade(upgradeID).GetPrice(currentLevel).ToString();
+        string price = isMaxLevel && !requirementsMet ? _lock : UpgradeData.GetUpgrade(upgradeID).GetPrice(currentLevel).ToString();
+        
+        string description = UpgradeData.GetUpgrade(upgradeID).description;
+        if (!requirementsMet)
+        {
+            string requirementData = "\n you need \n";
+            foreach(string upgrade in requirementList.Keys)
+            {
+                requirementData += upgrade.ToString() + " " + requirementList[upgrade].ToString() + "\n";
+            }
+            description += requirementData;
+        }
         shopUpgradeButtons[upgradeID].button.interactable = requirementsMet && !isMaxLevel;
         shopUpgradeButtons[upgradeID].currentText.text = currentLevel.ToString() + "/" + max;
         shopUpgradeButtons[upgradeID].priceText.text = price;
-        shopUpgradeButtons[upgradeID].descriptionText.text = UpgradeData.GetUpgrade(upgradeID).description;
+        shopUpgradeButtons[upgradeID].descriptionText.text = description;
     }
 }
 
