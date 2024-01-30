@@ -129,6 +129,7 @@ public class GameManager : MonoBehaviour {
 
     public bool protectedLife = false;
     public bool deathDefy = false;
+    public bool blockChoise = false;
     private int deathDefyMagnitude = 0;
 
     public float timeToIntersticial = 1;
@@ -254,6 +255,11 @@ public class GameManager : MonoBehaviour {
     public void OnIncorrectGuess()
     {
         IncorrectGuessFX();
+        if (blockChoise)
+        {
+            if (!currentlyInGameStickers[_currentlySelectedSticker].blockedNumbers.Contains(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences))
+                currentlyInGameStickers[_currentlySelectedSticker].blockedNumbers.Add(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences);
+        }
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             false);
@@ -564,6 +570,7 @@ public class GameManager : MonoBehaviour {
         
         protectedLife = userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0;
         deathDefy = userData.upgrades.ContainsKey(UpgradeID.DeathDefy) && userData.upgrades[UpgradeID.DeathDefy] > 0;
+        blockChoise = userData.upgrades.ContainsKey(UpgradeID.BlockChoise) && userData.upgrades[UpgradeID.BlockChoise] > 0;
         SetNumpadByDifficulty(selectedDifficulty);
         bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
         gameEnded = false;
