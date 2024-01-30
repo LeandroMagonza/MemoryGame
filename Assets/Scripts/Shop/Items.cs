@@ -211,6 +211,9 @@ public class UpgradeData
             case UpgradeID.BlockChoise:
                 upgrade = new UpgradeData()
                 {
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 0,
                     description = "BLOCK CHOISE\n",
                     levelPrices = new int[] { 3000 },
                 };
