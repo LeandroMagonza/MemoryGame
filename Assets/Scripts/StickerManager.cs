@@ -71,9 +71,15 @@ public class StickerManager : MonoBehaviour
             //TODO: fix Problema ACA
             LoadAllStickersFromSet(stickerSet);
         }
-        if (!currentLoadedSetStickerData.ContainsKey(stickerSet) || currentLoadedSetStickerData[stickerSet] is null || currentLoadedSetStickerData[stickerSet].Count == 0)
+        if (!currentLoadedSetStickerData.ContainsKey(stickerSet) )
         {
-            throw new Exception("Failed to load sticker set " + stickerSet);
+            throw new Exception("Failed to load sticker set " + stickerSet + " currentLoadedSetStickerData doesnt contain the key");
+        } if (currentLoadedSetStickerData[stickerSet] is null)
+        {
+            throw new Exception("Failed to load sticker set " + stickerSet+" element stickerSet in currentLoadedSetStickerData is null");
+        } if (currentLoadedSetStickerData[stickerSet].Count == 0)
+        {
+            throw new Exception("Failed to load sticker set " + stickerSet+ "currentLoadedSetStickerData[stickerSet] has no stickers ");
         }
 
         if (!currentLoadedSetStickerData[stickerSet].ContainsKey(stickerID))
@@ -93,6 +99,10 @@ public class StickerManager : MonoBehaviour
     {
         CustomDebugger.Log("LoadAllStickersFromSet "+setToLoad,DebugCategory.STICKERLOAD);
         var dictionary = new Dictionary<int, StickerData>();
+        if (currentLoadedSetStickerData.ContainsKey(setToLoad))
+        {
+            throw new Exception("setToLoad aready exists in currentLoadSetStickerData " + setToLoad);
+        }
         currentLoadedSetStickerData.Add(setToLoad, dictionary);
         
         string imageSetName = setToLoad.ToString();
@@ -118,55 +128,66 @@ public class StickerManager : MonoBehaviour
                 for (loadingStickerID = 0; loadingStickerID < totalStickersInSet; loadingStickerID++)
                 {
                     
-                    dictionary.Add(loadingStickerID,AssembleStickerData(setToLoad, loadingStickerID, allSprites[loadingStickerID]));
+                    dictionary.Add(loadingStickerID,AssembleStickerData(setToLoad, loadingStickerID, allSprites[loadingStickerID],1));
             
                 }
                 
                 break;
             case "IMAGES":
                 //this check is basically to see if the sticker list starts at 0 or starts at 1
+                int offset = 1;
                 for (loadingStickerID = 0; loadingStickerID < totalStickersInSet; loadingStickerID++)
                 {
                     path = imageSetName + "/(" + loadingStickerID + ")";
                     loadedSprite = Resources.Load<Sprite>(path);
-                    
+                    CustomDebugger.Log("Checked path "+path+" found "+loadedSprite);
                     if (loadedSprite == null)
                     {
                         //Debug.LogError("ImageID not found in spritesFromSet with parentheses '(name)' ");
                         path = imageSetName + "/" + loadingStickerID ;
                         loadedSprite = Resources.Load<Sprite>(path);
-                        if (loadedSprite == null && loadingStickerID != 0)
+                        CustomDebugger.Log("Checked path "+path+" found "+loadedSprite);
+                        if (loadedSprite == null)
                         {
-                            throw new Exception("ImageID "+loadingStickerID+" not found in spritesFromSet "+imageSetName+" at path "+path);
+                            if (loadingStickerID == 0)
+                            {
+                                // si es == a 0  y no se encuentra puede ser que la lista de imagenes empieze en 1
+                                offset = 0;
+                                continue;
+                            }
+                            else
+                            {
+                                throw new Exception("ImageID "+loadingStickerID+" not found in spritesFromSet "+imageSetName+" at path "+path);
+                            }
                         }
-                        else
-                        {
-                            // si es == a 0  y no se encuentra puede ser que la lista de imagenes empieze en 1 
-                            continue;
-                        }
-                    } 
-                    
-                    dictionary.Add(loadingStickerID,AssembleStickerData(setToLoad, loadingStickerID, loadedSprite));
+                    }
+
+                    if (loadedSprite != null)
+                    {
+                        CustomDebugger.Log("Adding stickerID "+loadingStickerID);
+                        dictionary.Add(loadingStickerID,AssembleStickerData(setToLoad, loadingStickerID, loadedSprite,offset));
+                    }
             
                 }
                 break;
             default:
                 throw new Exception("INVALID IMAGESET TYPE");
         }
+        CustomDebugger.Log("Loaded stickers from set "+setToLoad,DebugCategory.STICKERLOAD);
+        CustomDebugger.Log("found in internal dictionary stickers:"+dictionary.Count,DebugCategory.STICKERLOAD);
+        CustomDebugger.Log("found in currentLoadedSetStickerData[setToLoad] dictionary stickers:"+currentLoadedSetStickerData[setToLoad].Count,DebugCategory.STICKERLOAD);
 
-
-        CustomDebugger.Log("PATH: " + path);
         
     }
 
-    public StickerData AssembleStickerData(StickerSet stickerSet, int stickerID, Sprite sprite)
+    public StickerData AssembleStickerData(StickerSet stickerSet, int stickerID, Sprite sprite, int offset)
     {
         int amountOfDulpicates = 0;
         if (PersistanceManager.Instance.userData.stickerDuplicates.ContainsKey((stickerSet,stickerID))) {
             amountOfDulpicates = PersistanceManager.Instance.userData.stickerDuplicates[(stickerSet,stickerID)];
         }
 
-        var additionalData = GetStickerAdditionalData(stickerSet, stickerID+1);
+        var additionalData = GetStickerAdditionalData(stickerSet, stickerID+offset);
         return new StickerData(
             stickerID,
             sprite,
