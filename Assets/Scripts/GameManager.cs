@@ -168,7 +168,7 @@ public class GameManager : MonoBehaviour {
             CustomDebugger.Log("IncorrectGuess");
             int magnitude = number - currentStickerMatchData.amountOfAppearences;
             deathDefyMagnitude = Mathf.Abs(magnitude);
-            OnIncorrectGuess();
+            OnIncorrectGuess(number);
             turnAction = TurnAction.GuessIncorrect;
         }
         //usar el dato del sticker tomado antes de la funcion oncorrectguess
@@ -247,16 +247,16 @@ public class GameManager : MonoBehaviour {
 
 
 
-    public void OnIncorrectGuess()
+    public void OnIncorrectGuess(int number)
     {
         IncorrectGuessFX();
         if (blockChoice)
         {
             Debug.Log("Block");
-            if (!GetCurrentlySelectedSticker().matchData.blockedNumbers.Contains(GetCurrentlySelectedSticker().matchData.amountOfAppearences))
+            if (!GetCurrentlySelectedSticker().matchData.blockedNumbers.Contains(number))
             {
                 Debug.Log("Block In");
-                GetCurrentlySelectedSticker().matchData.AddBlockEffect(GetCurrentlySelectedSticker().matchData.amountOfAppearences);
+                GetCurrentlySelectedSticker().matchData.AddBlockEffect(number);
 
             }
         }

@@ -113,13 +113,14 @@ public class GameCanvas : MonoBehaviour
                 numpadButtons[stickerData.matchData.cutNumbers[i]].interactable = false;
             }
         }
-        Debug.Log("sdmb: " + stickerData.matchData.blockedNumbers.Count);
+        Debug.Log("BN count: " + stickerData.matchData.blockedNumbers.Count);
 
         if (stickerData.matchData.blockedNumbers.Count > 0)
         {
             //Block
-            for (int i = 1; i < stickerData.matchData.blockedNumbers.Count; i++)
+            for (int i = 0; i < stickerData.matchData.blockedNumbers.Count; i++)
             {
+            
                 CustomDebugger.Log($"stickerData.matchData.blockedNumbers: {stickerData.matchData.blockedNumbers.Count} number: {i} contains: {stickerData.matchData.blockedNumbers.Contains(i)}");
                 numpadButtons[stickerData.matchData.blockedNumbers[i]].GetComponentInChildren<TextMeshProUGUI>().color = Color.red;
                 numpadButtons[stickerData.matchData.blockedNumbers[i]].interactable = false;
