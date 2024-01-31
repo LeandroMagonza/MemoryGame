@@ -63,7 +63,6 @@ public class GameCanvas : MonoBehaviour
     }
     private void OnEnable()
     {
-        GameManager.SetMatchInventory();
         AssignNumpadButtons(GameManager.numpadRow0, GameManager.numpadRow1, GameManager.numpadRow2);
         UpdateUI();
     }
@@ -112,6 +111,16 @@ public class GameCanvas : MonoBehaviour
                 CustomDebugger.Log($"stickerData.matchData.cutNumbers: {stickerData.matchData.cutNumbers.Count} number: {i} contains: {stickerData.matchData.cutNumbers.Contains(i)}");
                 numpadButtons[stickerData.matchData.cutNumbers[i]].GetComponentInChildren<TextMeshProUGUI>().color = Color.red;
                 numpadButtons[stickerData.matchData.cutNumbers[i]].interactable = false;
+            }
+        }
+        if (stickerData.matchData.blockedNumbers.Count > 0)
+        {
+            //Block
+            for (int i = 1; i < stickerData.matchData.blockedNumbers.Count; i++)
+            {
+                CustomDebugger.Log($"stickerData.matchData.blockedNumbers: {stickerData.matchData.blockedNumbers.Count} number: {i} contains: {stickerData.matchData.blockedNumbers.Contains(i)}");
+                numpadButtons[stickerData.matchData.blockedNumbers[i]].GetComponentInChildren<TextMeshProUGUI>().color = Color.red;
+                numpadButtons[stickerData.matchData.blockedNumbers[i]].interactable = false;
             }
         }
     }

@@ -226,7 +226,8 @@ public class GameManager : MonoBehaviour {
             RemoveStickerFromPool();
         }
     }
-    public void NextTurn() {
+    public void NextTurn() 
+    {
         turnNumber++;
         if (currentlyInGameStickers.Count < 3)
         {
@@ -236,13 +237,7 @@ public class GameManager : MonoBehaviour {
         {
             AddImages(turnNumber / 10);
         }
-        if (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
-        {
-            if (currentlyInGameStickers[_currentlySelectedSticker].lastClueAppearenceNumber == null && currentlyInGameStickers[_currentlySelectedSticker].cutNumbers.Count > 0)
-            {
-                currentlyInGameStickers[_currentlySelectedSticker].cutNumbers = new List<int>();
-            }
-        }
+
         SetRandomImage();
         GameCanvas.UpdateUI();
         disableInput = false;
@@ -258,7 +253,10 @@ public class GameManager : MonoBehaviour {
         if (blockChoise)
         {
             if (!currentlyInGameStickers[_currentlySelectedSticker].blockedNumbers.Contains(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences))
-                currentlyInGameStickers[_currentlySelectedSticker].blockedNumbers.Add(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences);
+            {
+                currentlyInGameStickers[_currentlySelectedSticker].AddBlockEffect(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences);
+
+            }
         }
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
@@ -567,7 +565,7 @@ public class GameManager : MonoBehaviour {
             stickerDisplay = StickerManager.Instance.GetStickerHolder();
         }
         stickerDisplay.ConfigureForGame(currentGameMode);
-        
+        SetMatchInventory();
         protectedLife = userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0;
         deathDefy = userData.upgrades.ContainsKey(UpgradeID.DeathDefy) && userData.upgrades[UpgradeID.DeathDefy] > 0;
         blockChoise = userData.upgrades.ContainsKey(UpgradeID.BlockChoise) && userData.upgrades[UpgradeID.BlockChoise] > 0;
