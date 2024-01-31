@@ -129,9 +129,13 @@ public class GameManager : MonoBehaviour {
 
     public bool protectedLife = false;
     public bool deathDefy = false;
+    public bool blockChoise = false;
     private int deathDefyMagnitude = 0;
 
-
+    public float timeToIntersticial = 1;
+    private float elapsedBufferTime = 0;
+    private float startMatchTime = 0;
+    private float endMatchTime = 0;
     //TODO: Esta se va para manager stages o algo asi 
     
 
@@ -222,7 +226,8 @@ public class GameManager : MonoBehaviour {
             RemoveStickerFromPool();
         }
     }
-    public void NextTurn() {
+    public void NextTurn() 
+    {
         turnNumber++;
         if (currentlyInGameStickers.Count < 3)
         {
@@ -232,13 +237,7 @@ public class GameManager : MonoBehaviour {
         {
             AddImages(turnNumber / 10);
         }
-        if (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
-        {
-            if (currentlyInGameStickers[_currentlySelectedSticker].lastClueAppearenceNumber == null && currentlyInGameStickers[_currentlySelectedSticker].cutNumbers.Count > 0)
-            {
-                currentlyInGameStickers[_currentlySelectedSticker].cutNumbers = new List<int>();
-            }
-        }
+
         SetRandomImage();
         GameCanvas.UpdateUI();
         disableInput = false;
@@ -251,6 +250,14 @@ public class GameManager : MonoBehaviour {
     public void OnIncorrectGuess()
     {
         IncorrectGuessFX();
+        if (blockChoise)
+        {
+            if (!currentlyInGameStickers[_currentlySelectedSticker].blockedNumbers.Contains(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences))
+            {
+                currentlyInGameStickers[_currentlySelectedSticker].AddBlockEffect(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences);
+
+            }
+        }
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             false);
@@ -453,18 +460,31 @@ public class GameManager : MonoBehaviour {
         return false;
     }
     public IEnumerator EndGame(float delay) {
-        
-        
+
+
         endGameButtons.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
         CustomDebugger.Log("Match Ended");
-        
+        endMatchTime = Time.time;
+        float elapsedTime = endMatchTime - startMatchTime;
+        elapsedBufferTime += elapsedTime;
+
+        yield return new WaitForSeconds(0.2f);
+
+        if (elapsedBufferTime > timeToIntersticial)
+        {
+            AdmobAdsScript.Instance.ShowInterstitialAd();
+            elapsedBufferTime = 0;
+        }
+
         if (userData.GetUserStageData(selectedStage, selectedDifficulty).highScore < score)
         {
             yield return StartCoroutine(SetHighScore(score));
         }
         
         yield return new WaitForSeconds(delay);
+
+       
         //animation achievements
         var firstTimeAchievements = userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
         
@@ -527,7 +547,6 @@ public class GameManager : MonoBehaviour {
     }
     public void Reset() {
         //if (disableInput) return;
-
         switch (currentGameMode)
         {
             case GameMode.MEMORY:
@@ -539,15 +558,18 @@ public class GameManager : MonoBehaviour {
                 quizOptionPad.SetActive(true);
                 break;
         }
-        
+        startMatchTime = Time.time;
+        endMatchTime = 0;
+        AdmobAdsScript.Instance.LoadInterstitialAd();
         Instance.SetScoreTexts();
         if (stickerDisplay == null) {
             stickerDisplay = StickerManager.Instance.GetStickerHolder();
         }
         stickerDisplay.ConfigureForGame(currentGameMode);
-        
-        protectedLife = userData.upgrades.ContainsKey(UpgradeID.ProtectedLife) && userData.upgrades[UpgradeID.ProtectedLife] > 0;
+        SetMatchInventory();
+        protectedLife = userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0;
         deathDefy = userData.upgrades.ContainsKey(UpgradeID.DeathDefy) && userData.upgrades[UpgradeID.DeathDefy] > 0;
+        blockChoise = userData.upgrades.ContainsKey(UpgradeID.BlockChoise) && userData.upgrades[UpgradeID.BlockChoise] > 0;
         SetNumpadByDifficulty(selectedDifficulty);
         bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
         gameEnded = false;
@@ -689,7 +711,7 @@ public class GameManager : MonoBehaviour {
         int calculatedComboBonus = (int)Math.Floor(((float)_currentCombo / 2));
         if (calculatedComboBonus >= maxComboBonus)
         {
-            if (userData.upgrades.ContainsKey(UpgradeID.ProtectedLife) && userData.upgrades[UpgradeID.ProtectedLife] > 0)
+            if (userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0)
             {
                 protectedLife = true;
                 lifeCounter.ProtectHearts();

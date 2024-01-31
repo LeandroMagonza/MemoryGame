@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,12 +13,13 @@ public class ShopManager : MonoBehaviour
     public GameObject upgradeTittle;
     public TextMeshProUGUI moneyDisplay;
     public ShopButton[] shopButtons;
-
+    public Animator animatorMessage;
     private Dictionary<ConsumableID, ConsumableButton> shopConsumableButtons = new Dictionary<ConsumableID, ConsumableButton>();
     private Dictionary<UpgradeID, UpgradeButton> shopUpgradeButtons = new Dictionary<UpgradeID, UpgradeButton>();
 
     public UserData userData => PersistanceManager.Instance.userData;
-
+    private const string _lock = "Ω\n▀";
+    private const string _max = "MAX";
     private void Awake()
     {
         foreach (ShopButton button in shopButtons)
@@ -60,7 +62,10 @@ public class ShopManager : MonoBehaviour
         bool canBuy = GameManager.Instance.userData.ModifyCoins(-price);
         if (!canBuy)
         {
-            CustomDebugger.Log("Not enough money");
+            string message = "Not enough money";
+            animatorMessage.GetComponentInChildren<TextMeshProUGUI>().text = message;
+            animatorMessage.SetTrigger("play");
+            CustomDebugger.Log(message);
             return;
         }
         if (itemID < 0) return;
@@ -88,7 +93,10 @@ public class ShopManager : MonoBehaviour
         bool canBuy = GameManager.Instance.userData.ModifyCoins(-price);
         if (!canBuy)
         {
-            CustomDebugger.Log("Not enough money");
+            string message = "Not enough money";
+            animatorMessage.GetComponentInChildren<TextMeshProUGUI>().text = message;
+            animatorMessage.SetTrigger("play");
+            CustomDebugger.Log(message);
             return;
         }
 
@@ -157,8 +165,18 @@ public class ShopManager : MonoBehaviour
         }
         bool isMaxLevel = UpgradeData.GetUpgrade(upgradeID).IsMaxLevel(currentLevel);
 
-        bool requirementsMet = true;
+        int max = UpgradeData.GetUpgrade(upgradeID).GetMaxLevel();
 
+        bool requirementsMet = true;
+        
+        Dictionary<string, string> requirementList = new Dictionary<string, string>();
+        foreach (var requirement in UpgradeData.GetUpgrade(upgradeID).upgradeRequired)
+        {
+            if (!requirementList.ContainsKey(requirement.Key.ToString()))
+            {
+                requirementList.Add(requirement.Key.ToString(), requirement.Value.ToString());
+            }
+        }
         foreach (var requirement in UpgradeData.GetUpgrade(upgradeID).upgradeRequired)
         {
             UpgradeID requirementID = requirement.Key;
@@ -170,11 +188,25 @@ public class ShopManager : MonoBehaviour
                 break;
             }
         }
-
+        string price = UpgradeData.GetUpgrade(upgradeID).GetPrice(currentLevel).ToString();
+        price = !requirementsMet ? _lock : price;
+        price = isMaxLevel ? _max : price;
+        
+        string description = UpgradeData.GetUpgrade(upgradeID).description;
+        if (!requirementsMet)
+        {
+            string requirementData = "\n you need \n";
+            foreach(string upgrade in requirementList.Keys)
+            {
+                string upgradeNameFormatted = Regex.Replace(upgrade.ToString(), "([a-z])([A-Z])", "$1 $2");
+                requirementData += upgradeNameFormatted + " " + requirementList[upgrade].ToString() + "\n";
+            }
+            description += requirementData; 
+        }
         shopUpgradeButtons[upgradeID].button.interactable = requirementsMet && !isMaxLevel;
-        shopUpgradeButtons[upgradeID].currentText.text = currentLevel.ToString();
-        shopUpgradeButtons[upgradeID].priceText.text = UpgradeData.GetUpgrade(upgradeID).GetPrice(currentLevel).ToString();
-        shopUpgradeButtons[upgradeID].descriptionText.text = UpgradeData.GetUpgrade(upgradeID).description;
+        shopUpgradeButtons[upgradeID].currentText.text = currentLevel.ToString() + "/" + max;
+        shopUpgradeButtons[upgradeID].priceText.text = price;
+        shopUpgradeButtons[upgradeID].descriptionText.text = description;
     }
 }
 
