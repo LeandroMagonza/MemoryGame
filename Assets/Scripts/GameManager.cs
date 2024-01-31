@@ -129,7 +129,7 @@ public class GameManager : MonoBehaviour {
 
     public bool protectedLife = false;
     public bool deathDefy = false;
-    public bool blockChoise = false;
+    public bool blockChoice = false;
     private int deathDefyMagnitude = 0;
 
     public float timeToIntersticial = 1;
@@ -250,11 +250,13 @@ public class GameManager : MonoBehaviour {
     public void OnIncorrectGuess()
     {
         IncorrectGuessFX();
-        if (blockChoise)
+        if (blockChoice)
         {
-            if (!currentlyInGameStickers[_currentlySelectedSticker].blockedNumbers.Contains(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences))
+            Debug.Log("Block");
+            if (!GetCurrentlySelectedSticker().matchData.blockedNumbers.Contains(GetCurrentlySelectedSticker().matchData.amountOfAppearences))
             {
-                currentlyInGameStickers[_currentlySelectedSticker].AddBlockEffect(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences);
+                Debug.Log("Block In");
+                GetCurrentlySelectedSticker().matchData.AddBlockEffect(GetCurrentlySelectedSticker().matchData.amountOfAppearences);
 
             }
         }
@@ -567,9 +569,10 @@ public class GameManager : MonoBehaviour {
         }
         stickerDisplay.ConfigureForGame(currentGameMode);
         SetMatchInventory();
+        GameCanvas.Instance.UpdateUI();
         protectedLife = userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0;
         deathDefy = userData.upgrades.ContainsKey(UpgradeID.DeathDefy) && userData.upgrades[UpgradeID.DeathDefy] > 0;
-        blockChoise = userData.upgrades.ContainsKey(UpgradeID.BlockChoise) && userData.upgrades[UpgradeID.BlockChoise] > 0;
+        blockChoice = userData.upgrades.ContainsKey(UpgradeID.BlockChoise) && userData.upgrades[UpgradeID.BlockChoise] > 0;
         SetNumpadByDifficulty(selectedDifficulty);
         bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
         gameEnded = false;

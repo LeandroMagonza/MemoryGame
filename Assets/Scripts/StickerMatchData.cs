@@ -58,6 +58,8 @@ public class StickerMatchData
 
     public void AddBlockEffect(int blockedNumber)
     {
+        Debug.Log("Add Block: "+ blockedNumber);
         blockedNumbers.Add(blockedNumber);
+        Debug.Log("Add: "+ blockedNumbers.Count);
     }
 }
