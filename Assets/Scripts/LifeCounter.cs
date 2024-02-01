@@ -30,11 +30,11 @@ public class LifeCounter : MonoBehaviour
         {
             if (heartIndex >= lives)
             {
-                heart.GetComponent<Image>().color = Color.black;
+                ChangeHeartColor(heart, Color.black);
             }
             else
             {
-                heart.GetComponent<Image>().color = Color.cyan;
+                ChangeHeartColor(heart, Color.cyan);
             }
             heartIndex++;
         }
@@ -85,10 +85,10 @@ public class LifeCounter : MonoBehaviour
         int heartIndex = 0;
         foreach (var heart in hearts) {
             if (heartIndex >= lives) {
-                heart.GetComponent<Image>().color = Color.black;
+                ChangeHeartColor(heart, Color.black);
             }
             else {
-                heart.GetComponent<Image>().color = GetHeartColor(heartIndex);
+                ChangeHeartColor(heart,  GetHeartColor(heartIndex));
             }
             heartIndex++;
         }
@@ -100,11 +100,11 @@ public class LifeCounter : MonoBehaviour
         {
             if (heartIndex >= lives)
             {
-                heart.GetComponent<Image>().color = Color.black;
+                ChangeHeartColor(heart, Color.black);
             }
             else
             {
-                heart.GetComponent<Image>().color = Color.cyan;
+                ChangeHeartColor(heart, Color.cyan);
             }
             heartIndex++;
         }
@@ -139,6 +139,11 @@ public class LifeCounter : MonoBehaviour
         else
             c = Color.Lerp(Color.yellow, Color.green, lerp);
         return c;
+    }
+
+    private void ChangeHeartColor(GameObject heart, Color color)
+    {
+        heart.transform.Find("HeartFill").GetComponent<Image>().color = color;
     }
 }
 

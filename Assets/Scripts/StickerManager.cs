@@ -153,6 +153,7 @@ public class StickerManager : MonoBehaviour
                             {
                                 // si es == a 0  y no se encuentra puede ser que la lista de imagenes empieze en 1
                                 offset = 0;
+                                totalStickersInSet++;
                                 continue;
                             }
                             else
@@ -281,6 +282,8 @@ public class StickerData
         this.name = name;
         this.color = color;
         this.type = type;
+        this.stickerSet = stickerSet;
+
     }
 
     

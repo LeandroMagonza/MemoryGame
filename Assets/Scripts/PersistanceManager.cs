@@ -344,6 +344,7 @@ public class PersistanceManager : MonoBehaviour
 
     public int GetStickerDuplicates(StickerSet stickerSet,int stickerID)
     {
+        CustomDebugger.Log(stickerSet+" sticker id "+stickerID,DebugCategory.STICKERLOAD);
         if (userData.stickerDuplicates.ContainsKey((stickerSet,stickerID)))
         {
             return userData.stickerDuplicates[(stickerSet, stickerID)];
