@@ -139,7 +139,7 @@ public class ShopManager : MonoBehaviour
             shopButton.currentText.text = "Owned: 0";
         }
 
-        shopButton.priceText.text = "BUY\n$" + ConsumableData.GetConsumable(consumableID).price.ToString();
+        shopButton.priceText.text = ConsumableData.GetConsumable(consumableID).price.ToString();
         shopButton.descriptionText.text  = ConsumableData.GetConsumable(consumableID).description;
 
     }
@@ -195,7 +195,7 @@ public class ShopManager : MonoBehaviour
         string description = UpgradeData.GetUpgrade(upgradeID).description;
         if (!requirementsMet)
         {
-            string requirementData = "\n you need \n";
+            string requirementData = "\n YOU NEED: ";
             foreach(string upgrade in requirementList.Keys)
             {
                 string upgradeNameFormatted = Regex.Replace(upgrade.ToString(), "([a-z])([A-Z])", "$1 $2");
