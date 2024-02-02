@@ -6620,8 +6620,7 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -17.142857
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 248617514254179362, guid: eb9d401e946ffda48a82cb54ff3b4b37, type: 3}
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: eb9d401e946ffda48a82cb54ff3b4b37, type: 3}
 --- !u!1 &287874145
 GameObject:
@@ -17759,7 +17758,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -18226,7 +18225,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -18797,12 +18796,12 @@ MonoBehaviour:
   amountOfAppearencesText: {fileID: 426789308}
   stickerDisplay: {fileID: 620355432}
   audioSource: {fileID: 1079194500}
-  correctGuessClip: {fileID: 8300000, guid: 8d94eeba23e00564e9756c24a7bd7865, type: 3}
-  incorrectGuessClip: {fileID: 8300000, guid: f3896a228c744e04bab32bde6441f41a, type: 3}
-  endGameClip: {fileID: 8300000, guid: 3d7894853c8c0a34d8ca4d44f62208d4, type: 3}
-  bonusClip: {fileID: 8300000, guid: 404ad2f2639dda64f965113ff1f8f666, type: 3}
-  winClip: {fileID: 8300000, guid: 218bb145b8c91f14185fb2ec9cb1b54d, type: 3}
-  highScoreClip: {fileID: 8300000, guid: 97d73190587a27a498cc93daba75e6da, type: 3}
+  correctGuessClip: {fileID: 8300000, guid: ceee8d17818ca684da6456f899698a04, type: 3}
+  incorrectGuessClip: {fileID: 8300000, guid: e7333d828d219284d9ce1a061e534202, type: 3}
+  endGameClip: {fileID: 8300000, guid: d6b0ec09feef11146bc22bdf43abc0d2, type: 3}
+  bonusClip: {fileID: 8300000, guid: 503399d6f0e6a564abf6c42586449600, type: 3}
+  winClip: {fileID: 8300000, guid: 21dc7030934ec9245889efce3e97f4d2, type: 3}
+  highScoreClip: {fileID: 8300000, guid: c738a4dc09fd391429b3c65f4dd4ee49, type: 3}
   correctGuessParticle: {fileID: 207292370}
   incorrectGuessParticle: {fileID: 334700922}
   endGameButtons: {fileID: 1777753789}
@@ -25448,7 +25447,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
