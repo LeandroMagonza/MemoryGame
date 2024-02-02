@@ -316,7 +316,7 @@ public class GameManager : MonoBehaviour {
 
     private void CorrectGuessFX()
     {
-        StartCoroutine(Squash(stickerDisplay.spriteHolder.transform, .2f, 0.1f, 5));
+        StartCoroutine(Squash(stickerDisplay.spriteHolder.transform.parent.transform, .2f, 0.1f, 5));
         correctGuessParticle.Play();
     }
     private void IncorrectGuessFX()
@@ -740,6 +740,18 @@ public class GameManager : MonoBehaviour {
             return (_currentlySelectedSticker, null);
         }
         return (_currentlySelectedSticker, currentlyInGameStickers[_currentlySelectedSticker]);
+    }
+
+    public void Start() {
+        AudioClip mainTheme = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "mainTheme");
+        if (mainTheme is not null) audioSource.clip = mainTheme;
+        AudioClip correctGuess = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "correctGuess");
+        if (correctGuess is not null) audioSource.clip = correctGuess;
+        AudioClip incorrectGuess = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "incorrectGuess");
+        if (incorrectGuess is not null) audioSource.clip = incorrectGuess;
+        
+        
+        
     }
 }
 public enum StickerSet {
