@@ -746,12 +746,18 @@ public class GameManager : MonoBehaviour {
         AudioClip mainTheme = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "mainTheme");
         if (mainTheme is not null) audioSource.clip = mainTheme;
         AudioClip correctGuess = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "correctGuess");
-        if (correctGuess is not null) audioSource.clip = correctGuess;
+        if (correctGuess is not null) correctGuessClip = correctGuess;
         AudioClip incorrectGuess = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "incorrectGuess");
-        if (incorrectGuess is not null) audioSource.clip = incorrectGuess;
-        
-        
-        
+        if (incorrectGuess is not null) incorrectGuessClip = incorrectGuess;
+        AudioClip bonus = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "bonus");
+        if (incorrectGuess is not null) bonusClip = bonus;
+        AudioClip endGame = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "endGame");
+        if (endGame is not null) endGameClip = endGame;
+        AudioClip win = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "win");
+        if (win is not null) winClip = win;
+        AudioClip highScore = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "highScore");
+        if (highScore is not null) highScoreClip = highScore;
+        audioSource.Play();
     }
 }
 public enum StickerSet {
