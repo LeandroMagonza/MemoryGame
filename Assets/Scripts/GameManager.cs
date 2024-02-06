@@ -168,7 +168,7 @@ public class GameManager : MonoBehaviour {
             CustomDebugger.Log("IncorrectGuess");
             int magnitude = number - currentStickerMatchData.amountOfAppearences;
             deathDefyMagnitude = Mathf.Abs(magnitude);
-            OnIncorrectGuess();
+            OnIncorrectGuess(number);
             turnAction = TurnAction.GuessIncorrect;
         }
         //usar el dato del sticker tomado antes de la funcion oncorrectguess
@@ -247,14 +247,16 @@ public class GameManager : MonoBehaviour {
 
 
 
-    public void OnIncorrectGuess()
+    public void OnIncorrectGuess(int number)
     {
         IncorrectGuessFX();
         if (blockChoice)
         {
-            if (!currentlyInGameStickers[_currentlySelectedSticker].blockedNumbers.Contains(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences))
+            Debug.Log("Block");
+            if (!GetCurrentlySelectedSticker().matchData.blockedNumbers.Contains(number))
             {
-                currentlyInGameStickers[_currentlySelectedSticker].AddBlockEffect(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences);
+                Debug.Log("Block In");
+                GetCurrentlySelectedSticker().matchData.AddBlockEffect(number);
 
             }
         }
@@ -572,6 +574,7 @@ public class GameManager : MonoBehaviour {
         }
         stickerDisplay.ConfigureForGame(currentGameMode);
         SetMatchInventory();
+        GameCanvas.Instance.UpdateUI();
         protectedLife = userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0;
         deathDefy = userData.upgrades.ContainsKey(UpgradeID.DeathDefy) && userData.upgrades[UpgradeID.DeathDefy] > 0;
         blockChoice = userData.upgrades.ContainsKey(UpgradeID.BlockChoise) && userData.upgrades[UpgradeID.BlockChoise] > 0;

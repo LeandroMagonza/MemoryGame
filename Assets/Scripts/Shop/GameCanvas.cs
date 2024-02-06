@@ -113,11 +113,14 @@ public class GameCanvas : MonoBehaviour
                 numpadButtons[stickerData.matchData.cutNumbers[i]].interactable = false;
             }
         }
+        Debug.Log("BN count: " + stickerData.matchData.blockedNumbers.Count);
+
         if (stickerData.matchData.blockedNumbers.Count > 0)
         {
             //Block
-            for (int i = 1; i < stickerData.matchData.blockedNumbers.Count; i++)
+            for (int i = 0; i < stickerData.matchData.blockedNumbers.Count; i++)
             {
+            
                 CustomDebugger.Log($"stickerData.matchData.blockedNumbers: {stickerData.matchData.blockedNumbers.Count} number: {i} contains: {stickerData.matchData.blockedNumbers.Contains(i)}");
                 numpadButtons[stickerData.matchData.blockedNumbers[i]].GetComponentInChildren<TextMeshProUGUI>().color = Color.red;
                 numpadButtons[stickerData.matchData.blockedNumbers[i]].interactable = false;
@@ -190,17 +193,16 @@ public class GameCanvas : MonoBehaviour
 
         SaveAction(turnSticker, scoreModification);
     }
-    [ContextMenu("USE Better Clue")]
     public void UseBetterClue()
     {
         CustomDebugger.Log("Better");
 
         var turnSticker = USE(ConsumableID.Clue);
         int amountOfAppears = GameManager.GetCurrentlySelectedSticker().matchData.amountOfAppearences;
+        Debug.Log("amount of appears: " + amountOfAppears);
         // por que crea uno nuevo?
-        StickerMatchData stickerData = new StickerMatchData();
-        stickerData.AddBetterClueEffect(amountOfAppears);
-        GameManager.currentlyInGameStickers[GameManager.GetCurrentlySelectedSticker().sticker] = stickerData;
+        turnSticker.matchData.AddBetterClueEffect(amountOfAppears);
+        Debug.Log("amount of appears: " + amountOfAppears);
         int scoreModification = GameManager.OnCorrectGuess();
 
         SaveAction(turnSticker, scoreModification);
@@ -212,7 +214,6 @@ public class GameCanvas : MonoBehaviour
         GameManager.NextTurn();
 
     }
-    [ContextMenu("USECUT")]
     public void UseCut()
     {
         var turnSticker = USE(ConsumableID.Cut);
@@ -230,8 +231,6 @@ public class GameCanvas : MonoBehaviour
         switch (itemID)
         {
             case ConsumableID.Clue:
-                CustomDebugger.Log(GameManager.userData.upgrades.ContainsKey(UpgradeID.BetterClue));
-//                CustomDebugger.Log(GameManager.userData.upgrades[UpgradeID.BetterClue]);
                 if (GameManager.userData.upgrades.ContainsKey(UpgradeID.BetterClue) && GameManager.userData.upgrades[UpgradeID.BetterClue] > 0)
                     UseBetterClue();
                 else

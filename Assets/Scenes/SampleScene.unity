@@ -15850,10 +15850,6 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -19.625
       objectReference: {fileID: 0}
-    - target: {fileID: 2050823484728641625, guid: 85a5729d88170804da97e48dd3afa57a, type: 3}
-      propertyPath: button
-      value: 
-      objectReference: {fileID: 56502414}
     - target: {fileID: 2050823484804482074, guid: 85a5729d88170804da97e48dd3afa57a, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -16278,8 +16274,7 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -19.625
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 2050823484728641573, guid: 85a5729d88170804da97e48dd3afa57a, type: 3}
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 85a5729d88170804da97e48dd3afa57a, type: 3}
 --- !u!1 &679372958
 GameObject:
