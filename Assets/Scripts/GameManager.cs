@@ -133,7 +133,7 @@ public class GameManager : MonoBehaviour {
     private int deathDefyMagnitude = 0;
 
     public float timeToIntersticial = 1;
-    private float elapsedBufferTime = 0;
+    private float currentTimeToIntersticial = 0;
     private float startMatchTime = 0;
     private float endMatchTime = 0;
     //TODO: Esta se va para manager stages o algo asi 
@@ -476,7 +476,7 @@ public class GameManager : MonoBehaviour {
         CustomDebugger.Log("Match Ended");
         endMatchTime = Time.time;
         float elapsedTime = endMatchTime - startMatchTime;
-        elapsedBufferTime += elapsedTime;
+        currentTimeToIntersticial += elapsedTime;
 
         yield return new WaitForSeconds(0.2f);
 
@@ -500,10 +500,10 @@ public class GameManager : MonoBehaviour {
         userData.coins += score;
         SaveMatch();
             
-        if (elapsedBufferTime > timeToIntersticial)
+        if (currentTimeToIntersticial > timeToIntersticial)
         {
             AdmobAdsScript.Instance.ShowInterstitialAd();
-            elapsedBufferTime = 0;
+            currentTimeToIntersticial = 0;
         }
     }
 
@@ -577,7 +577,7 @@ public class GameManager : MonoBehaviour {
         GameCanvas.Instance.UpdateUI();
         protectedLife = userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0;
         deathDefy = userData.upgrades.ContainsKey(UpgradeID.DeathDefy) && userData.upgrades[UpgradeID.DeathDefy] > 0;
-        blockChoice = userData.upgrades.ContainsKey(UpgradeID.BlockChoise) && userData.upgrades[UpgradeID.BlockChoise] > 0;
+        blockChoice = userData.upgrades.ContainsKey(UpgradeID.BlockMistake) && userData.upgrades[UpgradeID.BlockMistake] > 0;
         SetNumpadByDifficulty(selectedDifficulty);
         gameCanvas.GetComponent<GameCanvas>().UpdateUI();
         bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);

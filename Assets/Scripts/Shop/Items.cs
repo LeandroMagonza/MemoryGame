@@ -24,7 +24,7 @@ public enum UpgradeID
     ExtraCut,
     BetterCut,
     ExtraPeek,
-    BlockChoise,
+    BlockMistake,
 
     DeathDefy
 }
@@ -57,7 +57,7 @@ public class ConsumableData
                 {
                     itemID = itemID,
                     price = 300,
-                    description = "REMOVE: Remove the current Sticker.",
+                    description = "REMOVE: Remove the current Sticker from the match.",
                     max = 1,
                 };
                 break;
@@ -131,7 +131,7 @@ public class UpgradeData
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 2,
-                    description = "EXTRA CLUE: ADD extra MAX and ITEM to the match.",
+                    description = "EXTRA CLUE: Start each match with an extra Clue. \n"+ConsumableData.GetConsumable(ConsumableID.Clue).description,
                     levelPrices = new int[] { 200, 400, 1200 },
                 };
                 break;
@@ -141,7 +141,7 @@ public class UpgradeData
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 2,
-                    description = "EXTRA REMOVE: ADD extra MAX and ITEM to the match.",
+                    description = "EXTRA REMOVE: Start each match with an extra Remove. \n" +ConsumableData.GetConsumable(ConsumableID.Remove).description,
                     levelPrices = new int[] { 2500 },
                 };
                 break;
@@ -151,7 +151,7 @@ public class UpgradeData
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 2,
-                    description = "EXTRA CUT: ADD extra MAX and ITEM to the match.",
+                    description = "EXTRA CUT: Start each match with an extra Cut. \n" +ConsumableData.GetConsumable(ConsumableID.Cut).description,
                     levelPrices = new int[] { 300, 700, 1500 },
 
                 };
@@ -174,7 +174,7 @@ public class UpgradeData
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 0,
-                    description = "LIFE PROTECTOR: Protect your life from one mistake.",
+                    description = "LIFE PROTECTOR: Protect your life from one mistake. Recharges on max Combo",
                     levelPrices = new int[] {2500},
                     upgradeRequired = new Dictionary<UpgradeID, int>()
                     {
@@ -188,7 +188,7 @@ public class UpgradeData
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 0,
-                    description = "BETTER CLUE: Upgrade CLUE behaviour.",
+                    description = "BETTER CLUE: Clues mark the number they were used on.",
                     levelPrices = new int[] { 1500 },
                     upgradeRequired = new Dictionary<UpgradeID, int>()
                     {
@@ -208,13 +208,13 @@ public class UpgradeData
                     levelPrices = new int[] { 3000 },
                 };
                 break;
-            case UpgradeID.BlockChoise:
+            case UpgradeID.BlockMistake:
                 upgrade = new UpgradeData()
                 {
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 0,
-                    description = "BLOCK MISTAKE: BLOCK the miss for next time.",
+                    description = "BLOCK MISTAKE: On mistake, the number is marked until guessed correctly.",
                     levelPrices = new int[] { 3000 },
                 };
                 break;
@@ -224,7 +224,7 @@ public class UpgradeData
                     itemId = itemId,
                     valueAddToInitial = 1,
                     valueAddToMax = 0,
-                    description = "DEATH DEFY: Probability of surviving a near miss.",
+                    description = "DEATH DEFY: Cheat death once per match on a SMALL mistake.",
                     levelPrices = new int[] { 3000 },
                     upgradeRequired = new Dictionary<UpgradeID, int>()
                     {
