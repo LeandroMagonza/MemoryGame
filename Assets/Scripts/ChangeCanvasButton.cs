@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class ChangeCanvasButton : MonoBehaviour {
     public Canvas canvasToSet;
+    public GameClip clip;
     public virtual void Start()
     {
         GetComponent<Button>().onClick.AddListener(OnClick);
@@ -17,10 +18,9 @@ public class ChangeCanvasButton : MonoBehaviour {
             CustomDebugger.Log("Canvas NotImplementedException set");
             return;
         }
+        AudioManager.Instance.PlayClip(clip);
         CanvasManager.Instance.ChangeCanvas(canvasToSet);  
     }
-    public void PlayOneShotOnManager(AudioClip clip) {
-        GameManager.Instance.audioSource.PlayOneShot(clip);
-    }
+
 
 }

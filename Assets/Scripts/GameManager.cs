@@ -26,7 +26,7 @@ public class GameManager : MonoBehaviour {
     protected void Awake() {
         if (_instance == null) {
             _instance = this as GameManager;
-            audioSource = GetComponent<AudioSource>();
+            
 
             quizOptionButtons = new List<(string, NumpadButton)>();
             foreach (Transform option in quizOptionPad.transform)
@@ -82,13 +82,13 @@ public class GameManager : MonoBehaviour {
 
     public Dictionary<StickerData,StickerMatchData> currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
 
-    public AudioSource audioSource;
-    public AudioClip correctGuessClip;
-    public AudioClip incorrectGuessClip;
-    public AudioClip endGameClip;
-    public AudioClip bonusClip;
-    public AudioClip winClip;
-    public AudioClip highScoreClip;
+    //public AudioSource audioSource;
+    // public AudioClip correctGuessClip;
+    // public AudioClip incorrectGuessClip;
+    // public AudioClip endGameClip;
+    // public AudioClip bonusClip;
+    // public AudioClip winClip;
+    // public AudioClip highScoreClip;
 
     public ParticleSystem correctGuessParticle;
     public ParticleSystem incorrectGuessParticle;
@@ -129,7 +129,7 @@ public class GameManager : MonoBehaviour {
 
     public bool protectedLife = false;
     public bool deathDefy = false;
-    public bool blockChoise = false;
+    public bool blockChoice = false;
     private int deathDefyMagnitude = 0;
 
     public float timeToIntersticial = 1;
@@ -196,7 +196,7 @@ public class GameManager : MonoBehaviour {
         yield return new WaitForSeconds(delayBetweenImages);
         SaveTurn(number, timerModification, turnAction, scoreModification, stickerData, stickerMatchData);
         if (currentlyInGameStickers.Count == 0) {
-            Win();
+            StartCoroutine(EndGame(true));
         }
         else {
             NextTurn();
@@ -250,7 +250,7 @@ public class GameManager : MonoBehaviour {
     public void OnIncorrectGuess()
     {
         IncorrectGuessFX();
-        if (blockChoise)
+        if (blockChoice)
         {
             if (!currentlyInGameStickers[_currentlySelectedSticker].blockedNumbers.Contains(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences))
             {
@@ -261,7 +261,7 @@ public class GameManager : MonoBehaviour {
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             false);
-        audioSource.PlayOneShot(incorrectGuessClip);
+        AudioManager.Instance.PlayClip(GameClip.incorrectGuess);
 
         currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
         bool DeathDefy = GetDeathDefy(deathDefyMagnitude);
@@ -297,7 +297,7 @@ public class GameManager : MonoBehaviour {
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             true);
-        audioSource.PlayOneShot(correctGuessClip);
+        AudioManager.Instance.PlayClip(GameClip.correctGuess);
         int scoreModification = stages[selectedStage].basePoints +
                                 currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences
                                 + (_currentlySelectedSticker.level - 1)
@@ -331,7 +331,7 @@ public class GameManager : MonoBehaviour {
         CustomDebugger.Log("gain bonus");
         ModifyScore(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences * bonusMultiplicator);
         bonusMultiplicator++;
-        audioSource.PlayOneShot(bonusClip);
+        AudioManager.Instance.PlayClip(GameClip.bonus);
         lifeCounter.GainLive();
     }
 
@@ -430,11 +430,7 @@ public class GameManager : MonoBehaviour {
         // aca se setea si la imagen vuelve al set general o no  
         _stickersFromStage.Remove(_currentlySelectedSticker.stickerID);
     }
-    private void Win() {
-        audioSource.PlayOneShot(winClip);
-        CustomDebugger.Log("Win");
-        StartCoroutine(EndGame(winClip.length));
-    }
+  
     private bool AddImages(int amountOfImages) {
         //para agregar una imagen al pool, se mezclan todos los sprites,
         //y se agrega el primer sprite que no este en el pool, al pool
@@ -459,8 +455,19 @@ public class GameManager : MonoBehaviour {
 
         return false;
     }
-    public IEnumerator EndGame(float delay) {
-
+    public IEnumerator EndGame(bool win) {
+        float delay;
+        if (win) {
+            CustomDebugger.Log("Win");
+            AudioManager.Instance.PlayClip(GameClip.win);
+            delay = AudioManager.Instance.clips[GameClip.win].length;
+        }
+        else
+        {
+            CustomDebugger.Log("Lose");
+            AudioManager.Instance.PlayClip(GameClip.endGame);
+            delay = AudioManager.Instance.clips[GameClip.endGame].length;
+        }
 
         endGameButtons.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
@@ -471,11 +478,7 @@ public class GameManager : MonoBehaviour {
 
         yield return new WaitForSeconds(0.2f);
 
-        if (elapsedBufferTime > timeToIntersticial)
-        {
-            AdmobAdsScript.Instance.ShowInterstitialAd();
-            elapsedBufferTime = 0;
-        }
+  
 
         if (userData.GetUserStageData(selectedStage, selectedDifficulty).highScore < score)
         {
@@ -494,6 +497,12 @@ public class GameManager : MonoBehaviour {
         //animationScore
         userData.coins += score;
         SaveMatch();
+            
+        if (elapsedBufferTime > timeToIntersticial)
+        {
+            AdmobAdsScript.Instance.ShowInterstitialAd();
+            elapsedBufferTime = 0;
+        }
     }
 
     public void UpdateAchievementAndUnlockedLevels()
@@ -516,8 +525,8 @@ public class GameManager : MonoBehaviour {
     }
     private IEnumerator SetHighScore(int highScoreToSet)
     {
-        audioSource.Pause();
-        audioSource.PlayOneShot(highScoreClip);
+        AudioManager.Instance.audioSource.Pause();
+        AudioManager.Instance.PlayClip(GameClip.highScore);
         yield return new WaitForSeconds(.25f);
         //Todo: Add highscore animation
         userData.GetUserStageData(selectedStage, selectedDifficulty).highScore = highScoreToSet;
@@ -539,12 +548,7 @@ public class GameManager : MonoBehaviour {
             SetTimer(maxTimer);
         }
     }
-    public void Lose()
-    {
-        CustomDebugger.Log("Lose");
-        audioSource.PlayOneShot(endGameClip);
-        StartCoroutine(EndGame(endGameClip.length));
-    }
+   
     public void Reset() {
         //if (disableInput) return;
         switch (currentGameMode)
@@ -560,6 +564,7 @@ public class GameManager : MonoBehaviour {
         }
         startMatchTime = Time.time;
         endMatchTime = 0;
+        //TODO: esto no deberia cargarse solo si paso x tiempo? O el load no es el show?
         AdmobAdsScript.Instance.LoadInterstitialAd();
         Instance.SetScoreTexts();
         if (stickerDisplay == null) {
@@ -569,13 +574,14 @@ public class GameManager : MonoBehaviour {
         SetMatchInventory();
         protectedLife = userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0;
         deathDefy = userData.upgrades.ContainsKey(UpgradeID.DeathDefy) && userData.upgrades[UpgradeID.DeathDefy] > 0;
-        blockChoise = userData.upgrades.ContainsKey(UpgradeID.BlockChoise) && userData.upgrades[UpgradeID.BlockChoise] > 0;
+        blockChoice = userData.upgrades.ContainsKey(UpgradeID.BlockChoise) && userData.upgrades[UpgradeID.BlockChoise] > 0;
         SetNumpadByDifficulty(selectedDifficulty);
+        gameCanvas.GetComponent<GameCanvas>().UpdateUI();
         bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
         gameEnded = false;
         stickerDisplay.gameObject.SetActive(true);
         endGameButtons.transform.parent.gameObject.SetActive(false);
-        audioSource.Play();
+        AudioManager.Instance.audioSource.Play();
         SetTimer(15);
         SetScore(0);
         turnNumber = 1;
@@ -628,7 +634,7 @@ public class GameManager : MonoBehaviour {
             yield return new WaitForSeconds(0.01f);
         }
         transform.localScale = initialScale;
-        StopCoroutine(Squash(transform, delay: 0, amount: 0, speed: 0));
+        //StopCoroutine(Squash(transform, delay: 0, amount: 0, speed: 0));
     }
     private IEnumerator Wooble(Transform transform, float delay, float angleAmount, float angleSpeed, float verticalAmount, float verticalSpeed)
     {
@@ -645,7 +651,7 @@ public class GameManager : MonoBehaviour {
         }
         transform.localEulerAngles = initialRotation;
         transform.localPosition = initialPosition;
-        StopCoroutine(Wooble(transform, delay: 0, angleAmount: 0, angleSpeed: 0, verticalAmount: 0, verticalSpeed: 0));
+        //StopCoroutine(Wooble(transform, delay: 0, angleAmount: 0, angleSpeed: 0, verticalAmount: 0, verticalSpeed: 0));
     }
     private IEnumerator Shake(Transform transform, float delay, float amount, float speed)
     {
@@ -658,7 +664,7 @@ public class GameManager : MonoBehaviour {
             yield return new WaitForSeconds(0.01f);
         }
         transform.localPosition = initialPosition;
-        StopCoroutine(Shake(transform, delay: 0, amount: 0, speed: 0));
+        //StopCoroutine(Shake(transform, delay: 0, amount: 0, speed: 0));
     }
 
 
@@ -742,23 +748,7 @@ public class GameManager : MonoBehaviour {
         return (_currentlySelectedSticker, currentlyInGameStickers[_currentlySelectedSticker]);
     }
 
-    public void Start() {
-        AudioClip mainTheme = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "mainTheme");
-        if (mainTheme is not null) audioSource.clip = mainTheme;
-        AudioClip correctGuess = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "correctGuess");
-        if (correctGuess is not null) correctGuessClip = correctGuess;
-        AudioClip incorrectGuess = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "incorrectGuess");
-        if (incorrectGuess is not null) incorrectGuessClip = incorrectGuess;
-        AudioClip bonus = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "bonus");
-        if (incorrectGuess is not null) bonusClip = bonus;
-        AudioClip endGame = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "endGame");
-        if (endGame is not null) endGameClip = endGame;
-        AudioClip win = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "win");
-        if (win is not null) winClip = win;
-        AudioClip highScore = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "highScore");
-        if (highScore is not null) highScoreClip = highScore;
-        audioSource.Play();
-    }
+
 }
 public enum StickerSet {
     Pokemons_SPRITESHEET_151,

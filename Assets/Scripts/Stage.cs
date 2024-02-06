@@ -15,7 +15,9 @@ public class Stage : MonoBehaviour
     public TextMeshProUGUI titleText; 
     public TextMeshProUGUI amountStickersTotalText; 
     public TextMeshProUGUI amountStickersCurrentText; 
-    public List<DifficultyButton> difficultyButtons; 
+    public List<DifficultyButton> difficultyButtons;
+    public GameObject unlockMessage;
+
     public void SetTitle(string title) {
         titleText.text = title;
     }
@@ -44,6 +46,7 @@ public class Stage : MonoBehaviour
             difficulty++;
         }
         UpdateDifficultyUnlockedAndAmountOfStickersUnlocked();
+        
     }
     public void UpdateDifficultyUnlockedAndAmountOfStickersUnlocked()
     {
@@ -59,6 +62,14 @@ public class Stage : MonoBehaviour
         }
         SetAmountOfStickersCurrent(unlockedStickers.Count);
         SetAmountOfStickersTotal(GameManager.Instance.stages[stage].stickers.Count);
+        if (unlockedStickers.Count < GameManager.Instance.stages[stage].stickers.Count) {
+            unlockMessage.SetActive(true);
+            difficultyButtons[0].transform.parent.gameObject.SetActive(false);
+        }
+        else {
+            unlockMessage.SetActive(false);
+            difficultyButtons[0].transform.parent.gameObject.SetActive(true);
+        }
         foreach (var difficultyButton in difficultyButtons)
         {
             difficultyButton.UpdateDifficultyUnlocked();

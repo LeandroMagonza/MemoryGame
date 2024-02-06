@@ -12,7 +12,7 @@ public struct ConsumableButtonData
     [SerializeField] public ConsumableID ID;
     [SerializeField] public Button button;
     [SerializeField] public TextMeshProUGUI text;
-    [SerializeField] public AudioClip audioClip;
+    [SerializeField] public GameClip gameClip;
 
     public void SetButtonText(ConsumableID consumableID)
     {
@@ -160,7 +160,7 @@ public class GameCanvas : MonoBehaviour
         CustomDebugger.Log("USE: " + ID.ToString());
         var turnSticker = GameManager.GetCurrentlySelectedSticker();
         if (!GameManager.matchInventory.ContainsKey(ID) || GameManager.matchInventory[ID].current <= 0) return (turnSticker);
-        GameManager.audioSource.PlayOneShot(buttons[(int)ID].audioClip);
+        AudioManager.Instance.PlayClip((buttons[(int)ID].gameClip));
         //anim
         var consumable = GameManager.matchInventory[ID];
         GameManager.matchInventory[ID] = (consumable.current - 1, consumable.max, consumable.initial);
@@ -187,7 +187,7 @@ public class GameCanvas : MonoBehaviour
 
         var turnSticker = USE(ConsumableID.Clue);
         int scoreModification = GameManager.OnCorrectGuess();
-        UpdateUI();
+
         SaveAction(turnSticker, scoreModification);
     }
     [ContextMenu("USE Better Clue")]
@@ -202,7 +202,7 @@ public class GameCanvas : MonoBehaviour
         stickerData.AddBetterClueEffect(amountOfAppears);
         GameManager.currentlyInGameStickers[GameManager.GetCurrentlySelectedSticker().sticker] = stickerData;
         int scoreModification = GameManager.OnCorrectGuess();
-        UpdateUI();
+
         SaveAction(turnSticker, scoreModification);
     }
     public void UseRemove()
@@ -210,7 +210,7 @@ public class GameCanvas : MonoBehaviour
         var turnSticker = USE(ConsumableID.Remove);
         GameManager.RemoveStickerFromPool();
         GameManager.NextTurn();
-        UpdateUI();
+
     }
     [ContextMenu("USECUT")]
     public void UseCut()
@@ -218,7 +218,7 @@ public class GameCanvas : MonoBehaviour
         var turnSticker = USE(ConsumableID.Cut);
         int amountOfAppears = turnSticker.matchData.amountOfAppearences;
         turnSticker.matchData.AddCutEffect(amountOfAppears, GameManager.selectedDifficulty);
-        UpdateUI();
+
     }
     public void UsePeek()
     {
@@ -250,5 +250,6 @@ public class GameCanvas : MonoBehaviour
             default:
                 break;
         }
+        UpdateUI();
     }
 }

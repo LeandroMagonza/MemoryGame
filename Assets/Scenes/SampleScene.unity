@@ -13736,6 +13736,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 55675751}
     m_Modifications:
     - target: {fileID: 2412363556221592344, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
+      propertyPath: clip
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2412363556221592344, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: canvasToSet
       value: 
       objectReference: {fileID: 320812680}
@@ -13769,7 +13773,7 @@ PrefabInstance:
       objectReference: {fileID: 1424790196}
     - target: {fileID: 2970192187020338406, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338406, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -16523,22 +16527,22 @@ MonoBehaviour:
     ID: 0
     button: {fileID: 1612607760}
     text: {fileID: 900080962}
-    audioClip: {fileID: 8300000, guid: e611ff6c1e6c2401bbe445f94b7380db, type: 3}
+    gameClip: 0
   - name: Cut
     ID: 2
     button: {fileID: 1216765168}
     text: {fileID: 1961674620}
-    audioClip: {fileID: 8300000, guid: e611ff6c1e6c2401bbe445f94b7380db, type: 3}
+    gameClip: 0
   - name: Remove
     ID: 1
     button: {fileID: 1244338488}
     text: {fileID: 1387719791}
-    audioClip: {fileID: 8300000, guid: e611ff6c1e6c2401bbe445f94b7380db, type: 3}
+    gameClip: 0
   - name: Peek
     ID: 3
     button: {fileID: 1194736572}
     text: {fileID: 1331240323}
-    audioClip: {fileID: 8300000, guid: e611ff6c1e6c2401bbe445f94b7380db, type: 3}
+    gameClip: 0
 --- !u!224 &687619532 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
@@ -16667,6 +16671,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 699705993}
     m_Modifications:
     - target: {fileID: 2412363556221592344, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
+      propertyPath: clip
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 2412363556221592344, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: canvasToSet
       value: 
       objectReference: {fileID: 743536599}
@@ -16692,7 +16700,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338406, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338406, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -18759,6 +18767,7 @@ GameObject:
   - component: {fileID: 1079194499}
   - component: {fileID: 1079194498}
   - component: {fileID: 1079194500}
+  - component: {fileID: 1079194501}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -18795,13 +18804,6 @@ MonoBehaviour:
   highScoreText: {fileID: 2139734648}
   amountOfAppearencesText: {fileID: 426789308}
   stickerDisplay: {fileID: 620355432}
-  audioSource: {fileID: 1079194500}
-  correctGuessClip: {fileID: 8300000, guid: ceee8d17818ca684da6456f899698a04, type: 3}
-  incorrectGuessClip: {fileID: 8300000, guid: e7333d828d219284d9ce1a061e534202, type: 3}
-  endGameClip: {fileID: 8300000, guid: d6b0ec09feef11146bc22bdf43abc0d2, type: 3}
-  bonusClip: {fileID: 8300000, guid: 503399d6f0e6a564abf6c42586449600, type: 3}
-  winClip: {fileID: 8300000, guid: 21dc7030934ec9245889efce3e97f4d2, type: 3}
-  highScoreClip: {fileID: 8300000, guid: c738a4dc09fd391429b3c65f4dd4ee49, type: 3}
   correctGuessParticle: {fileID: 207292370}
   incorrectGuessParticle: {fileID: 334700922}
   endGameButtons: {fileID: 1777753789}
@@ -18819,7 +18821,7 @@ MonoBehaviour:
   comboText: {fileID: 1121805667}
   protectedLife: 0
   deathDefy: 0
-  blockChoise: 0
+  blockChoice: 0
   timeToIntersticial: 60
 --- !u!4 &1079194499
 Transform:
@@ -18932,6 +18934,19 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1079194501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1079194497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac00f292577730c4389b1e6db327ae0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioSource: {fileID: 0}
 --- !u!1001 &1088812577
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18939,6 +18954,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 55675751}
     m_Modifications:
+    - target: {fileID: 2412363556221592344, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
+      propertyPath: clip
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 2412363556221592344, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: canvasToSet
       value: 
@@ -18961,7 +18980,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338406, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338406, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode

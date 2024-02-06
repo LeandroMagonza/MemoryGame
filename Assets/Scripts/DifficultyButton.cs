@@ -70,6 +70,4 @@ public class DifficultyButton : ChangeCanvasButton {
             yield return stars.SetAchievement(achievement, delay);
         }
     }
-
-
 }
