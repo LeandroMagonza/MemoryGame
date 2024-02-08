@@ -502,7 +502,8 @@ public class GameManager : MonoBehaviour {
             
         if (currentTimeToIntersticial > timeToIntersticial)
         {
-            AdmobAdsScript.Instance.ShowInterstitialAd();
+            CustomDebugger.Log("this is where we would show an ad");
+            //AdmobAdsScript.Instance.ShowInterstitialAd();
             currentTimeToIntersticial = 0;
         }
     }
@@ -567,7 +568,7 @@ public class GameManager : MonoBehaviour {
         startMatchTime = Time.time;
         endMatchTime = 0;
         //TODO: esto no deberia cargarse solo si paso x tiempo? O el load no es el show?
-        AdmobAdsScript.Instance.LoadInterstitialAd();
+        //AdmobAdsScript.Instance.LoadInterstitialAd();
         Instance.SetScoreTexts();
         if (stickerDisplay == null) {
             stickerDisplay = StickerManager.Instance.GetStickerHolder();
