@@ -10,9 +10,9 @@ public class AdmobAdsScript : MonoBehaviour
     public string appId = "ca-app-pub-1385093244148841~5602672977";
 
 
+    [SerializeField] string interId = "ca-app-pub-3940256099942544/1033173712";
 #if UNITY_ANDROID
     //[SerializeField] string bannerId = "ca-app-pub-1385093244148841/2952458907";
-    [SerializeField] string interId = "ca-app-pub-3940256099942544/1033173712";
     //[SerializeField] string rewardedId = "ca-app-pub-3940256099942544/5224354917";
     //[SerializeField] string nativeId = "ca-app-pub-3940256099942544/2247696110";
 
