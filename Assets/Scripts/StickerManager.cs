@@ -41,7 +41,7 @@ public class StickerManager : MonoBehaviour
     private List<Sticker> _stickerPool = new List<Sticker>();
     private Dictionary<StickerSet,Dictionary<int, (string name, string type, Color color)>> stickersAdditionalData = new Dictionary<StickerSet, Dictionary<int, (string name, string type, Color color)>>();
 
-    private StickerSet? currentLoadedSetName = null;
+    //private StickerSet? currentLoadedSetName = null;
     public Dictionary<StickerSet,Dictionary<int,StickerData>> currentLoadedSetStickerData = new Dictionary<StickerSet, Dictionary<int, StickerData>>();
 
     // Update is called once per frame

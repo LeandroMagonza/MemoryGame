@@ -478,7 +478,10 @@ public class GameManager : MonoBehaviour {
         endMatchTime = Time.time;
         float elapsedTime = endMatchTime - startMatchTime;
         currentTimeToIntersticial += elapsedTime;
-
+        userData.coins += score;
+        var firstTimeAchievements = userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
+        SaveMatch();
+        //Grant first time Achievemnts bonus
         yield return new WaitForSeconds(0.2f);
 
   
@@ -492,9 +495,10 @@ public class GameManager : MonoBehaviour {
 
        
         //animation achievements
-        var firstTimeAchievements = userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
         
-        yield return stages[selectedStage].stageObject.difficultyButtons[selectedDifficulty].SetAchievements(firstTimeAchievements,0.5f);
+        
+        yield return stages[selectedStage].stageObject.difficultyButtons[selectedDifficulty]
+            .SetAchievements(firstTimeAchievements,0.5f);
 
         UpdateAchievementAndUnlockedLevels();
         //animationScore
@@ -533,12 +537,20 @@ public class GameManager : MonoBehaviour {
         AudioManager.Instance.PlayClip(GameClip.highScore);
         yield return new WaitForSeconds(.25f);
         //Todo: Add highscore animation
+        int oldHighScore = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore; 
         userData.GetUserStageData(selectedStage, selectedDifficulty).highScore = highScoreToSet;
-
-        //oasar esto a userdata que llame automaticamente cuando se modificque el highscore en user data, agregar funcionn en vez de seteo directo
         stages[selectedStage].stageObject.SetScore(selectedDifficulty,highScoreToSet);
-        
+
+        //pasar esto a userdata que llame automaticamente cuando se modificque el highscore en user data, agregar funcionn en vez de seteo directo
+
+        const int steps = 10;
+        int scoreIncrement = (highScoreToSet - oldHighScore)/steps;
+        for (int i = 0; i < steps; i++) {
+            yield return new WaitForSeconds(.1f);
+            highScoreText.text = (oldHighScore + scoreIncrement * i).ToString();
+        }
         highScoreText.text = highScoreToSet.ToString();
+        
     }
     public void SetTimer(float timer) {
         this.timer = Mathf.Clamp(timer,0,maxTimer);

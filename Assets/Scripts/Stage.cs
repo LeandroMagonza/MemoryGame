@@ -184,6 +184,31 @@ public class Match
         CustomDebugger.Log("clearedImages " +clearedImages.Count);
         List<Achievement> achievementsFullFilled = new List<Achievement>();
         date = DateTime.Now;
+        //Check achievements
+        int amountOfImagesInStage = GameManager.Instance.stages[stage].stickers.Count;
+        CustomDebugger.Log("-------------------Achievement ClearedEveryImage----------------------");
+        CustomDebugger.Log("amountOfImagesInStage == clearedImages.Count");
+        CustomDebugger.Log(amountOfImagesInStage +" == "+ clearedImages.Count);
+        CustomDebugger.Log(amountOfImagesInStage == clearedImages.Count);
+        CustomDebugger.Log("---------------------------------------------------------");
+        if (amountOfImagesInStage == clearedImages.Count)
+        {
+            achievementsFullFilled.Add(Achievement.ClearedEveryImage);
+        }
+        foreach (var clearedImageID in clearedImages) {
+            if ( !clearedImages.Contains(clearedImageID)) clearedImages.Add(clearedImageID); 
+        }
+        CustomDebugger.Log("-------------------Achievement ClearedStage----------------------");
+        CustomDebugger.Log("amountOfImagesInStage == matchResult.clearedImages.Count");
+        CustomDebugger.Log(amountOfImagesInStage +" == "+ clearedImages.Count);
+        CustomDebugger.Log(amountOfImagesInStage == clearedImages.Count);
+        CustomDebugger.Log("---------------------------------------------------------");
+        
+        if (amountOfImagesInStage == clearedImages.Count)
+        {
+            achievementsFullFilled.Add(Achievement.ClearedStage);
+        }
+       
         if (!lostLife) achievementsFullFilled.Add(Achievement.ClearedStageNoMistakes);
         return (clearedImages, achievementsFullFilled);
     }
@@ -398,36 +423,14 @@ public class UserStageData
         List<Achievement> firstTimeAchievements = new List<Achievement>();
         matches.Add(currentMatch);
         var matchResult = currentMatch.EndMatch();
-        int amountOfImagesInStage = GameManager.Instance.stages[stage].stickers.Count;
-        foreach (var clearedImageID in matchResult.clearedImages) {
-            if ( !clearedImages.Contains(clearedImageID)) clearedImages.Add(clearedImageID); 
-        }
-        CustomDebugger.Log("-------------------Achievement ClearedStage----------------------");
-        CustomDebugger.Log("amountOfImagesInStage == matchResult.clearedImages.Count");
-        CustomDebugger.Log(amountOfImagesInStage +" == "+ matchResult.clearedImages.Count);
-        CustomDebugger.Log(amountOfImagesInStage == matchResult.clearedImages.Count);
-        CustomDebugger.Log("---------------------------------------------------------");
         
-        if (amountOfImagesInStage == matchResult.clearedImages.Count)
-        {
-            matchResult.achievementsFullfilled.Add(Achievement.ClearedStage);
-        }
-        CustomDebugger.Log("-------------------Achievement ClearedEveryImage----------------------");
-        CustomDebugger.Log("amountOfImagesInStage == clearedImages.Count");
-        CustomDebugger.Log(amountOfImagesInStage +" == "+ clearedImages.Count);
-        CustomDebugger.Log(amountOfImagesInStage == clearedImages.Count);
-        CustomDebugger.Log("---------------------------------------------------------");
-        if (amountOfImagesInStage == clearedImages.Count)
-        {
-            matchResult.achievementsFullfilled.Add(Achievement.ClearedEveryImage);
-        }
         CustomDebugger.Log("achievements fullfilled count"+matchResult.achievementsFullfilled.Count);
-        foreach (var fullfilledAchievement in matchResult.achievementsFullfilled) {
-            CustomDebugger.Log("achievement fullfilled "+fullfilledAchievement);
-            if (!achievements.Contains(fullfilledAchievement))
+        foreach (var previouslyFullfilledAchievement in matchResult.achievementsFullfilled) {
+            CustomDebugger.Log("achievement fullfilled "+previouslyFullfilledAchievement);
+            if (!achievements.Contains(previouslyFullfilledAchievement))
             {
-                achievements.Add(fullfilledAchievement);
-                firstTimeAchievements.Add(fullfilledAchievement);
+                achievements.Add(previouslyFullfilledAchievement);
+                firstTimeAchievements.Add(previouslyFullfilledAchievement);
             } 
         }
         

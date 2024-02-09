@@ -34,9 +34,6 @@ public class Sticker : MonoBehaviour
     private void SetExpBar(StickerData stickerDataToSet) {
         int duplicatesForCurrentLevel = 0;
 
-        int duplicatesForImage;
-        int duplicatesForNextLevel;
-        
         if (!PersistanceManager.Instance.StickerLevels.ContainsKey(stickerDataToSet.level)) {
             if (stickerDataToSet.level == 0) {
                 duplicatesForCurrentLevel = 0;
