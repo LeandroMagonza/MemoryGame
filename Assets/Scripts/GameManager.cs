@@ -201,6 +201,8 @@ public class GameManager : MonoBehaviour {
         else {
             NextTurn();
         }
+
+        disableInput = false;
     }
 
     private void SaveTurn(int number, float timerModification, TurnAction turnAction, int scoreModification,StickerData stickerData,StickerMatchData stickerMatchData)
@@ -240,7 +242,6 @@ public class GameManager : MonoBehaviour {
 
         SetRandomImage();
         GameCanvas.UpdateUI();
-        disableInput = false;
     }
 
 
@@ -553,7 +554,6 @@ public class GameManager : MonoBehaviour {
     }
    
     public void Reset() {
-        //if (disableInput) return;
         switch (currentGameMode)
         {
             case GameMode.MEMORY:
