@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class StickerMatchData
 {
@@ -16,7 +18,7 @@ public class StickerMatchData
     }
     public void AddCutEffect(int correctNumber, int difficulty)
     {
-        int lastClue = 1;
+        int lastClue = 0;
         int iterator = 0;
         if (lastClueAppearenceNumber is not null)
         {
@@ -28,24 +30,21 @@ public class StickerMatchData
 
         switch (options)
         {
-            case int i when i < 2:
+            case int i when i <= 1:
                 iterator = 0;
                 break;
-            case int i when i < 4:
+            case int i when i <= 3:
                 iterator = 1;
                 break;
-            case int i when i < 7:
-                iterator = 2;
-                break;
             default:
-                iterator = 3;
+                iterator = Mathf.CeilToInt((options)/2);
                 break;
             
         }
 
         while (iterator >= 0)
         {
-            int random = Random.Range(lastClue, GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) +1 );
+            int random = Random.Range(lastClue+1, GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) + 1 );
             Debug.Log($"Random: {random} Correct: {correctNumber}");
             if (random != correctNumber && !cutNumbers.Contains(random))
             {

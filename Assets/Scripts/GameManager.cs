@@ -252,7 +252,6 @@ public class GameManager : MonoBehaviour {
 
     public void OnIncorrectGuess(int number)
     {
-        IncorrectGuessFX();
         if (blockChoice)
         {
             Debug.Log("Block");
@@ -263,6 +262,7 @@ public class GameManager : MonoBehaviour {
 
             }
         }
+        IncorrectGuessFX();
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             false);
@@ -544,11 +544,10 @@ public class GameManager : MonoBehaviour {
     }
     private IEnumerator SetHighScore(int highScoreToSet)
     {
-        AudioManager.Instance.audioSource.Pause();
         AudioManager.Instance.PlayClip(GameClip.highScore);
-        yield return new WaitForSeconds(.25f);
         userData.GetUserStageData(selectedStage, selectedDifficulty).highScore = highScoreToSet;
         stages[selectedStage].stageObject.SetScore(selectedDifficulty,highScoreToSet);
+        yield return new WaitForSeconds(.25f);
         
         //Todo: agregar animacion de texto estrellas colores whatever
         highScoreText.text = highScoreToSet.ToString();
@@ -557,16 +556,24 @@ public class GameManager : MonoBehaviour {
         this.timer = Mathf.Clamp(timer,0,maxTimer);
         timerText.text = ((int)this.timer).ToString();
         
-        if (this.timer<=1)
-        {
-            lifeCounter.LoseLive(ref protectedLife, false);
-            currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
-            StartCoroutine(FinishProcessingTurnAction(0, TurnAction.RanOutOfTime, 0, _currentlySelectedSticker,currentlyInGameStickers[_currentlySelectedSticker]));
-            NextTurn();
-            SetTimer(maxTimer);
+        if (this.timer<=1) {
+            OnRanOutOfTime();
         }
     }
-   
+
+    private void OnRanOutOfTime() {
+        lifeCounter.LoseLive(ref protectedLife, false);
+        currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
+        StartCoroutine(FinishProcessingTurnAction(0, TurnAction.RanOutOfTime, 0, _currentlySelectedSticker,
+            currentlyInGameStickers[_currentlySelectedSticker]));
+        IncorrectGuessFX();
+        amountOfAppearencesText.SetAmountOfGuessesAndShowText(
+            currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
+            false);
+        AudioManager.Instance.PlayClip(GameClip.incorrectGuess);
+        SetTimer(maxTimer);
+    }
+
     public void Reset() {
         switch (currentGameMode)
         {
@@ -618,7 +625,9 @@ public class GameManager : MonoBehaviour {
         _currentCombo = 0;
         endGameScoreText.text = "0";
         endGameAchievementStars.ResetStars();
-
+        GameCanvas.UpdateUI();
+        
+        
 
     }
 

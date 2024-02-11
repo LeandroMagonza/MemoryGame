@@ -212,6 +212,7 @@ public class GameCanvas : MonoBehaviour
         var turnSticker = USE(ConsumableID.Remove);
         GameManager.RemoveStickerFromPool();
         GameManager.NextTurn();
+        //TODO: agregarlo al matchistory save action
 
     }
     public void UseCut()
@@ -219,6 +220,7 @@ public class GameCanvas : MonoBehaviour
         var turnSticker = USE(ConsumableID.Cut);
         int amountOfAppears = turnSticker.matchData.amountOfAppearences;
         turnSticker.matchData.AddCutEffect(amountOfAppears, GameManager.selectedDifficulty);
+        //TODO: agregarlo al matchistory save action
 
     }
     public void UsePeek()
