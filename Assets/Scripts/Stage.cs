@@ -163,6 +163,7 @@ public class Match
         List<int> clearedImages = new();
         int maxLives = turnHistory[0].remainingLives;
         bool lostLife = false;
+        int removesUsed = 0;
         CustomDebugger.Log("Ending match with turns:"+turnHistory.Count);
         foreach (var turn in turnHistory) {
             score += turn.scoreModification;
@@ -180,6 +181,10 @@ public class Match
             {
                 lostLife = true;
             }
+
+            if (turn.action == TurnAction.UseRemove) {
+                removesUsed++;
+            }
         }
         
         CustomDebugger.Log("clearedImages " +clearedImages.Count);
@@ -191,7 +196,7 @@ public class Match
         CustomDebugger.Log(amountOfImagesInStage +" == "+ clearedImages.Count);
         CustomDebugger.Log(amountOfImagesInStage == clearedImages.Count);
         CustomDebugger.Log("---------------------------------------------------------");
-        if (amountOfImagesInStage == clearedImages.Count)
+        if (amountOfImagesInStage-removesUsed <= clearedImages.Count)
         {
             achievementsFulfilled.Add(Achievement.ClearedEveryImage);
         }
@@ -472,7 +477,8 @@ public enum TurnAction {
     UseRemove,
     Peek,
     ReduceOptions,
-    RanOutOfTime
+    RanOutOfTime,
+    UseCut
 }
 
 public class StickerLevelsData

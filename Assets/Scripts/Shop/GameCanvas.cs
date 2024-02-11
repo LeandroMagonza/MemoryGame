@@ -174,11 +174,11 @@ public class GameCanvas : MonoBehaviour
         return (turnSticker);
     }
 
-    private void SaveAction((StickerData sticker, StickerMatchData matchData) turnSticker, int scoreModification)
+    private void SaveAction((StickerData sticker, StickerMatchData matchData) turnSticker, int scoreModification,TurnAction turnAction)
     {
         StartCoroutine(GameManager.FinishProcessingTurnAction(
         turnSticker.matchData.amountOfAppearences,
-        TurnAction.UseClue,
+        turnAction,
         scoreModification,
         turnSticker.sticker,
         turnSticker.matchData
@@ -191,7 +191,7 @@ public class GameCanvas : MonoBehaviour
         var turnSticker = USE(ConsumableID.Clue);
         int scoreModification = GameManager.OnCorrectGuess();
 
-        SaveAction(turnSticker, scoreModification);
+        SaveAction(turnSticker, scoreModification,TurnAction.UseClue);
     }
     public void UseBetterClue()
     {
@@ -205,14 +205,13 @@ public class GameCanvas : MonoBehaviour
         Debug.Log("amount of appears: " + amountOfAppears);
         int scoreModification = GameManager.OnCorrectGuess();
 
-        SaveAction(turnSticker, scoreModification);
+        SaveAction(turnSticker, scoreModification,TurnAction.UseClue);
     }
     public void UseRemove()
     {
         var turnSticker = USE(ConsumableID.Remove);
         GameManager.RemoveStickerFromPool();
-        GameManager.NextTurn();
-        //TODO: agregarlo al matchistory save action
+        SaveAction(turnSticker, 0,TurnAction.UseRemove);
 
     }
     public void UseCut()
@@ -220,8 +219,7 @@ public class GameCanvas : MonoBehaviour
         var turnSticker = USE(ConsumableID.Cut);
         int amountOfAppears = turnSticker.matchData.amountOfAppearences;
         turnSticker.matchData.AddCutEffect(amountOfAppears, GameManager.selectedDifficulty);
-        //TODO: agregarlo al matchistory save action
-
+        SaveAction(turnSticker, 0,TurnAction.UseCut);
     }
     public void UsePeek()
     {
