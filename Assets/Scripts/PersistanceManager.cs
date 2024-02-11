@@ -58,10 +58,17 @@ public class PersistanceManager : MonoBehaviour
     
     public PacksData packs = new PacksData();
     public UserData userData;
+    private int eraseCounter = 3;
 
-    void Start()
-    {
-        StartCoroutine(LoadUserData());
+    void Start() {
+        StartCoroutine(LoadDataAndSetup());
+    }
+
+    public IEnumerator LoadDataAndSetup() {
+        yield return StartCoroutine(LoadUserData());
+        yield return StartCoroutine(LoadStages());
+        yield return StartCoroutine(LoadStickerLevels());
+        yield return StartCoroutine(LoadPacks());
     }
     private void OnApplicationQuit()
     {
@@ -191,9 +198,6 @@ public class PersistanceManager : MonoBehaviour
 
         this.userData = userData;
         yield return null;
-        yield return StartCoroutine(LoadStages());
-        yield return StartCoroutine(LoadStickerLevels());
-        yield return StartCoroutine(LoadPacks());
     }
 
     public string SerializeUserData()
@@ -339,9 +343,21 @@ public class PersistanceManager : MonoBehaviour
                 Debug.Log("File saved to " + filePath);
             }
         }
+        
+    }
+    public void OnEraseDataButtonPressed() {
+        eraseCounter--;
+        if (eraseCounter<=0) {
+            eraseCounter = 3;
+            StartCoroutine(ResetUserData());
+        }
     }
 
-
+    public IEnumerator ResetUserData() {
+        //TODO: Agregar chequeo/confirm
+        yield return StartCoroutine(GetJson("userData"));
+        yield return StartCoroutine(LoadUserData());
+    }
     public int GetStickerDuplicates(StickerSet stickerSet,int stickerID)
     {
         CustomDebugger.Log(stickerSet+" sticker id "+stickerID,DebugCategory.STICKERLOAD);
