@@ -83,5 +83,8 @@ public enum GameClip {
     highScore,
     playStage,
     enterStages,
-    enterShop
+    enterShop,
+    getAchievementStar0,
+    getAchievementStar1,
+    getAchievementStar2
 }

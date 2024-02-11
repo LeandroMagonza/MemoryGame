@@ -65,6 +65,8 @@ public class GameManager : MonoBehaviour {
     public int bonusMultiplicator = 1;
  
     public TextMeshProUGUI highScoreText; 
+    public TextMeshProUGUI endGameScoreText;
+    public AchievementStars endGameAchievementStars;
     
     public FadeOut amountOfAppearencesText; 
 
@@ -166,8 +168,8 @@ public class GameManager : MonoBehaviour {
         else
         {
             CustomDebugger.Log("IncorrectGuess");
-            int magnitude = number - currentStickerMatchData.amountOfAppearences;
-            deathDefyMagnitude = Mathf.Abs(magnitude);
+            int mistakeMagnitude = number - currentStickerMatchData.amountOfAppearences;
+            deathDefyMagnitude = Mathf.Abs(mistakeMagnitude);
             OnIncorrectGuess(number);
             turnAction = TurnAction.GuessIncorrect;
         }
@@ -481,33 +483,42 @@ public class GameManager : MonoBehaviour {
         userData.coins += score;
         var firstTimeAchievements = userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
         SaveMatch();
+        UpdateAchievementAndUnlockedLevels();
+        //animationScore
+        userData.coins += score;
+        
         //Grant first time Achievemnts bonus
         yield return new WaitForSeconds(0.2f);
 
-  
+        const int steps = 10;
+        int scoreIncrement = (score)/steps;
+        for (int i = 0; i < steps; i++) {
+            yield return new WaitForSeconds(.1f);
+            delay -= .1f;
+            endGameScoreText.text = (scoreIncrement * i).ToString();
+        }
+        endGameScoreText.text = score.ToString();
 
+        yield return endGameAchievementStars.SetAchievements(_currentMatch.achievementsFulfilled,.35f);
+        
+        delay -= .35f * firstTimeAchievements.Count;
+        delay -= 1f;
+        yield return new WaitForSeconds(delay);
+        
         if (userData.GetUserStageData(selectedStage, selectedDifficulty).highScore < score)
         {
             yield return StartCoroutine(SetHighScore(score));
         }
         
-        yield return new WaitForSeconds(delay);
-
        
         //animation achievements
         
         
-        yield return stages[selectedStage].stageObject.difficultyButtons[selectedDifficulty]
-            .SetAchievements(firstTimeAchievements,0.5f);
-
-        UpdateAchievementAndUnlockedLevels();
-        //animationScore
-        userData.coins += score;
-        SaveMatch();
+        
             
         if (currentTimeToIntersticial > timeToIntersticial)
         {
-            CustomDebugger.Log("this is where we would show an ad");
+            //CustomDebugger.Log("this is where we would show an ad");
             AdmobAdsScript.Instance.ShowInterstitialAd();
             currentTimeToIntersticial = 0;
         }
@@ -536,21 +547,11 @@ public class GameManager : MonoBehaviour {
         AudioManager.Instance.audioSource.Pause();
         AudioManager.Instance.PlayClip(GameClip.highScore);
         yield return new WaitForSeconds(.25f);
-        //Todo: Add highscore animation
-        int oldHighScore = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore; 
         userData.GetUserStageData(selectedStage, selectedDifficulty).highScore = highScoreToSet;
         stages[selectedStage].stageObject.SetScore(selectedDifficulty,highScoreToSet);
-
-        //pasar esto a userdata que llame automaticamente cuando se modificque el highscore en user data, agregar funcionn en vez de seteo directo
-
-        const int steps = 10;
-        int scoreIncrement = (highScoreToSet - oldHighScore)/steps;
-        for (int i = 0; i < steps; i++) {
-            yield return new WaitForSeconds(.1f);
-            highScoreText.text = (oldHighScore + scoreIncrement * i).ToString();
-        }
-        highScoreText.text = highScoreToSet.ToString();
         
+        //Todo: agregar animacion de texto estrellas colores whatever
+        highScoreText.text = highScoreToSet.ToString();
     }
     public void SetTimer(float timer) {
         this.timer = Mathf.Clamp(timer,0,maxTimer);
@@ -560,6 +561,7 @@ public class GameManager : MonoBehaviour {
         {
             lifeCounter.LoseLive(ref protectedLife, false);
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
+            StartCoroutine(FinishProcessingTurnAction(0, TurnAction.RanOutOfTime, 0, _currentlySelectedSticker,currentlyInGameStickers[_currentlySelectedSticker]));
             NextTurn();
             SetTimer(maxTimer);
         }
@@ -614,6 +616,9 @@ public class GameManager : MonoBehaviour {
         disableInput = false;
         _currentMatch = new Match(selectedStage,selectedDifficulty,false);
         _currentCombo = 0;
+        endGameScoreText.text = "0";
+        endGameAchievementStars.ResetStars();
+
 
     }
 

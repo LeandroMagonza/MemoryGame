@@ -75,8 +75,8 @@ public class StageManager : MonoBehaviour
                 if (userData.GetUserStageData(stageData.stageID, difficulty) is not null)
                 {
                     newStage.SetScore(difficulty, userData.GetUserStageData(stageData.stageID, difficulty).highScore);
-                    StartCoroutine(newStage.difficultyButtons[difficulty]
-                        .SetAchievements(userData.GetUserStageData(stageData.stageID, difficulty).achievements, 0f));
+                    newStage.difficultyButtons[difficulty].stars
+                        .SetAchievements(userData.GetUserStageData(stageData.stageID, difficulty).achievements);
                 }
                 else
                 {

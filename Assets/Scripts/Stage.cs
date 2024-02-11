@@ -146,6 +146,7 @@ public class Match
     public int amountOfTurns;
     public bool hardcore;
     public List<TurnData> turnHistory = new ();
+    public List<Achievement> achievementsFulfilled = new ();
 
     public Match(int stage, int difficulty, bool hardcore) {
         this.stage = stage;
@@ -182,7 +183,6 @@ public class Match
         }
         
         CustomDebugger.Log("clearedImages " +clearedImages.Count);
-        List<Achievement> achievementsFullFilled = new List<Achievement>();
         date = DateTime.Now;
         //Check achievements
         int amountOfImagesInStage = GameManager.Instance.stages[stage].stickers.Count;
@@ -193,7 +193,7 @@ public class Match
         CustomDebugger.Log("---------------------------------------------------------");
         if (amountOfImagesInStage == clearedImages.Count)
         {
-            achievementsFullFilled.Add(Achievement.ClearedEveryImage);
+            achievementsFulfilled.Add(Achievement.ClearedEveryImage);
         }
         foreach (var clearedImageID in clearedImages) {
             if ( !clearedImages.Contains(clearedImageID)) clearedImages.Add(clearedImageID); 
@@ -206,11 +206,11 @@ public class Match
         
         if (amountOfImagesInStage == clearedImages.Count)
         {
-            achievementsFullFilled.Add(Achievement.ClearedStage);
+            achievementsFulfilled.Add(Achievement.ClearedStage);
         }
        
-        if (!lostLife) achievementsFullFilled.Add(Achievement.ClearedStageNoMistakes);
-        return (clearedImages, achievementsFullFilled);
+        if (!lostLife) achievementsFulfilled.Add(Achievement.ClearedStageNoMistakes);
+        return (clearedImages, achievementsFulfilled);
     }
 }
 
@@ -471,7 +471,8 @@ public enum TurnAction {
     UseClue,
     UseRemove,
     Peek,
-    ReduceOptions
+    ReduceOptions,
+    RanOutOfTime
 }
 
 public class StickerLevelsData

@@ -61,13 +61,9 @@ public class DifficultyButton : ChangeCanvasButton {
         {
             GetComponent<Button>().interactable = false;
         }
+
+        stars.SetAchievements(GameManager.Instance.userData.GetUserStageData(stage, difficulty).achievements);
     }
 
-    public IEnumerator SetAchievements(List<Achievement> achievements,float delay)
-    {
-        foreach (var achievement in achievements)
-        {
-            yield return stars.SetAchievement(achievement, delay);
-        }
-    }
+
 }
