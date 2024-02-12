@@ -64,6 +64,10 @@ public class PackManager : MonoBehaviour {
         CustomDebugger.Log("stickers per pack "+GameManager.Instance.packs.stickersPerPack);
 
         List< (int stickerID,StickerSet stickerSet)> gainedStickers = new List<(int stickerID, StickerSet stickerSet)>();
+        
+        // newStickers es para marcar cuando sacas la primera copia de un sticker, asi la mostramos al jugador con brillo y un cartel que diga new
+        List< (StickerSet stickerSet,int stickerID)> newStickers = new List<(StickerSet stickerSet, int stickerID)>();
+        
         for (int stickerNumber = 0; stickerNumber < GameManager.Instance.packs.stickersPerPack; stickerNumber++) {
             CustomDebugger.Log("stickerNumber "+stickerNumber);
             //int rarityRandomizer = Random.Range(0, 101);
@@ -71,12 +75,16 @@ public class PackManager : MonoBehaviour {
             //rarity para despues, normal, raro legendario en instance packs legendary y rare chance
             //sumar rare / legendary amount si correspoende
             
-            int stickerStageRandomizer = Random.Range(0, 101);
+            int stickerStageRandomizer = Random.Range(1, 101);
+            // esto da un numero entre 0 y 100, y los pack odds dicen un porcentaje de chance por level, o 
+            // hasta numero del random corresponde a cada pack. Si dice stage0: 50 y stage1: 50, es un 50% de chance cada uno,
+            // pero los numeros del 1 al 50 correspondern al stage0, y del 51 al 100 correspondel al stage1. Por eso esta el acumulator,
+            // que pasa de probablidad a los rangos por pack
             int accumulator = 0;
             int stickerStage = 0;
             foreach (var VARIABLE in GameManager.Instance.stages[packStage].packOdds){
                 stickerStage = VARIABLE.Key;
-                accumulator += GameManager.Instance.stages[packStage].packOdds[VARIABLE.Key];
+                accumulator += GameManager.Instance.stages[packStage].packOdds[stickerStage];
                 if (accumulator > stickerStageRandomizer) {
                     break;
                 }
@@ -95,18 +103,29 @@ public class PackManager : MonoBehaviour {
             }
             else {
                 GameManager.Instance.userData.stickerDuplicates.Add((GameManager.Instance.stages[stickerStage].stickerSet, selectedStickerImageID),1);
+                if (!newStickers.Contains((
+                        GameManager.Instance.stages[stickerStage].stickerSet,
+                            selectedStickerImageID
+                        ))) {
+                    CustomDebugger.Log("Adding to new stickers"+(GameManager.Instance.stages[stickerStage].stickerSet,selectedStickerImageID));
+                    newStickers.Add((GameManager.Instance.stages[stickerStage].stickerSet,selectedStickerImageID));
+                }
             }
 
         }
         foreach (var sticker in gainedStickers) {
-            Sticker newSticker = StickerManager.Instance.GetStickerHolder();
-            newSticker.transform.SetParent(stickerHolder.transform);
+            Sticker obtainedStickerHolder = StickerManager.Instance.GetStickerHolder();
+            obtainedStickerHolder.transform.SetParent(stickerHolder.transform);
             //Instantiate(stickerHolderPrefab, stickerHolder.transform);
             StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(sticker.stickerSet,sticker.stickerID);
             CustomDebugger.Log(stickerData.color);
-            newSticker.SetStickerData(stickerData);
-            newSticker.ConfigureForPack();
-            newSticker.transform.localScale = Vector3.one;
+            obtainedStickerHolder.SetStickerData(stickerData);
+            obtainedStickerHolder.ConfigureForPack();
+            obtainedStickerHolder.transform.localScale = Vector3.one;
+            if (newStickers.Contains((sticker.stickerSet,sticker.stickerID))) {
+                CustomDebugger.Log("calling display as new on "+stickerData.name+" "+(sticker.stickerSet,sticker.stickerID));
+                obtainedStickerHolder.DisplayNewMarker(true);
+            }
         }
         GameManager.Instance.UpdateAchievementAndUnlockedLevels();
         GameManager.Instance.disableInput = false;

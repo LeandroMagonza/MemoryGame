@@ -15,6 +15,7 @@ public class Sticker : MonoBehaviour
     public TextMeshProUGUI level;
     public TextMeshProUGUI levelStickerCurrent;
     public TextMeshProUGUI levelStickerTotal;
+    public TextMeshProUGUI newMarkerText;
 
     public void SetStickerData(StickerData stickerDataToSet)
     {
@@ -115,6 +116,12 @@ public class Sticker : MonoBehaviour
         DisplayName(true);
         DisplayExpBar(true);
         DisplayBonus(false);
+        DisplayNewMarker(false);
+    }
+
+    public void DisplayNewMarker(bool display) {
+        CustomDebugger.Log("DisplayNewMarker called on "+name.text+" with value of "+display);
+        newMarkerText.gameObject.SetActive(display);
     }
     public void ConfigureForGame(GameMode gameMode) {
         switch (gameMode)
@@ -132,6 +139,7 @@ public class Sticker : MonoBehaviour
         DisplayLevelStickerProgressAmount(false);
         DisplayExpBar(false);
         DisplayBonus(true);
+        DisplayNewMarker(false);
     }
 
     public void ConfigureLocked() {
@@ -143,6 +151,7 @@ public class Sticker : MonoBehaviour
         name.text = "??????";
         DisplayExpBar(false);
         DisplayBonus(true);
+        DisplayNewMarker(false);
     }
 }
 

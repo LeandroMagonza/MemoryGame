@@ -485,7 +485,6 @@ public class GameManager : MonoBehaviour {
         SaveMatch();
         UpdateAchievementAndUnlockedLevels();
         //animationScore
-        userData.coins += score;
         
         //Grant first time Achievemnts bonus
         yield return new WaitForSeconds(0.2f);
