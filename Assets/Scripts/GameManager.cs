@@ -74,6 +74,7 @@ public class GameManager : MonoBehaviour {
     
     //sticker
     public Sticker stickerDisplay;
+    private Vector3 startScale;
     //public TextMeshProUGUI imageIDText; 
     //public GameObject imageOnDisplay;
 
@@ -592,6 +593,7 @@ public class GameManager : MonoBehaviour {
         if (stickerDisplay == null) {
             stickerDisplay = StickerManager.Instance.GetStickerHolder();
         }
+        startScale = stickerDisplay.spriteHolder.transform.parent.transform.localScale;
         stickerDisplay.ConfigureForGame(currentGameMode);
         SetMatchInventory();
         GameCanvas.Instance.UpdateUI();
@@ -648,18 +650,18 @@ public class GameManager : MonoBehaviour {
         SetTimer(timer - Time.deltaTime);
 
     }
-    private IEnumerator Squash(Transform transform, float delay, float amount, float speed)
+    private IEnumerator Squash(Transform squashedTransform, float delay, float amount, float speed)
     {
-        Vector3 initialScale = transform.localScale;
+        Vector3 initialScale = squashedTransform.localScale;
         while (delay > 0)
         {
             float scale = 1.0f + Mathf.Sin(Time.time * speed) * amount;
-            transform.localScale = new Vector3(initialScale.x * scale, initialScale.y / scale, initialScale.z);
+            squashedTransform.localScale = new Vector3(initialScale.x * scale, initialScale.y / scale, initialScale.z);
             delay -= Time.deltaTime;
             yield return new WaitForSeconds(0.01f);
         }
-        transform.localScale = initialScale;
-        //StopCoroutine(Squash(transform, delay: 0, amount: 0, speed: 0));
+        squashedTransform.localScale = startScale;
+        //StopCoroutine(Squash(squashedTransform, delay: 0, amount: 0, speed: 0));
     }
     private IEnumerator Wooble(Transform transform, float delay, float angleAmount, float angleSpeed, float verticalAmount, float verticalSpeed)
     {
@@ -676,7 +678,7 @@ public class GameManager : MonoBehaviour {
         }
         transform.localEulerAngles = initialRotation;
         transform.localPosition = initialPosition;
-        //StopCoroutine(Wooble(transform, delay: 0, angleAmount: 0, angleSpeed: 0, verticalAmount: 0, verticalSpeed: 0));
+        //StopCoroutine(Wooble(squashedTransform, delay: 0, angleAmount: 0, angleSpeed: 0, verticalAmount: 0, verticalSpeed: 0));
     }
     private IEnumerator Shake(Transform transform, float delay, float amount, float speed)
     {
@@ -689,7 +691,7 @@ public class GameManager : MonoBehaviour {
             yield return new WaitForSeconds(0.01f);
         }
         transform.localPosition = initialPosition;
-        //StopCoroutine(Shake(transform, delay: 0, amount: 0, speed: 0));
+        //StopCoroutine(Shake(squashedTransform, delay: 0, amount: 0, speed: 0));
     }
 
 
