@@ -625,9 +625,6 @@ public class GameManager : MonoBehaviour {
         endGameScoreText.text = "0";
         endGameAchievementStars.ResetStars();
         GameCanvas.UpdateUI();
-        
-        
-
     }
 
     public int DifficultyToAmountOfAppearences(int difficulty)

@@ -16,6 +16,10 @@ public class Sticker : MonoBehaviour
     public TextMeshProUGUI levelStickerCurrent;
     public TextMeshProUGUI levelStickerTotal;
     public TextMeshProUGUI newMarkerText;
+    public TextMeshProUGUI clearedText;
+
+    public Sprite normalFrame;
+    public Sprite clearedFrame;
 
     public void SetStickerData(StickerData stickerDataToSet)
     {
@@ -100,6 +104,8 @@ public class Sticker : MonoBehaviour
     }
     public void DisplayFrame(bool active) {
         GetComponent<Image>().enabled = active;
+        GetComponent<Image>().sprite = normalFrame;
+        
     }
     public void DisplayExpBar(bool active) {
         expBar.gameObject.SetActive(active);
@@ -117,11 +123,18 @@ public class Sticker : MonoBehaviour
         DisplayExpBar(true);
         DisplayBonus(false);
         DisplayNewMarker(false);
+        DisplayCleared(false);
     }
 
     public void DisplayNewMarker(bool display) {
         CustomDebugger.Log("DisplayNewMarker called on "+name.text+" with value of "+display);
         newMarkerText.gameObject.SetActive(display);
+    }    
+    void DisplayCleared(bool display) {
+        CustomDebugger.Log("DisplayCleared called on "+name.text+" with value of "+display);
+        clearedText.gameObject.SetActive(display);
+        if (display) GetComponent<Image>().sprite = clearedFrame;
+        
     }
     public void ConfigureForGame(GameMode gameMode) {
         switch (gameMode)
@@ -140,6 +153,7 @@ public class Sticker : MonoBehaviour
         DisplayExpBar(false);
         DisplayBonus(true);
         DisplayNewMarker(false);
+        DisplayCleared(false);
     }
 
     public void ConfigureLocked() {
@@ -152,6 +166,7 @@ public class Sticker : MonoBehaviour
         DisplayExpBar(false);
         DisplayBonus(true);
         DisplayNewMarker(false);
+        DisplayCleared(false);
     }
 }
 

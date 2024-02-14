@@ -196,6 +196,7 @@ public class Match
         CustomDebugger.Log(amountOfImagesInStage +" == "+ clearedImages.Count);
         CustomDebugger.Log(amountOfImagesInStage == clearedImages.Count);
         CustomDebugger.Log("---------------------------------------------------------");
+        
         if (amountOfImagesInStage-removesUsed <= clearedImages.Count)
         {
             achievementsFulfilled.Add(Achievement.ClearedEveryImage);
@@ -408,7 +409,7 @@ public class UserStageData
 {
     public int stage;
     public int difficulty;
-    public List<int> clearedImages = new List<int>();
+    public List<int> clearedStickers = new List<int>();
     public int highScore = 0;
     //[JsonProperty (ItemConverterType = typeof(StringEnumConverter))]
     [JsonIgnore]
