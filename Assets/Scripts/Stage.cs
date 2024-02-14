@@ -482,10 +482,9 @@ public enum TurnAction {
     GuessIncorrect,
     UseClue,
     UseRemove,
-    Peek,
-    ReduceOptions,
+    UseCut,
+    UsePeek,
     RanOutOfTime,
-    UseCut
 }
 
 public class StickerLevelsData

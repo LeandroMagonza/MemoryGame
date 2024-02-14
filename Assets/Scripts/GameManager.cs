@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -69,7 +70,7 @@ public class GameManager : MonoBehaviour {
     public AchievementStars endGameAchievementStars;
     
     public FadeOut amountOfAppearencesText; 
-
+    public GameObject pausePanel;
     
     
     //sticker
@@ -139,6 +140,8 @@ public class GameManager : MonoBehaviour {
     private float currentTimeToIntersticial = 0;
     private float startMatchTime = 0;
     private float endMatchTime = 0;
+
+    private bool pause = false;
     //TODO: Esta se va para manager stages o algo asi 
     
 
@@ -174,6 +177,7 @@ public class GameManager : MonoBehaviour {
             OnIncorrectGuess(number);
             turnAction = TurnAction.GuessIncorrect;
         }
+        
         //usar el dato del sticker tomado antes de la funcion oncorrectguess
         yield return FinishProcessingTurnAction(number, turnAction, scoreModification, turnSticker,currentStickerMatchData);
     }
@@ -201,7 +205,7 @@ public class GameManager : MonoBehaviour {
         if (currentlyInGameStickers.Count == 0) {
             StartCoroutine(EndGame(true));
         }
-        else {
+        else if(turnAction != TurnAction.UseCut) {
             NextTurn();
         }
 
@@ -222,14 +226,17 @@ public class GameManager : MonoBehaviour {
         );
     }
 
-    private void CheckAmountOfAppearences()
+    private int CheckAmountOfAppearences()
     {
+        int scoreModificationBonus = 0;
         if (currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences == bonusOnAmountOfAppearences)
         {
             CustomDebugger.Log("Clear: " + _currentlySelectedSticker.name);
-            GainBonus();
+            scoreModificationBonus = GainBonus();
             RemoveStickerFromPool();
         }
+
+        return scoreModificationBonus;
     }
     public void NextTurn() 
     {
@@ -316,7 +323,7 @@ public class GameManager : MonoBehaviour {
             currentlyInGameStickers[_currentlySelectedSticker].blockedNumbers = new List<int>();
             currentlyInGameStickers[_currentlySelectedSticker].cutNumbers = new List<int>();
         }
-        CheckAmountOfAppearences();
+        scoreModification += CheckAmountOfAppearences();
         return scoreModification;
     }
 
@@ -332,13 +339,16 @@ public class GameManager : MonoBehaviour {
     }
 
     [ContextMenu("GainBonus")]
-    private void GainBonus()
+    private int GainBonus()
     {
         CustomDebugger.Log("gain bonus");
-        ModifyScore(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences * bonusMultiplicator);
+        int scoreModificationBonus = currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences * (
+                Mathf.Clamp((int)Math.Floor((float)bonusMultiplicator / 2), 0, 5));
+        ModifyScore(scoreModificationBonus);
         bonusMultiplicator++;
         AudioManager.Instance.PlayClip(GameClip.bonus);
         lifeCounter.GainLive();
+        return scoreModificationBonus;
     }
 
     public void ModifyScore(int modificationAmount) 
@@ -627,6 +637,8 @@ public class GameManager : MonoBehaviour {
         endGameScoreText.text = "0";
         endGameAchievementStars.ResetStars();
         GameCanvas.UpdateUI();
+        pause = false;
+        pausePanel.SetActive(false);
     }
 
     public int DifficultyToAmountOfAppearences(int difficulty)
@@ -646,7 +658,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private void FixedUpdate() {
-        if (gameEnded) return;
+        if (gameEnded || pause) return;
         SetTimer(timer - Time.deltaTime);
 
     }
@@ -775,7 +787,11 @@ public class GameManager : MonoBehaviour {
         return (_currentlySelectedSticker, currentlyInGameStickers[_currentlySelectedSticker]);
     }
 
-
+    public void TogglePause()
+    {
+        pause = !pause;
+        pausePanel.SetActive(pause);
+    }
 }
 public enum StickerSet {
     Pokemons_SPRITESHEET_151,
