@@ -128,8 +128,8 @@ public class StageData
 
 //[JsonConverter(typeof(StringEnumConverter))]
 public enum Achievement {
-    ClearedEveryImage,
-    ClearedStage,
+    BarelyClearedStage,
+    ClearedStageWithMoreThanOneHP,
     ClearedStageNoMistakes,
     ClearedStageNoUpgrades,
     ClearedStageNoMistakesNoUpgrades,
@@ -164,6 +164,7 @@ public class Match
         int maxLives = turnHistory[0].remainingLives;
         bool lostLife = false;
         int removesUsed = 0;
+        bool reachedOneHP = false;
         CustomDebugger.Log("Ending match with turns:"+turnHistory.Count);
         foreach (var turn in turnHistory) {
             score += turn.scoreModification;
@@ -184,38 +185,43 @@ public class Match
 
             if (turn.action == TurnAction.UseRemove) {
                 removesUsed++;
+            }  
+            if (turn.remainingLives == 1) {
+                reachedOneHP = true;
             }
+
         }
         
         CustomDebugger.Log("clearedImages " +clearedImages.Count);
         date = DateTime.Now;
         //Check achievements
-        int amountOfImagesInStage = GameManager.Instance.stages[stage].stickers.Count;
+        int amountOfStickersInStage = GameManager.Instance.stages[stage].stickers.Count;
         CustomDebugger.Log("-------------------Achievement ClearedEveryImage----------------------");
         CustomDebugger.Log("amountOfImagesInStage == clearedImages.Count");
-        CustomDebugger.Log(amountOfImagesInStage +" == "+ clearedImages.Count);
-        CustomDebugger.Log(amountOfImagesInStage == clearedImages.Count);
+        CustomDebugger.Log(amountOfStickersInStage +" == "+ clearedImages.Count);
+        CustomDebugger.Log(amountOfStickersInStage == clearedImages.Count);
         CustomDebugger.Log("---------------------------------------------------------");
         
-        if (amountOfImagesInStage-removesUsed <= clearedImages.Count)
+        if (amountOfStickersInStage-removesUsed <= clearedImages.Count)
         {
-            achievementsFulfilled.Add(Achievement.ClearedEveryImage);
+            achievementsFulfilled.Add(Achievement.BarelyClearedStage);
+            if (!reachedOneHP)
+            {
+                achievementsFulfilled.Add(Achievement.ClearedStageWithMoreThanOneHP);
+                if (!lostLife)
+                {
+                    achievementsFulfilled.Add(Achievement.ClearedStageNoMistakes);
+                }
+            }
         }
-        foreach (var clearedImageID in clearedImages) {
-            if ( !clearedImages.Contains(clearedImageID)) clearedImages.Add(clearedImageID); 
-        }
-        CustomDebugger.Log("-------------------Achievement ClearedStage----------------------");
-        CustomDebugger.Log("amountOfImagesInStage == matchResult.clearedImages.Count");
-        CustomDebugger.Log(amountOfImagesInStage +" == "+ clearedImages.Count);
-        CustomDebugger.Log(amountOfImagesInStage == clearedImages.Count);
+
+        CustomDebugger.Log("-------------------Achievement ClearedStageWithMoreThanOneHP----------------------");
+        CustomDebugger.Log("reachedOneHP");
+        CustomDebugger.Log(reachedOneHP);
         CustomDebugger.Log("---------------------------------------------------------");
+
         
-        if (amountOfImagesInStage == clearedImages.Count)
-        {
-            achievementsFulfilled.Add(Achievement.ClearedStage);
-        }
-       
-        if (!lostLife) achievementsFulfilled.Add(Achievement.ClearedStageNoMistakes);
+        
         return (clearedImages, achievementsFulfilled);
     }
 }

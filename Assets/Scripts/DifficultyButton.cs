@@ -50,7 +50,7 @@ public class DifficultyButton : ChangeCanvasButton {
         bool conditionStage = GameManager.Instance.userData.GetUserStageData(stage, difficulty).HasUnlockedStage();
         bool conditionDifficulty = GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null ||
                                    GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1).achievements
-                                       .Contains(Achievement.ClearedEveryImage);
+                                       .Contains(Achievement.BarelyClearedStage);
         CustomDebugger.Log("conditionStage " + conditionStage);
         CustomDebugger.Log("conditionDifficulty " + conditionDifficulty);
         if (conditionStage && conditionDifficulty)
