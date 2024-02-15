@@ -206,6 +206,7 @@ public class ShopManager : MonoBehaviour
         shopUpgradeButtons[upgradeID].button.interactable = requirementsMet && !isMaxLevel;
         shopUpgradeButtons[upgradeID].currentText.text = currentLevel.ToString() + "/" + max;
         shopUpgradeButtons[upgradeID].priceText.text = price;
+        shopUpgradeButtons[upgradeID].priceText.color = shopUpgradeButtons[upgradeID].button.interactable? Color.white : Color.gray;
         shopUpgradeButtons[upgradeID].descriptionText.text = description;
     }
 }
