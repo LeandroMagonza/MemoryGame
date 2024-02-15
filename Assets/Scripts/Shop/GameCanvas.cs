@@ -29,10 +29,7 @@ public struct ConsumableButtonData
                 text.text = "0";
             }
         }
-        else
-        {
-        }
-
+        text.color = text.text.Equals("0") ? Color.white : Color.yellow;
     }
     public void SetInteractable(ConsumableID consumableID)
     {
@@ -47,6 +44,7 @@ public struct ConsumableButtonData
             {
                 button.interactable = false;
             }
+            button.GetComponent<Image>().color = button.interactable ? Color.white : Color.gray;
         }
     }
 }
