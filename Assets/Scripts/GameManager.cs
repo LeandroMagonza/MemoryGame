@@ -626,7 +626,7 @@ public class GameManager : MonoBehaviour {
         gameEnded = false;
         stickerDisplay.gameObject.SetActive(true);
         endGameButtons.transform.parent.gameObject.SetActive(false);
-        AudioManager.Instance.audioSource.Play();
+        if (AudioManager.Instance.playMusic) AudioManager.Instance.audioSource.Play();
         SetTimer(15);
         SetScore(0);
         turnNumber = 1;
