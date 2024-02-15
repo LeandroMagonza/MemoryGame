@@ -113,6 +113,8 @@ public class ShopManager : MonoBehaviour
     {
         GameManager.Instance.userData.ModifyCoins(1000000);
         UpdateMoneyDisplay();
+        UpdateConsumableButtonsUI();
+        UpdateUpgradeButtonsIU();
     }
     private void UpdateMoneyDisplay()
     {
@@ -130,6 +132,7 @@ public class ShopManager : MonoBehaviour
     private void SetConsumableButton(ConsumableID consumableID)
     {
         ShopButton shopButton = shopConsumableButtons[consumableID];
+        shopButton.button.interactable = true;
         if (userData.consumables.ContainsKey(consumableID))
         {
             shopButton.currentText.text = "Owned: " + userData.consumables[consumableID].ToString();
@@ -141,7 +144,7 @@ public class ShopManager : MonoBehaviour
 
         shopButton.priceText.text = ConsumableData.GetConsumable(consumableID).price.ToString();
         shopButton.descriptionText.text  = ConsumableData.GetConsumable(consumableID).description;
-
+        if (userData.coins < ConsumableData.GetConsumable(consumableID).price) shopButton.button.interactable = false;
     }
 
     [ContextMenu("UpdateUpgrade")]
@@ -191,7 +194,7 @@ public class ShopManager : MonoBehaviour
         string price = UpgradeData.GetUpgrade(upgradeID).GetPrice(currentLevel).ToString();
         price = !requirementsMet ? _lock : price;
         price = isMaxLevel ? _max : price;
-        
+        bool isMoneyEnought = userData.coins >= UpgradeData.GetUpgrade(upgradeID).GetPrice(currentLevel);
         string description = UpgradeData.GetUpgrade(upgradeID).description;
         if (!requirementsMet)
         {
@@ -207,6 +210,7 @@ public class ShopManager : MonoBehaviour
         shopUpgradeButtons[upgradeID].currentText.text = currentLevel.ToString() + "/" + max;
         shopUpgradeButtons[upgradeID].priceText.text = price;
         shopUpgradeButtons[upgradeID].priceText.color = shopUpgradeButtons[upgradeID].button.interactable? Color.white : Color.gray;
+        shopUpgradeButtons[upgradeID].priceText.color = isMoneyEnought? Color.white : Color.red;
         shopUpgradeButtons[upgradeID].descriptionText.text = description;
     }
 }
