@@ -61,7 +61,8 @@ public class BuyPackButtonTest : MonoBehaviour {
             number.color = Color.white;
         }
         numbers[packNumber].color = new Color(1f, 0.5f, 0);
-        stickerCostDisplay.text = "BUY\n"+(100 * packNumber + 100).ToString();
-        stickerSelectedDisplay.text = "Current Pack Selected: "+ packNumber.ToString();
+        
+        stickerCostDisplay.text = "BUY\n"+(PersistanceManager.Instance.stages[packNumber].packCost).ToString();
+        stickerSelectedDisplay.text = "Current Pack Selected: "+ PersistanceManager.Instance.stages[packNumber].title.ToString();
     }
 }

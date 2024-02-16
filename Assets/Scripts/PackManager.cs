@@ -43,7 +43,8 @@ public class PackManager : MonoBehaviour {
     public IEnumerator OpenPack(int packStage = 0)
     {
         GameManager.Instance.disableInput = true;
-        int packCost = -(100 * packStage + 100);
+        //int packCost = -(100 * packStage + 100);
+        int packCost = -(PersistanceManager.Instance.stages[packStage].packCost);
 
         bool canBuyPack = GameManager.Instance.userData.ModifyCoins(packCost);
         if (!canBuyPack)

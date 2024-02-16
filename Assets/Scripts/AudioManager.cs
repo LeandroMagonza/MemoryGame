@@ -62,14 +62,15 @@ public class AudioManager : MonoBehaviour
         if (playMusic) audioSource.Play();
     }
 
-    public void PlayClip(GameClip clipToPlay) {
-        if (!clips.ContainsKey(clipToPlay)) return;
+    public float PlayClip(GameClip clipToPlay) {
+        if (!clips.ContainsKey(clipToPlay)) return 0f;
         if ((clipToPlay == GameClip.win || clipToPlay == GameClip.highScore)
             && playMusic) {
             audioSource.Stop();
             StartCoroutine(RestartMusicInDelay(clips[clipToPlay].length));
         }
         audioSource.PlayOneShot(clips[clipToPlay]);
+        return clips[clipToPlay].length;
     }
 
     public IEnumerator RestartMusicInDelay(float delay) {

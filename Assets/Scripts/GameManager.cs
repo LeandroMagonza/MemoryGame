@@ -522,7 +522,7 @@ public class GameManager : MonoBehaviour {
         yield return endGameAchievementStars.SetAchievements(_currentMatch.achievementsFulfilled,.35f);
         
         delay -= .35f * firstTimeAchievements.Count;
-        delay -= 1f;
+        delay -= 3f;
         yield return new WaitForSeconds(delay);
         
         if (userData.GetUserStageData(selectedStage, selectedDifficulty).highScore < score)
@@ -564,13 +564,15 @@ public class GameManager : MonoBehaviour {
     }
     private IEnumerator SetHighScore(int highScoreToSet)
     {
-        AudioManager.Instance.PlayClip(GameClip.highScore);
+        float clipDuration = AudioManager.Instance.PlayClip(GameClip.highScore);
+        float timeUntillHighScoreTextUpdate = 0.25f;
         userData.GetUserStageData(selectedStage, selectedDifficulty).highScore = highScoreToSet;
         stages[selectedStage].stageObject.SetScore(selectedDifficulty,highScoreToSet);
-        yield return new WaitForSeconds(.25f);
+        yield return new WaitForSeconds(timeUntillHighScoreTextUpdate);
         
         //Todo: agregar animacion de texto estrellas colores whatever
         highScoreText.text = highScoreToSet.ToString();
+        yield return new WaitForSeconds(clipDuration - timeUntillHighScoreTextUpdate);
     }
     public void SetTimer(float timer) {
         this.timer = Mathf.Clamp(timer,0,maxTimer);
@@ -582,16 +584,17 @@ public class GameManager : MonoBehaviour {
     }
 
     private void OnRanOutOfTime() {
+        disableInput = true;
         lifeCounter.LoseLive(ref protectedLife, false);
-        currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
-        StartCoroutine(FinishProcessingTurnAction(0, TurnAction.RanOutOfTime, 0, _currentlySelectedSticker,
-            currentlyInGameStickers[_currentlySelectedSticker]));
         IncorrectGuessFX();
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             false);
+        currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
         AudioManager.Instance.PlayClip(GameClip.incorrectGuess);
         SetTimer(maxTimer);
+        StartCoroutine(FinishProcessingTurnAction(0, TurnAction.RanOutOfTime, 0, _currentlySelectedSticker,
+            currentlyInGameStickers[_currentlySelectedSticker]));
     }
 
     public void Reset() {

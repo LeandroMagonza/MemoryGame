@@ -132,7 +132,7 @@ public class UpgradeData
                     valueAddToInitial = 1,
                     valueAddToMax = 2,
                     description = "EXTRA CLUE: Start each match with an extra Clue. \n"+ConsumableData.GetConsumable(ConsumableID.Clue).description,
-                    levelPrices = new int[] { 200, 400, 1200 },
+                    levelPrices = new int[] { 1000, 2000, 3000 },
                 };
                 break;
             case UpgradeID.ExtraRemove:
@@ -142,7 +142,7 @@ public class UpgradeData
                     valueAddToInitial = 1,
                     valueAddToMax = 2,
                     description = "EXTRA REMOVE: Start each match with an extra Remove. \n" +ConsumableData.GetConsumable(ConsumableID.Remove).description,
-                    levelPrices = new int[] { 2500 },
+                    levelPrices = new int[] { 3000 },
                 };
                 break;
             case UpgradeID.ExtraCut:
@@ -152,7 +152,7 @@ public class UpgradeData
                     valueAddToInitial = 1,
                     valueAddToMax = 2,
                     description = "EXTRA CUT: Start each match with an extra Cut. \n" +ConsumableData.GetConsumable(ConsumableID.Cut).description,
-                    levelPrices = new int[] { 300, 700, 1500 },
+                    levelPrices = new int[] { 500, 1000, 2000 },
 
                 };
                 break;
@@ -189,7 +189,7 @@ public class UpgradeData
                     valueAddToInitial = 1,
                     valueAddToMax = 0,
                     description = "BETTER CLUE: Clues mark the number they were used on.",
-                    levelPrices = new int[] { 1500 },
+                    levelPrices = new int[] { 2000 },
                     upgradeRequired = new Dictionary<UpgradeID, int>()
                     {
                         { UpgradeID.ExtraClue, 1 }
@@ -199,7 +199,7 @@ public class UpgradeData
             case UpgradeID.BetterCut:
                 upgrade = new UpgradeData()
                 {
-                    levelPrices = new int[] { 3000 },
+                    levelPrices = new int[] { 2500 },
                 };
                 break;
             case UpgradeID.ExtraPeek:
