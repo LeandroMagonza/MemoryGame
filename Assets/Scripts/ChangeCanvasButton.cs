@@ -14,11 +14,11 @@ public class ChangeCanvasButton : MonoBehaviour {
 
     public virtual void OnClick() {
         CustomDebugger.Log("Pressed" +name);
+        AudioManager.Instance.PlayClip(clip);
         if (canvasToSet ==  null) {
             CustomDebugger.Log("Canvas NotImplementedException set");
             return;
         }
-        AudioManager.Instance.PlayClip(clip);
         CanvasManager.Instance.ChangeCanvas(canvasToSet);  
     }
 

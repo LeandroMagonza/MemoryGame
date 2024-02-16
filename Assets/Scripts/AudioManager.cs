@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AudioManager : MonoBehaviour
 {
@@ -42,6 +43,11 @@ public class AudioManager : MonoBehaviour
     #endregion
     public AudioSource audioSource;
     public Dictionary<GameClip, AudioClip> clips = new();
+    public bool playMusic = true;
+    public GameObject muteMusicButtonImage;
+    public Sprite musicOnSprite;
+    public Sprite musicOffSprite;
+
     public void Start() {
         AudioClip mainTheme = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "mainTheme");
         if (mainTheme is null) mainTheme = Resources.Load<AudioClip>("defaultAssets/audio/"+ "mainTheme");
@@ -52,12 +58,14 @@ public class AudioManager : MonoBehaviour
             if (clip is null) clip = Resources.Load<AudioClip>("defaultAssets/audio/" + gameClip.ToString());
             if (clip is not null) clips[gameClip] = clip;
         }
-        audioSource.Play();
+
+        if (playMusic) audioSource.Play();
     }
 
     public void PlayClip(GameClip clipToPlay) {
         if (!clips.ContainsKey(clipToPlay)) return;
-        if (clipToPlay == GameClip.win || clipToPlay == GameClip.highScore) {
+        if ((clipToPlay == GameClip.win || clipToPlay == GameClip.highScore)
+            && playMusic) {
             audioSource.Stop();
             StartCoroutine(RestartMusicInDelay(clips[clipToPlay].length));
         }
@@ -70,6 +78,22 @@ public class AudioManager : MonoBehaviour
             yield return null;
         }
         audioSource.Play();
+    }
+
+    public void ToggleMusic()
+    {
+        playMusic = !playMusic;
+
+        if (playMusic)
+        {
+            audioSource.Play();
+            muteMusicButtonImage.GetComponent<Image>().sprite = musicOnSprite;
+        }
+        else
+        {
+            audioSource.Stop ();
+            muteMusicButtonImage.GetComponent<Image>().sprite = musicOffSprite;
+        }
     }
 }
 

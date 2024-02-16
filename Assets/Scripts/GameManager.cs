@@ -71,7 +71,8 @@ public class GameManager : MonoBehaviour {
     
     public FadeOut amountOfAppearencesText; 
     public GameObject pausePanel;
-    
+
+    public bool firstMistake = false;
     
     //sticker
     public Sticker stickerDisplay;
@@ -142,8 +143,10 @@ public class GameManager : MonoBehaviour {
     private float endMatchTime = 0;
 
     private bool pause = false;
-    //TODO: Esta se va para manager stages o algo asi 
-    
+
+    public GameObject tutorialPanel;
+    public List<GameObject> newPlayerTutorialTexts;
+    public List<GameObject> firstMistakeTutorialTexts;
 
     public void SetScoreTexts() {
         if (userData.GetUserStageData(selectedStage, selectedDifficulty) is not null) {
@@ -260,6 +263,11 @@ public class GameManager : MonoBehaviour {
 
     public void OnIncorrectGuess(int number)
     {
+        if (!firstMistake)
+        {
+            firstMistake = true;
+            OpenTutorialPanel(1);
+        }
         if (blockChoice)
         {
             Debug.Log("Block");
@@ -343,7 +351,9 @@ public class GameManager : MonoBehaviour {
     {
         CustomDebugger.Log("gain bonus");
         int scoreModificationBonus = currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences * (
-                Mathf.Clamp((int)Math.Floor((float)bonusMultiplicator / 2), 0, 5));
+                Mathf.Clamp((int)Math.Floor((float)bonusMultiplicator / 2), 0,
+                    DifficultyToAmountOfAppearences(selectedDifficulty)
+                    ));
         ModifyScore(scoreModificationBonus);
         bonusMultiplicator++;
         AudioManager.Instance.PlayClip(GameClip.bonus);
@@ -616,7 +626,7 @@ public class GameManager : MonoBehaviour {
         gameEnded = false;
         stickerDisplay.gameObject.SetActive(true);
         endGameButtons.transform.parent.gameObject.SetActive(false);
-        AudioManager.Instance.audioSource.Play();
+        if (AudioManager.Instance.playMusic) AudioManager.Instance.audioSource.Play();
         SetTimer(15);
         SetScore(0);
         turnNumber = 1;
@@ -639,6 +649,24 @@ public class GameManager : MonoBehaviour {
         GameCanvas.UpdateUI();
         pause = false;
         pausePanel.SetActive(false);
+        tutorialPanel.SetActive(false);
+        
+        if (userData.stages[0].matches.Count == 0)
+        {
+            OpenTutorialPanel(0);
+        }
+        foreach (var stageData in userData.stages)
+        {
+            if (firstMistake) break;
+            foreach (var match in stageData.matches)
+            {
+                if (!match.achievementsFulfilled.Contains(Achievement.ClearedStageNoMistakes))
+                {
+                    firstMistake = true;
+                    break;
+                }
+            }                
+        }
     }
 
     public int DifficultyToAmountOfAppearences(int difficulty)
@@ -791,6 +819,30 @@ public class GameManager : MonoBehaviour {
     {
         pause = !pause;
         pausePanel.SetActive(pause);
+    }    
+    public void OpenTutorialPanel(int tutorialNumber)
+    {
+        switch (tutorialNumber)
+        {
+            case 0:
+                foreach (var VARIABLE in newPlayerTutorialTexts) VARIABLE.SetActive(true);
+                foreach (var VARIABLE in firstMistakeTutorialTexts) VARIABLE.SetActive(false);
+                break;
+            case 1 :
+                foreach (var VARIABLE in firstMistakeTutorialTexts) VARIABLE.SetActive(true);
+                foreach (var VARIABLE in newPlayerTutorialTexts) VARIABLE.SetActive(false);
+                break;
+            default:
+                    CustomDebugger.Log("tutorialNumber not found",DebugCategory.TUTORIAL);
+                    return;
+        }
+        pause = true;
+        tutorialPanel.SetActive(pause);
+    }    
+    public void CloseTutorialPanel()
+    {
+        pause = false;
+        tutorialPanel.SetActive(pause);
     }
 }
 public enum StickerSet {
