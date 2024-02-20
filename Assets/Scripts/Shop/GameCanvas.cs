@@ -53,6 +53,7 @@ public class GameCanvas : MonoBehaviour
     public ConsumableButtonData[] buttons;
     private GameManager GameManager => GameManager.Instance;
     public static GameCanvas Instance;
+    public Transform stickerHolder;
     private Dictionary<int, Button> numpadButtons = new Dictionary<int, Button>();
     private void Awake()
     {
@@ -61,6 +62,7 @@ public class GameCanvas : MonoBehaviour
     }
     private void OnEnable()
     {
+        GameManager.stickerDisplay.spriteHolder.transform.localScale = GameManager.startScale;
         AssignNumpadButtons(GameManager.numpadRow0, GameManager.numpadRow1, GameManager.numpadRow2);
         UpdateUI();
     }

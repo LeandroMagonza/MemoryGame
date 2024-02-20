@@ -76,7 +76,7 @@ public class GameManager : MonoBehaviour {
     
     //sticker
     public Sticker stickerDisplay;
-    private Vector3 startScale;
+    public Vector3 startScale;
     //public TextMeshProUGUI imageIDText; 
     //public GameObject imageOnDisplay;
 
