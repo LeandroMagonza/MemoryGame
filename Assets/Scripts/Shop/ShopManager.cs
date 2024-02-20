@@ -1,12 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
+public enum OrderItemBy
+{
+    Price,
+    Active
+}
 public class ShopManager : MonoBehaviour
 {
+
     public GameObject consumablePanel;
     public GameObject consumableTittle;
     public GameObject upgradePanel;
@@ -14,8 +22,8 @@ public class ShopManager : MonoBehaviour
     public TextMeshProUGUI moneyDisplay;
     public ShopButton[] shopButtons;
     public Animator animatorMessage;
-    private Dictionary<ConsumableID, ConsumableButton> shopConsumableButtons = new Dictionary<ConsumableID, ConsumableButton>();
-    private Dictionary<UpgradeID, UpgradeButton> shopUpgradeButtons = new Dictionary<UpgradeID, UpgradeButton>();
+    private Dictionary<ConsumableID, (ConsumableButton button, Transform panel, ConsumableData data)> shopConsumableButtons = new Dictionary<ConsumableID, (ConsumableButton,Transform,ConsumableData)>();
+    private Dictionary<UpgradeID, (UpgradeButton button, Transform panel, UpgradeData data)> shopUpgradeButtons = new Dictionary<UpgradeID, (UpgradeButton,Transform,UpgradeData)>();
 
     public UserData userData => PersistanceManager.Instance.userData;
     private const string _lock = "Ω\n▀";
@@ -27,16 +35,28 @@ public class ShopManager : MonoBehaviour
             if (button is ConsumableButton)
             {
                 ConsumableButton consumable = (ConsumableButton)button;
+
                 if (!shopConsumableButtons.ContainsKey(consumable.ID))
-                    shopConsumableButtons.Add(consumable.ID, consumable);
+                {
+                    ConsumableData data = ConsumableData.GetConsumable(consumable.ID);
+                    shopConsumableButtons.Add(consumable.ID, (consumable, consumable.transform.parent, data));
+                }
             }
             else if (button is UpgradeButton) 
             {
                 UpgradeButton upgrade = (UpgradeButton)button;
-                if (!shopUpgradeButtons.ContainsKey(upgrade.ID)) 
-                    shopUpgradeButtons.Add(upgrade.ID, upgrade);
+
+                if (!shopUpgradeButtons.ContainsKey(upgrade.ID))
+                {
+                    UpgradeData data = UpgradeData.GetUpgrade(upgrade.ID);
+                    shopUpgradeButtons.Add(upgrade.ID, (upgrade, upgrade.transform.parent, data));
+                }
             }
         }
+    }
+    private void Start()
+    {
+        OrderUpgradePanels();
     }
     private void OnEnable()
     {
@@ -77,6 +97,18 @@ public class ShopManager : MonoBehaviour
         UpdateConsumableButtonsUI();
         UpdateUpgradeButtonsIU();
 
+    }
+
+    public void OrderUpgradePanels()
+    {
+        var upgradesOrder = shopUpgradeButtons.Values
+            .OrderBy(tuple => tuple.data.levelPrices[0])
+            .OrderByDescending(tuple => tuple.button.button.interactable)
+            .ToList();
+        foreach (var upgrade in upgradesOrder)
+        {
+            upgrade.panel.SetAsLastSibling();
+        }
     }
     public void BuyItemUpgrade(int itemID)
     {
@@ -129,7 +161,7 @@ public class ShopManager : MonoBehaviour
 
     private void SetConsumableButton(ConsumableID consumableID)
     {
-        ShopButton shopButton = shopConsumableButtons[consumableID];
+        ShopButton shopButton = shopConsumableButtons[consumableID].button;
         if (userData.consumables.ContainsKey(consumableID))
         {
             shopButton.currentText.text = "Owned: " + userData.consumables[consumableID].ToString();
@@ -203,11 +235,11 @@ public class ShopManager : MonoBehaviour
             }
             description += requirementData; 
         }
-        shopUpgradeButtons[upgradeID].button.interactable = requirementsMet && !isMaxLevel;
-        shopUpgradeButtons[upgradeID].currentText.text = currentLevel.ToString() + "/" + max;
-        shopUpgradeButtons[upgradeID].priceText.text = price;
-        shopUpgradeButtons[upgradeID].priceText.color = shopUpgradeButtons[upgradeID].button.interactable? Color.white : Color.gray;
-        shopUpgradeButtons[upgradeID].descriptionText.text = description;
+        shopUpgradeButtons[upgradeID].button.button.interactable = requirementsMet && !isMaxLevel;
+        shopUpgradeButtons[upgradeID].button.currentText.text = currentLevel.ToString() + "/" + max;
+        shopUpgradeButtons[upgradeID].button.priceText.text = price;
+        shopUpgradeButtons[upgradeID].button.priceText.color = shopUpgradeButtons[upgradeID].button.button.interactable? Color.white : Color.gray;
+        shopUpgradeButtons[upgradeID].button.descriptionText.text = description;
     }
 }
 
