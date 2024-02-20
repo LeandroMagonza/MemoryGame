@@ -62,7 +62,8 @@ public class GameCanvas : MonoBehaviour
     }
     private void OnEnable()
     {
-        GameManager.stickerDisplay.spriteHolder.transform.localScale = GameManager.startScale;
+        if (GameManager.startScale != Vector3.zero)
+            GameManager.stickerDisplay.spriteHolder.transform.localScale = GameManager.startScale;
         AssignNumpadButtons(GameManager.numpadRow0, GameManager.numpadRow1, GameManager.numpadRow2);
         UpdateUI();
     }
