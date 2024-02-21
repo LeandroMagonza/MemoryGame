@@ -62,7 +62,6 @@ public class GameManager : MonoBehaviour {
     public int score = 0;
     public TextMeshProUGUI scoreText; 
     public int turnNumber = 1;
-    public int bonusOnAmountOfAppearences = 9;
     public int bonusMultiplicator = 1;
  
     public TextMeshProUGUI highScoreText; 
@@ -232,7 +231,7 @@ public class GameManager : MonoBehaviour {
     private int CheckAmountOfAppearences()
     {
         int scoreModificationBonus = 0;
-        if (currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences == bonusOnAmountOfAppearences)
+        if (currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences == selectedDifficulty)
         {
             CustomDebugger.Log("Clear: " + _currentlySelectedSticker.name);
             scoreModificationBonus = GainBonus();
@@ -351,9 +350,7 @@ public class GameManager : MonoBehaviour {
     {
         CustomDebugger.Log("gain bonus");
         int scoreModificationBonus = currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences * (
-                Mathf.Clamp((int)Math.Floor((float)bonusMultiplicator / 2), 0,
-                    DifficultyToAmountOfAppearences(selectedDifficulty)
-                    ));
+                Mathf.Clamp((int)Math.Floor((float)bonusMultiplicator / 2), 0, selectedDifficulty));
         ModifyScore(scoreModificationBonus);
         bonusMultiplicator++;
         AudioManager.Instance.PlayClip(GameClip.bonus);
@@ -625,7 +622,6 @@ public class GameManager : MonoBehaviour {
         blockChoice = userData.upgrades.ContainsKey(UpgradeID.BlockMistake) && userData.upgrades[UpgradeID.BlockMistake] > 0;
         SetNumpadByDifficulty(selectedDifficulty);
         gameCanvas.GetComponent<GameCanvas>().UpdateUI();
-        bonusOnAmountOfAppearences = DifficultyToAmountOfAppearences(selectedDifficulty);
         gameEnded = false;
         stickerDisplay.gameObject.SetActive(true);
         endGameButtons.transform.parent.gameObject.SetActive(false);
@@ -670,11 +666,6 @@ public class GameManager : MonoBehaviour {
                 }
             }                
         }
-    }
-
-    public int DifficultyToAmountOfAppearences(int difficulty)
-    {
-        return (selectedDifficulty + 1)*3;
     }
 
     private void SetNumpadByDifficulty(int difficulty)

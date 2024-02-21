@@ -12,10 +12,11 @@ using ColorUtility = UnityEngine.ColorUtility;
 public class Stage : MonoBehaviour
 {
     public int stage;
+    public int difficulty;
     public TextMeshProUGUI titleText; 
     public TextMeshProUGUI amountStickersTotalText; 
     public TextMeshProUGUI amountStickersCurrentText; 
-    public List<DifficultyButton> difficultyButtons;
+    public DifficultyButton difficultyButton;
     public GameObject unlockMessage;
 
     public void SetTitle(string title) {
@@ -33,23 +34,21 @@ public class Stage : MonoBehaviour
         amountStickersCurrentText.text = imageListCount.ToString();
     }
 
-    public void SetScore(int difficulty, int score) {
-        difficultyButtons[difficulty].SetScore(score);
+    public void SetScore(int score) {
+        difficultyButton.SetScore(score);
     }
-    public void SetStage(int stage)
+    public void SetStage(int stage,int difficulty)
     {
         this.stage = stage;
-        int difficulty = 0;
-        foreach (var difficultyButton in difficultyButtons)
-        {
-            difficultyButton.SetStage(stage);
-            difficulty++;
-        }
+        this.difficulty = difficulty;
+        difficultyButton.SetStage(stage,difficulty);
+        
         UpdateDifficultyUnlockedAndAmountOfStickersUnlocked();
         
     }
     public void UpdateDifficultyUnlockedAndAmountOfStickersUnlocked()
     {
+        // se eliminan el requerimiento de stickers, solo se requiere ahora que tengas el nivel anterior con una 
         List<int> unlockedStickers = new List<int>();
         
         foreach (var stickerFromStage in GameManager.Instance.stages[stage].stickers) {
@@ -64,16 +63,13 @@ public class Stage : MonoBehaviour
         SetAmountOfStickersTotal(GameManager.Instance.stages[stage].stickers.Count);
         if (unlockedStickers.Count < GameManager.Instance.stages[stage].stickers.Count) {
             unlockMessage.SetActive(true);
-            difficultyButtons[0].transform.parent.gameObject.SetActive(false);
+            difficultyButton.transform.parent.gameObject.SetActive(false);
         }
         else {
             unlockMessage.SetActive(false);
-            difficultyButtons[0].transform.parent.gameObject.SetActive(true);
+            difficultyButton.transform.parent.gameObject.SetActive(true);
         }
-        foreach (var difficultyButton in difficultyButtons)
-        {
-            difficultyButton.UpdateDifficultyUnlocked();
-        }
+        difficultyButton.UpdateDifficultyUnlocked();
     }
 
     public void OpenStickerPanel() {
@@ -170,10 +166,10 @@ public class Match
             score += turn.scoreModification;
             amountOfTurns ++;
             CustomDebugger.Log("turnNumber: "+amountOfTurns);
-            CustomDebugger.Log("turn.amountOfAppearences == GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)");
-            CustomDebugger.Log(turn.amountOfAppearences +"=="+ GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) +"&& ("+turn.action +"=="+ TurnAction.GuessCorrect +"||"+turn.action+" == "+TurnAction.UseClue+")");
-            CustomDebugger.Log(turn.amountOfAppearences == GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue));
-            if (turn.amountOfAppearences == GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)) {
+            CustomDebugger.Log("turn.amountOfAppearences == difficulty && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)");
+            CustomDebugger.Log(turn.amountOfAppearences +"=="+ difficulty +"&& ("+turn.action +"=="+ TurnAction.GuessCorrect +"||"+turn.action+" == "+TurnAction.UseClue+")");
+            CustomDebugger.Log(turn.amountOfAppearences == difficulty && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue));
+            if (turn.amountOfAppearences == difficulty && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)) {
                 clearedImages.Add(turn.imageID);
                 CustomDebugger.Log("Ädding clearedImages stickerID"+turn.imageID);
             }

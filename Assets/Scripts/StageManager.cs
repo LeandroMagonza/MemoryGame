@@ -35,7 +35,7 @@ public class StageManager : MonoBehaviour
     
     public GameObject stageHolder;
     public int selectedStage = 0;
-    public int selectedDifficulty = 0;
+    public int selectedDifficulty = 3;
     public GameObject stageDisplayPrefab;
 
     public GameObject stickerHolder;
@@ -70,7 +70,7 @@ public class StageManager : MonoBehaviour
             newStage.SetColor(stageData.ColorValue);
             newStage.SetStage(stageData.stageID);
 
-            for (int difficulty = 0; difficulty < 3; difficulty++)
+            for (int difficulty = 3; difficulty < 10; difficulty++)
             {
                 if (userData.GetUserStageData(stageData.stageID, difficulty) is not null)
                 {

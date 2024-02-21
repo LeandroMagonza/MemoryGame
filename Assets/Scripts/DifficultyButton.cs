@@ -29,8 +29,9 @@ public class DifficultyButton : ChangeCanvasButton {
         scoreText.text = score.ToString();
     }
 
-    public void SetStage(int stage) {
+    public void SetStage(int stage,int difficulty) {
         this.stage = stage;
+        this.difficulty = difficulty;
         gameObject.name = "ButtonDifficulty S" + stage+" D"+difficulty;
     }
 

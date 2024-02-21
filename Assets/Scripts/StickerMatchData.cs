@@ -24,8 +24,7 @@ public class StickerMatchData
         {
             lastClue = (int)lastClueAppearenceNumber;
         }
-        int options = GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) -
-                      lastClue;
+        int options = difficulty - lastClue;
         cutNumbers = new List<int>();
 
         switch (options)
@@ -44,7 +43,7 @@ public class StickerMatchData
 
         while (iterator >= 0)
         {
-            int random = Random.Range(lastClue+1, GameManager.Instance.DifficultyToAmountOfAppearences(difficulty) + 1 );
+            int random = Random.Range(lastClue+1, difficulty + 1 );
             Debug.Log($"Random: {random} Correct: {correctNumber}");
             if (random != correctNumber && !cutNumbers.Contains(random))
             {
