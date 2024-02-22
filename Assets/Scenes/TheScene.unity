@@ -555,10 +555,10 @@ RectTransform:
   m_Father: {fileID: 287874150}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 140.95746, y: -386.47}
-  m_SizeDelta: {x: 281.91492, y: 227.06001}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &55675752
 MonoBehaviour:
@@ -722,10 +722,10 @@ RectTransform:
   m_Father: {fileID: 287874150}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 140.95746, y: -53.530006}
-  m_SizeDelta: {x: 281.91492, y: 107.06001}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &73667070
 MonoBehaviour:
@@ -825,10 +825,10 @@ RectTransform:
   m_Father: {fileID: 73667069}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 140.95746, y: -85.29501}
-  m_SizeDelta: {x: 281.91492, y: 43.530006}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &77634992
 MonoBehaviour:
@@ -1284,7 +1284,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1
+  m_text: 4
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
   m_sharedMaterial: {fileID: 7374927986402738804, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
@@ -7712,7 +7712,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &287874146
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13254,7 +13254,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: OPCION
+  m_text: 2
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
   m_sharedMaterial: {fileID: 7374927986402738804, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
@@ -14114,7 +14114,7 @@ GameObject:
   - component: {fileID: 434649906}
   - component: {fileID: 434649909}
   m_Layer: 5
-  m_Name: ButtonNumpad
+  m_Name: NumpadButtonN 6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14236,8 +14236,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 6
-  _numberText: {fileID: 0}
-  _button: {fileID: 0}
+  _numberText: {fileID: 1276124387}
+  _button: {fileID: 434649906}
 --- !u!1 &435409935
 GameObject:
   m_ObjectHideFlags: 0
@@ -14340,10 +14340,10 @@ RectTransform:
   m_Father: {fileID: 73667069}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 140.95746, y: -31.765003}
-  m_SizeDelta: {x: 281.91492, y: 63.530006}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &444996916
 MonoBehaviour:
@@ -15569,15 +15569,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 241.91492
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 88.53001
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_LocalPosition.x
@@ -15609,11 +15609,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 140.95746
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -162.79501
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -16073,7 +16073,7 @@ GameObject:
   - component: {fileID: 619306290}
   - component: {fileID: 619306293}
   m_Layer: 5
-  m_Name: ButtonNumpad
+  m_Name: NumpadButtonN 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16195,8 +16195,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 1
-  _numberText: {fileID: 0}
-  _button: {fileID: 0}
+  _numberText: {fileID: 854568571}
+  _button: {fileID: 619306290}
 --- !u!224 &620355431 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6881186438950080302, guid: eb9d401e946ffda48a82cb54ff3b4b37, type: 3}
@@ -16428,7 +16428,7 @@ GameObject:
   - component: {fileID: 670090198}
   - component: {fileID: 670090201}
   m_Layer: 5
-  m_Name: ButtonNumpad
+  m_Name: NumpadButtonN 9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16550,8 +16550,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 9
-  _numberText: {fileID: 0}
-  _button: {fileID: 0}
+  _numberText: {fileID: 1419653540}
+  _button: {fileID: 670090198}
 --- !u!1 &672144252
 GameObject:
   m_ObjectHideFlags: 0
@@ -16906,7 +16906,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.47003174, y: 0.88998413}
+  m_AnchoredPosition: {x: 0.47003174, y: 0.8899536}
   m_SizeDelta: {x: -19.010015, y: -18.11}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &689241862
@@ -17171,7 +17171,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &743536597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19794,7 +19794,7 @@ GameObject:
   - component: {fileID: 1070697703}
   - component: {fileID: 1070697707}
   m_Layer: 5
-  m_Name: ButtonNumpad
+  m_Name: NumpadButtonN 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19835,8 +19835,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 3
-  _numberText: {fileID: 0}
-  _button: {fileID: 0}
+  _numberText: {fileID: 1648153546}
+  _button: {fileID: 1070697704}
 --- !u!114 &1070697704
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19988,7 +19988,6 @@ MonoBehaviour:
   score: 0
   scoreText: {fileID: 1311056529}
   turnNumber: 1
-  bonusOnAmountOfAppearences: 3
   bonusMultiplicator: 1
   highScoreText: {fileID: 2044751347}
   endGameScoreText: {fileID: 2139734648}
@@ -20278,15 +20277,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 241.91492
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 88.53001
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_LocalPosition.x
@@ -20318,11 +20317,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 140.95746
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -64.265
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -20927,7 +20926,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -47.899994, y: -26.475006}
+  m_AnchoredPosition: {x: -47.899994, y: -26.474976}
   m_SizeDelta: {x: 95.81, y: 52.94}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1140690576
@@ -20982,7 +20981,7 @@ GameObject:
   - component: {fileID: 1146872081}
   - component: {fileID: 1146872084}
   m_Layer: 5
-  m_Name: ButtonNumpad
+  m_Name: NumpadButtonN 5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -21104,8 +21103,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 5
-  _numberText: {fileID: 0}
-  _button: {fileID: 0}
+  _numberText: {fileID: 1481628398}
+  _button: {fileID: 1146872081}
 --- !u!114 &1155261344
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22207,7 +22206,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1
+  m_text: 7
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
   m_sharedMaterial: {fileID: 7374927986402738804, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
@@ -22347,7 +22346,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1
+  m_text: 6
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
   m_sharedMaterial: {fileID: 7374927986402738804, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
@@ -22482,7 +22481,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1
+  m_text: 8
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
   m_sharedMaterial: {fileID: 7374927986402738804, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
@@ -22890,7 +22889,7 @@ GameObject:
   - component: {fileID: 1312576791}
   - component: {fileID: 1312576795}
   m_Layer: 5
-  m_Name: ButtonNumpad
+  m_Name: NumpadButtonN 0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22931,8 +22930,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 0
-  _numberText: {fileID: 0}
-  _button: {fileID: 0}
+  _numberText: {fileID: 1460609282}
+  _button: {fileID: 1312576792}
 --- !u!114 &1312576792
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23325,7 +23324,7 @@ GameObject:
   - component: {fileID: 1351193080}
   - component: {fileID: 1351193083}
   m_Layer: 5
-  m_Name: ButtonNumpad
+  m_Name: NumpadButtonN 4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -23447,8 +23446,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 4
-  _numberText: {fileID: 0}
-  _button: {fileID: 0}
+  _numberText: {fileID: 140515955}
+  _button: {fileID: 1351193080}
 --- !u!224 &1364443669 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
@@ -23910,7 +23909,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1
+  m_text: 9
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
   m_sharedMaterial: {fileID: 7374927986402738804, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
@@ -24002,7 +24001,7 @@ GameObject:
   - component: {fileID: 1420584768}
   - component: {fileID: 1420584772}
   m_Layer: 5
-  m_Name: ButtonNumpad
+  m_Name: NumpadButtonN 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -24043,8 +24042,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 1
-  _numberText: {fileID: 0}
-  _button: {fileID: 0}
+  _numberText: {fileID: 1739155852}
+  _button: {fileID: 1420584769}
 --- !u!114 &1420584769
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24352,7 +24351,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: OPCION
+  m_text: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
   m_sharedMaterial: {fileID: 7374927986402738804, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
@@ -24487,7 +24486,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: OPCION
+  m_text: 4
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
   m_sharedMaterial: {fileID: 7374927986402738804, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
@@ -24622,7 +24621,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1
+  m_text: 5
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
   m_sharedMaterial: {fileID: 7374927986402738804, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
@@ -26042,7 +26041,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: OPCION
+  m_text: 3
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
   m_sharedMaterial: {fileID: 7374927986402738804, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
@@ -26242,7 +26241,7 @@ GameObject:
   - component: {fileID: 1655867712}
   - component: {fileID: 1655867716}
   m_Layer: 5
-  m_Name: ButtonNumpad
+  m_Name: NumpadButtonN 4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26283,8 +26282,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 4
-  _numberText: {fileID: 0}
-  _button: {fileID: 0}
+  _numberText: {fileID: 1481529088}
+  _button: {fileID: 1655867713}
 --- !u!114 &1655867713
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26631,7 +26630,7 @@ GameObject:
   - component: {fileID: 1670337698}
   - component: {fileID: 1670337702}
   m_Layer: 5
-  m_Name: ButtonNumpad
+  m_Name: NumpadButtonN 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26672,8 +26671,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 2
-  _numberText: {fileID: 0}
-  _button: {fileID: 0}
+  _numberText: {fileID: 352506953}
+  _button: {fileID: 1670337699}
 --- !u!114 &1670337699
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27147,7 +27146,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1
+  m_text: 2
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
   m_sharedMaterial: {fileID: 7374927986402738804, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
@@ -27571,7 +27570,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: OPCION
+  m_text: 1
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
   m_sharedMaterial: {fileID: 7374927986402738804, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
@@ -27808,7 +27807,7 @@ GameObject:
   - component: {fileID: 1765245778}
   - component: {fileID: 1765245781}
   m_Layer: 5
-  m_Name: ButtonNumpad
+  m_Name: NumpadButtonN 8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -27930,8 +27929,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 8
-  _numberText: {fileID: 0}
-  _button: {fileID: 0}
+  _numberText: {fileID: 1280161358}
+  _button: {fileID: 1765245778}
 --- !u!1 &1766858645
 GameObject:
   m_ObjectHideFlags: 0
@@ -29264,7 +29263,7 @@ GameObject:
   - component: {fileID: 1842231492}
   - component: {fileID: 1842231495}
   m_Layer: 5
-  m_Name: ButtonNumpad
+  m_Name: NumpadButtonN 7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29386,8 +29385,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 7
-  _numberText: {fileID: 0}
-  _button: {fileID: 0}
+  _numberText: {fileID: 1275182327}
+  _button: {fileID: 1842231492}
 --- !u!1 &1845456369
 GameObject:
   m_ObjectHideFlags: 0
@@ -29402,7 +29401,7 @@ GameObject:
   - component: {fileID: 1845456371}
   - component: {fileID: 1845456374}
   m_Layer: 5
-  m_Name: ButtonNumpad
+  m_Name: NumpadButtonN 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29524,8 +29523,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 3
-  _numberText: {fileID: 0}
-  _button: {fileID: 0}
+  _numberText: {fileID: 1991748019}
+  _button: {fileID: 1845456371}
 --- !u!224 &1845908895 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2970192187020338407, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
@@ -30954,7 +30953,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1
+  m_text: 3
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
   m_sharedMaterial: {fileID: 7374927986402738804, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
@@ -31606,7 +31605,7 @@ GameObject:
   - component: {fileID: 2044619476}
   - component: {fileID: 2044619479}
   m_Layer: 5
-  m_Name: ButtonNumpad
+  m_Name: NumpadButtonN 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31728,8 +31727,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 2
-  _numberText: {fileID: 0}
-  _button: {fileID: 0}
+  _numberText: {fileID: 1698972079}
+  _button: {fileID: 2044619476}
 --- !u!1 &2044751345
 GameObject:
   m_ObjectHideFlags: 0

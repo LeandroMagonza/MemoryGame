@@ -90,7 +90,7 @@ public class GameCanvas : MonoBehaviour
 
     private void SetNumpadButtons((StickerData sticker, StickerMatchData matchData) stickerData)
     {
-        ResetNumUIButtons();
+        ResetNumpadUIButtons();
         if (stickerData.matchData == null || stickerData.sticker == null) return;
         //BetterClue
         if (stickerData.matchData.lastClueAppearenceNumber != null)
@@ -127,14 +127,17 @@ public class GameCanvas : MonoBehaviour
         }
     }
 
-    public void ResetNumUIButtons()
+    public void ResetNumpadUIButtons()
     {
         if (GameManager.numButtons.Length > 0)
         {
             for (int i = 0; i < GameManager.numButtons.Length; i++)
             {
-                GameManager.numButtons[i]._button.interactable = true;
-                GameManager.numButtons[i]._numberText.color = Color.white;
+                if (GameManager.numButtons[i].gameObject.activeInHierarchy)
+                {
+                    GameManager.numButtons[i]._button.interactable = true;
+                    GameManager.numButtons[i]._numberText.color = Color.white;
+                }
             }
         }
     }
