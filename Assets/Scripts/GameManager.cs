@@ -118,7 +118,7 @@ public class GameManager : MonoBehaviour {
     public GameObject gameCanvas;
 
 
-    public NumpadButton[] numButtons;
+    public NumpadButton[] numpadButtons;
     //public GameObject numpadRow0;
     //public GameObject numpadRow1;
     //public GameObject numpadRow2;
@@ -674,13 +674,15 @@ public class GameManager : MonoBehaviour {
 
     private void SetNumpadByDifficulty(int difficulty)
     {
-        for (int i = 0; i < numButtons.Length; i++)
+        for (int i = 0; i < numpadButtons.Length; i++)
         {
-            numButtons[i].gameObject.SetActive(false);
+            numpadButtons[i].gameObject.transform.parent.gameObject.SetActive(false);
+            numpadButtons[i].gameObject.SetActive(false);
         }
         for (int i = 0; i < difficulty; i++)
         {
-            numButtons[i].gameObject.SetActive(true);
+            numpadButtons[i].gameObject.SetActive(true);
+            numpadButtons[i].gameObject.transform.parent.gameObject.SetActive(true);
         }
     }
 

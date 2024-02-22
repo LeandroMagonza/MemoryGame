@@ -96,10 +96,10 @@ public class GameCanvas : MonoBehaviour
         if (stickerData.matchData.lastClueAppearenceNumber != null)
         {
             CustomDebugger.Log("active turn sticker" + stickerData.matchData.lastClueAppearenceNumber);
-            GameManager.numButtons[(int)stickerData.matchData.lastClueAppearenceNumber]._numberText.color = Color.green;
+            GameManager.numpadButtons[(int)stickerData.matchData.lastClueAppearenceNumber]._numberText.color = Color.green;
             for (int i = 0; i < (int)stickerData.matchData.lastClueAppearenceNumber; i++)
             {
-                GameManager.numButtons[i]._button.interactable = false;
+                GameManager.numpadButtons[i]._button.interactable = false;
             }
         }
         if (stickerData.matchData.cutNumbers.Count > 0)
@@ -108,8 +108,8 @@ public class GameCanvas : MonoBehaviour
             for (int i = 1; i < stickerData.matchData.cutNumbers.Count; i++)
             {
                 CustomDebugger.Log($"stickerData.matchData.cutNumbers: {stickerData.matchData.cutNumbers.Count} number: {i} contains: {stickerData.matchData.cutNumbers.Contains(i)}");
-                GameManager.numButtons[stickerData.matchData.cutNumbers[i]]._numberText.color = Color.red;
-                GameManager.numButtons[stickerData.matchData.cutNumbers[i]]._button.interactable = false;
+                GameManager.numpadButtons[stickerData.matchData.cutNumbers[i]]._numberText.color = Color.red;
+                GameManager.numpadButtons[stickerData.matchData.cutNumbers[i]]._button.interactable = false;
             }
         }
         Debug.Log("BN count: " + stickerData.matchData.blockedNumbers.Count);
@@ -121,22 +121,22 @@ public class GameCanvas : MonoBehaviour
             {
             
                 CustomDebugger.Log($"stickerData.matchData.blockedNumbers: {stickerData.matchData.blockedNumbers.Count} number: {i} contains: {stickerData.matchData.blockedNumbers.Contains(i)}");
-                GameManager.numButtons[stickerData.matchData.blockedNumbers[i]]._numberText.color = Color.red;
-                GameManager.numButtons[stickerData.matchData.blockedNumbers[i]]._button.interactable = false;
+                GameManager.numpadButtons[stickerData.matchData.blockedNumbers[i]]._numberText.color = Color.red;
+                GameManager.numpadButtons[stickerData.matchData.blockedNumbers[i]]._button.interactable = false;
             }
         }
     }
 
     public void ResetNumpadUIButtons()
     {
-        if (GameManager.numButtons.Length > 0)
+        if (GameManager.numpadButtons.Length > 0)
         {
-            for (int i = 0; i < GameManager.numButtons.Length; i++)
+            for (int i = 0; i < GameManager.numpadButtons.Length; i++)
             {
-                if (GameManager.numButtons[i].gameObject.activeInHierarchy)
+                if (GameManager.numpadButtons[i].gameObject.activeInHierarchy)
                 {
-                    GameManager.numButtons[i]._button.interactable = true;
-                    GameManager.numButtons[i]._numberText.color = Color.white;
+                    GameManager.numpadButtons[i]._button.interactable = true;
+                    GameManager.numpadButtons[i]._numberText.color = Color.white;
                 }
             }
         }
