@@ -205,7 +205,23 @@ public class GameManager : MonoBehaviour {
         float timerModification = maxTimer - timer;
         SetTimer(maxTimer);
         yield return new WaitForSeconds(delayBetweenImages);
+        
+        //Checkeamos si el sticker que adivinamos recien es el ultimo que queda en el pool, y de ser asi le damos todos los puntos de una y sacamos el sticker
+        if (currentlyInGameStickers.Count == 1 && currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
+        {
+            //se repite este while hasta que el sticker salga del pool, para sumar sus puntos, el check amount of appearences lo saca del pool cuando llega
+            //a la cant de apariciones de la dificultad 
+            while (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
+            {
+                currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences++;
+                scoreModification += CalculateCorrectGuessBasePointsAndCombo();
+                SetCurrentCombo(_currentCombo+1);
+                
+                scoreModification += CheckAmountOfAppearences();
+            }
+        }
         SaveTurn(number, timerModification, turnAction, scoreModification, stickerData, stickerMatchData);
+        
         if (currentlyInGameStickers.Count == 0) {
             StartCoroutine(EndGame(true));
         }
@@ -247,11 +263,11 @@ public class GameManager : MonoBehaviour {
         turnNumber++;
         if (currentlyInGameStickers.Count < 3)
         {
-            AddImages(1);
+            AddStickers(1);
         }
         else if (turnNumber % 10 == 0)
         {
-            AddImages(turnNumber / 10);
+            AddStickers(turnNumber / 10);
         }
 
         SetRandomImage();
@@ -320,12 +336,9 @@ public class GameManager : MonoBehaviour {
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             true);
         AudioManager.Instance.PlayClip(GameClip.correctGuess);
-        int scoreModification = stages[selectedStage].basePoints +
-                                currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences
-                                + (_currentlySelectedSticker.level - 1)
-                                + CalculateScoreComboBonus();
-        ModifyScore(scoreModification);
+        int scoreModification = CalculateCorrectGuessBasePointsAndCombo();
         SetCurrentCombo(_currentCombo+1);
+        ModifyScore(scoreModification);
         //Reset blocked and cut numbers for next appearence
         if (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
         {
@@ -334,6 +347,14 @@ public class GameManager : MonoBehaviour {
         }
         scoreModification += CheckAmountOfAppearences();
         return scoreModification;
+    }
+
+    private int CalculateCorrectGuessBasePointsAndCombo()
+    {
+        return stages[selectedStage].basePoints +
+               currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences
+               + (_currentlySelectedSticker.level - 1)
+               + CalculateScoreComboBonus();
     }
 
     private void CorrectGuessFX()
@@ -456,9 +477,11 @@ public class GameManager : MonoBehaviour {
         _stickersFromStage.Remove(_currentlySelectedSticker.stickerID);
     }
   
-    private bool AddImages(int amountOfImages) {
+    private bool AddStickers(int amountOfImages) {
         //para agregar una imagen al pool, se mezclan todos los sprites,
         //y se agrega el primer sprite que no este en el pool, al pool
+        
+        //devuelve verdadero si se pudieron agregar al pool todas las imagenes requeridas
 
         List<StickerData> shuffledStickers =
             new List<StickerData >();
@@ -638,7 +661,7 @@ public class GameManager : MonoBehaviour {
         lifeCounter.ResetLives();
         LoadStickers();
         currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
-        AddImages(4);
+        AddStickers(4);
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion
         //TODO: recordar para que era el comentario de arriba, poirque capaz esta arreglado ya y no me acuerdo
         //TODO: JAJAJ
