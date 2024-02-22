@@ -15,7 +15,7 @@ public class Stage : MonoBehaviour
     public int difficulty;
     public TextMeshProUGUI titleText; 
     public TextMeshProUGUI amountStickersTotalText; 
-    public TextMeshProUGUI amountStickersCurrentText; 
+    //public TextMeshProUGUI amountStickersCurrentText; 
     public DifficultyButton difficultyButton;
     public GameObject unlockMessage;
 
@@ -30,9 +30,9 @@ public class Stage : MonoBehaviour
     public void SetAmountOfStickersTotal(int imageListCount) {
         amountStickersTotalText.text = imageListCount.ToString();
     }
-    public void SetAmountOfStickersCurrent(int imageListCount) {
+    /*public void SetAmountOfStickersCurrent(int imageListCount) {
         amountStickersCurrentText.text = imageListCount.ToString();
-    }
+    }*/
 
     public void SetScore(int score) {
         difficultyButton.SetScore(score);
@@ -49,6 +49,7 @@ public class Stage : MonoBehaviour
     public void UpdateDifficultyUnlockedAndAmountOfStickersUnlocked()
     {
         // se eliminan el requerimiento de stickers, solo se requiere ahora que tengas el nivel anterior con una 
+        /*
         List<int> unlockedStickers = new List<int>();
         
         foreach (var stickerFromStage in GameManager.Instance.stages[stage].stickers) {
@@ -59,8 +60,7 @@ public class Stage : MonoBehaviour
                 unlockedStickers.Add(stickerFromStage);
             }
         }
-        SetAmountOfStickersCurrent(unlockedStickers.Count);
-        SetAmountOfStickersTotal(GameManager.Instance.stages[stage].stickers.Count);
+        //SetAmountOfStickersCurrent(unlockedStickers.Count);
         if (unlockedStickers.Count < GameManager.Instance.stages[stage].stickers.Count) {
             unlockMessage.SetActive(true);
             difficultyButton.transform.parent.gameObject.SetActive(false);
@@ -69,6 +69,9 @@ public class Stage : MonoBehaviour
             unlockMessage.SetActive(false);
             difficultyButton.transform.parent.gameObject.SetActive(true);
         }
+        */
+        SetAmountOfStickersTotal(GameManager.Instance.stages[stage].stickers.Count);
+        unlockMessage.SetActive(false);
         difficultyButton.UpdateDifficultyUnlocked();
     }
 
@@ -271,21 +274,14 @@ public class UserData
         {
             return null;
         }
-        UserStageData userStageData = null;
-        foreach (var VARIABLE in stages)
+        foreach (var userStageData in stages)
         {
-            if (VARIABLE.stage == stage && VARIABLE.difficulty == difficulty)
+            if (userStageData.stage == stage && userStageData.difficulty == difficulty)
             {
-                userStageData = VARIABLE;
                 return userStageData;
             }
         }
-
-        //if (userStageData is null)
-        userStageData = new UserStageData(stage, difficulty); 
-        stages.Add(userStageData);
-        
-        return userStageData;
+        return null;
     }
     public void ConvertStickerListToDictionary()
     {
@@ -411,7 +407,7 @@ public class UserStageData
 {
     public int stage;
     public int difficulty;
-    public List<int> clearedStickers = new List<int>();
+    //public List<int> clearedStickers = new List<int>();
     public int highScore = 0;
     //[JsonProperty (ItemConverterType = typeof(StringEnumConverter))]
     [JsonIgnore]
@@ -445,7 +441,7 @@ public class UserStageData
         CustomDebugger.Log("Added Match with turns "+currentMatch.turnHistory.Count);
         return firstTimeAchievements;
     }
-    public bool HasUnlockedStage()
+    /*public bool HasUnlockedStage()
     {
         foreach (var imageFromStage in GameManager.Instance.stages[stage].stickers) {
             //tiene por lo menos una vez la figurita del stage, en sus imageduplicates
@@ -456,7 +452,7 @@ public class UserStageData
             }
         }
         return true;
-    }
+    }*/
 }
 
 public class StickerKey

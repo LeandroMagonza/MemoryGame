@@ -521,8 +521,8 @@ RectTransform:
   m_Children:
   - {fileID: 7852772126908680309}
   - {fileID: 6908902282144733475}
-  - {fileID: 5657132590691213012}
   - {fileID: 7925258568248802559}
+  - {fileID: 5657132590691213012}
   m_Father: {fileID: 6108995385127829772}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -803,7 +803,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &5657132590691213012
 RectTransform:
   m_ObjectHideFlags: 0
@@ -817,12 +817,12 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 987430744265839515}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 82.95298, y: -4.6952}
-  m_SizeDelta: {x: 39.0833, y: 25.7006}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 25.7006}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &8331528140966755686
 CanvasRenderer:
@@ -1772,7 +1772,7 @@ GameObject:
   - component: {fileID: 7282044559815090792}
   - component: {fileID: 8560745628623522344}
   m_Layer: 5
-  m_Name: stageStickersCurrent (1)
+  m_Name: Flags
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1791,7 +1791,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 987430744265839515}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1826,7 +1826,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: FLAGS
+  m_text: 'FLAGS:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9a2157e1f9c4c4d38841fbb92558f587, type: 2}
   m_sharedMaterial: {fileID: -6360588970910393389, guid: 9a2157e1f9c4c4d38841fbb92558f587, type: 2}
@@ -2651,13 +2651,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stage: 0
+  difficulty: 0
   titleText: {fileID: 6108995385229307237}
   amountStickersTotalText: {fileID: 8161461968779296617}
-  amountStickersCurrentText: {fileID: 8724110188102341641}
-  difficultyButtons:
-  - {fileID: 8694857771726920485}
-  - {fileID: 8040548265381071890}
-  - {fileID: 2280509224887961901}
+  difficultyButton: {fileID: 8694857771726920485}
   unlockMessage: {fileID: 900923410331610414}
 --- !u!1 &9171511943087894412
 GameObject:

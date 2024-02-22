@@ -138,10 +138,10 @@ public class PersistanceManager : MonoBehaviour
 
     public void SaveUserData()
     {
-        if (userData.stickerDuplicates.Count == 0)
+        /*if (userData.stickerDuplicates.Count == 0)
         {
             throw new Exception("Sticker duplicates was empty, user data save aborted");
-        }
+        }*/
         userData.ConvertStickerDictionaryToList();
         string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, "userData.json");

@@ -48,13 +48,23 @@ public class DifficultyButton : ChangeCanvasButton {
                   (difficulty - 1)+" "+GameManager.Instance.userData.GetUserStageData(stage, difficulty  - 1).achievements.Contains(Achievement.ClearedEveryImage));*/
         CustomDebugger.Log("button name "+ name);
         // por que no encuentra el stage en userdata
-        bool conditionStage = GameManager.Instance.userData.GetUserStageData(stage, difficulty).HasUnlockedStage();
+        //bool conditionStage = GameManager.Instance.userData.GetUserStageData(stage, difficulty).HasUnlockedStage();
         bool conditionDifficulty = GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null ||
                                    GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1).achievements
                                        .Contains(Achievement.BarelyClearedStage);
-        CustomDebugger.Log("conditionStage " + conditionStage);
+        //CustomDebugger.Log("conditionStage " + conditionStage);
+
+        UserStageData currentUserStageData = GameManager.Instance.userData.GetUserStageData(stage, difficulty);
+        if (currentUserStageData is null)
+        {
+            currentUserStageData = new UserStageData(stage, difficulty);
+            PersistanceManager.Instance.userData.stages.Add(currentUserStageData);
+        }
+        
+        
         CustomDebugger.Log("conditionDifficulty " + conditionDifficulty);
-        if (conditionStage && conditionDifficulty)
+        //if (conditionStage && conditionDifficulty)
+        if (conditionDifficulty)
         {
             GetComponent<Button>().interactable = true;
         }
@@ -63,7 +73,7 @@ public class DifficultyButton : ChangeCanvasButton {
             GetComponent<Button>().interactable = false;
         }
 
-        stars.SetAchievements(GameManager.Instance.userData.GetUserStageData(stage, difficulty).achievements);
+        stars.SetAchievements(currentUserStageData.achievements);
     }
 
 

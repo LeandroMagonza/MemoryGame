@@ -46,44 +46,55 @@ public class StageManager : MonoBehaviour
 
     public void InitializeStages()
     {
-        foreach (var stageIndexAndData in stages)
+        //stages = LoadStages();
+        // Parseo en cada Stage el color
+        foreach (var stage in stages.Values)
         {
-            //stages = LoadStages();
-            foreach (var stage in stages.Values)
+            if (ColorUtility.TryParseHtmlString("#" + stage.color, out Color colorValue))
             {
-                if (ColorUtility.TryParseHtmlString("#" + stage.color, out Color colorValue))
-                {
-                    stage.ColorValue = colorValue;
-                }
+                stage.ColorValue = colorValue;
             }
-
-            //.ToArray().Select((data, index) => new { index, data })
-            StageData stageData = stageIndexAndData.Value;
-
-            GameObject stageDisplay = Instantiate(stageDisplayPrefab, stageHolder.transform);
-            Stage newStage = stageDisplay.GetComponent<Stage>();
-            stageData.stageObject = newStage;
-
-
-            newStage.name = stageData.title;
-            newStage.SetTitle(stageData.title);
-            newStage.SetColor(stageData.ColorValue);
-            newStage.SetStage(stageData.stageID);
-
-            for (int difficulty = 3; difficulty < 10; difficulty++)
+        }
+        // Recorro las dificultades, arrancando por 3, hasta 9, creando los stages para cada una, y cortando cuando la dificultad este bloqueada
+        // que es cuando la dificultad anterior no tenga por lo menos 1 achievement
+        bool nextStageUnlocked = true;
+        for (int difficulty = 3; difficulty < 10; difficulty++)
+        {
+            if (!nextStageUnlocked) break;
+            foreach (var stageIndexAndData in stages)
             {
+                if (!nextStageUnlocked) break;
+                StageData stageData = stageIndexAndData.Value;
+                UserStageData currentUserStageData = userData.GetUserStageData(stageData.stageID, difficulty);
+
+                nextStageUnlocked = (currentUserStageData is not null && currentUserStageData.achievements.Count > 0);
+
+                //.ToArray().Select((data, index) => new { index, data })
+                
+
+                GameObject stageDisplay = Instantiate(stageDisplayPrefab, stageHolder.transform);
+                stageDisplay.transform.SetSiblingIndex(0);
+                Stage newStage = stageDisplay.GetComponent<Stage>();
+                stageData.stageObject = newStage;
+
+                newStage.name = stageData.title;
+                newStage.SetTitle(stageData.title);
+                newStage.SetColor(stageData.ColorValue);
+                newStage.SetStage(stageData.stageID, difficulty);
+
                 if (userData.GetUserStageData(stageData.stageID, difficulty) is not null)
                 {
-                    newStage.SetScore(difficulty, userData.GetUserStageData(stageData.stageID, difficulty).highScore);
-                    newStage.difficultyButtons[difficulty].stars
+                    newStage.SetScore( userData.GetUserStageData(stageData.stageID, difficulty).highScore);
+                    newStage.difficultyButton.stars
                         .SetAchievements(userData.GetUserStageData(stageData.stageID, difficulty).achievements);
                 }
                 else
                 {
-                    newStage.SetScore(difficulty, 0);
+                    newStage.SetScore(0);
                 }
             }
         }
+
 
         GameManager.Instance.SetScoreTexts();
     }
@@ -102,12 +113,15 @@ public class StageManager : MonoBehaviour
             Sticker display = StickerManager.Instance.GetStickerHolder();
             StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(stages[stage].stickerSet,stickerID);
             display.SetStickerData(stickerData);
-            if (stickerData.amountOfDuplicates == 0) {
+            // esto era para cuando tenias que desbloquear los stages, los lockeados eran los stickers que no tenias, pero ahora no se loquean asi que el boton
+            // trae todos los stickers siempre
+            /*if (stickerData.amountOfDuplicates == 0) {
                 display.ConfigureLocked();
             }
-            else {
-                display.ConfigureForPack();
-            }
+            else {*/
+            //}
+            display.ConfigureForPack();
+            
             display.transform.SetParent(stickerHolder.transform);
             display.transform.localScale = Vector3.one;
         }

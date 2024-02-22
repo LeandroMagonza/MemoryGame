@@ -544,7 +544,7 @@ public class GameManager : MonoBehaviour {
     public void UpdateAchievementAndUnlockedLevels()
     {
         foreach (var stageIndexAndData in stages) {
-                stageIndexAndData.Value.stageObject.UpdateDifficultyUnlockedAndAmountOfStickersUnlocked();
+            if (stageIndexAndData.Value.stageObject is not null) stageIndexAndData.Value.stageObject.UpdateDifficultyUnlockedAndAmountOfStickersUnlocked();
         }
     }
 
@@ -564,7 +564,7 @@ public class GameManager : MonoBehaviour {
         float clipDuration = AudioManager.Instance.PlayClip(GameClip.highScore);
         float timeUntillHighScoreTextUpdate = 0.25f;
         userData.GetUserStageData(selectedStage, selectedDifficulty).highScore = highScoreToSet;
-        stages[selectedStage].stageObject.SetScore(selectedDifficulty,highScoreToSet);
+        stages[selectedStage].stageObject.SetScore(highScoreToSet);
         yield return new WaitForSeconds(timeUntillHighScoreTextUpdate);
         
         //Todo: agregar animacion de texto estrellas colores whatever
