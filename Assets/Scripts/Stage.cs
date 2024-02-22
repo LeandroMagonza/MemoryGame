@@ -36,13 +36,14 @@ public class Stage : MonoBehaviour
     public void SetScore(int difficulty, int score) {
         difficultyButtons[difficulty].SetScore(score);
     }
-    public void SetStage(int stage)
+    public void SetStage(int stage )
     {
         this.stage = stage;
-        int difficulty = 0;
+        int difficulty = 3;
         foreach (var difficultyButton in difficultyButtons)
         {
             difficultyButton.SetStage(stage);
+            difficultyButton.SetDifficulty(difficulty);
             difficulty++;
         }
         UpdateDifficultyUnlockedAndAmountOfStickersUnlocked();

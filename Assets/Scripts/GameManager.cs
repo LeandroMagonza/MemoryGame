@@ -118,9 +118,11 @@ public class GameManager : MonoBehaviour {
     
     public GameObject gameCanvas;
 
-    public GameObject numpadRow0;
-    public GameObject numpadRow1;
-    public GameObject numpadRow2;
+
+    public NumpadButton[] numButtons;
+    //public GameObject numpadRow0;
+    //public GameObject numpadRow1;
+    //public GameObject numpadRow2;
 
     private Match _currentMatch;
     private int _currentCombo = 0;
@@ -597,7 +599,9 @@ public class GameManager : MonoBehaviour {
             currentlyInGameStickers[_currentlySelectedSticker]));
     }
 
-    public void Reset() {
+    public void Reset() 
+    {
+
         switch (currentGameMode)
         {
             case GameMode.MEMORY:
@@ -672,19 +676,20 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public int DifficultyToAmountOfAppearences(int difficulty)
+    public int DifficultyToAmountOfAppearences(int selectedDifficulty)
     {
-        return (selectedDifficulty + 1)*3;
+        return selectedDifficulty;
     }
 
     private void SetNumpadByDifficulty(int difficulty)
     {
-        numpadRow1.SetActive(false);
-        numpadRow2.SetActive(false);
-        if (difficulty > 0)
+        for (int i = 0; i < numButtons.Length; i++)
         {
-            numpadRow1.SetActive(true);
-            if (difficulty > 1) numpadRow2.SetActive(true);
+            numButtons[i].gameObject.SetActive(false);
+        }
+        for (int i = 0; i < difficulty; i++)
+        {
+            numButtons[i].gameObject.SetActive(true);
         }
     }
 

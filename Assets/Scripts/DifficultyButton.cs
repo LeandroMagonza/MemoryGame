@@ -4,7 +4,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
-public class DifficultyButton : ChangeCanvasButton {
+public class DifficultyButton : ChangeCanvasButton 
+{
     public int difficulty;
     public int stage;
     public AchievementStars stars;
@@ -28,10 +29,14 @@ public class DifficultyButton : ChangeCanvasButton {
     public void SetScore(int score) {
         scoreText.text = score.ToString();
     }
-
+    public void SetDifficulty (int difficulty)
+    {
+        this.difficulty = difficulty;
+        gameObject.name = "ButtonDifficulty S" + stage + " D" + difficulty;
+    }
     public void SetStage(int stage) {
         this.stage = stage;
-        gameObject.name = "ButtonDifficulty S" + stage+" D"+difficulty;
+        gameObject.name = "ButtonDifficulty S" + stage+" D" + difficulty;
     }
 
     public void UpdateDifficultyUnlocked() {
