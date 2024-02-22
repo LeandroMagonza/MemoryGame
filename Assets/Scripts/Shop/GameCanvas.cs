@@ -54,7 +54,6 @@ public class GameCanvas : MonoBehaviour
     private GameManager GameManager => GameManager.Instance;
     public static GameCanvas Instance;
     public Transform stickerHolder;
-    private Dictionary<int, Button> numpadButtons = new Dictionary<int, Button>();
     private void Awake()
     {
         if (Instance == null)
@@ -64,7 +63,6 @@ public class GameCanvas : MonoBehaviour
     {
         if (GameManager.startScale != Vector3.zero)
             GameManager.stickerDisplay.spriteHolder.transform.localScale = GameManager.startScale;
-        AssignNumpadButtons(GameManager.numpadRow0, GameManager.numpadRow1, GameManager.numpadRow2);
         UpdateUI();
     }
 
@@ -98,10 +96,10 @@ public class GameCanvas : MonoBehaviour
         if (stickerData.matchData.lastClueAppearenceNumber != null)
         {
             CustomDebugger.Log("active turn sticker" + stickerData.matchData.lastClueAppearenceNumber);
-            numpadButtons[(int)stickerData.matchData.lastClueAppearenceNumber].GetComponentInChildren<TextMeshProUGUI>().color = Color.green;
-            for (int i = 1; i <= (int)stickerData.matchData.lastClueAppearenceNumber; i++)
+            GameManager.numButtons[(int)stickerData.matchData.lastClueAppearenceNumber]._numberText.color = Color.green;
+            for (int i = 0; i < (int)stickerData.matchData.lastClueAppearenceNumber; i++)
             {
-                numpadButtons[i].interactable = false;
+                GameManager.numButtons[i]._button.interactable = false;
             }
         }
         if (stickerData.matchData.cutNumbers.Count > 0)
@@ -110,8 +108,8 @@ public class GameCanvas : MonoBehaviour
             for (int i = 1; i < stickerData.matchData.cutNumbers.Count; i++)
             {
                 CustomDebugger.Log($"stickerData.matchData.cutNumbers: {stickerData.matchData.cutNumbers.Count} number: {i} contains: {stickerData.matchData.cutNumbers.Contains(i)}");
-                numpadButtons[stickerData.matchData.cutNumbers[i]].GetComponentInChildren<TextMeshProUGUI>().color = Color.red;
-                numpadButtons[stickerData.matchData.cutNumbers[i]].interactable = false;
+                GameManager.numButtons[stickerData.matchData.cutNumbers[i]]._numberText.color = Color.red;
+                GameManager.numButtons[stickerData.matchData.cutNumbers[i]]._button.interactable = false;
             }
         }
         Debug.Log("BN count: " + stickerData.matchData.blockedNumbers.Count);
@@ -123,40 +121,22 @@ public class GameCanvas : MonoBehaviour
             {
             
                 CustomDebugger.Log($"stickerData.matchData.blockedNumbers: {stickerData.matchData.blockedNumbers.Count} number: {i} contains: {stickerData.matchData.blockedNumbers.Contains(i)}");
-                numpadButtons[stickerData.matchData.blockedNumbers[i]].GetComponentInChildren<TextMeshProUGUI>().color = Color.red;
-                numpadButtons[stickerData.matchData.blockedNumbers[i]].interactable = false;
+                GameManager.numButtons[stickerData.matchData.blockedNumbers[i]]._numberText.color = Color.red;
+                GameManager.numButtons[stickerData.matchData.blockedNumbers[i]]._button.interactable = false;
             }
         }
     }
 
     public void ResetNumUIButtons()
     {
-        if (numpadButtons.Count > 0)
+        if (GameManager.numButtons.Length > 0)
         {
-            for (int i = 1; i <= numpadButtons.Count; i++)
+            for (int i = 0; i < GameManager.numButtons.Length; i++)
             {
-                numpadButtons[i].interactable = true;
-                numpadButtons[i].GetComponentInChildren<TextMeshProUGUI>().color = Color.white;
+                GameManager.numButtons[i]._button.interactable = true;
+                GameManager.numButtons[i]._numberText.color = Color.white;
             }
         }
-    }
-
-    private void AssignNumpadButtons(params GameObject[] rows)
-    {
-        CustomDebugger.Log("NumPAD_ROW_Buttons Lenght: " + rows.Length);
-        for (int i = 0; i < rows.Length; i++)
-        {
-            for (int j = 0; j < rows[i].transform.childCount; j++)
-            {
-                Button button = rows[i].transform.GetChild(j).GetComponent<Button>();
-                NumpadButton numpadButton = button.GetComponent<NumpadButton>();
-                if (!numpadButtons.ContainsKey(numpadButton.number))
-                {
-                    numpadButtons.Add(numpadButton.number, button);
-                }
-            }
-        }
-        CustomDebugger.Log("NumPAD_Buttons Count: " + numpadButtons.Count);
     }
 
     private (StickerData sticker, StickerMatchData matchData) USE(ConsumableID ID)

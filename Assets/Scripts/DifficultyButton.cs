@@ -4,7 +4,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
-public class DifficultyButton : ChangeCanvasButton {
+public class DifficultyButton : ChangeCanvasButton 
+{
     public int difficulty;
     public int stage;
     public AchievementStars stars;
