@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.UIElements;
+using Image = UnityEngine.UI.Image;
 
 public class StageManager : MonoBehaviour
 {
@@ -43,9 +45,14 @@ public class StageManager : MonoBehaviour
     public UserData userData => PersistanceManager.Instance.userData;
     public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
     public StickerSet gameVersion;
+    public string difficultyDisplayLabel;
+    public int difficultyDisplayOffset;
 
-    public void InitializeStages()
-    {
+    public void InitializeStages() {
+        CustomDebugger.Log("called initialize stages");
+        //Si el stage holder tiene stages, osea que esta vacio, topmoststage es null, si no topmoststage es el child 0 de stageholder transform
+        Stage topmostStage = (stageHolder.transform.childCount == 0)? null :stageHolder.transform.GetChild(0)?.gameObject.GetComponent<Stage>();
+
         //stages = LoadStages();
         // Parseo en cada Stage el color
         foreach (var stage in stages.Values)
@@ -61,16 +68,18 @@ public class StageManager : MonoBehaviour
         for (int difficulty = 3; difficulty < 10; difficulty++)
         {
             if (!nextStageUnlocked) break;
-            foreach (var stageIndexAndData in stages)
-            {
+            foreach (var stageIndexAndData in stages) {
                 if (!nextStageUnlocked) break;
                 StageData stageData = stageIndexAndData.Value;
+
+                //Evita crear stages que ya estan creados. Si el que esta arriba, que es el de (dificultad,stageid) mas alto 
+                if (topmostStage is not null &&
+                    (topmostStage.difficulty > difficulty || 
+                     (topmostStage.difficulty == difficulty && topmostStage.stage >= stageData.stageID))) continue;
+                
                 UserStageData currentUserStageData = userData.GetUserStageData(stageData.stageID, difficulty);
 
                 nextStageUnlocked = (currentUserStageData is not null && currentUserStageData.achievements.Count > 0);
-
-                //.ToArray().Select((data, index) => new { index, data })
-                
 
                 GameObject stageDisplay = Instantiate(stageDisplayPrefab, stageHolder.transform);
                 stageDisplay.transform.SetSiblingIndex(0);
@@ -78,13 +87,15 @@ public class StageManager : MonoBehaviour
                 stageData.stageObject = newStage;
 
                 newStage.name = stageData.title;
-                newStage.SetTitle(stageData.title);
+                newStage.SetTitle(stageData.title+" "+difficultyDisplayLabel+ (difficulty - difficultyDisplayOffset));
                 newStage.SetColor(stageData.ColorValue);
                 newStage.SetStage(stageData.stageID, difficulty);
 
                 if (userData.GetUserStageData(stageData.stageID, difficulty) is not null)
                 {
                     newStage.SetScore( userData.GetUserStageData(stageData.stageID, difficulty).highScore);
+                    newStage.difficultyButton.gameObject.GetComponent<Image>().color = 
+                        MyExtensions.GetLerpColor(difficulty-3,9-3,new List<Color>(){Color.green,Color.yellow,Color.red});
                     newStage.difficultyButton.stars
                         .SetAchievements(userData.GetUserStageData(stageData.stageID, difficulty).achievements);
                 }

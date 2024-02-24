@@ -58,8 +58,7 @@ public class AudioManager : MonoBehaviour
             if (clip is null) clip = Resources.Load<AudioClip>("defaultAssets/audio/" + gameClip.ToString());
             if (clip is not null) clips[gameClip] = clip;
         }
-
-        if (playMusic) audioSource.Play();
+        if (playMusic && !audioSource.isPlaying) audioSource.Play();
     }
 
     public float PlayClip(GameClip clipToPlay) {
@@ -78,7 +77,7 @@ public class AudioManager : MonoBehaviour
             delay -= Time.deltaTime;
             yield return null;
         }
-        audioSource.Play();
+        if (playMusic && !audioSource.isPlaying) audioSource.Play();
     }
 
     public void ToggleMusic()

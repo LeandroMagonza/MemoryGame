@@ -525,8 +525,13 @@ public class GameManager : MonoBehaviour {
         currentTimeToIntersticial += elapsedTime;
         userData.coins += score;
         var firstTimeAchievements = userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
-        SaveMatch();
+        if (userData.GetUserStageData(selectedStage, selectedDifficulty).highScore < score)
+        {
+            userData.GetUserStageData(selectedStage, selectedDifficulty).highScore = score;
+        }
+        UpdateInventoryAndSave();
         UpdateAchievementAndUnlockedLevels();
+        StageManager.Instance.InitializeStages();
         //animationScore
         
         //Grant first time Achievemnts bonus
@@ -573,8 +578,8 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    private void SaveMatch() {
-
+    private void UpdateInventoryAndSave() {
+        
 
         foreach (ConsumableID consumable in matchInventory.Keys)
         {
@@ -582,13 +587,13 @@ public class GameManager : MonoBehaviour {
             if (result > 0)
                 userData.modifyConsumableObject(consumable, -result);
         }
+        
         PersistanceManager.Instance.SaveUserData();
     }
     private IEnumerator SetHighScore(int highScoreToSet)
     {
         float clipDuration = AudioManager.Instance.PlayClip(GameClip.highScore);
         float timeUntillHighScoreTextUpdate = 0.25f;
-        userData.GetUserStageData(selectedStage, selectedDifficulty).highScore = highScoreToSet;
         stages[selectedStage].stageObject.SetScore(highScoreToSet);
         yield return new WaitForSeconds(timeUntillHighScoreTextUpdate);
         

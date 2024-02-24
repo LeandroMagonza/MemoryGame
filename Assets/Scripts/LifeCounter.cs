@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -130,6 +131,7 @@ public class LifeCounter : MonoBehaviour
         int add = 0;
         if (GameManager.Instance.userData.upgrades.ContainsKey(UpgradeID.ExtraLife))
             add = GameManager.Instance.userData.upgrades[UpgradeID.ExtraLife];
+        /*
         float lerp = 1 / (float)(heartCount + add);
         lerp *= heartIndex;
         float halfWay = lerp / 2; 
@@ -138,8 +140,10 @@ public class LifeCounter : MonoBehaviour
              c = Color.Lerp(Color.red, Color.yellow, lerp);
         else
             c = Color.Lerp(Color.yellow, Color.green, lerp);
-        return c;
-    }
+            */
+        return MyExtensions.GetLerpColor(heartIndex,heartCount+add-1,new List<Color>(){Color.green,Color.yellow,Color.red});
+    }  
+
 
     private void ChangeHeartColor(GameObject heart, Color color)
     {
@@ -164,4 +168,33 @@ public static class MyExtensions
             list[n] = value;
         }
     }
+    
+    public static Color GetLerpColor(int index,int max,List<Color> colors)
+    {
+        if (colors.Count<2) {
+            throw new Exception("Can't lerp between less than 2 colors");
+        }
+        if (index == 0) {
+            return colors[0];
+        }
+        if (index == max) {
+            return colors[colors.Count-1];
+        }
+        
+        float selectedStartingColorIndex = (float)index/max*(colors.Count - 1);
+        // float bracketSize = (float)(max + 1) / (colors.Count - 1);
+        // for (int colorIndex = 0; colorIndex < colors.Count-1; colorIndex++) {
+        //     if (colorIndex*bracketSize > index) {
+        //         break;
+        //     }
+        //
+        //     selectedStartingColorIndex = colorIndex;
+        // }
+        
+        //float partialFill = (index - selectedStartingColorIndex * bracketSize) / bracketSize;
+        CustomDebugger.Log(index+" partial fill "+selectedStartingColorIndex%1);
+        return Color.Lerp(colors[Mathf.FloorToInt(selectedStartingColorIndex)], colors[Mathf.FloorToInt(selectedStartingColorIndex)+1], selectedStartingColorIndex%1);
+    }
+
+
 }
