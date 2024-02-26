@@ -12,7 +12,7 @@ public static class CustomDebugger
         {
             Initialize();
         }
-        if (!disabledCategories.Contains(debugCategory))
+        if (!disabledCategories.Contains(debugCategory) && initialized)
         {
             Debug.Log(message);
         }
@@ -25,7 +25,9 @@ public static class CustomDebugger
         //disabledCategories.Add(DebugCategory.LOAD);
         //disabledCategories.Add(DebugCategory.SAVE);
         //disabledCategories.Add(DebugCategory.STICKERLOAD);
-        initialized = true;
+        #if UNITY_EDITOR
+            initialized = true;
+        #endif
     }
 
     public static void LogError(object message)

@@ -82,8 +82,13 @@ public class GameManager : MonoBehaviour {
     //stickerData?
     private StickerData _currentlySelectedSticker;
     
+    public int currentlyInGameStickersTotalAmount;
+    public int currentlySelectedStickerID;
+    public string currentlySelectedStickerName;
+    public int currentlySelectedStickerAmountOfAppearences;
+    public string[] currentlyInGameStickersNames;
+    
     private Dictionary<int,StickerData> _stickersFromStage = new Dictionary<int, StickerData>();
-
     public Dictionary<StickerData,StickerMatchData> currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
 
     //public AudioSource audioSource;
@@ -159,6 +164,7 @@ public class GameManager : MonoBehaviour {
     public float shakeAmount = 5;
     public float shakeSpeed = 80;
     private int maxComboBonus = 5;
+    
 
     public void SetScoreTexts() {
         if (userData.GetUserStageData(selectedStage, selectedDifficulty) is not null) {
@@ -561,10 +567,11 @@ public class GameManager : MonoBehaviour {
         
         endGameButtons.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
+        bool showAd = false;
         if (currentTimeToIntersticial > timeToIntersticial)
         {
+            showAd = true;
             //CustomDebugger.Log("this is where we would show an ad");
-            gameEnded = false;
             currentTimeToIntersticial = 0;
         }
         CustomDebugger.Log("Match Ended");
@@ -630,11 +637,11 @@ public class GameManager : MonoBehaviour {
         //animation achievements
 
 
-
-
-        if (gameEnded == false)  {
+        if (showAd)
+        {
+            //CustomDebugger.Log("this is where we would show an ad");
             AdmobAdsScript.Instance.ShowInterstitialAd();
-            gameEnded = true;
+            currentTimeToIntersticial = 0;
         }
     }
 
@@ -797,8 +804,62 @@ public class GameManager : MonoBehaviour {
     private void FixedUpdate() {
         if (gameEnded || pause) return;
         SetTimer(timer - Time.deltaTime);
+        
+        
 
     }
+
+    private void Update()
+    {
+    #if UNITY_EDITOR
+     currentlyInGameStickersTotalAmount = currentlyInGameStickers.Count;
+     currentlyInGameStickersNames = new string[currentlyInGameStickers.Count];
+     int stickerOrderNumber = 0;
+     foreach (var currentSticker in currentlyInGameStickers)
+     {
+         currentlyInGameStickersNames[stickerOrderNumber] = currentSticker.Key.name;
+         stickerOrderNumber++;
+     }
+     if (_currentlySelectedSticker is not null)
+     {
+        currentlySelectedStickerID = _currentlySelectedSticker.stickerID;
+        currentlySelectedStickerName = _currentlySelectedSticker.name;
+        if (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
+        {
+            currentlySelectedStickerAmountOfAppearences = currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences;
+        }
+     }
+     
+     
+     for (int i = 0; i <= 9; i++)
+    {
+        if (Input.GetKeyDown(i.ToString()))
+        {
+            Debug.Log("Number key " + i + " pressed");
+             if (gameEnded || disableInput) {
+                 return;
+             }
+             CustomDebugger.Log("Clicked number "+ i);
+             StartCoroutine(ProcessTurnAction(i));
+        }
+    }
+
+    // Check for numpad keys
+    for (KeyCode key = KeyCode.Keypad0; key <= KeyCode.Keypad9; key++)
+    {
+        if (Input.GetKeyDown(key))
+        {
+            Debug.Log("Numpad key " + (key - KeyCode.Keypad0) + " pressed kp");
+            if (gameEnded || disableInput) {
+                return;
+            }
+            CustomDebugger.Log("Clicked number "+ (key - KeyCode.Keypad0));
+            StartCoroutine(ProcessTurnAction((key - KeyCode.Keypad0)));
+        }
+    }
+    #endif
+    }
+
     private IEnumerator Squash(Transform squashedTransform, float delay, float amount, float speed)
     {
         Vector3 initialScale = squashedTransform.localScale;

@@ -8218,10 +8218,10 @@ RectTransform:
   m_Father: {fileID: 743536600}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 0.85400003}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -20, y: -20}
+  m_AnchorMin: {x: 0.0071182796, y: 0}
+  m_AnchorMax: {x: 1, y: 0.87000006}
+  m_AnchoredPosition: {x: -1, y: 5.049988}
+  m_SizeDelta: {x: -18, y: -9.9}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &331072043
 MonoBehaviour:
@@ -17370,7 +17370,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &743536597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20201,6 +20201,11 @@ MonoBehaviour:
   firstMistake: 0
   stickerDisplay: {fileID: 620355432}
   startScale: {x: 0, y: 0, z: 0}
+  currentlyInGameStickersTotalAmount: 0
+  currentlySelectedStickerID: 0
+  currentlySelectedStickerName: 
+  currentlySelectedStickerAmountOfAppearences: 0
+  currentlyInGameStickersNames: []
   correctGuessParticle: {fileID: 207292370}
   incorrectGuessParticle: {fileID: 334700922}
   endGameButtons: {fileID: 1777753789}
@@ -20773,7 +20778,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 10}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1103987008
 MonoBehaviour:
@@ -25561,7 +25566,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30.05
+  m_fontSize: 30.1
   m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -27403,7 +27408,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -40.000015}
+  m_AnchoredPosition: {x: 0, y: -40}
   m_SizeDelta: {x: 0, y: -160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1685436244
@@ -33404,7 +33409,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 52.2
+  m_fontSize: 52.25
   m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 1
