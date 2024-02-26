@@ -26,7 +26,8 @@ public class AudioManager : MonoBehaviour
     {
         if (_instance == null) {
             _instance = this as AudioManager;
-            audioSource = GetComponent<AudioSource>();
+            audioSourceMusic = GetComponents<AudioSource>()[0];
+            audioSourceFX = GetComponents<AudioSource>()[1];
         }
         else if (_instance != this)
             DestroySelf();
@@ -41,7 +42,8 @@ public class AudioManager : MonoBehaviour
     }
 
     #endregion
-    public AudioSource audioSource;
+    public AudioSource audioSourceMusic;
+    public AudioSource audioSourceFX;
     public Dictionary<GameClip, AudioClip> clips = new();
     public bool playMusic = true;
     public GameObject muteMusicButtonImage;
@@ -51,25 +53,31 @@ public class AudioManager : MonoBehaviour
     public void Start() {
         AudioClip mainTheme = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "mainTheme");
         if (mainTheme is null) mainTheme = Resources.Load<AudioClip>("defaultAssets/audio/"+ "mainTheme");
-        if (mainTheme is not null) audioSource.clip = mainTheme;
+        if (mainTheme is not null) audioSourceMusic.clip = mainTheme;
 
         foreach (GameClip gameClip in Enum.GetValues(typeof(GameClip))) {
             AudioClip clip = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + gameClip.ToString());
             if (clip is null) clip = Resources.Load<AudioClip>("defaultAssets/audio/" + gameClip.ToString());
             if (clip is not null) clips[gameClip] = clip;
         }
-        if (playMusic && !audioSource.isPlaying) audioSource.Play();
+        if (playMusic && !audioSourceMusic.isPlaying) audioSourceMusic.Play();
     }
 
     public float PlayClip(GameClip clipToPlay) {
         if (!clips.ContainsKey(clipToPlay)) return 0f;
         if ((clipToPlay == GameClip.win || clipToPlay == GameClip.highScore)
             && playMusic) {
-            audioSource.Stop();
+            audioSourceMusic.Stop();
             StartCoroutine(RestartMusicInDelay(clips[clipToPlay].length));
         }
-        audioSource.PlayOneShot(clips[clipToPlay]);
+
+
+        audioSourceFX.PlayOneShot(clips[clipToPlay]);
         return clips[clipToPlay].length;
+    }
+    public float PlayClip(GameClip clipToPlay, float pitchShift) {
+        audioSourceFX.pitch = pitchShift;
+        return PlayClip(clipToPlay);
     }
 
     public IEnumerator RestartMusicInDelay(float delay) {
@@ -77,7 +85,7 @@ public class AudioManager : MonoBehaviour
             delay -= Time.deltaTime;
             yield return null;
         }
-        if (playMusic && !audioSource.isPlaying) audioSource.Play();
+        if (playMusic && !audioSourceMusic.isPlaying) audioSourceMusic.Play();
     }
 
     public void ToggleMusic()
@@ -86,12 +94,12 @@ public class AudioManager : MonoBehaviour
 
         if (playMusic)
         {
-            audioSource.Play();
+            audioSourceMusic.Play();
             muteMusicButtonImage.GetComponent<Image>().sprite = musicOnSprite;
         }
         else
         {
-            audioSource.Stop ();
+            audioSourceMusic.Stop ();
             muteMusicButtonImage.GetComponent<Image>().sprite = musicOffSprite;
         }
     }

@@ -73,14 +73,16 @@ public class StageManager : MonoBehaviour
                 StageData stageData = stageIndexAndData.Value;
 
                 //Evita crear stages que ya estan creados. Si el que esta arriba, que es el de (dificultad,stageid) mas alto 
-                if (topmostStage is not null &&
-                    (topmostStage.difficulty > difficulty || 
-                     (topmostStage.difficulty == difficulty && topmostStage.stage >= stageData.stageID))) continue;
+                
                 
                 UserStageData currentUserStageData = userData.GetUserStageData(stageData.stageID, difficulty);
 
                 nextStageUnlocked = (currentUserStageData is not null && currentUserStageData.achievements.Count > 0);
-
+               
+                if (topmostStage is not null &&
+                    (topmostStage.difficulty > difficulty || 
+                     (topmostStage.difficulty == difficulty && topmostStage.stage >= stageData.stageID))) continue;
+                
                 GameObject stageDisplay = Instantiate(stageDisplayPrefab, stageHolder.transform);
                 stageDisplay.transform.SetSiblingIndex(0);
                 Stage newStage = stageDisplay.GetComponent<Stage>();
@@ -105,9 +107,6 @@ public class StageManager : MonoBehaviour
                 }
             }
         }
-
-
-        GameManager.Instance.SetScoreTexts();
     }
     public void SetStageAndDifficulty(int stage, int difficulty)
     {
