@@ -1,15 +1,20 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TimerEnabledButton : MonoBehaviour
 {
-    public float timer = 3f;
+    public float timer = 8f;
+    public float maxTimer = 8f;
+    public TextMeshProUGUI buttonText;
     // Start is called before the first frame update
-    void Start()
-    {
-        
+    private void OnEnable() {
+        gameObject.GetComponent<Button>().interactable = false;
+        buttonText.color = new Color(buttonText.color.r, buttonText.color.g, buttonText.color.b, 0);
+        timer = maxTimer;
     }
 
     // Update is called once per frame
@@ -18,6 +23,7 @@ public class TimerEnabledButton : MonoBehaviour
         if (timer < 0)
         {
             gameObject.GetComponent<Button>().interactable = true;
+            buttonText.color = new Color(buttonText.color.r, buttonText.color.g, buttonText.color.b,1 );
             return;
         }
         timer -= Time.deltaTime;

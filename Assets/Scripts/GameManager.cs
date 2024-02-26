@@ -149,6 +149,17 @@ public class GameManager : MonoBehaviour {
     public List<GameObject> newPlayerTutorialTexts;
     public List<GameObject> firstMistakeTutorialTexts;
 
+    public ChangeCanvasButton nextStageButton;
+    
+    public float squashDelay = 0.2f;
+    public float squashAmount = 0.1f;
+    public float squashSpeed = 5f;
+    
+    public float shakeDelay = .2f;
+    public float shakeAmount = 5;
+    public float shakeSpeed = 80;
+    private int maxComboBonus = 5;
+
     public void SetScoreTexts() {
         if (userData.GetUserStageData(selectedStage, selectedDifficulty) is not null) {
             scoreText.text = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore.ToString();
@@ -205,22 +216,27 @@ public class GameManager : MonoBehaviour {
         float timerModification = maxTimer - timer;
         SetTimer(maxTimer);
         yield return new WaitForSeconds(delayBetweenImages);
-        
+        SaveTurn(number, timerModification, turnAction, scoreModification, stickerData, stickerMatchData);
         //Checkeamos si el sticker que adivinamos recien es el ultimo que queda en el pool, y de ser asi le damos todos los puntos de una y sacamos el sticker
-        if (currentlyInGameStickers.Count == 1 && currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
+        if ((turnAction == TurnAction.GuessCorrect || turnAction== TurnAction.UseClue)&& currentlyInGameStickers.Count == 1 && currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
         {
             //se repite este while hasta que el sticker salga del pool, para sumar sus puntos, el check amount of appearences lo saca del pool cuando llega
             //a la cant de apariciones de la dificultad 
-            while (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
-            {
+            int amountOfAppearences;
+            while (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker)) {
+                scoreModification = 0;
                 currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences++;
+                amountOfAppearences = currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences;
                 scoreModification += CalculateCorrectGuessBasePointsAndCombo();
                 SetCurrentCombo(_currentCombo+1);
                 
                 scoreModification += CheckAmountOfAppearences();
+                score += scoreModification;
+                SaveTurn(amountOfAppearences, 0, turnAction, scoreModification, stickerData, stickerMatchData);
+                
             }
         }
-        SaveTurn(number, timerModification, turnAction, scoreModification, stickerData, stickerMatchData);
+        
         
         if (currentlyInGameStickers.Count == 0) {
             StartCoroutine(EndGame(true));
@@ -299,7 +315,7 @@ public class GameManager : MonoBehaviour {
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             false);
-        AudioManager.Instance.PlayClip(GameClip.incorrectGuess);
+        AudioManager.Instance.PlayClip(GameClip.incorrectGuess,1);
 
         currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
         bool DeathDefy = GetDeathDefy(deathDefyMagnitude);
@@ -324,8 +340,17 @@ public class GameManager : MonoBehaviour {
     public void SetCurrentCombo(int newCurrentComboAmount)
     {
         _currentCombo = newCurrentComboAmount;
-        comboBonusText.text = CalculateScoreComboBonus().ToString();
+        int calculatedComboBonus = CalculateScoreComboBonus();
+        comboBonusText.text = calculatedComboBonus.ToString();
         comboText.text = _currentCombo.ToString(); 
+        
+        if (calculatedComboBonus >= maxComboBonus && userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0)
+        {
+            protectedLife = true;
+            lifeCounter.ProtectHearts();
+            AudioManager.Instance.PlayClip(GameClip.bonus);
+        }
+
         //TODO: add animation
     }
    
@@ -335,7 +360,14 @@ public class GameManager : MonoBehaviour {
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             true);
-        AudioManager.Instance.PlayClip(GameClip.correctGuess);
+        AudioManager.Instance.PlayClip(GameClip.correctGuess,1);
+        // probe pitch shift pero no me convence, me distrae y hace que sea mas complicado con los otros sonidos
+        // necesitaria un audio soucer especifico para este clip asi el resto no hace shift tmb mientras se reproduce este sonido
+        // y podria tener otro igual para el bonus, y que se haga mas augudo mientras mas bonus tengas / menos imagenes te queden
+        // y podria haber otro para los errores, que se haga mas grave mientras menos vida tengas
+        //AudioManager.Instance.PlayClip(GameClip.correctGuess,Mathf.Pow(1.05946f, 2 * CalculateScoreComboBonus()));
+        
+        
         int scoreModification = CalculateCorrectGuessBasePointsAndCombo();
         SetCurrentCombo(_currentCombo+1);
         ModifyScore(scoreModification);
@@ -359,12 +391,12 @@ public class GameManager : MonoBehaviour {
 
     private void CorrectGuessFX()
     {
-        StartCoroutine(Squash(stickerDisplay.spriteHolder.transform.parent.transform, .2f, 0.1f, 5));
+        StartCoroutine(Squash(stickerDisplay.spriteHolder.transform.parent.transform, squashDelay, squashAmount, squashSpeed));
         correctGuessParticle.Play();
     }
     private void IncorrectGuessFX()
     {
-        StartCoroutine(Shake(stickerDisplay.spriteHolder.transform, .2f, 5, 80));
+        StartCoroutine(Shake(stickerDisplay.spriteHolder.transform, shakeDelay, shakeAmount, shakeSpeed));
         incorrectGuessParticle.Play();
     }
 
@@ -516,16 +548,53 @@ public class GameManager : MonoBehaviour {
             AudioManager.Instance.PlayClip(GameClip.endGame);
             delay = AudioManager.Instance.clips[GameClip.endGame].length;
         }
-
+        
+        if (StageManager.Instance.stages.ContainsKey(selectedStage + 1) ) {
+            nextStageButton.GetComponent<Button>().interactable = true;
+        }
+        else if (selectedDifficulty<9) {
+            nextStageButton.GetComponent<Button>().interactable = true;
+        }
+        else {
+            nextStageButton.GetComponent<Button>().interactable = true;
+        }
+        
         endGameButtons.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
+        if (currentTimeToIntersticial > timeToIntersticial)
+        {
+            //CustomDebugger.Log("this is where we would show an ad");
+            gameEnded = false;
+            currentTimeToIntersticial = 0;
+        }
         CustomDebugger.Log("Match Ended");
         endMatchTime = Time.time;
         float elapsedTime = endMatchTime - startMatchTime;
         currentTimeToIntersticial += elapsedTime;
         userData.coins += score;
         var firstTimeAchievements = userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
-        if (userData.GetUserStageData(selectedStage, selectedDifficulty).highScore < score)
+
+        //si no hay proximo stage desactivo el boton play next stage
+        if (StageManager.Instance.stages.ContainsKey(selectedStage + 1) || selectedDifficulty<9 ) {
+            nextStageButton.gameObject.SetActive(true);
+        }
+        else {
+            nextStageButton.gameObject.SetActive(false);
+        }
+        
+        // si hay proximo stage pero el stage actual no tiene el primer achievement, hago que el boton no sea interactuable
+        if (
+            userData.GetUserStageData(selectedStage, selectedDifficulty).achievements
+            .Contains(Achievement.BarelyClearedStage)
+            ) {
+            nextStageButton.GetComponent<Button>().interactable = true;
+        }
+        else {
+            nextStageButton.GetComponent<Button>().interactable = false;
+        }
+        
+        int lastHighScore = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore;
+        if (lastHighScore < score)
         {
             userData.GetUserStageData(selectedStage, selectedDifficulty).highScore = score;
         }
@@ -552,22 +621,20 @@ public class GameManager : MonoBehaviour {
         delay -= 3f;
         yield return new WaitForSeconds(delay);
         
-        if (userData.GetUserStageData(selectedStage, selectedDifficulty).highScore < score)
+        if (lastHighScore < score)
         {
             yield return StartCoroutine(SetHighScore(score));
         }
         
        
         //animation achievements
-        
-        
-        
-            
-        if (currentTimeToIntersticial > timeToIntersticial)
-        {
-            //CustomDebugger.Log("this is where we would show an ad");
+
+
+
+
+        if (gameEnded == false)  {
             AdmobAdsScript.Instance.ShowInterstitialAd();
-            currentTimeToIntersticial = 0;
+            gameEnded = true;
         }
     }
 
@@ -618,10 +685,23 @@ public class GameManager : MonoBehaviour {
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             false);
         currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
-        AudioManager.Instance.PlayClip(GameClip.incorrectGuess);
+        AudioManager.Instance.PlayClip(GameClip.incorrectGuess,1);
         SetTimer(maxTimer);
         StartCoroutine(FinishProcessingTurnAction(0, TurnAction.RanOutOfTime, 0, _currentlySelectedSticker,
             currentlyInGameStickers[_currentlySelectedSticker]));
+    }
+
+    public void PlayNextStage() {
+        if (StageManager.Instance.stages.ContainsKey(selectedStage + 1)) {
+            StageManager.Instance.SetStageAndDifficulty(selectedStage + 1, selectedDifficulty);
+        }
+        else if (selectedDifficulty<9) {
+            StageManager.Instance.SetStageAndDifficulty(0, selectedDifficulty+1);
+        }
+        else {
+            throw new Exception("Play Next stage called but there is no next stage");
+        }
+        Reset();
     }
 
     public void Reset() 
@@ -657,7 +737,7 @@ public class GameManager : MonoBehaviour {
         gameEnded = false;
         stickerDisplay.gameObject.SetActive(true);
         endGameButtons.transform.parent.gameObject.SetActive(false);
-        if (AudioManager.Instance.playMusic) AudioManager.Instance.audioSource.Play();
+        if (AudioManager.Instance.playMusic) AudioManager.Instance.audioSourceMusic.Play();
         SetTimer(15);
         SetScore(0);
         turnNumber = 1;
@@ -809,15 +889,10 @@ public class GameManager : MonoBehaviour {
     }
     public int CalculateScoreComboBonus()
     {
-        int maxComboBonus = 5;
+        maxComboBonus = 5;
         int calculatedComboBonus = (int)Math.Floor(((float)_currentCombo / 2));
         if (calculatedComboBonus >= maxComboBonus)
         {
-            if (userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0)
-            {
-                protectedLife = true;
-                lifeCounter.ProtectHearts();
-            }
             calculatedComboBonus = maxComboBonus;
         }
         return calculatedComboBonus;
