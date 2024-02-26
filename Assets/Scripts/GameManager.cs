@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour {
             if (_instance == null)
                 _instance = FindObjectOfType<GameManager>();
             if (_instance == null)
-                Debug.LogError("Singleton<" + typeof(GameManager) + "> instance has been not found.");
+                CustomDebugger.LogError("Singleton<" + typeof(GameManager) + "> instance has been not found.");
             return _instance;
         }
     }
@@ -58,6 +58,7 @@ public class GameManager : MonoBehaviour {
     public LifeCounter lifeCounter;
     public float timer = 3;
     public float maxTimer = 10;
+    public float maxTimerSpeedrun = 2;
     public TextMeshProUGUI timerText; 
     public int score = 0;
     public TextMeshProUGUI scoreText; 
@@ -143,8 +144,7 @@ public class GameManager : MonoBehaviour {
     public bool blockChoice = false;
     private int deathDefyMagnitude = 0;
 
-    public float timeToIntersticial = 1;
-    private float currentTimeToIntersticial = 0;
+    
     private float startMatchTime = 0;
     private float endMatchTime = 0;
 
@@ -164,7 +164,8 @@ public class GameManager : MonoBehaviour {
     public float shakeAmount = 5;
     public float shakeSpeed = 80;
     private int maxComboBonus = 5;
-    
+    public bool perfectMode;
+
 
     public void SetScoreTexts() {
         if (userData.GetUserStageData(selectedStage, selectedDifficulty) is not null) {
@@ -183,7 +184,7 @@ public class GameManager : MonoBehaviour {
         TurnAction turnAction;
         int scoreModification = 0;
         var turnSticker = _currentlySelectedSticker;
-        
+        bool defeat = false;
         if (number == GetCorrectGuess(turnSticker,currentStickerMatchData))
         {
             CustomDebugger.Log("CorrectGuess");
@@ -195,12 +196,12 @@ public class GameManager : MonoBehaviour {
             CustomDebugger.Log("IncorrectGuess");
             int mistakeMagnitude = number - currentStickerMatchData.amountOfAppearences;
             deathDefyMagnitude = Mathf.Abs(mistakeMagnitude);
-            OnIncorrectGuess(number);
+            defeat = OnIncorrectGuess(number);
             turnAction = TurnAction.GuessIncorrect;
         }
         
         //usar el dato del sticker tomado antes de la funcion oncorrectguess
-        yield return FinishProcessingTurnAction(number, turnAction, scoreModification, turnSticker,currentStickerMatchData);
+        yield return FinishProcessingTurnAction(number, turnAction, scoreModification, turnSticker,currentStickerMatchData,defeat);
     }
 
     public int GetCorrectGuess(StickerData turnSticker,StickerMatchData stickerMatchData)
@@ -217,7 +218,7 @@ public class GameManager : MonoBehaviour {
     }
 
     public IEnumerator FinishProcessingTurnAction(int number, TurnAction turnAction,
-        int scoreModification, StickerData stickerData, StickerMatchData stickerMatchData)
+        int scoreModification, StickerData stickerData, StickerMatchData stickerMatchData, bool defeat)
     {
         float timerModification = maxTimer - timer;
         SetTimer(maxTimer);
@@ -242,9 +243,12 @@ public class GameManager : MonoBehaviour {
                 
             }
         }
-        
-        
-        if (currentlyInGameStickers.Count == 0) {
+
+        if (defeat)
+        {
+            StartCoroutine(EndGame(false));
+        }
+        else if (currentlyInGameStickers.Count == 0) {
             StartCoroutine(EndGame(true));
         }
         else if(turnAction != TurnAction.UseCut) {
@@ -262,7 +266,7 @@ public class GameManager : MonoBehaviour {
             timerModification,
             number,
             turnAction,
-            lifeCounter.lives,
+            lifeCounter.currentLives,
             _currentCombo,
             scoreModification
         );
@@ -300,7 +304,7 @@ public class GameManager : MonoBehaviour {
 
 
 
-    public void OnIncorrectGuess(int number)
+    public bool OnIncorrectGuess(int number)
     {
         if (!firstMistake)
         {
@@ -309,10 +313,10 @@ public class GameManager : MonoBehaviour {
         }
         if (blockChoice)
         {
-            Debug.Log("Block");
+            CustomDebugger.Log("Block");
             if (!GetCurrentlySelectedSticker().matchData.blockedNumbers.Contains(number))
             {
-                Debug.Log("Block In");
+                CustomDebugger.Log("Block In");
                 GetCurrentlySelectedSticker().matchData.AddBlockEffect(number);
 
             }
@@ -325,9 +329,9 @@ public class GameManager : MonoBehaviour {
 
         currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
         bool DeathDefy = GetDeathDefy(deathDefyMagnitude);
-        lifeCounter.LoseLive(ref protectedLife, DeathDefy);
 
         SetCurrentCombo(0);
+        return lifeCounter.LoseLive(ref protectedLife, DeathDefy);
     }
 
     private bool GetDeathDefy(float magnitude)
@@ -337,7 +341,7 @@ public class GameManager : MonoBehaviour {
         {
             canDefyDeath = true;
         }
-        bool DeathDefy = lifeCounter.lives == 1 && deathDefy && canDefyDeath;
+        bool DeathDefy = lifeCounter.currentLives == 1 && deathDefy && canDefyDeath;
         if (DeathDefy)
             deathDefy = false;
         return DeathDefy;
@@ -567,17 +571,11 @@ public class GameManager : MonoBehaviour {
         
         endGameButtons.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
-        bool showAd = false;
-        if (currentTimeToIntersticial > timeToIntersticial)
-        {
-            showAd = true;
-            //CustomDebugger.Log("this is where we would show an ad");
-            currentTimeToIntersticial = 0;
-        }
+        
         CustomDebugger.Log("Match Ended");
         endMatchTime = Time.time;
         float elapsedTime = endMatchTime - startMatchTime;
-        currentTimeToIntersticial += elapsedTime;
+        AdmobAdsManager.Instance.ReduceInstertitialTime(elapsedTime);
         userData.coins += score;
         var firstTimeAchievements = userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
 
@@ -625,7 +623,7 @@ public class GameManager : MonoBehaviour {
         yield return endGameAchievementStars.SetAchievements(_currentMatch.achievementsFulfilled,.35f);
         
         delay -= .35f * firstTimeAchievements.Count;
-        delay -= 3f;
+        delay -= 5f;
         yield return new WaitForSeconds(delay);
         
         if (lastHighScore < score)
@@ -636,13 +634,7 @@ public class GameManager : MonoBehaviour {
        
         //animation achievements
 
-
-        if (showAd)
-        {
-            //CustomDebugger.Log("this is where we would show an ad");
-            AdmobAdsScript.Instance.ShowInterstitialAd();
-            currentTimeToIntersticial = 0;
-        }
+        AdmobAdsManager.Instance.ShowInterstitialAd();
     }
 
     public void UpdateAchievementAndUnlockedLevels()
@@ -686,7 +678,6 @@ public class GameManager : MonoBehaviour {
 
     private void OnRanOutOfTime() {
         disableInput = true;
-        lifeCounter.LoseLive(ref protectedLife, false);
         IncorrectGuessFX();
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
@@ -694,8 +685,9 @@ public class GameManager : MonoBehaviour {
         currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
         AudioManager.Instance.PlayClip(GameClip.incorrectGuess,1);
         SetTimer(maxTimer);
+        bool defeat = lifeCounter.LoseLive(ref protectedLife, false);
         StartCoroutine(FinishProcessingTurnAction(0, TurnAction.RanOutOfTime, 0, _currentlySelectedSticker,
-            currentlyInGameStickers[_currentlySelectedSticker]));
+            currentlyInGameStickers[_currentlySelectedSticker],defeat));
     }
 
     public void PlayNextStage() {
@@ -727,7 +719,7 @@ public class GameManager : MonoBehaviour {
         }
         startMatchTime = Time.time;
         endMatchTime = 0;
-        AdmobAdsScript.Instance.LoadInterstitialAd();
+        AdmobAdsManager.Instance.LoadInterstitialAd();
         Instance.SetScoreTexts();
         if (stickerDisplay == null) {
             stickerDisplay = StickerManager.Instance.GetStickerHolder();
@@ -750,7 +742,14 @@ public class GameManager : MonoBehaviour {
         turnNumber = 1;
         SetCurrentCombo(0);
         bonusMultiplicator = 1;
-        lifeCounter.ResetLives();
+        if (perfectMode)
+        {
+            lifeCounter.ResetLivesPerfectMode();
+        }
+        else
+        {
+            lifeCounter.ResetLives();
+        }
         LoadStickers();
         currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
         AddStickers(4);
@@ -835,7 +834,7 @@ public class GameManager : MonoBehaviour {
     {
         if (Input.GetKeyDown(i.ToString()))
         {
-            Debug.Log("Number key " + i + " pressed");
+            CustomDebugger.Log("Number key " + i + " pressed");
              if (gameEnded || disableInput) {
                  return;
              }
@@ -845,11 +844,11 @@ public class GameManager : MonoBehaviour {
     }
 
     // Check for numpad keys
-    for (KeyCode key = KeyCode.Keypad0; key <= KeyCode.Keypad9; key++)
+    for (KeyCode key = KeyCode.Keypad1; key <= KeyCode.Keypad9; key++)
     {
         if (Input.GetKeyDown(key))
         {
-            Debug.Log("Numpad key " + (key - KeyCode.Keypad0) + " pressed kp");
+            CustomDebugger.Log("Numpad key " + (key - KeyCode.Keypad0) + " pressed kp");
             if (gameEnded || disableInput) {
                 return;
             }
@@ -858,6 +857,24 @@ public class GameManager : MonoBehaviour {
         }
     }
     #endif
+        if (Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            CustomDebugger.Log("Numpad key " + (KeyCode.KeypadEnter) + " pressed kp");
+            if (gameEnded || disableInput) {
+                return;
+            }
+            CustomDebugger.Log("Clicked number "+ (KeyCode.KeypadEnter));
+            StartCoroutine(ProcessTurnAction(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences));
+        }
+        if (Input.GetKeyDown(KeyCode.Keypad0))
+        {
+            CustomDebugger.Log("Numpad key " + (KeyCode.Keypad0) + " pressed kp");
+            if (gameEnded || disableInput) {
+                return;
+            }
+            CustomDebugger.Log("Clicked number "+ (KeyCode.Keypad0));
+            StartCoroutine(ProcessTurnAction((0)));
+        }
     }
 
     private IEnumerator Squash(Transform squashedTransform, float delay, float amount, float speed)

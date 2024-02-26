@@ -165,7 +165,8 @@ public class GameCanvas : MonoBehaviour
         turnAction,
         scoreModification,
         turnSticker.sticker,
-        turnSticker.matchData
+        turnSticker.matchData,
+        false
         ));
     }
     public void UseClue()

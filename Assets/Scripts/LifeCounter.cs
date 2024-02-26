@@ -9,8 +9,8 @@ public class LifeCounter : MonoBehaviour
 {
     public GameObject heartPrefab;
     public Transform lifeCounterContainer;
-    public int lives;
-    public int heartCount = 3;
+    public int currentLives;
+    public int baseLives = 3;
 
     public List<GameObject> hearts;
     // Start is called before the first frame update
@@ -29,7 +29,7 @@ public class LifeCounter : MonoBehaviour
         int heartIndex = 0;
         foreach (var heart in hearts)
         {
-            if (heartIndex >= lives)
+            if (heartIndex >= currentLives)
             {
                 ChangeHeartColor(heart, Color.black);
             }
@@ -43,22 +43,19 @@ public class LifeCounter : MonoBehaviour
 
     public void SetLives()
     {
-        int add = 0;
-        if (GameManager.Instance.userData.upgrades.ContainsKey(UpgradeID.ExtraLife))
-            add = GameManager.Instance.userData.upgrades[UpgradeID.ExtraLife];
-        int index = heartCount - 1 + add;
-        if (index + 1 != hearts.Count)
+        if (currentLives != hearts.Count)
         {
             if (hearts.Count > 0)
             {
-                List<GameObject> list = new List<GameObject>(hearts);
-                hearts = new List<GameObject>();
-                foreach(GameObject gameObject in list)
+                //List<GameObject> list = new List<GameObject>(hearts);
+                foreach(GameObject gameObject in hearts.ToArray())
                 {
                     Destroy(gameObject.gameObject);
                 }
+                hearts = new List<GameObject>();
+                
             }
-            for (int i = index; i >= 0; i--)
+            for (int i = 0; i < currentLives ; i++)
             {
                 var heart = Instantiate(heartPrefab, lifeCounterContainer);
                 hearts.Add(heart);
@@ -67,25 +64,27 @@ public class LifeCounter : MonoBehaviour
 
         
     }
-    public void LoseLive(ref bool protectedLife, bool deathDefy) 
+    public bool LoseLive(ref bool protectedLife, bool deathDefy) 
     {
-        //TODO: Chequear tema de que corazones aparecen, etc
+        //Devuelve true si te quedaste sin vidas
         if (protectedLife)
         {
             protectedLife = false;
         }
         else if (!deathDefy)
-            lives--;
+            currentLives--;
         UpdateHearts();
-        if (lives <= 0) {
-            StartCoroutine(GameManager.Instance.EndGame(false));
+        if (currentLives <= 0)
+        {
+            return true;
         }
+        return false;
     }
 
     private void UpdateHearts() {
         int heartIndex = 0;
         foreach (var heart in hearts) {
-            if (heartIndex >= lives) {
+            if (heartIndex >= currentLives) {
                 ChangeHeartColor(heart, Color.black);
             }
             else {
@@ -99,7 +98,7 @@ public class LifeCounter : MonoBehaviour
         int heartIndex = 0;
         foreach (var heart in hearts)
         {
-            if (heartIndex >= lives)
+            if (heartIndex >= currentLives)
             {
                 ChangeHeartColor(heart, Color.black);
             }
@@ -114,13 +113,17 @@ public class LifeCounter : MonoBehaviour
         int add = 0;
         if (GameManager.Instance.userData.upgrades.ContainsKey(UpgradeID.ExtraLife))
             add = GameManager.Instance.userData.upgrades[UpgradeID.ExtraLife];
-        lives = heartCount + add;
+        currentLives = baseLives + add;
+        Start();
+    }    
+    public void ResetLivesPerfectMode() {
+        currentLives = 1;
         Start();
     }
 
     public void GainLive() {
-        if (lives < hearts.Count) {
-            lives++;
+        if (currentLives < hearts.Count) {
+            currentLives++;
             UpdateHearts();
         }
 
@@ -131,17 +134,8 @@ public class LifeCounter : MonoBehaviour
         int add = 0;
         if (GameManager.Instance.userData.upgrades.ContainsKey(UpgradeID.ExtraLife))
             add = GameManager.Instance.userData.upgrades[UpgradeID.ExtraLife];
-        /*
-        float lerp = 1 / (float)(heartCount + add);
-        lerp *= heartIndex;
-        float halfWay = lerp / 2; 
-        Color c = Color.white;
-        if (lerp <= halfWay)
-             c = Color.Lerp(Color.red, Color.yellow, lerp);
-        else
-            c = Color.Lerp(Color.yellow, Color.green, lerp);
-            */
-        return MyExtensions.GetLerpColor(heartIndex,heartCount+add-1,new List<Color>(){Color.green,Color.yellow,Color.red});
+        
+        return MyExtensions.GetLerpColor(heartIndex,baseLives+add-1,new List<Color>(){Color.red,Color.yellow,Color.green});
     }  
 
 

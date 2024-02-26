@@ -4,9 +4,9 @@ using TMPro;
 using UnityEngine.UI;
 using Newtonsoft.Json.Linq;
 
-public class AdmobAdsScript : MonoBehaviour
+public class AdmobAdsManager : MonoBehaviour
 {
-    public static AdmobAdsScript Instance;
+    public static AdmobAdsManager Instance;
     public string appId = "ca-app-pub-1385093244148841~5602672977";
 
 
@@ -28,6 +28,10 @@ public class AdmobAdsScript : MonoBehaviour
     InterstitialAd interstitialAd;
     RewardedAd rewardedAd;
 
+    public bool showInterstitial;
+    public float timeToInterstitial = 60;
+    private float currentTimeToInterstitial = 0;
+    
     private void Awake()
     {
         if (Instance == null)
@@ -163,15 +167,16 @@ public class AdmobAdsScript : MonoBehaviour
     [ContextMenu("ShowInterstitialAd")]
     public void ShowInterstitialAd()
     {
-
+        if (!showInterstitial) return;
         if (interstitialAd != null && interstitialAd.CanShowAd())
         {
             interstitialAd.Show();
         }
         else
         {
-            print("Intersititial ad not ready!!");
+            print("Interstitial ad not ready!!");
         }
+        showInterstitial = false;
     }
     public void InterstitialEvent(InterstitialAd ad)
     {
@@ -209,6 +214,17 @@ public class AdmobAdsScript : MonoBehaviour
                            "with error : " + error);
         };
     }
+
+    public void ReduceInstertitialTime(float elapsedTime)
+    {
+        currentTimeToInterstitial += elapsedTime;
+        if (currentTimeToInterstitial > timeToInterstitial)
+        {
+            currentTimeToInterstitial = 0;
+            showInterstitial = true;
+        }
+    }
+    
 }
     #endregion
     /*

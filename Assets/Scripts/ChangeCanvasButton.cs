@@ -13,6 +13,9 @@ public class ChangeCanvasButton : MonoBehaviour {
     }
 
     public virtual void OnClick() {
+        
+        AdmobAdsManager.Instance.ShowInterstitialAd();
+        
         CustomDebugger.Log("Pressed" +name);
         AudioManager.Instance.PlayClip(clip);
         if (canvasToSet ==  null) {
