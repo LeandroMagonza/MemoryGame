@@ -164,7 +164,9 @@ public class GameManager : MonoBehaviour {
     public float shakeAmount = 5;
     public float shakeSpeed = 80;
     private int maxComboBonus = 5;
-    public bool perfectMode;
+    
+    public bool perfectMode = false;
+    public bool speedrunMode = false;
 
 
     public void SetScoreTexts() {
@@ -221,7 +223,7 @@ public class GameManager : MonoBehaviour {
         int scoreModification, StickerData stickerData, StickerMatchData stickerMatchData, bool defeat)
     {
         float timerModification = maxTimer - timer;
-        SetTimer(maxTimer);
+        ResetTimer();
         yield return new WaitForSeconds(delayBetweenImages);
         SaveTurn(number, timerModification, turnAction, scoreModification, stickerData, stickerMatchData);
         //Checkeamos si el sticker que adivinamos recien es el ultimo que queda en el pool, y de ser asi le damos todos los puntos de una y sacamos el sticker
@@ -684,7 +686,7 @@ public class GameManager : MonoBehaviour {
             false);
         currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
         AudioManager.Instance.PlayClip(GameClip.incorrectGuess,1);
-        SetTimer(maxTimer);
+        ResetTimer();
         bool defeat = lifeCounter.LoseLive(ref protectedLife, false);
         StartCoroutine(FinishProcessingTurnAction(0, TurnAction.RanOutOfTime, 0, _currentlySelectedSticker,
             currentlyInGameStickers[_currentlySelectedSticker],defeat));
@@ -737,7 +739,7 @@ public class GameManager : MonoBehaviour {
         stickerDisplay.gameObject.SetActive(true);
         endGameButtons.transform.parent.gameObject.SetActive(false);
         if (AudioManager.Instance.playMusic) AudioManager.Instance.audioSourceMusic.Play();
-        SetTimer(15);
+        ResetTimer();
         SetScore(0);
         turnNumber = 1;
         SetCurrentCombo(0);
@@ -783,6 +785,18 @@ public class GameManager : MonoBehaviour {
                     break;
                 }
             }                
+        }
+    }
+
+    private void ResetTimer()
+    {
+        if (speedrunMode)
+        {
+            SetTimer(maxTimerSpeedrun);
+        }
+        else
+        {
+            SetTimer(maxTimer);
         }
     }
 
