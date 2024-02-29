@@ -3014,7 +3014,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.5943396, g: 0, b: 0.5779816, a: 1}
+  m_Color: {r: 0.68956923, g: 0.9811321, b: 0.7574708, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3045,10 +3045,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stage: 0
   difficulty: 0
+  baseColor: {r: 0, g: 0, b: 0, a: 0}
   titleText: {fileID: 6108995385229307237}
   amountStickersTotalText: {fileID: 8161461968779296617}
   difficultyButton: {fileID: 8694857771726920485}
   unlockMessage: {fileID: 900923410331610414}
+  shining: 0
 --- !u!114 &7318370628772073373
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -52,7 +52,7 @@ public class StageManager : MonoBehaviour
         CustomDebugger.Log("called initialize stages");
         //Si el stage holder tiene stages, osea que esta vacio, topmoststage es null, si no topmoststage es el child 0 de stageholder transform
         Stage topmostStage = (stageHolder.transform.childCount == 0)? null :stageHolder.transform.GetChild(0)?.gameObject.GetComponent<Stage>();
-
+        if (topmostStage is not null) topmostStage.shining = false;
         //stages = LoadStages();
         // Parseo en cada Stage el color
         foreach (var stage in stages.Values)
@@ -107,6 +107,8 @@ public class StageManager : MonoBehaviour
                 }
             }
         }
+        topmostStage = (stageHolder.transform.childCount == 0)? null :stageHolder.transform.GetChild(0)?.gameObject.GetComponent<Stage>();
+        if (topmostStage is not null) topmostStage.shining = true;
     }
     public void SetStageAndDifficulty(int stage, int difficulty)
     {

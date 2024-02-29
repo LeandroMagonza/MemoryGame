@@ -13,17 +13,20 @@ public class Stage : MonoBehaviour
 {
     public int stage;
     public int difficulty;
+    public Color baseColor;
     public TextMeshProUGUI titleText; 
     public TextMeshProUGUI amountStickersTotalText; 
     //public TextMeshProUGUI amountStickersCurrentText; 
     public DifficultyButton difficultyButton;
     public GameObject unlockMessage;
-
+    public bool shining = false;
     public void SetTitle(string title) {
         titleText.text = title;
     }
 
-    public void SetColor(Color color) {
+    public void SetColor(Color color)
+    {
+        baseColor = color;
         GetComponent<Image>().color = color;
     }
 
@@ -70,6 +73,7 @@ public class Stage : MonoBehaviour
             difficultyButton.transform.parent.gameObject.SetActive(true);
         }
         */
+
         SetAmountOfStickersTotal(GameManager.Instance.stages[stage].stickers.Count);
         unlockMessage.SetActive(false);
         difficultyButton.UpdateDifficultyUnlocked();
@@ -78,7 +82,21 @@ public class Stage : MonoBehaviour
     public void OpenStickerPanel() {
         StageManager.Instance.OpenStickerPanel(stage);
     }
-    
+
+    private void Update()
+    {
+        if (shining)
+        {
+         // if (transform.parent.GetChild(0) == this.transform)
+          //  {
+            GetComponent<Image>().color = Color.black;
+           // }
+        }
+        else
+        {
+            GetComponent<Image>().color = baseColor;
+        }
+    }
 }
 
 [Serializable]
@@ -132,6 +150,7 @@ public enum Achievement {
     ClearedStageNoMistakes,
     ClearedStageNoUpgrades,
     ClearedStageNoMistakesNoUpgrades,
+    FastWin
 }
 [Serializable]
 public class Match
@@ -164,6 +183,7 @@ public class Match
         bool lostLife = false;
         int removesUsed = 0;
         bool reachedOneHP = false;
+        bool speedrunAchievement = true;
         CustomDebugger.Log("Ending match with turns:"+turnHistory.Count);
         foreach (var turn in turnHistory) {
             score += turn.scoreModification;
@@ -189,6 +209,11 @@ public class Match
                 reachedOneHP = true;
             }
 
+            if (turn.turnDuration > GameManager.Instance.maxTimerSpeedrun)
+            {
+                speedrunAchievement = false;
+            }
+
         }
         
         CustomDebugger.Log("clearedImages " +clearedImages.Count);
@@ -210,8 +235,14 @@ public class Match
                 if (!lostLife)
                 {
                     achievementsFulfilled.Add(Achievement.ClearedStageNoMistakes);
+                    if (speedrunAchievement)
+                    {
+                        achievementsFulfilled.Add(Achievement.FastWin);
+                    }
                 }
             }
+
+           
         }
 
         CustomDebugger.Log("-------------------Achievement ClearedStageWithMoreThanOneHP----------------------");
