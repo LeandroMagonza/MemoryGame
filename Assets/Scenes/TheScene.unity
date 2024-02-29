@@ -16922,7 +16922,19 @@ PrefabInstance:
     - target: {fileID: 2970192187020338405, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 804461bef59b141dba258fc997c8ca15, type: 3}
+      objectReference: {fileID: 21300000, guid: 65f4f5d0e117ad246aed297baf38d64c, type: 3}
+    - target: {fileID: 2970192187020338405, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2970192187020338405, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
+      propertyPath: m_Color.g
+      value: 0.7600515
+      objectReference: {fileID: 0}
+    - target: {fileID: 2970192187020338405, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338406, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_TargetGraphic
       value: 
@@ -21367,7 +21379,6 @@ MonoBehaviour:
   lifeCounter: {fileID: 1636331682}
   timer: 10
   maxTimer: 10
-  maxTimerSpeedrun: 2
   timerText: {fileID: 1676126507}
   score: 0
   scoreText: {fileID: 1311056529}
@@ -21411,6 +21422,7 @@ MonoBehaviour:
   protectedLife: 0
   deathDefy: 0
   blockChoice: 0
+  timeToIntersticial: 1
   tutorialPanel: {fileID: 1107291723}
   newPlayerTutorialTexts:
   - {fileID: 67191254}
@@ -21431,8 +21443,6 @@ MonoBehaviour:
   shakeDelay: 0.2
   shakeAmount: 5
   shakeSpeed: 80
-  perfectMode: 0
-  speedrunMode: 0
 --- !u!4 &1079194499
 Transform:
   m_ObjectHideFlags: 0
@@ -21712,6 +21722,22 @@ PrefabInstance:
     - target: {fileID: 2970192187020338400, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_Name
       value: PlayButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 2970192187020338405, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 65f4f5d0e117ad246aed297baf38d64c, type: 3}
+    - target: {fileID: 2970192187020338405, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2970192187020338405, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2970192187020338405, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
+      propertyPath: m_Color.r
+      value: 0.17368424
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338406, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -29181,8 +29207,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   heartPrefab: {fileID: 6950419497658983372, guid: 4a477a5804ba89145b9bf45fee8f26db, type: 3}
   lifeCounterContainer: {fileID: 1636331680}
-  currentLives: 0
-  baseLives: 3
+  lives: 0
+  heartCount: 3
   hearts: []
 --- !u!1001 &1643859533
 PrefabInstance:
@@ -32023,8 +32049,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   appId: ca-app-pub-1071952418870103~1405538241
   interId: ca-app-pub-3940256099942544/1033173712
-  showInterstitial: 0
-  timeToInterstitial: 60
 --- !u!4 &1766858647
 Transform:
   m_ObjectHideFlags: 0
