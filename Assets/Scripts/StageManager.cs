@@ -70,6 +70,7 @@ public class StageManager : MonoBehaviour
             if (!nextStageUnlocked) break;
             foreach (var stageIndexAndData in stages) {
                 if (!nextStageUnlocked) break;
+               // if (stageIndexAndData.Key != 0) break;
                 StageData stageData = stageIndexAndData.Value;
 
                 //Evita crear stages que ya estan creados. Si el que esta arriba, que es el de (dificultad,stageid) mas alto 
@@ -78,7 +79,7 @@ public class StageManager : MonoBehaviour
                 UserStageData currentUserStageData = userData.GetUserStageData(stageData.stageID, difficulty);
 
                 nextStageUnlocked = (currentUserStageData is not null && currentUserStageData.achievements.Count > 0);
-               
+                nextStageUnlocked = true;
                 if (topmostStage is not null &&
                     (topmostStage.difficulty > difficulty || 
                      (topmostStage.difficulty == difficulty && topmostStage.stage >= stageData.stageID))) continue;
@@ -96,8 +97,18 @@ public class StageManager : MonoBehaviour
                 if (userData.GetUserStageData(stageData.stageID, difficulty) is not null)
                 {
                     newStage.SetScore( userData.GetUserStageData(stageData.stageID, difficulty).highScore);
+                    
+             
+                    
+                    if (ColorUtility.TryParseHtmlString("#00d561", out Color green))
+                         
+                    if (ColorUtility.TryParseHtmlString("#fedd30", out Color yellow))
+                         
+                    if (ColorUtility.TryParseHtmlString("#d60149", out Color red))
+                    
                     newStage.difficultyButton.gameObject.GetComponent<Image>().color = 
-                        MyExtensions.GetLerpColor(difficulty-3,9-3,new List<Color>(){Color.green,Color.yellow,Color.red});
+                        MyExtensions.GetLerpColor(difficulty-3,9-3,new List<Color>()
+                            {green, yellow, red});
                     newStage.difficultyButton.stars
                         .SetAchievements(userData.GetUserStageData(stageData.stageID, difficulty).achievements);
                 }

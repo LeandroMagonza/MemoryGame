@@ -20,6 +20,7 @@ public class Stage : MonoBehaviour
     public DifficultyButton difficultyButton;
     public GameObject unlockMessage;
     public bool shining = false;
+    public float shiningSpeed = 1;
     public void SetTitle(string title) {
         titleText.text = title;
     }
@@ -83,14 +84,17 @@ public class Stage : MonoBehaviour
         StageManager.Instance.OpenStickerPanel(stage);
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        if (shining)
-        {
-         // if (transform.parent.GetChild(0) == this.transform)
-          //  {
-            GetComponent<Image>().color = Color.black;
-           // }
+        if (shining) {
+            GetComponent<Image>().color = new Color(
+                GetComponent<Image>().color.r - baseColor.r * shiningSpeed * Time.deltaTime,
+                GetComponent<Image>().color.g - baseColor.g * shiningSpeed * Time.deltaTime,
+                GetComponent<Image>().color.b - baseColor.b * shiningSpeed * Time.deltaTime
+            );
+            if(GetComponent<Image>().color.r < baseColor.r*0.5f) {
+                GetComponent<Image>().color = baseColor;
+            }
         }
         else
         {
