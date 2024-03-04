@@ -12,6 +12,7 @@ public class AchievementStars : MonoBehaviour
     // Start is called before the first frame update
     public void SetAchievement(Achievement achievementToSet, float delay)
     {
+        if (stars.Count <= (int)achievementToSet) return;
         
         stars[(int)achievementToSet].GetComponent<Image>().sprite = starOn;
         if (delay <= 0) return;

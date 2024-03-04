@@ -79,7 +79,7 @@ public class StageManager : MonoBehaviour
                 UserStageData currentUserStageData = userData.GetUserStageData(stageData.stageID, difficulty);
 
                 nextStageUnlocked = (currentUserStageData is not null && currentUserStageData.achievements.Count > 0);
-                nextStageUnlocked = true;
+                //nextStageUnlocked = true;
                 if (topmostStage is not null &&
                     (topmostStage.difficulty > difficulty || 
                      (topmostStage.difficulty == difficulty && topmostStage.stage >= stageData.stageID))) continue;
