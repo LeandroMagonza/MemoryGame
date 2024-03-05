@@ -60,7 +60,8 @@ public class CanvasManager : MonoBehaviour
         }
         Camera.main.backgroundColor = color;
         Sprite backgound = Resources.Load<Sprite>(StageManager.Instance.gameVersion + "/background");
-        backgroundImage.sprite = backgound;
+        if (backgound is Sprite)
+            backgroundImage.sprite = backgound;
 
     }
 }

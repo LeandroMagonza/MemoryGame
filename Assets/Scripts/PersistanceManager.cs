@@ -92,8 +92,15 @@ public class PersistanceManager : MonoBehaviour
         JObject jsonData = JObject.Parse(json);
 
         JObject mainMenuConfigJson = jsonData["config"].ToObject<JObject>();
-        string hexColor = mainMenuConfigJson["backgroundColor"].Value<string>();
-        CanvasManager.Instance.SetMainMenuCanvas(hexColor);
+        if (mainMenuConfigJson is JObject)
+        {
+            string hexColor = mainMenuConfigJson["backgroundColor"].Value<string>();
+            CanvasManager.Instance.SetMainMenuCanvas(hexColor);
+        }
+        else
+        {
+            CustomDebugger.LogError("Not Set Configuration");
+        }
         yield return null;
     }
 
