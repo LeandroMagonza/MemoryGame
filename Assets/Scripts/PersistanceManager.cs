@@ -69,7 +69,34 @@ public class PersistanceManager : MonoBehaviour
         yield return StartCoroutine(LoadStages());
         yield return StartCoroutine(LoadStickerLevels());
         yield return StartCoroutine(LoadPacks());
+        yield return StartCoroutine(LoadUIMenuConfiguration());
+
+
     }
+
+    private IEnumerator LoadUIMenuConfiguration()
+    {
+        string setName = StageManager.Instance.gameVersion.ToString();
+        string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
+        string json;
+        if (!File.Exists(filePath))
+        {
+            CustomDebugger.Log("No saved stages found at " + filePath);
+            yield return StartCoroutine(GetJson("stages"));
+        }
+
+        CustomDebugger.Log(filePath);
+        json = File.ReadAllText(filePath);
+
+        // Parse the JSON into a JObject
+        JObject jsonData = JObject.Parse(json);
+
+        JObject mainMenuConfigJson = jsonData["config"].ToObject<JObject>();
+        string hexColor = mainMenuConfigJson["backgroundColor"].Value<string>();
+        CanvasManager.Instance.SetMainMenuCanvas(hexColor);
+        yield return null;
+    }
+
     private void OnApplicationQuit()
     {
         //SaveStages(stages);
