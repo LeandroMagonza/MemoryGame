@@ -13,7 +13,30 @@ public struct ConsumableButtonData
     [SerializeField] public Button button;
     [SerializeField] public TextMeshProUGUI text;
     [SerializeField] public GameClip gameClip;
+    [SerializeField] public GameObject peekCanvas;
+    public void OpenStickerPanel(int stage)
+    {
 
+        StageManager.Instance.stickerHolder.transform.GetComponentsInChildren<Sticker>();
+        foreach (var stickerID in StageManager.Instance.stages[stage].stickers)
+        {
+            Sticker display = StickerManager.Instance.GetStickerHolder();
+            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(StageManager.Instance.stages[stage].stickerSet, stickerID);
+            display.SetStickerData(stickerData);
+            // esto era para cuando tenias que desbloquear los stages, los lockeados eran los stickers que no tenias, pero ahora no se loquean asi que el boton
+            // trae todos los stickers siempre
+            /*if (stickerData.amountOfDuplicates == 0) {
+                display.ConfigureLocked();
+            }
+            else {*/
+            //}
+            display.ConfigureForPack();
+
+            display.transform.SetParent(StageManager.Instance.stickerHolder.transform);
+            display.transform.localScale = Vector3.one;
+        }
+        StageManager.Instance.stickerPanel.SetActive(true);
+    }
     public void SetButtonText(ConsumableID consumableID)
     {
         if (text != null)
@@ -207,6 +230,7 @@ public class GameCanvas : MonoBehaviour
     }
     public void UsePeek()
     {
+
     }
 
     public void UseItem(int ID)

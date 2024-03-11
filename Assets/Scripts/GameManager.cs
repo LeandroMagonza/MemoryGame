@@ -534,7 +534,7 @@ public class GameManager : MonoBehaviour {
                 currentlyInGameStickers.Add(sticker,new StickerMatchData());
                 amountOfImages--;
                 if (amountOfImages == 0) {
-                    return true;
+                    return true; 
                 }
             }
         }
