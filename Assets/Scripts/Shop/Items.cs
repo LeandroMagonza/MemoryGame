@@ -205,7 +205,15 @@ public class UpgradeData
             case UpgradeID.ExtraPeek:
                 upgrade = new UpgradeData()
                 {
-                    levelPrices = new int[] { 3000 },
+                    itemId = itemId,
+                    valueAddToInitial = 1,
+                    valueAddToMax = 0,
+                    description = "EXTRA PEEK: Look how much stickers appears so far.",
+                    levelPrices = new int[] { 6000 },
+                    upgradeRequired = new Dictionary<UpgradeID, int>()
+                    {
+                        { UpgradeID.DeathDefy, 1 },
+                    }
                 };
                 break;
             case UpgradeID.BlockMistake:

@@ -1,7 +1,6 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CanvasManager : MonoBehaviour
 {
@@ -33,6 +32,8 @@ public class CanvasManager : MonoBehaviour
     }
     #endregion
 
+
+    public Image backgroundImage;
     public Canvas initialCanvas;
     public List<Canvas> allCanvas;
 
@@ -48,5 +49,19 @@ public class CanvasManager : MonoBehaviour
         }
         canvasToSet.gameObject.SetActive(true);
         //enable canvasToSet
+    }
+
+    public void SetMainMenuCanvas(string HexbackgoundColor)
+    {
+        Color color = Color.white;
+        if (ColorUtility.TryParseHtmlString("#" + HexbackgoundColor, out Color colorValue))
+        {
+            color = colorValue;
+        }
+        Camera.main.backgroundColor = color;
+        Sprite backgound = Resources.Load<Sprite>(StageManager.Instance.gameVersion + "/background");
+        if (backgound is Sprite)
+            backgroundImage.sprite = backgound;
+
     }
 }
