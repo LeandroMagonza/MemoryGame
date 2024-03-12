@@ -11,18 +11,24 @@ public class NumpadButton : MonoBehaviour {
     // Start is called before the first frame update
     void Awake()
     {
-
         //_numberText = GetComponentInChildren<TextMeshProUGUI>();
         // _numberText = transform.Find("TextNumpad").GetComponent<TextMeshProUGUI>();
         // _button = GetComponent<Button>();
         SetText(number.ToString());
         gameObject.name = "NumpadButtonN " + number;
         GetComponent<Button>().onClick.AddListener(OnClick);
+    }
+    private void OnEnable()
+    {
+        RefreshSize();
+    }
+    [ContextMenu("RefreshSize")]
+    public void RefreshSize()
+    {
         RectTransform rectTransform = GetComponent<RectTransform>();
         RectTransform rectReferrence = GameManager.Instance.numpadButtons[0].GetComponent<RectTransform>();
         rectTransform.sizeDelta = new Vector2(rectReferrence.sizeDelta.x, rectTransform.sizeDelta.y);
     }
-
     public void OnClick()
     {
         if (GameManager.Instance.gameEnded || GameManager.Instance.disableInput) {

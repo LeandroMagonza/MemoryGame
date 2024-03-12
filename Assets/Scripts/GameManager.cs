@@ -799,9 +799,9 @@ public class GameManager : MonoBehaviour {
             SetTimer(maxTimer);
         }
     }
-
     private void SetNumpadByDifficulty(int difficulty)
     {
+        RectTransform referenceTransform = numpadButtons[0].gameObject.GetComponent<RectTransform>();
         for (int i = 0; i < numpadButtons.Length; i++)
         {
             numpadButtons[i].gameObject.transform.parent.gameObject.SetActive(false);
