@@ -9,6 +9,7 @@ public class NumpadButton : MonoBehaviour {
     [SerializeField] public TextMeshProUGUI _numberText;
     [SerializeField] public Button _button;
     // Start is called before the first frame update
+
     void Awake()
     {
         //_numberText = GetComponentInChildren<TextMeshProUGUI>();
