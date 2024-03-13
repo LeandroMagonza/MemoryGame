@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class ChangeCanvasButton : MonoBehaviour {
-    public Canvas canvasToSet;
+    public CanvasName canvasToSet;
     public GameClip clip;
     public virtual void Start()
     {
@@ -18,12 +18,16 @@ public class ChangeCanvasButton : MonoBehaviour {
         
         CustomDebugger.Log("Pressed" +name);
         AudioManager.Instance.PlayClip(clip);
-        if (canvasToSet ==  null) {
-            CustomDebugger.Log("Canvas NotImplementedException set");
-            return;
-        }
         CanvasManager.Instance.ChangeCanvas(canvasToSet);  
     }
 
 
+}
+public enum CanvasName
+{ 
+    NO_CANVAS = 0,
+    MENU,
+    GAME,
+    SELECT_STAGE,
+    SHOP,
 }

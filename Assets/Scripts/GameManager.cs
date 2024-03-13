@@ -571,7 +571,7 @@ public class GameManager : MonoBehaviour {
             nextStageButton.GetComponent<Button>().interactable = true;
         }
         
-        endGameButtons.transform.parent.gameObject.SetActive(true);
+        endGameButtons.transform.parent.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
         
         CustomDebugger.Log("Match Ended");
@@ -607,6 +607,7 @@ public class GameManager : MonoBehaviour {
         }
         UpdateInventoryAndSave();
         UpdateAchievementAndUnlockedLevels();
+        //Aca puede que haya que actualizar las estrellas en el nivel
         StageManager.Instance.InitializeStages();
         //animationScore
         
@@ -737,7 +738,7 @@ public class GameManager : MonoBehaviour {
         gameCanvas.GetComponent<GameCanvas>().UpdateUI();
         gameEnded = false;
         stickerDisplay.gameObject.SetActive(true);
-        endGameButtons.transform.parent.gameObject.SetActive(false);
+        endGameButtons.transform.parent.transform.parent.gameObject.SetActive(false);
         if (AudioManager.Instance.playMusic) AudioManager.Instance.audioSourceMusic.Play();
         ResetTimer();
         SetScore(0);

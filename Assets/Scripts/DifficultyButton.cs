@@ -15,7 +15,7 @@ public class DifficultyButton : ChangeCanvasButton
     {
         gameObject.name = "ButtonDifficulty S" + stage+" D"+difficulty;
         GetComponent<Button>().onClick.AddListener(OnClick);
-        this.canvasToSet = GameManager.Instance.GetGameCanvas();
+        this.canvasToSet = CanvasName.GAME;
     }
 
     public override void OnClick()

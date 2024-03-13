@@ -522,8 +522,12 @@ PrefabInstance:
     m_TransformParent: {fileID: 3594057873731267875}
     m_Modifications:
     - target: {fileID: 2412363556221592344, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
+      propertyPath: clip
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2412363556221592344, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: canvasToSet
-      value: 
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2970192186945074569, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_text
@@ -4281,7 +4285,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7943365471629466935, guid: 635288ba9a1a546478a2016859dd7dd3, type: 3}
       propertyPath: canvasToSet
-      value: 
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9177947230194735913, guid: 635288ba9a1a546478a2016859dd7dd3, type: 3}
       propertyPath: m_AnchorMax.y

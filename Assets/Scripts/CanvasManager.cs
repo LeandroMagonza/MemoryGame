@@ -34,21 +34,34 @@ public class CanvasManager : MonoBehaviour
 
 
     public Image backgroundImage;
-    public Canvas initialCanvas;
-    public List<Canvas> allCanvas;
+    public CanvasName initialCanvas = CanvasName.MENU;
+    public Dictionary<CanvasName,Canvas> allCanvas = new Dictionary<CanvasName, Canvas>();
 
+    public Canvas menuCanvas;
+    public Canvas selectStageCanvas;
+    public Canvas gameCanvas;
+    public Canvas shopCanvas;
     private void Start()
     {
+        
+        allCanvas.Add(CanvasName.MENU,menuCanvas);
+        allCanvas.Add(CanvasName.SELECT_STAGE,selectStageCanvas);
+        allCanvas.Add(CanvasName.GAME,gameCanvas);
+        allCanvas.Add(CanvasName.SHOP,shopCanvas);
+        
         ChangeCanvas(initialCanvas);
     }
 
 
-    public void ChangeCanvas(Canvas canvasToSet) {
-        foreach (var VARIABLE in allCanvas) {
-            VARIABLE.gameObject.SetActive(false);//disable all canvas
+    public void ChangeCanvas(CanvasName canvasToSet) {
+        if (canvasToSet == CanvasName.NO_CANVAS) return; 
+        
+        foreach (var VARIABLE in allCanvas) { 
+            //disable all canvas
+            VARIABLE.Value.gameObject.SetActive(false);
         }
-        canvasToSet.gameObject.SetActive(true);
-        //enable canvasToSet
+        
+        allCanvas[canvasToSet].gameObject.SetActive(true);
     }
 
     public void SetMainMenuCanvas(string HexbackgoundColor)
