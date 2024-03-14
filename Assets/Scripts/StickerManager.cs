@@ -69,6 +69,7 @@ public class StickerManager : MonoBehaviour
         if (!currentLoadedSetStickerData.ContainsKey(stickerSet))
         {
             //TODO: fix Problema ACA
+            // no me acuerdo que habia que arreglar jaja
             LoadAllStickersFromSet(stickerSet);
         }
         if (!currentLoadedSetStickerData.ContainsKey(stickerSet) )

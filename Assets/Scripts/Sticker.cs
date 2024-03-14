@@ -117,10 +117,10 @@ public class Sticker : MonoBehaviour
     public void ConfigureForPack() {
         spriteHolder.color = Color.white;
         DisplayFrame(true);
-        DisplayLevel(true);
-        DisplayLevelStickerProgressAmount(true);
+        DisplayLevel(false);
+        DisplayLevelStickerProgressAmount(false);
         DisplayName(true);
-        DisplayExpBar(true);
+        DisplayExpBar(false);
         DisplayBonus(false);
         DisplayNewMarker(false);
         DisplayCleared(false);

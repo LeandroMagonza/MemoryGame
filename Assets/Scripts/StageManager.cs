@@ -155,7 +155,7 @@ public class StageManager : MonoBehaviour
         stickerPanel.SetActive(false);
         foreach (var sticker in stickerHolder.transform.GetComponentsInChildren<Sticker>()) {
             StickerManager.Instance.RecycleSticker(sticker);
-            sticker.transform.SetParent(null);
+            sticker.transform.SetParent(StickerManager.Instance.gameObject.transform);
         }
     }
 }

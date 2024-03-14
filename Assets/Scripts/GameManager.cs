@@ -6,6 +6,7 @@ using TMPro;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Purchasing.Extension;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -48,114 +49,79 @@ public class GameManager : MonoBehaviour {
 
     #endregion
 
-    public GameObject numpad;
-    public GameObject quizOptionPad;
+    [Header("Config")]
+    public GameMode currentGameMode = GameMode.QUIZ; 
+    public float delayBetweenImages = .72f;
     public bool limitOptionsToStage = true;
-    public List<(string optionName, NumpadButton numpadButton)> quizOptionButtons = new List<(string optionName, NumpadButton numpadButton)>();
-        
-    public GameMode currentGameMode = GameMode.QUIZ;
+
+
+    [Header("State")]
     public bool gameEnded = false;
-    public LifeCounter lifeCounter;
-    public float timer = 3;
-    public float maxTimer = 10;
-    public float maxTimerSpeedrun = 2;
-    public TextMeshProUGUI timerText; 
-    public int score = 0;
-    public TextMeshProUGUI scoreText; 
+    private Match _currentMatch;
+    private bool pause = false;
     public int turnNumber = 1;
-    public int bonusMultiplicator = 1;
- 
-    public TextMeshProUGUI highScoreText; 
-    public TextMeshProUGUI endGameScoreText;
-    public AchievementStars endGameAchievementStars;
-    
-    public FadeOut amountOfAppearencesText; 
-    public GameObject pausePanel;
-
     public bool firstMistake = false;
-    
-    //sticker
-    public Sticker stickerDisplay;
-    public Vector3 startScale;
-    //public TextMeshProUGUI imageIDText; 
-    //public GameObject imageOnDisplay;
-
-    //stickerData?
     private StickerData _currentlySelectedSticker;
-    
-    public int currentlyInGameStickersTotalAmount;
-    public int currentlySelectedStickerID;
-    public string currentlySelectedStickerName;
-    public int currentlySelectedStickerAmountOfAppearences;
-    public string[] currentlyInGameStickersNames;
-    
     private Dictionary<int,StickerData> _stickersFromStage = new Dictionary<int, StickerData>();
     public Dictionary<StickerData,StickerMatchData> currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
-
-    //public AudioSource audioSource;
-    // public AudioClip correctGuessClip;
-    // public AudioClip incorrectGuessClip;
-    // public AudioClip endGameClip;
-    // public AudioClip bonusClip;
-    // public AudioClip winClip;
-    // public AudioClip highScoreClip;
-
-    public ParticleSystem correctGuessParticle;
-    public ParticleSystem incorrectGuessParticle;
-
-    public GameObject endGameButtons;
-    public float delayBetweenImages = .72f;
-
+    private float startMatchTime = 0;
+    private float endMatchTime = 0; 
     public bool disableInput = false;
-
-    #region PersistanceReferences
-    public UserData userData => PersistanceManager.Instance.userData;
-    public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
-    private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.StickerLevels;
-    public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> matchInventory = new Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)>();
-    public PacksData packs => PersistanceManager.Instance.packs;
-    #endregion
-
-    public int currentClues = 0;
-    public int maxCluesAmount = 5;
-    public int currentRemoves = 0;
-    public int maxRemovesAmount = 5;
     
-    public GameObject gameCanvas;
-
-
-    public NumpadButton[] numpadButtons;
-    //public GameObject numpadRow0;
-    //public GameObject numpadRow1;
-    //public GameObject numpadRow2;
-
-    private Match _currentMatch;
-    private int _currentCombo = 0;
-    public TextMeshProUGUI comboBonusText;
-    public TextMeshProUGUI comboText;
-
-
-    public GameCanvas GameCanvas => GameCanvas.Instance;
-    public int selectedStage => StageManager.Instance.selectedStage;
-    public int selectedDifficulty => StageManager.Instance.selectedDifficulty;
-
+    [Header("Skills")]
     public bool protectedLife = false;
     public bool deathDefy = false;
     public bool blockChoice = false;
     private int deathDefyMagnitude = 0;
 
+    [Header("Timer")]    
+    public float timer = 3;
+    public float maxTimer = 10;
+    public float maxTimerSpeedrun = 2;
     
-    private float startMatchTime = 0;
-    private float endMatchTime = 0;
+    [Header("Score")]
+    public int score = 0;
+    public int bonusMultiplicator = 1;
+    
+    [Header("Combo")]
+    private int _currentCombo = 0;
+    private int maxCombo = 5;
+    
+    [Header("End Game Panel")]
+    public TextMeshProUGUI highScoreText; 
+    public TextMeshProUGUI endGameScoreText;
+    public TextMeshProUGUI currentCoins;
+    public AchievementStars endGameAchievementStars;
+    public GameObject endGameButtons;
+    public ChangeCanvasButton nextStageButton;
 
-    private bool pause = false;
+    
+    [Header("Pause")]
+    public GameObject pausePanel;
+    
+    [Header("NumpadQuizOptionsPad")]
+    public GameObject numpad;
+    public NumpadButton[] numpadButtons;
+    
+    [Header("QuizOptionsPad")]
+    public GameObject quizOptionPad;
+    public List<(string optionName, NumpadButton numpadButton)> quizOptionButtons = new List<(string optionName, NumpadButton numpadButton)>();
 
+    
+    [Header("Frame")]   
+    public FadeOut amountOfAppearencesText; 
+    public Sticker stickerDisplay;
+    public Vector3 startScale;
+    
+    [Header("Tutorial")]
     public GameObject tutorialPanel;
     public List<GameObject> newPlayerTutorialTexts;
     public List<GameObject> firstMistakeTutorialTexts;
-
-    public ChangeCanvasButton nextStageButton;
     
+    [Header("Particles")]
+    public ParticleSystem correctGuessParticle;
+    public ParticleSystem incorrectGuessParticle;
+        
     public float squashDelay = 0.2f;
     public float squashAmount = 0.1f;
     public float squashSpeed = 5f;
@@ -163,16 +129,50 @@ public class GameManager : MonoBehaviour {
     public float shakeDelay = .2f;
     public float shakeAmount = 5;
     public float shakeSpeed = 80;
-    private int maxComboBonus = 5;
     
+    [Header("Visualizations")]
+    public int currentlyInGameStickersTotalAmount;
+    public int currentlySelectedStickerID;
+    public string currentlySelectedStickerName;
+    public int currentlySelectedStickerAmountOfAppearences;
+    public string[] currentlyInGameStickersNames;
+    
+
+    [Header("References")]
+    #region References
+    #region Game Canvas Header
+    public GameCanvasHeader gameCanvasHeader;
+    
+    public LifeCounter lifeCounter  => gameCanvasHeader.lifeCounter ;
+    public TextMeshProUGUI timerText => gameCanvasHeader.timerText; 
+    public TextMeshProUGUI scoreText => gameCanvasHeader.scoreText;
+    public TextMeshProUGUI comboText => gameCanvasHeader.comboText;
+    public TextMeshProUGUI comboBonusText => gameCanvasHeader.comboBonusText;
+
+    #endregion
+    public UserData userData => PersistanceManager.Instance.userData;
+    public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
+    private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.StickerLevels;
+    public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> matchInventory = new Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)>();
+    public PacksData packs => PersistanceManager.Instance.packs;
+    public GameCanvas GameCanvas => GameCanvas.Instance;
+    public int selectedStage => StageManager.Instance.selectedStage;
+    public int selectedDifficulty => StageManager.Instance.selectedDifficulty;
+    #endregion
+
+    [Header("Modes")]
     public bool perfectMode = false;
     public bool speedrunMode = false;
 
 
     public void SetScoreTexts() {
         if (userData.GetUserStageData(selectedStage, selectedDifficulty) is not null) {
-            scoreText.text = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore.ToString();
+            currentCoins.text = userData.coins.ToString();
+            endGameScoreText.text = "0";
             highScoreText.text = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore.ToString();
+        }
+        else {
+            CustomDebugger.Log("stage data not found when setting highscore on endmatchscreen");
         }
     }
 
@@ -356,7 +356,7 @@ public class GameManager : MonoBehaviour {
         comboBonusText.text = calculatedComboBonus.ToString();
         comboText.text = _currentCombo.ToString(); 
         
-        if (calculatedComboBonus >= maxComboBonus && userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0)
+        if (calculatedComboBonus >= maxCombo && userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0)
         {
             protectedLife = true;
             lifeCounter.ProtectHearts();
@@ -578,6 +578,7 @@ public class GameManager : MonoBehaviour {
         endMatchTime = Time.time;
         float elapsedTime = endMatchTime - startMatchTime;
         AdmobAdsManager.Instance.ReduceInstertitialTime(elapsedTime);
+        int formerCoins = userData.coins;
         userData.coins += score;
         var firstTimeAchievements = userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
 
@@ -620,7 +621,9 @@ public class GameManager : MonoBehaviour {
             yield return new WaitForSeconds(.1f);
             delay -= .1f;
             endGameScoreText.text = (scoreIncrement * i).ToString();
+            currentCoins.text = (formerCoins + scoreIncrement * i).ToString();
         }
+        currentCoins.text = userData.coins.ToString();
         endGameScoreText.text = score.ToString();
 
         yield return endGameAchievementStars.SetAchievements(_currentMatch.achievementsFulfilled,.35f);
@@ -723,7 +726,7 @@ public class GameManager : MonoBehaviour {
         startMatchTime = Time.time;
         endMatchTime = 0;
         AdmobAdsManager.Instance.LoadInterstitialAd();
-        Instance.SetScoreTexts();
+        SetScoreTexts();
         if (stickerDisplay == null) {
             stickerDisplay = StickerManager.Instance.GetStickerHolder();
         }
@@ -735,7 +738,7 @@ public class GameManager : MonoBehaviour {
         deathDefy = userData.upgrades.ContainsKey(UpgradeID.DeathDefy) && userData.upgrades[UpgradeID.DeathDefy] > 0;
         blockChoice = userData.upgrades.ContainsKey(UpgradeID.BlockMistake) && userData.upgrades[UpgradeID.BlockMistake] > 0;
         SetNumpadByDifficulty(selectedDifficulty);
-        gameCanvas.GetComponent<GameCanvas>().UpdateUI();
+        GameCanvas.gameObject.GetComponent<GameCanvas>().UpdateUI();
         gameEnded = false;
         stickerDisplay.gameObject.SetActive(true);
         endGameButtons.transform.parent.transform.parent.gameObject.SetActive(false);
@@ -764,7 +767,6 @@ public class GameManager : MonoBehaviour {
         disableInput = false;
         _currentMatch = new Match(selectedStage,selectedDifficulty,false);
         _currentCombo = 0;
-        endGameScoreText.text = "0";
         endGameAchievementStars.ResetStars();
         GameCanvas.UpdateUI();
         pause = false;
@@ -818,9 +820,6 @@ public class GameManager : MonoBehaviour {
     private void FixedUpdate() {
         if (gameEnded || pause) return;
         SetTimer(timer - Time.deltaTime);
-        
-        
-
     }
 
     private void Update()
@@ -982,16 +981,16 @@ public class GameManager : MonoBehaviour {
     }
     public int CalculateScoreComboBonus()
     {
-        maxComboBonus = 5;
+        maxCombo = 5;
         int calculatedComboBonus = (int)Math.Floor(((float)_currentCombo / 2));
-        if (calculatedComboBonus >= maxComboBonus)
+        if (calculatedComboBonus >= maxCombo)
         {
-            calculatedComboBonus = maxComboBonus;
+            calculatedComboBonus = maxCombo;
         }
         return calculatedComboBonus;
     }
     public Canvas GetGameCanvas() {
-        return gameCanvas.GetComponent<Canvas>();
+        return GameCanvas.gameObject.GetComponent<Canvas>();
     }
 
     public void SetMatchInventory()
