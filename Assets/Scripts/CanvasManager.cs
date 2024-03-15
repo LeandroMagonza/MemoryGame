@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -77,4 +78,14 @@ public class CanvasManager : MonoBehaviour
             backgroundImage.sprite = backgound;
 
     }
+
+    private void Update() {
+        if (Input.GetKeyUp(KeyCode.Escape) ) {
+            if (allCanvas[CanvasName.MENU].gameObject.activeInHierarchy) {
+                CustomDebugger.Log("Application quit called");
+                Application.Quit();
+            }
+        }
+    }
+
 }

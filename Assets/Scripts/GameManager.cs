@@ -53,12 +53,12 @@ public class GameManager : MonoBehaviour {
     public GameMode currentGameMode = GameMode.QUIZ; 
     public float delayBetweenImages = .72f;
     public bool limitOptionsToStage = true;
-
+    public bool increaseAmountOfAppearencesOnMistake;
 
     [Header("State")]
     public bool gameEnded = false;
     private Match _currentMatch;
-    private bool pause = false;
+    public bool pause = false;
     public int turnNumber = 1;
     public bool firstMistake = false;
     private StickerData _currentlySelectedSticker;
@@ -162,6 +162,7 @@ public class GameManager : MonoBehaviour {
 
     [Header("Modes")]
     public bool perfectMode = false;
+
     public bool speedrunMode = false;
 
 
@@ -224,7 +225,6 @@ public class GameManager : MonoBehaviour {
     {
         float timerModification = maxTimer - timer;
         ResetTimer();
-        yield return new WaitForSeconds(delayBetweenImages);
         SaveTurn(number, timerModification, turnAction, scoreModification, stickerData, stickerMatchData);
         //Checkeamos si el sticker que adivinamos recien es el ultimo que queda en el pool, y de ser asi le damos todos los puntos de una y sacamos el sticker
         if ((turnAction == TurnAction.GuessCorrect || turnAction== TurnAction.UseClue)&& currentlyInGameStickers.Count == 1 && currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
@@ -245,7 +245,8 @@ public class GameManager : MonoBehaviour {
                 
             }
         }
-
+        yield return new WaitForSeconds(delayBetweenImages);
+        
         if (defeat)
         {
             StartCoroutine(EndGame(false));
@@ -254,6 +255,7 @@ public class GameManager : MonoBehaviour {
             StartCoroutine(EndGame(true));
         }
         else if(turnAction != TurnAction.UseCut) {
+            //yield return new WaitForSeconds(delayBetweenImages);
             NextTurn();
         }
 
@@ -274,13 +276,13 @@ public class GameManager : MonoBehaviour {
         );
     }
 
-    private int CheckAmountOfAppearences()
+    private int CheckAmountOfAppearences(bool correct = true)
     {
         int scoreModificationBonus = 0;
         if (currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences == selectedDifficulty)
         {
             CustomDebugger.Log("Clear: " + _currentlySelectedSticker.name);
-            scoreModificationBonus = GainBonus();
+            if (correct) scoreModificationBonus = GainBonus();
             RemoveStickerFromPool();
         }
 
@@ -328,8 +330,12 @@ public class GameManager : MonoBehaviour {
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             false);
         AudioManager.Instance.PlayClip(GameClip.incorrectGuess,1);
-
-        currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
+        if (increaseAmountOfAppearencesOnMistake) {
+            CheckAmountOfAppearences(false);
+        }
+        else {
+            currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
+        }
         bool DeathDefy = GetDeathDefy(deathDefyMagnitude);
 
         SetCurrentCombo(0);

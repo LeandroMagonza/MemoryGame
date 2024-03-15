@@ -194,7 +194,6 @@ public class StickerManager : MonoBehaviour
             stickerID,
             sprite,
             stickerSet,
-            //sacar estos datos de csv pokemonlist, cambiar nombre y hacerlo generico para todos, algo como stickersadditionalinfo
             additionalData.name,
             additionalData.color,
             additionalData.type
