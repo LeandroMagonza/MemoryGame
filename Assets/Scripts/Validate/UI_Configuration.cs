@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 
+using System.Data;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -19,6 +20,28 @@ public class UI_Configuration : MonoBehaviour
     }
     [ContextMenu("ValidateData")]
     public void ValidateData()
+    {
+        foreach (var config in textToConfig)
+        {
+            config.Initialize();
+        }
+        foreach (var config in imageToConfig)
+        {
+            config.Initialize();
+        }
+    }
+}
+[System.Serializable]
+public struct UI_ConfigurationData
+{
+    [SerializeField] public string name;
+    [Space(10)]
+    [SerializeField] public TextConfiguration[] textToConfig;
+
+    [Space(10)]
+    [SerializeField] public ImageConfiguration[] imageToConfig;
+
+    public void Initialize()
     {
         foreach (var config in textToConfig)
         {
@@ -64,8 +87,12 @@ public struct TextDataConfiguration
         {
             uGUI.font = configuration.fontToSet;
             uGUI.color = colorToSet;
-            uGUI.outlineWidth = outlineToSet.outlineThicknessToSet;
-            uGUI.outlineColor = outlineToSet.outlineColorToSet;
+            CanvasRenderer canvasRenderer = uGUI.canvasRenderer;
+            if (canvasRenderer != null )
+            {
+                uGUI.outlineWidth = outlineToSet.outlineThicknessToSet;
+                uGUI.outlineColor = outlineToSet.outlineColorToSet;
+            }
         }
     }
 }
