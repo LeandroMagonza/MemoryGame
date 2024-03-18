@@ -62,7 +62,7 @@ public class GameManager : MonoBehaviour {
     public int turnNumber = 1;
     public bool firstMistake = false;
     private StickerData _currentlySelectedSticker;
-    private Dictionary<int,StickerData> _stickersFromStage = new Dictionary<int, StickerData>();
+    private Dictionary<int,StickerData> _remainingStickersFromStage = new Dictionary<int, StickerData>();
     public Dictionary<StickerData,StickerMatchData> currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
     private float startMatchTime = 0;
     private float endMatchTime = 0; 
@@ -360,7 +360,15 @@ public class GameManager : MonoBehaviour {
         _currentCombo = newCurrentComboAmount;
         int calculatedComboBonus = CalculateScoreComboBonus();
         comboBonusText.text = calculatedComboBonus.ToString();
-        comboText.text = _currentCombo.ToString(); 
+        if (newCurrentComboAmount == 0 )
+        {
+            comboText.text = "";  
+            
+        }
+        else
+        {
+            comboText.text = _currentCombo.ToString() + " COMBO!"; 
+        }
         
         if (!protectedLife &&
             calculatedComboBonus >= maxCombo && 
@@ -369,7 +377,7 @@ public class GameManager : MonoBehaviour {
         {
             protectedLife = true;
             lifeCounter.ProtectHearts();
-            AudioManager.Instance.PlayClip(GameClip.bonus);
+            AudioManager.Instance.PlayClip(GameClip.bonus); 
         }
 
         //TODO: add animation  y que ahga el ruido siempre que llegues al combo maximo, pero no despoues
@@ -448,17 +456,16 @@ public class GameManager : MonoBehaviour {
 
     private void LoadStickers() {
 
-        _stickersFromStage = new Dictionary<int, StickerData>();
+        _remainingStickersFromStage = new Dictionary<int, StickerData>();
         CustomDebugger.Log("Loading stickers for stage "+stages[selectedStage].stageID+", name "+stages[selectedStage].title+" from set "+ stages[selectedStage].stickerSet);
-
+        //david cantidad total stages[selectedStage].stickers.Count
         foreach (var stickerID in stages[selectedStage].stickers) {
             StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(stages[selectedStage].stickerSet, stickerID);
-            _stickersFromStage.Add(stickerID, stickerData);
+            _remainingStickersFromStage.Add(stickerID, stickerData);
         }
     }
 
 
-    
     private void SetRandomImage() {
         
          
@@ -527,7 +534,7 @@ public class GameManager : MonoBehaviour {
         //currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences = 0;
         currentlyInGameStickers.Remove(_currentlySelectedSticker);
         // aca se setea si la imagen vuelve al set general o no  
-        _stickersFromStage.Remove(_currentlySelectedSticker.stickerID);
+        //_remainingStickersFromStage.Remove(_currentlySelectedSticker.stickerID);
     }
   
     private bool AddStickers(int amountOfImages) {
@@ -538,7 +545,7 @@ public class GameManager : MonoBehaviour {
 
         List<StickerData> shuffledStickers =
             new List<StickerData >();
-        foreach (var sticker in _stickersFromStage) {
+        foreach (var sticker in _remainingStickersFromStage) {
             shuffledStickers.Add(sticker.Value);
         }
 
@@ -547,6 +554,7 @@ public class GameManager : MonoBehaviour {
         foreach (var sticker in shuffledStickers) {
             if (!currentlyInGameStickers.ContainsKey(sticker)) {
                 currentlyInGameStickers.Add(sticker,new StickerMatchData());
+                _remainingStickersFromStage.Remove(sticker.stickerID);
                 amountOfImages--;
                 if (amountOfImages == 0) {
                     return true; 
@@ -742,12 +750,10 @@ public class GameManager : MonoBehaviour {
         startScale = stickerDisplay.spriteHolder.transform.parent.transform.localScale;
         stickerDisplay.ConfigureForGame(currentGameMode);
         SetMatchInventory();
-        GameCanvas.Instance.UpdateUI();
         protectedLife = userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0;
         deathDefy = userData.upgrades.ContainsKey(UpgradeID.DeathDefy) && userData.upgrades[UpgradeID.DeathDefy] > 0;
         blockChoice = userData.upgrades.ContainsKey(UpgradeID.BlockMistake) && userData.upgrades[UpgradeID.BlockMistake] > 0;
         SetNumpadByDifficulty(selectedDifficulty);
-        GameCanvas.gameObject.GetComponent<GameCanvas>().UpdateUI();
         gameEnded = false;
         stickerDisplay.gameObject.SetActive(true);
         endGameButtons.transform.parent.transform.parent.gameObject.SetActive(false);
@@ -777,7 +783,7 @@ public class GameManager : MonoBehaviour {
         _currentMatch = new Match(selectedStage,selectedDifficulty,false);
         _currentCombo = 0;
         endGameAchievementStars.ResetStars();
-        GameCanvas.UpdateUI();
+        GameCanvas.Instance.UpdateUI();
         pause = false;
         pausePanel.SetActive(false);
         tutorialPanel.SetActive(false);
@@ -813,7 +819,6 @@ public class GameManager : MonoBehaviour {
     }
     private void SetNumpadByDifficulty(int difficulty)
     {
-        RectTransform referenceTransform = numpadButtons[0].gameObject.GetComponent<RectTransform>();
         for (int i = 0; i < numpadButtons.Length; i++)
         {
             numpadButtons[i].gameObject.transform.parent.gameObject.SetActive(false);
@@ -823,6 +828,7 @@ public class GameManager : MonoBehaviour {
         {
             numpadButtons[i].gameObject.SetActive(true);
             numpadButtons[i].gameObject.transform.parent.gameObject.SetActive(true);
+            numpadButtons[i].RefreshSize();
         }
     }
 

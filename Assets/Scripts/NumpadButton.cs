@@ -21,11 +21,12 @@ public class NumpadButton : MonoBehaviour {
     }
     private void OnEnable()
     {
-        RefreshSize();
+        StartCoroutine(RefreshSize());
     }
     [ContextMenu("RefreshSize")]
-    public void RefreshSize()
+    public IEnumerator RefreshSize()
     {
+        yield return new WaitForEndOfFrame();
         RectTransform rectTransform = GetComponent<RectTransform>();
         RectTransform rectReferrence = GameManager.Instance.numpadButtons[0].GetComponent<RectTransform>();
         rectTransform.sizeDelta = new Vector2(rectReferrence.sizeDelta.x, rectTransform.sizeDelta.y);

@@ -91,6 +91,11 @@ public class PersistanceManager : MonoBehaviour
         // Parse the JSON into a JObject
         JObject jsonData = JObject.Parse(json);
 
+        if (!jsonData.ContainsKey("config"))
+        {
+            CustomDebugger.Log("No config found");
+            yield break;
+        }
         JObject mainMenuConfigJson = jsonData["config"].ToObject<JObject>();
         if (mainMenuConfigJson is JObject)
         {
