@@ -34,10 +34,12 @@ public class StageManager : MonoBehaviour
             DestroyImmediate(this);
     }
     #endregion
+
+    public SelectStageCanvas selectStageCanvas;
     
-    public GameObject stageHolder;
     public int selectedStage = 0;
     public int selectedDifficulty = 3;
+    public GameObject stageHolder => selectStageCanvas.stageHolder;
     public GameObject stageDisplayPrefab;
 
     public GameObject stickerHolder;
@@ -50,6 +52,7 @@ public class StageManager : MonoBehaviour
 
     public void InitializeStages() {
         CustomDebugger.Log("called initialize stages");
+
         //Si el stage holder tiene stages, osea que esta vacio, topmoststage es null, si no topmoststage es el child 0 de stageholder transform
         Stage topmostStage = (stageHolder.transform.childCount == 0)? null :stageHolder.transform.GetChild(0)?.gameObject.GetComponent<Stage>();
         if (topmostStage is not null) topmostStage.shining = false;
@@ -120,6 +123,8 @@ public class StageManager : MonoBehaviour
         }
         topmostStage = (stageHolder.transform.childCount == 0)? null :stageHolder.transform.GetChild(0)?.gameObject.GetComponent<Stage>();
         if (topmostStage is not null) topmostStage.shining = true;
+        
+        //scrollRect.normalizedPosition = new Vector2(0, 1);
     }
     public void SetStageAndDifficulty(int stage, int difficulty)
     {
