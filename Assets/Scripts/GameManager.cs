@@ -362,14 +362,17 @@ public class GameManager : MonoBehaviour {
         comboBonusText.text = calculatedComboBonus.ToString();
         comboText.text = _currentCombo.ToString(); 
         
-        if (calculatedComboBonus >= maxCombo && userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0)
+        if (!protectedLife &&
+            calculatedComboBonus >= maxCombo && 
+            userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && 
+            userData.upgrades[UpgradeID.LifeProtector] > 0)
         {
             protectedLife = true;
             lifeCounter.ProtectHearts();
             AudioManager.Instance.PlayClip(GameClip.bonus);
         }
 
-        //TODO: add animation
+        //TODO: add animation  y que ahga el ruido siempre que llegues al combo maximo, pero no despoues
     }
    
     public int OnCorrectGuess()
