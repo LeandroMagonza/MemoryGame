@@ -49,8 +49,18 @@ public class AudioManager : MonoBehaviour
     public GameObject muteMusicButtonImage;
     public Sprite musicOnSprite;
     public Sprite musicOffSprite;
+    
+    private float maxMusicVolume;
+    private float maxSoundFXVolume;
 
+    public ConfigCanvas configCanvas;
     public void Start() {
+        maxMusicVolume = audioSourceMusic.volume;
+        maxSoundFXVolume = audioSourceFX.volume;
+
+        audioSourceMusic.volume = PlayerPrefs.GetFloat("MusicVolumePercentage") * maxMusicVolume;
+        audioSourceFX.volume = PlayerPrefs.GetFloat("SoundFXVolumePercentage") * maxSoundFXVolume;
+
         AudioClip mainTheme = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "mainTheme");
         if (mainTheme is null) mainTheme = Resources.Load<AudioClip>("defaultAssets/audio/"+ "mainTheme");
         if (mainTheme is not null) audioSourceMusic.clip = mainTheme;
@@ -102,6 +112,16 @@ public class AudioManager : MonoBehaviour
             audioSourceMusic.Stop ();
             muteMusicButtonImage.GetComponent<Image>().sprite = musicOffSprite;
         }
+    }
+
+    public void AdjustMusicVolume(float volumePercentage) {
+        audioSourceMusic.volume = maxMusicVolume * volumePercentage;
+        PlayerPrefs.SetFloat("MusicVolumePercentage",volumePercentage);
+    }
+
+    public void AdjustSoundFXVolume(float volumePercentage) {
+        audioSourceFX.volume = maxSoundFXVolume * volumePercentage;
+        PlayerPrefs.SetFloat("SoundFXVolumePercentage",volumePercentage);
     }
 }
 

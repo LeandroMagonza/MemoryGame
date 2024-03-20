@@ -42,6 +42,10 @@ public class CanvasManager : MonoBehaviour
     public Canvas selectStageCanvas;
     public Canvas gameCanvas;
     public Canvas shopCanvas;
+    public Canvas configCanvas;
+
+    public CanvasName previousCanvas;
+    public CanvasName currentCanvas;
     private void Start()
     {
         
@@ -49,15 +53,23 @@ public class CanvasManager : MonoBehaviour
         allCanvas.Add(CanvasName.SELECT_STAGE,selectStageCanvas);
         allCanvas.Add(CanvasName.GAME,gameCanvas);
         allCanvas.Add(CanvasName.SHOP,shopCanvas);
-        
+        allCanvas.Add(CanvasName.CONFIG,configCanvas);
+        currentCanvas = CanvasName.MENU;
         ChangeCanvas(initialCanvas);
     }
 
 
     public void ChangeCanvas(CanvasName canvasToSet) {
-        if (canvasToSet == CanvasName.NO_CANVAS) return; 
+        if (canvasToSet == CanvasName.NO_CANVAS) return;
+
+        if (canvasToSet == CanvasName.RETURN) {
+            ChangeCanvas(previousCanvas);
+            return;
+        }
+        previousCanvas = currentCanvas;
+        currentCanvas = canvasToSet;
         
-        foreach (var VARIABLE in allCanvas) { 
+        foreach (var VARIABLE in allCanvas) {
             //disable all canvas
             VARIABLE.Value.gameObject.SetActive(false);
         }
@@ -65,7 +77,7 @@ public class CanvasManager : MonoBehaviour
         allCanvas[canvasToSet].gameObject.SetActive(true);
     }
 
-    public void SetMainMenuCanvas(string HexbackgoundColor)
+    public void SetMainMenuCanvasColor(string HexbackgoundColor)
     {
         Color color = Color.white;
         if (ColorUtility.TryParseHtmlString("#" + HexbackgoundColor, out Color colorValue))

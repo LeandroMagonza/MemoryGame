@@ -80,7 +80,7 @@ public class GameCanvas : MonoBehaviour
     private GameManager GameManager => GameManager.Instance;
     public static GameCanvas Instance;
     public Transform stickerHolder;
-    private void Awake()
+    private GameCanvas()
     {
         if (Instance == null)
             Instance = this;

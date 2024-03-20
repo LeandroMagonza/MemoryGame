@@ -196,7 +196,13 @@ public class Match
             CustomDebugger.Log("turn.amountOfAppearences == difficulty && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)");
             CustomDebugger.Log(turn.amountOfAppearences +"=="+ difficulty +"&& ("+turn.action +"=="+ TurnAction.GuessCorrect +"||"+turn.action+" == "+TurnAction.UseClue+")");
             CustomDebugger.Log(turn.amountOfAppearences == difficulty && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue));
-            if (turn.amountOfAppearences == difficulty && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)) {
+            if (turn.amountOfAppearences == difficulty
+                &&
+                (
+                 GameManager.Instance.increaseAmountOfAppearencesOnMistake
+                 || 
+                 turn.action == TurnAction.GuessCorrect || turn.action == TurnAction.UseClue)
+                ) {
                 clearedImages.Add(turn.imageID);
                 CustomDebugger.Log("Ädding clearedImages stickerID"+turn.imageID);
             }

@@ -70,8 +70,9 @@ public class GameManager : MonoBehaviour {
     
     [Header("Skills")]
     public bool protectedLife = false;
+    public int protectedLifeOnComboAmount = 10;
     public bool deathDefy = false;
-    public bool blockChoice = false;
+    public bool blockMistake = false;
     private int deathDefyMagnitude = 0;
 
     [Header("Timer")]    
@@ -84,8 +85,8 @@ public class GameManager : MonoBehaviour {
     public int bonusMultiplicator = 1;
     
     [Header("Combo")]
-    private int _currentCombo = 0;
-    private int maxCombo = 5;
+    [SerializeField] private int _currentCombo = 0;
+    [SerializeField] private int maxComboBonus = 5;
     
     [Header("End Game Panel")]
     public TextMeshProUGUI highScoreText; 
@@ -315,7 +316,7 @@ public class GameManager : MonoBehaviour {
             firstMistake = true;
             OpenTutorialPanel(1);
         }
-        if (blockChoice)
+        if (blockMistake)
         {
             CustomDebugger.Log("Block");
             if (!GetCurrentlySelectedSticker().matchData.blockedNumbers.Contains(number))
@@ -371,7 +372,7 @@ public class GameManager : MonoBehaviour {
         }
         
         if (!protectedLife &&
-            calculatedComboBonus >= maxCombo && 
+            _currentCombo >= protectedLifeOnComboAmount && 
             userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && 
             userData.upgrades[UpgradeID.LifeProtector] > 0)
         {
@@ -705,7 +706,13 @@ public class GameManager : MonoBehaviour {
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             false);
-        currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
+        if (increaseAmountOfAppearencesOnMistake) {
+            CheckAmountOfAppearences(false);
+        }
+        else {
+            currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
+        }
+
         AudioManager.Instance.PlayClip(GameClip.incorrectGuess,1);
         ResetTimer();
         bool defeat = lifeCounter.LoseLive(ref protectedLife, false);
@@ -752,7 +759,7 @@ public class GameManager : MonoBehaviour {
         SetMatchInventory();
         protectedLife = userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0;
         deathDefy = userData.upgrades.ContainsKey(UpgradeID.DeathDefy) && userData.upgrades[UpgradeID.DeathDefy] > 0;
-        blockChoice = userData.upgrades.ContainsKey(UpgradeID.BlockMistake) && userData.upgrades[UpgradeID.BlockMistake] > 0;
+        blockMistake = userData.upgrades.ContainsKey(UpgradeID.BlockMistake) && userData.upgrades[UpgradeID.BlockMistake] > 0;
         SetNumpadByDifficulty(selectedDifficulty);
         gameEnded = false;
         stickerDisplay.gameObject.SetActive(true);
@@ -783,7 +790,7 @@ public class GameManager : MonoBehaviour {
         _currentMatch = new Match(selectedStage,selectedDifficulty,false);
         _currentCombo = 0;
         endGameAchievementStars.ResetStars();
-        GameCanvas.Instance.UpdateUI();
+        GameCanvas.UpdateUI();
         pause = false;
         pausePanel.SetActive(false);
         tutorialPanel.SetActive(false);
@@ -996,11 +1003,10 @@ public class GameManager : MonoBehaviour {
     }
     public int CalculateScoreComboBonus()
     {
-        maxCombo = 5;
         int calculatedComboBonus = (int)Math.Floor(((float)_currentCombo / 2));
-        if (calculatedComboBonus >= maxCombo)
+        if (calculatedComboBonus >= maxComboBonus)
         {
-            calculatedComboBonus = maxCombo;
+            calculatedComboBonus = maxComboBonus;
         }
         return calculatedComboBonus;
     }

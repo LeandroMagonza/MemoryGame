@@ -30,4 +30,6 @@ public enum CanvasName
     GAME,
     SELECT_STAGE,
     SHOP,
+    CONFIG,
+    RETURN
 }

@@ -100,7 +100,7 @@ public class PersistanceManager : MonoBehaviour
         if (mainMenuConfigJson is JObject)
         {
             string hexColor = mainMenuConfigJson["backgroundColor"].Value<string>();
-            CanvasManager.Instance.SetMainMenuCanvas(hexColor);
+            CanvasManager.Instance.SetMainMenuCanvasColor(hexColor);
         }
         else
         {
