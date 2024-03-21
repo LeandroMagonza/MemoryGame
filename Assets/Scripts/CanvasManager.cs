@@ -43,6 +43,7 @@ public class CanvasManager : MonoBehaviour
     public Canvas gameCanvas;
     public Canvas shopCanvas;
     public Canvas configCanvas;
+    public Canvas languageCanvas;
 
     public CanvasName previousCanvas;
     public CanvasName currentCanvas;
@@ -54,6 +55,7 @@ public class CanvasManager : MonoBehaviour
         allCanvas.Add(CanvasName.GAME,gameCanvas);
         allCanvas.Add(CanvasName.SHOP,shopCanvas);
         allCanvas.Add(CanvasName.CONFIG,configCanvas);
+        allCanvas.Add(CanvasName.LANGUAGE,languageCanvas);
         currentCanvas = CanvasName.MENU;
         ChangeCanvas(initialCanvas);
     }

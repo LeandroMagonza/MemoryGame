@@ -579,15 +579,7 @@ public class GameManager : MonoBehaviour {
             delay = AudioManager.Instance.clips[GameClip.endGame].length;
         }
         
-        if (StageManager.Instance.stages.ContainsKey(selectedStage + 1) ) {
-            nextStageButton.GetComponent<Button>().interactable = true;
-        }
-        else if (selectedDifficulty<9) {
-            nextStageButton.GetComponent<Button>().interactable = true;
-        }
-        else {
-            nextStageButton.GetComponent<Button>().interactable = true;
-        }
+        
         
         endGameButtons.transform.parent.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
@@ -600,23 +592,17 @@ public class GameManager : MonoBehaviour {
         userData.coins += score;
         var firstTimeAchievements = userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
 
+
         //si no hay proximo stage desactivo el boton play next stage
-        if (StageManager.Instance.stages.ContainsKey(selectedStage + 1) || selectedDifficulty<9 ) {
+        if ((StageManager.Instance.stages.ContainsKey(selectedStage + 1) || selectedDifficulty < 9)
+            &&
+            (userData.GetUserStageData(selectedStage, selectedDifficulty).achievements
+                .Contains(Achievement.BarelyClearedStage))
+            ) {
             nextStageButton.gameObject.SetActive(true);
         }
         else {
             nextStageButton.gameObject.SetActive(false);
-        }
-        
-        // si hay proximo stage pero el stage actual no tiene el primer achievement, hago que el boton no sea interactuable
-        if (
-            userData.GetUserStageData(selectedStage, selectedDifficulty).achievements
-            .Contains(Achievement.BarelyClearedStage)
-            ) {
-            nextStageButton.GetComponent<Button>().interactable = true;
-        }
-        else {
-            nextStageButton.GetComponent<Button>().interactable = false;
         }
         
         int lastHighScore = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore;

@@ -31,5 +31,6 @@ public enum CanvasName
     SELECT_STAGE,
     SHOP,
     CONFIG,
-    RETURN
+    RETURN,
+    LANGUAGE
 }
