@@ -282,6 +282,7 @@ public class GameManager : MonoBehaviour {
         if (currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences == selectedDifficulty)
         {
             CustomDebugger.Log("Clear: " + _currentlySelectedSticker.name);
+            GameCanvas.barController.Substract();
             if (correct) scoreModificationBonus = GainBonus();
             RemoveStickerFromPool();
         }
@@ -772,6 +773,7 @@ public class GameManager : MonoBehaviour {
             lifeCounter.ResetLives();
         }
         LoadStickers();
+        GameCanvas.barController.SetBar(_remainingStickersFromStage.Count);
         currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
         AddStickers(4);
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion

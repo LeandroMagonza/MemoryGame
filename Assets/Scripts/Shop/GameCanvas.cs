@@ -77,9 +77,11 @@ public struct ConsumableButtonData
 public class GameCanvas : MonoBehaviour
 {
     public ConsumableButtonData[] buttons;
+    public RemainingBarController barController;
     private GameManager GameManager => GameManager.Instance;
     public static GameCanvas Instance;
     public Transform stickerHolder;
+
     private void Awake()
     {
         if (Instance == null)
