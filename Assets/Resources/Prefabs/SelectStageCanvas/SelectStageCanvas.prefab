@@ -764,6 +764,22 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7385570368427170505, guid: 635288ba9a1a546478a2016859dd7dd3, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2679346203571788118}
+    - target: {fileID: 7385570368427170505, guid: 635288ba9a1a546478a2016859dd7dd3, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: CloseStickerPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 7385570368427170505, guid: 635288ba9a1a546478a2016859dd7dd3, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: SelectStageCanvas, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 7943365471629466935, guid: 635288ba9a1a546478a2016859dd7dd3, type: 3}
+      propertyPath: canvasToSet
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8212974396992618341, guid: 635288ba9a1a546478a2016859dd7dd3, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -778,7 +794,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8212974396992618341, guid: 635288ba9a1a546478a2016859dd7dd3, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 60.775
+      value: 56.875
       objectReference: {fileID: 0}
     - target: {fileID: 8212974396992618341, guid: 635288ba9a1a546478a2016859dd7dd3, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -786,7 +802,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8212974396992618341, guid: 635288ba9a1a546478a2016859dd7dd3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -30.3875
+      value: -28.4375
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 635288ba9a1a546478a2016859dd7dd3, type: 3}

@@ -116,7 +116,7 @@ public class Sticker : MonoBehaviour
 
     public void ConfigureForPack() {
         spriteHolder.color = Color.white;
-        DisplayFrame(true);
+        DisplayFrame(false);
         DisplayLevel(false);
         DisplayLevelStickerProgressAmount(false);
         DisplayName(true);

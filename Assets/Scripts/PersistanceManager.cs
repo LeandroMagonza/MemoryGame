@@ -59,6 +59,8 @@ public class PersistanceManager : MonoBehaviour
     public PacksData packs = new PacksData();
     public UserData userData;
     private int eraseCounter = 3;
+    
+    private int stagesVersion = 0;
 
     void Start() {
         StartCoroutine(LoadDataAndSetup());
@@ -66,10 +68,12 @@ public class PersistanceManager : MonoBehaviour
 
     public IEnumerator LoadDataAndSetup() {
         yield return StartCoroutine(LoadUserData());
+        // LOAD UI TIENE QUE LLAMARSE PRIMERO PORQUE AHI VIENE LA VERSION DEL STAGES
+        // SE FIJA SI HAY UNO MAS NUEVO Y LO REEMPLAZA
+        yield return StartCoroutine(LoadUIMenuConfiguration());
         yield return StartCoroutine(LoadStages());
         yield return StartCoroutine(LoadStickerLevels());
         yield return StartCoroutine(LoadPacks());
-        yield return StartCoroutine(LoadUIMenuConfiguration());
 
 
     }
@@ -78,36 +82,63 @@ public class PersistanceManager : MonoBehaviour
     {
         string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
+        string latestFilePath = Path.Combine(Application.persistentDataPath, setName, "latestStages.json");
         string json;
+
         if (!File.Exists(filePath))
         {
             CustomDebugger.Log("No saved stages found at " + filePath);
             yield return StartCoroutine(GetJson("stages"));
         }
-
-        CustomDebugger.Log(filePath);
-        json = File.ReadAllText(filePath);
-
-        // Parse the JSON into a JObject
-        JObject jsonData = JObject.Parse(json);
-
-        if (!jsonData.ContainsKey("config"))
+        else
         {
-            CustomDebugger.Log("No config found");
-            yield break;
+            yield return StartCoroutine(GetJson("stages", "latestStages"));
         }
-        JObject mainMenuConfigJson = jsonData["config"].ToObject<JObject>();
-        if (mainMenuConfigJson is JObject)
+
+        // Cargar la configuración actual
+        json = File.ReadAllText(filePath);
+        JObject jsonData = JObject.Parse(json);
+        ConfigData currentConfig = jsonData["config"].ToObject<ConfigData>();
+
+        // Cargar la última configuración, si está disponible
+        ConfigData latestConfig = null;
+        if (File.Exists(latestFilePath))
         {
-            string hexColor = mainMenuConfigJson["backgroundColor"].Value<string>();
-            CanvasManager.Instance.SetMainMenuCanvasColor(hexColor);
+            json = File.ReadAllText(latestFilePath);
+            JObject latestJsonData = JObject.Parse(json);
+            latestConfig = latestJsonData["config"].ToObject<ConfigData>();
+        }
+
+        // Inicializar finalConfig con la configuración actual
+        ConfigData finalConfig = currentConfig;
+
+        // Verificar si existe una última configuración y si su versión es más reciente
+        if (latestConfig != null && latestConfig.version > currentConfig.version)
+        {
+            // Si la última configuración es más reciente, utilizar esa
+            finalConfig = latestConfig;
+        }
+
+
+        // Aplicar la configuración
+        if (!string.IsNullOrEmpty(finalConfig.backgroundColor))
+        {
+            CanvasManager.Instance.SetMainMenuCanvasColor(finalConfig.backgroundColor);
         }
         else
         {
-            CustomDebugger.LogError("Not Set Configuration");
+            CustomDebugger.LogError("No valid configuration found.");
         }
+
+        // Opcional: reemplazar la configuración actual por la última si es más nueva
+        if (finalConfig == latestConfig)
+        {
+           File.Copy(latestFilePath, filePath, true);
+        }
+
         yield return null;
     }
+
 
     private void OnApplicationQuit()
     {
@@ -349,8 +380,11 @@ public class PersistanceManager : MonoBehaviour
         yield return null;
     }
 
-    IEnumerator GetJson(string file_name)
+    IEnumerator GetJson(string file_name,string save_name = "")
     {
+        if (save_name == "") {
+            save_name = file_name;
+        }
         string setName = StageManager.Instance.gameVersion.ToString();
         string url = "https://leandromagonza.github.io/MemoGram/" + setName + "/" + file_name + ".json";
 
@@ -375,7 +409,7 @@ public class PersistanceManager : MonoBehaviour
             else
             {
                 // Construye la ruta completa del archivo, incluyendo el nombre del archivo
-                string filePath = Path.Combine(directoryPath, file_name + ".json");
+                string filePath = Path.Combine(directoryPath, save_name + ".json");
         
                 // Escribe el texto en el archivo
                 File.WriteAllText(filePath, www.downloadHandler.text);
@@ -442,4 +476,9 @@ public enum DataLocation
 {
     LocalStorage,
     ResourcesFolder
+}
+
+public class ConfigData {
+    public int version = 0; // Valor predeterminado 0 para versiones sin este campo
+    public string backgroundColor;
 }
