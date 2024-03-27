@@ -141,7 +141,7 @@ Canvas:
   m_GameObject: {fileID: 2263625804015464043}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 1
+  m_RenderMode: 0
   m_Camera: {fileID: 0}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -151,7 +151,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
-  m_SortingLayerID: 0
+  m_SortingLayerID: 885428685
   m_SortingOrder: 0
   m_TargetDisplay: 0
 --- !u!114 &2263625804015464046
@@ -169,8 +169,8 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 500}
-  m_ScreenMatchMode: 2
+  m_ReferenceResolution: {x: 1920, y: 1080}
+  m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
@@ -521,7 +521,7 @@ MonoBehaviour:
   m_ChildAlignment: 1
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 75, y: 75}
+  m_CellSize: {x: 150, y: 150}
   m_Spacing: {x: 40, y: 40}
   m_Constraint: 1
   m_ConstraintCount: 2
@@ -951,14 +951,14 @@ PrefabInstance:
     - target: {fileID: 2970192187020338405, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 65f4f5d0e117ad246aed297baf38d64c, type: 3}
+      objectReference: {fileID: 21300000, guid: 681db73f19fb24efe843aad713eccb43, type: 3}
     - target: {fileID: 2970192187020338405, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_Color.b
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338405, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_Color.g
-      value: 0.248857
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2970192187020338405, guid: 135141b41a529a64a9f7f670bd56f09f, type: 3}
       propertyPath: m_Color.r
