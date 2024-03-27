@@ -78,8 +78,9 @@ public class GameCanvas : MonoBehaviour
 {
     public ConsumableButtonData[] buttons;
     private GameManager GameManager => GameManager.Instance;
-    public static GameCanvas Instance;
-    public Transform stickerHolder;
+    public static GameCanvas Instance;    
+    [SerializeField] public GameObject pausePanel;
+
     private GameCanvas()
     {
         if (Instance == null)

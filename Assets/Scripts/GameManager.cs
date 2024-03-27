@@ -96,9 +96,9 @@ public class GameManager : MonoBehaviour {
     public GameObject endGameButtons;
     public ChangeCanvasButton nextStageButton;
 
-    
-    [Header("Pause")]
-    public GameObject pausePanel;
+
+    //[Header("Pause")] 
+    public GameObject pausePanel => GameCanvas.pausePanel;
     
     [Header("NumpadQuizOptionsPad")]
     public GameObject numpad;
