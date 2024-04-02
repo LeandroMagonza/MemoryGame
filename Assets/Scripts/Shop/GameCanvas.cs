@@ -258,7 +258,6 @@ public class GameCanvas : MonoBehaviour
             case ConsumableID.Peek:
                 UsePeek();
                 break;
-
             default:
                 break;
         }
