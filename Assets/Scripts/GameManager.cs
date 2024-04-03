@@ -283,6 +283,7 @@ public class GameManager : MonoBehaviour {
         if (currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences == selectedDifficulty)
         {
             CustomDebugger.Log("Clear: " + _currentlySelectedSticker.name);
+            GameCanvas.barController.Substract();
             if (correct) scoreModificationBonus = GainBonus();
             RemoveStickerFromPool();
         }
@@ -302,7 +303,7 @@ public class GameManager : MonoBehaviour {
         }
 
         SetRandomImage();
-        GameCanvas.UpdateUI();
+        PowerPanelButtonHolder.Instance.UpdateUI();
     }
 
 
@@ -314,7 +315,7 @@ public class GameManager : MonoBehaviour {
         if (!firstMistake)
         {
             firstMistake = true;
-            OpenTutorialPanel(1);
+            //OpenTutorialPanel(1);
         }
         if (blockMistake)
         {
@@ -765,6 +766,7 @@ public class GameManager : MonoBehaviour {
             lifeCounter.ResetLives();
         }
         LoadStickers();
+        GameCanvas.barController.SetBar(_remainingStickersFromStage.Count);
         currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
         AddStickers(4);
         //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion
@@ -776,14 +778,14 @@ public class GameManager : MonoBehaviour {
         _currentMatch = new Match(selectedStage,selectedDifficulty,false);
         _currentCombo = 0;
         endGameAchievementStars.ResetStars();
-        GameCanvas.UpdateUI();
+        PowerPanelButtonHolder.Instance.UpdateUI();
         pause = false;
         pausePanel.SetActive(false);
         tutorialPanel.SetActive(false);
         
         if (userData.stages[0].matches.Count == 0)
         {
-            OpenTutorialPanel(0);
+            //OpenTutorialPanel(0);
         }
         foreach (var stageData in userData.stages)
         {
@@ -1049,11 +1051,11 @@ public class GameManager : MonoBehaviour {
     }
 }
 public enum StickerSet {
-    Pokemons_SPRITESHEET_151,
-    Landscapes_IMAGES_10,
-    AnatomyFractures_SPRITESHEET_10,
-    AnatomyBones_SPRITESHEET_10,
-    WorldFlags_IMAGES_51
+    Pokemon,
+    Landscapes,
+    AnatomyFractures,
+    AnatomyBones,
+    WorldFlagsga
 }
 
 public enum ShopItemType

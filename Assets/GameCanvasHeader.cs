@@ -10,6 +10,7 @@ public class GameCanvasHeader : MonoBehaviour
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI comboText;
     public TextMeshProUGUI comboBonusText;
+    public RemainingBarController barController;
 
     public void PauseButtonPressed() {
         GameManager.Instance.TogglePause();
