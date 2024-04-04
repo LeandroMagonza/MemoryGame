@@ -186,7 +186,7 @@ public class PersistanceManager : MonoBehaviour
             Debug.LogError("Invalid data location.");
             yield break;
         }
-
+        //jsonData["stickerLevels"]        
         Serialization<StageData> stageList = JsonConvert.DeserializeObject<Serialization<StageData>>(json);
         if (stageList == null || stageList.items == null)
         {
@@ -433,7 +433,7 @@ public class PersistanceManager : MonoBehaviour
     }
     public int GetStickerDuplicates(StickerSet stickerSet,int stickerID)
     {
-        CustomDebugger.Log(stickerSet+" sticker id "+stickerID,DebugCategory.STICKERLOAD);
+        CustomDebugger.Log(stickerSet+" sticker id "+stickerID,DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
         if (userData.stickerDuplicates.ContainsKey((stickerSet,stickerID)))
         {
             return userData.stickerDuplicates[(stickerSet, stickerID)];

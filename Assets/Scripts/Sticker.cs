@@ -29,12 +29,18 @@ public class Sticker : MonoBehaviour
         SetExpBar(stickerDataToSet);
         SetSprite(stickerDataToSet);
         SetLevel(stickerDataToSet);
+        SetFrame(stickerDataToSet);
 
+    }
+
+    private void SetFrame(StickerData stickerDataToSet) {
+        CustomDebugger.Log("setframecolor"+stickerDataToSet.color);
+        GetComponent<Image>().color = stickerDataToSet.color;
     }
 
     public void SetName(StickerData stickerDataToSet) {
         name.text = stickerDataToSet.name;
-        name.color = stickerDataToSet.color;
+        //name.color = stickerDataToSet.color;
     }
     private void SetExpBar(StickerData stickerDataToSet) {
         int duplicatesForCurrentLevel = 0;

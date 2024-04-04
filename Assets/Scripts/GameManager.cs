@@ -283,7 +283,6 @@ public class GameManager : MonoBehaviour {
         if (currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences == selectedDifficulty)
         {
             CustomDebugger.Log("Clear: " + _currentlySelectedSticker.name);
-            GameCanvas.barController.Substract();
             if (correct) scoreModificationBonus = GainBonus();
             RemoveStickerFromPool();
         }
@@ -461,10 +460,39 @@ public class GameManager : MonoBehaviour {
         _remainingStickersFromStage = new Dictionary<int, StickerData>();
         CustomDebugger.Log("Loading stickers for stage "+stages[selectedStage].stageID+", name "+stages[selectedStage].title+" from set "+ stages[selectedStage].stickerSet);
         //david cantidad total stages[selectedStage].stickers.Count
-        foreach (var stickerID in stages[selectedStage].stickers) {
-            StickerData stickerData = StickerManager.Instance.GetStickerDataFromSetByStickerID(stages[selectedStage].stickerSet, stickerID);
-            _remainingStickersFromStage.Add(stickerID, stickerData);
+        int amountOfStickersToSelect = stages[selectedStage].stickers.Count;
+        
+        //StickerManager.Instance.currentLoadedSetStickerData
+        if (!StickerManager.Instance.currentLoadedStickerGroups.ContainsKey(stages[selectedStage].stickerSet))
+        {
+            StickerManager.Instance.LoadAllStickersFromSet(stages[selectedStage].stickerSet);
         }
+        int randomGroupSelectedIndex = Random.Range(0, StickerManager.Instance.currentLoadedStickerGroups[stages[selectedStage].stickerSet].Keys.Count);
+        string randomGroupSelectedName = "";
+        int currentGroup = 0;
+        foreach (var VARIABLE in StickerManager.Instance.currentLoadedStickerGroups[stages[selectedStage].stickerSet]) {
+            if (currentGroup == randomGroupSelectedIndex) {
+                randomGroupSelectedName = VARIABLE.Key;
+                break;
+            }
+            currentGroup++;
+        }
+
+        if (StickerManager.Instance.currentLoadedStickerGroups[stages[selectedStage].stickerSet][randomGroupSelectedName].Count < amountOfStickersToSelect) {
+            Debug.LogError("Se intentaron seleccionar mas stickers que los que hay en el grupo");
+        }
+
+        var shuffledStickers = StickerManager.Instance.currentLoadedStickerGroups[stages[selectedStage].stickerSet][randomGroupSelectedName].ToList().Shuffle();
+
+        for (int currentStickerSelectedIndex = 0; currentStickerSelectedIndex < amountOfStickersToSelect; currentStickerSelectedIndex++) {
+            int selectedStickerID = shuffledStickers[currentStickerSelectedIndex];
+            StickerData stickerData =
+                StickerManager.Instance.GetStickerDataFromSetByStickerID(stages[selectedStage].stickerSet, selectedStickerID);
+            _remainingStickersFromStage.Add(selectedStickerID, stickerData);
+        }
+        //de este grupo 
+        //StickerManager.Instance.currentLoadedStickerGroups[StageManager.Instance.gameVersion][randomGroupSelectedName];
+        //seleccionar amountOfStickersToSelect, ordenar random y quedar con los amountoftickestoselect primeros?
     }
 
 
@@ -535,6 +563,7 @@ public class GameManager : MonoBehaviour {
     public void RemoveStickerFromPool() {
         //currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences = 0;
         currentlyInGameStickers.Remove(_currentlySelectedSticker);
+        GameCanvas.barController.IncreaseCounter();
         // aca se setea si la imagen vuelve al set general o no  
         //_remainingStickersFromStage.Remove(_currentlySelectedSticker.stickerID);
     }
@@ -1055,7 +1084,7 @@ public enum StickerSet {
     Landscapes,
     AnatomyFractures,
     AnatomyBones,
-    WorldFlagsga
+    WorldFlags
 }
 
 public enum ShopItemType

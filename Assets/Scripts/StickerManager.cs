@@ -41,8 +41,11 @@ public class StickerManager : MonoBehaviour
     private List<Sticker> _stickerPool = new List<Sticker>();
     // esto se tiene que ir porque ya esta todo en sticker data, y se va a cargar directo desde el csv
 
-    public Dictionary<StickerSet,Dictionary<int,StickerData>> currentLoadedSetStickerData = new Dictionary<StickerSet, Dictionary<int, StickerData>>();
-
+    public Dictionary<StickerSet,Dictionary<int,StickerData>> currentLoadedSetStickerData = new ();
+    
+    //para cada sticker set tenemos varios grupos, si el sticker set es worldflags los grupos serian los continentes
+    // cada continente tiene una lista de stickers en el
+    public Dictionary<StickerSet, Dictionary<string, List<int>>> currentLoadedStickerGroups = new ();
     // Update is called once per frame
     public Sticker GetStickerHolder()
     {
@@ -97,18 +100,18 @@ public class StickerManager : MonoBehaviour
     }
     public int GetStickerLevelByAmountOfDuplicates(int amountOfDuplicates)
     {
-        CustomDebugger.Log("GetStickerLevelByAmountOfDuplicates");
-        CustomDebugger.Log("amount of duplicates "+amountOfDuplicates);
+        CustomDebugger.Log("GetStickerLevelByAmountOfDuplicates",DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
+        CustomDebugger.Log("amount of duplicates "+amountOfDuplicates,DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
         int level = 0;
-        CustomDebugger.Log("stikcerlevels count "+PersistanceManager.Instance.StickerLevels.Count);
+        CustomDebugger.Log("stikcerlevels count "+PersistanceManager.Instance.StickerLevels.Count,DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
         foreach (var VARIABLE in PersistanceManager.Instance.StickerLevels)
         {
             
-            CustomDebugger.Log("level "+VARIABLE.Key+" duplicates required "+VARIABLE.Value.amountRequired);
+            CustomDebugger.Log("level "+VARIABLE.Key+" duplicates required "+VARIABLE.Value.amountRequired,DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
             if (amountOfDuplicates < VARIABLE.Value.amountRequired) break;
             level = VARIABLE.Key;
         }
-        CustomDebugger.Log("resulitng level "+level);
+        CustomDebugger.Log("resulitng level "+level,DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
         return level;
     }
 
@@ -145,8 +148,10 @@ public class StickerManager : MonoBehaviour
             int id = int.Parse(fields[0]);
             string name = fields[1];
             string type = fields[2];
-            ColorUtility.TryParseHtmlString(fields[3], out Color color);
-
+            ColorUtility.TryParseHtmlString(fields[3].Trim(), out Color color);
+            //ColorUtility.TryParseHtmlString("#FF0000", out Color color);
+            //ColorUtility.TryParseHtmlString("#71558e", out Color color);
+            CustomDebugger.Log("creating sticker " +id+" "+fields[3]+" "+color);
             Sprite sprite = null;
             if (setType == "SPRITESHEET")
             {
@@ -171,10 +176,24 @@ public class StickerManager : MonoBehaviour
 
             StickerData stickerData = new StickerData(id, sprite, setToLoad, name, color, type);
             dictionary.Add(id, stickerData);
+
+            if (!currentLoadedStickerGroups.ContainsKey(setToLoad)) {
+                currentLoadedStickerGroups.Add(setToLoad,new Dictionary<string, List<int>>());
+            }
+
+            if (!currentLoadedStickerGroups[setToLoad].ContainsKey(type)) {
+                currentLoadedStickerGroups[setToLoad].Add(type,new List<int>());
+            }
+            currentLoadedStickerGroups[setToLoad][type].Add(id);            
         }
 
         currentLoadedSetStickerData.Add(setToLoad, dictionary);
         Debug.Log("Loaded stickers from set " + setToLoad);
+        foreach (var set in currentLoadedStickerGroups) {
+            foreach (var group in set.Value) {
+                CustomDebugger.Log(set.Key + " " + group.Key + " " + group.Value.Count);
+            }
+        }
     }
 
 }

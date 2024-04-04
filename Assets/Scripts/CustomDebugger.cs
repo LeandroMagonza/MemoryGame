@@ -24,7 +24,7 @@ public static class CustomDebugger
         //disabledCategories.Add(DebugCategory.GENERAL);
         //disabledCategories.Add(DebugCategory.LOAD);
         //disabledCategories.Add(DebugCategory.SAVE);
-        //disabledCategories.Add(DebugCategory.STICKERLOAD);
+        disabledCategories.Add(DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
         #if UNITY_EDITOR
             initialized = true;
         #endif
@@ -42,5 +42,6 @@ public enum DebugCategory
     LOAD,
     SAVE,
     STICKERLOAD,
-    TUTORIAL
+    TUTORIAL,
+    STICKERLOAD_AMOUNTOFCATEGORIES
 }

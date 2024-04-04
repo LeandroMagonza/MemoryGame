@@ -68,7 +68,7 @@ public class StageManager : MonoBehaviour
         // Recorro las dificultades, arrancando por 3, hasta 9, creando los stages para cada una, y cortando cuando la dificultad este bloqueada
         // que es cuando la dificultad anterior no tenga por lo menos 1 achievement
         bool nextStageUnlocked = true;
-        for (int difficulty = 3; difficulty < 10; difficulty++)
+        for (int difficulty = 2; difficulty < 10; difficulty++)
         {
             if (!nextStageUnlocked) break;
             foreach (var stageIndexAndData in stages) {
@@ -102,7 +102,7 @@ public class StageManager : MonoBehaviour
                     newStage.SetScore( userData.GetUserStageData(stageData.stageID, difficulty).highScore);
                     
              
-                    
+                    //TODO: mover esto a otro laod que tenga mas sentido
                     if (ColorUtility.TryParseHtmlString("#00d561", out Color green))
                          
                     if (ColorUtility.TryParseHtmlString("#fedd30", out Color yellow))
@@ -110,7 +110,7 @@ public class StageManager : MonoBehaviour
                     if (ColorUtility.TryParseHtmlString("#d60149", out Color red))
                     
                     newStage.difficultyButton.gameObject.GetComponent<Image>().color = 
-                        MyExtensions.GetLerpColor(difficulty-3,9-3,new List<Color>()
+                        MyExtensions.GetLerpColor(difficulty-2,9-2,new List<Color>()
                             {green, yellow, red});
                     newStage.difficultyButton.stars
                         .SetAchievements(userData.GetUserStageData(stageData.stageID, difficulty).achievements);
