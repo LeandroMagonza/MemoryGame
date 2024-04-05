@@ -40,6 +40,7 @@ public class PackManager : MonoBehaviour {
         coins.text = GameManager.Instance.userData.coins.ToString();
     }
 
+    /*
     public IEnumerator OpenPack(int packStage = 0)
     {
         GameManager.Instance.disableInput = true;
@@ -131,4 +132,5 @@ public class PackManager : MonoBehaviour {
         GameManager.Instance.UpdateAchievementAndUnlockedLevels();
         GameManager.Instance.disableInput = false;
     }
+    */
 }

@@ -1079,7 +1079,7 @@ MonoBehaviour:
   scoreText: {fileID: 8671258919712023167}
   comboText: {fileID: 8671258919901275533}
   comboBonusText: {fileID: 8671258921447544636}
-  barController: {fileID: 8065467366552045194}
+  barController: {fileID: 7350290626302882907}
 --- !u!1 &8671258920454318535
 GameObject:
   m_ObjectHideFlags: 0
@@ -1932,6 +1932,30 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2445190125569365011, guid: 6954c6db519ada748ad554c33891736f, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2445190125569365011, guid: 6954c6db519ada748ad554c33891736f, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2445190125569365011, guid: 6954c6db519ada748ad554c33891736f, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2445190125569365011, guid: 6954c6db519ada748ad554c33891736f, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2445190125569365011, guid: 6954c6db519ada748ad554c33891736f, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2445190125569365011, guid: 6954c6db519ada748ad554c33891736f, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2939479517768760614, guid: 6954c6db519ada748ad554c33891736f, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -2186,9 +2210,9 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 807348116456677303, guid: 6954c6db519ada748ad554c33891736f, type: 3}
   m_PrefabInstance: {fileID: 246488865774612998}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &8065467366552045194 stripped
+--- !u!114 &7350290626302882907 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7819937283674649740, guid: 6954c6db519ada748ad554c33891736f, type: 3}
+  m_CorrespondingSourceObject: {fileID: 7307880054493480541, guid: 6954c6db519ada748ad554c33891736f, type: 3}
   m_PrefabInstance: {fileID: 246488865774612998}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}

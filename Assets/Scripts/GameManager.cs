@@ -152,12 +152,12 @@ public class GameManager : MonoBehaviour {
 
     #endregion
     public UserData userData => PersistanceManager.Instance.userData;
-    public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
+    //public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
     private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.StickerLevels;
     public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> matchInventory = new Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)>();
     public PacksData packs => PersistanceManager.Instance.packs;
     public GameCanvas GameCanvas => GameCanvas.Instance;
-    public int selectedStage => StageManager.Instance.selectedStage;
+    public int selectedLevel => StageManager.Instance.selectedStage;
     public int selectedDifficulty => StageManager.Instance.selectedDifficulty;
     #endregion
 
@@ -168,10 +168,10 @@ public class GameManager : MonoBehaviour {
 
 
     public void SetScoreTexts() {
-        if (userData.GetUserStageData(selectedStage, selectedDifficulty) is not null) {
+        if (userData.GetUserStageData(selectedLevel, selectedDifficulty) is not null) {
             currentCoins.text = userData.coins.ToString();
             endGameScoreText.text = "0";
-            highScoreText.text = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore.ToString();
+            highScoreText.text = userData.GetUserStageData(selectedLevel, selectedDifficulty).highScore.ToString();
         }
         else {
             CustomDebugger.Log("stage data not found when setting highscore on endmatchscreen");
@@ -413,7 +413,7 @@ public class GameManager : MonoBehaviour {
 
     private int CalculateCorrectGuessBasePointsAndCombo()
     {
-        return stages[selectedStage].basePoints +
+        return (int)MathF.Floor(selectedLevel / 2) +
                currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences
                + (_currentlySelectedSticker.level - 1)
                + CalculateScoreComboBonus();
@@ -458,42 +458,33 @@ public class GameManager : MonoBehaviour {
     private void LoadStickers() {
 
         _remainingStickersFromStage = new Dictionary<int, StickerData>();
-        CustomDebugger.Log("Loading stickers for stage "+stages[selectedStage].stageID+", name "+stages[selectedStage].title+" from set "+ stages[selectedStage].stickerSet);
+        CustomDebugger.Log("Loading stickers for stage "+selectedLevel+" from set "+ StageManager.Instance.gameVersion);
         //david cantidad total stages[selectedStage].stickers.Count
-        int amountOfStickersToSelect = stages[selectedStage].stickers.Count;
+        int amountOfStickersToSelect = selectedLevel;
         
         //StickerManager.Instance.currentLoadedSetStickerData
-        if (!StickerManager.Instance.currentLoadedStickerGroups.ContainsKey(stages[selectedStage].stickerSet))
-        {
-            StickerManager.Instance.LoadAllStickersFromSet(stages[selectedStage].stickerSet);
-        }
-        int randomGroupSelectedIndex = Random.Range(0, StickerManager.Instance.currentLoadedStickerGroups[stages[selectedStage].stickerSet].Keys.Count);
-        string randomGroupSelectedName = "";
-        int currentGroup = 0;
-        foreach (var VARIABLE in StickerManager.Instance.currentLoadedStickerGroups[stages[selectedStage].stickerSet]) {
-            if (currentGroup == randomGroupSelectedIndex) {
-                randomGroupSelectedName = VARIABLE.Key;
-                break;
-            }
-            currentGroup++;
-        }
+  
+        
+        var randomGroupSelectedName = StageManager.Instance.selectedStickerGroup;
 
-        if (StickerManager.Instance.currentLoadedStickerGroups[stages[selectedStage].stickerSet][randomGroupSelectedName].Count < amountOfStickersToSelect) {
+        if (StickerManager.Instance.currentLoadedStickerGroups[StageManager.Instance.gameVersion][randomGroupSelectedName].Count < amountOfStickersToSelect) {
             Debug.LogError("Se intentaron seleccionar mas stickers que los que hay en el grupo");
         }
 
-        var shuffledStickers = StickerManager.Instance.currentLoadedStickerGroups[stages[selectedStage].stickerSet][randomGroupSelectedName].ToList().Shuffle();
+        var shuffledStickers = StickerManager.Instance.currentLoadedStickerGroups[StageManager.Instance.gameVersion][randomGroupSelectedName].ToList().Shuffle();
 
         for (int currentStickerSelectedIndex = 0; currentStickerSelectedIndex < amountOfStickersToSelect; currentStickerSelectedIndex++) {
             int selectedStickerID = shuffledStickers[currentStickerSelectedIndex];
             StickerData stickerData =
-                StickerManager.Instance.GetStickerDataFromSetByStickerID(stages[selectedStage].stickerSet, selectedStickerID);
+                StickerManager.Instance.GetStickerDataFromSetByStickerID(StageManager.Instance.gameVersion, selectedStickerID);
             _remainingStickersFromStage.Add(selectedStickerID, stickerData);
         }
         //de este grupo 
         //StickerManager.Instance.currentLoadedStickerGroups[StageManager.Instance.gameVersion][randomGroupSelectedName];
         //seleccionar amountOfStickersToSelect, ordenar random y quedar con los amountoftickestoselect primeros?
     }
+
+    
 
 
     private void SetRandomImage() {
@@ -510,7 +501,10 @@ public class GameManager : MonoBehaviour {
         stickerDisplay.SetStickerData(nextSticker);
         
         _currentlySelectedSticker = nextSticker;
-        if (currentGameMode == GameMode.QUIZ)
+
+        #region QuizMode
+        //TODO: Revisar porque hubo muchos cambios en como se hacen los stages que hay que actualizar en este modo
+        /*if (currentGameMode == GameMode.QUIZ)
         {
             quizOptionButtons.Shuffle();
 
@@ -529,9 +523,9 @@ public class GameManager : MonoBehaviour {
             
             List<StickerData> listForRandomOptions = new List<StickerData>();
 
-            foreach (var VARIABLE in StickerManager.Instance.currentLoadedSetStickerData[stages[selectedStage].stickerSet].ToList())
+            foreach (var VARIABLE in StickerManager.Instance.currentLoadedSetStickerData[StageManager.Instance.gameVersion].ToList())
             {
-                bool isStickerInStage = stages[selectedStage].stickers.Contains(VARIABLE.Value.stickerID);
+                bool isStickerInStage = stages[selectedLevel].stickers.Contains(VARIABLE.Value.stickerID);
                 if (VARIABLE.Value.stickerID != _currentlySelectedSticker.stickerID &&
                     VARIABLE.Value.name.ToUpper() != _currentlySelectedSticker.name.ToUpper() &&
                     ((limitOptionsToStage && isStickerInStage) || !limitOptionsToStage)
@@ -556,7 +550,8 @@ public class GameManager : MonoBehaviour {
             }
 
         }
-        
+        */
+        #endregion
         currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences++;
     }
 
@@ -620,13 +615,13 @@ public class GameManager : MonoBehaviour {
         AdmobAdsManager.Instance.ReduceInstertitialTime(elapsedTime);
         int formerCoins = userData.coins;
         userData.coins += score;
-        var firstTimeAchievements = userData.GetUserStageData(selectedStage, selectedDifficulty).AddMatch(_currentMatch);
+        var firstTimeAchievements = userData.GetUserStageData(selectedLevel, selectedDifficulty).AddMatch(_currentMatch);
 
 
         //si no hay proximo stage desactivo el boton play next stage
-        if ((StageManager.Instance.stages.ContainsKey(selectedStage + 1) || selectedDifficulty < 9)
+        if ((selectedLevel < 13 || selectedDifficulty < 9)
             &&
-            (userData.GetUserStageData(selectedStage, selectedDifficulty).achievements
+            (userData.GetUserStageData(selectedLevel, selectedDifficulty).achievements
                 .Contains(Achievement.BarelyClearedStage))
             ) {
             nextStageButton.gameObject.SetActive(true);
@@ -635,10 +630,10 @@ public class GameManager : MonoBehaviour {
             nextStageButton.gameObject.SetActive(false);
         }
         
-        int lastHighScore = userData.GetUserStageData(selectedStage, selectedDifficulty).highScore;
+        int lastHighScore = userData.GetUserStageData(selectedLevel, selectedDifficulty).highScore;
         if (lastHighScore < score)
         {
-            userData.GetUserStageData(selectedStage, selectedDifficulty).highScore = score;
+            userData.GetUserStageData(selectedLevel, selectedDifficulty).highScore = score;
         }
         UpdateInventoryAndSave();
         UpdateAchievementAndUnlockedLevels();
@@ -679,8 +674,8 @@ public class GameManager : MonoBehaviour {
 
     public void UpdateAchievementAndUnlockedLevels()
     {
-        foreach (var stageIndexAndData in stages) {
-            if (stageIndexAndData.Value.stageObject is not null) stageIndexAndData.Value.stageObject.UpdateDifficultyUnlockedAndAmountOfStickersUnlocked();
+        foreach (var stageIndexAndData in StageManager.Instance.stages) {
+            stageIndexAndData.Value.UpdateDifficultyUnlockedAndAmountOfStickersUnlocked();
         }
     }
 
@@ -700,7 +695,7 @@ public class GameManager : MonoBehaviour {
     {
         float clipDuration = AudioManager.Instance.PlayClip(GameClip.highScore);
         float timeUntillHighScoreTextUpdate = 0.25f;
-        stages[selectedStage].stageObject.SetScore(highScoreToSet);
+        StageManager.Instance.stages[(selectedLevel,selectedDifficulty)].SetScore(highScoreToSet);
         yield return new WaitForSeconds(timeUntillHighScoreTextUpdate);
         
         //Todo: agregar animacion de texto estrellas colores whatever
@@ -737,8 +732,8 @@ public class GameManager : MonoBehaviour {
     }
 
     public void PlayNextStage() {
-        if (StageManager.Instance.stages.ContainsKey(selectedStage + 1)) {
-            StageManager.Instance.SetStageAndDifficulty(selectedStage + 1, selectedDifficulty);
+        if (selectedLevel < 13) {
+            StageManager.Instance.SetStageAndDifficulty(selectedLevel + 1, selectedDifficulty);
         }
         else if (selectedDifficulty<9) {
             StageManager.Instance.SetStageAndDifficulty(0, selectedDifficulty+1);
@@ -794,7 +789,10 @@ public class GameManager : MonoBehaviour {
         {
             lifeCounter.ResetLives();
         }
+
+        StageManager.Instance.AssignRandomStickerGroup();
         LoadStickers();
+        
         GameCanvas.barController.SetBar(_remainingStickersFromStage.Count);
         currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
         AddStickers(4);
@@ -804,7 +802,7 @@ public class GameManager : MonoBehaviour {
         _currentlySelectedSticker = null;
         SetRandomImage();
         disableInput = false;
-        _currentMatch = new Match(selectedStage,selectedDifficulty,false);
+        _currentMatch = new Match(selectedLevel,selectedDifficulty,false);
         _currentCombo = 0;
         endGameAchievementStars.ResetStars();
         PowerPanelButtonHolder.Instance.UpdateUI();

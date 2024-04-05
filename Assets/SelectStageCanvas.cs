@@ -10,6 +10,6 @@ public class SelectStageCanvas : MonoBehaviour
         stageHolder.transform.localPosition = Vector3.zero;
     }
     public void CloseStickerPanel() {
-        StageManager.Instance.CloseStickerPanel();
+        //StageManager.Instance.CloseStickerPanel();
     }
 }

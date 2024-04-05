@@ -47,7 +47,7 @@ public class PersistanceManager : MonoBehaviour
     #endregion
     public DataLocation dataLocation = DataLocation.ResourcesFolder;
     
-    public Dictionary<int, StageData> stages;
+    //public Dictionary<int, StageData> stages;
     private Dictionary<int, StickerLevelsData> stickerLevels = new Dictionary<int, StickerLevelsData>();
 
     public Dictionary<int, StickerLevelsData> StickerLevels
@@ -158,49 +158,51 @@ public class PersistanceManager : MonoBehaviour
 
     public IEnumerator LoadStages()
     {
-        string setName = StageManager.Instance.gameVersion.ToString();
-        string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
-        string json;
-        CustomDebugger.Log(filePath);
-        if (dataLocation == DataLocation.LocalStorage)
-        {
-            if (!File.Exists(filePath))
-            {
-                Debug.LogError("No saved stages found at " + filePath);
-                yield return StartCoroutine(GetJson("stages"));
-            }
-            json = File.ReadAllText(filePath);
-        }
-        else if (dataLocation == DataLocation.ResourcesFolder)
-        {
-            TextAsset file = Resources.Load<TextAsset>("Storage/"+setName+"/stages");
-            if (file == null)
-            {
-                Debug.LogError("No stages found in Resources.");
-                yield break;
-            }
-            json = file.text;
-        }
-        else
-        {
-            Debug.LogError("Invalid data location.");
-            yield break;
-        }
-        //jsonData["stickerLevels"]        
-        Serialization<StageData> stageList = JsonConvert.DeserializeObject<Serialization<StageData>>(json);
-        if (stageList == null || stageList.items == null)
-        {
-            Debug.LogError("Failed to deserialize stages.");
-            yield break;
-        }
-
-        foreach (var stageData in stageList.items)
-        {
-            stageData.ConvertColorStringToColorValue();
-        }
-
-        this.stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
-        CustomDebugger.Log("Stages loaded, stages count: " + stages.Count);
+        // se comenta todo porque ya no hay stages para cargar, se generan de 4 hasta 12 niveles, y de 0 (2 botones) a 7 (9 botones)
+        
+        // string setName = StageManager.Instance.gameVersion.ToString();
+        // string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
+        // string json;
+        // CustomDebugger.Log(filePath);
+        // if (dataLocation == DataLocation.LocalStorage)
+        // {
+        //     if (!File.Exists(filePath))
+        //     {
+        //         Debug.LogError("No saved stages found at " + filePath);
+        //         yield return StartCoroutine(GetJson("stages"));
+        //     }
+        //     json = File.ReadAllText(filePath);
+        // }
+        // else if (dataLocation == DataLocation.ResourcesFolder)
+        // {
+        //     TextAsset file = Resources.Load<TextAsset>("Storage/"+setName+"/stages");
+        //     if (file == null)
+        //     {
+        //         Debug.LogError("No stages found in Resources.");
+        //         yield break;
+        //     }
+        //     json = file.text;
+        // }
+        // else
+        // {
+        //     Debug.LogError("Invalid data location.");
+        //     yield break;
+        // }
+        // //jsonData["stickerLevels"]        
+        // Serialization<StageData> stageList = JsonConvert.DeserializeObject<Serialization<StageData>>(json);
+        // if (stageList == null || stageList.items == null)
+        // {
+        //     Debug.LogError("Failed to deserialize stages.");
+        //     yield break;
+        // }
+        //
+        // foreach (var stageData in stageList.items)
+        // {
+        //     stageData.ConvertColorStringToColorValue();
+        // }
+        //
+        // this.stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
+        // CustomDebugger.Log("Stages loaded, stages count: " + stages.Count);
         yield return null;
         StageManager.Instance.InitializeStages();
     }

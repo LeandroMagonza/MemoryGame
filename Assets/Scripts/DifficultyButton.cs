@@ -56,11 +56,6 @@ public class DifficultyButton : ChangeCanvasButton
         //CustomDebugger.Log("conditionStage " + conditionStage);
 
         UserStageData currentUserStageData = GameManager.Instance.userData.GetUserStageData(stage, difficulty);
-        if (currentUserStageData is null)
-        {
-            currentUserStageData = new UserStageData(stage, difficulty);
-            PersistanceManager.Instance.userData.stages.Add(currentUserStageData);
-        }
         
         
         CustomDebugger.Log("conditionDifficulty " + conditionDifficulty);
@@ -71,7 +66,7 @@ public class DifficultyButton : ChangeCanvasButton
         }
         else
         {
-            GetComponent<Button>().interactable = false;
+            //GetComponent<Button>().interactable = false;
         }
 
         stars.SetAchievements(currentUserStageData.achievements);

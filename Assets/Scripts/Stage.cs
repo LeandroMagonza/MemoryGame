@@ -11,7 +11,7 @@ using ColorUtility = UnityEngine.ColorUtility;
 
 public class Stage : MonoBehaviour
 {
-    public int stage;
+    public int level;
     public int difficulty;
     public Color baseColor;
     public TextMeshProUGUI titleText; 
@@ -43,7 +43,7 @@ public class Stage : MonoBehaviour
     }
     public void SetStage(int stage,int difficulty)
     {
-        this.stage = stage;
+        this.level = stage;
         this.difficulty = difficulty;
         difficultyButton.SetStage(stage,difficulty);
         
@@ -52,37 +52,14 @@ public class Stage : MonoBehaviour
     }
     public void UpdateDifficultyUnlockedAndAmountOfStickersUnlocked()
     {
-        // se eliminan el requerimiento de stickers, solo se requiere ahora que tengas el nivel anterior con una 
-        /*
-        List<int> unlockedStickers = new List<int>();
-        
-        foreach (var stickerFromStage in GameManager.Instance.stages[stage].stickers) {
-            //tiene por lo menos una vez la figurita del stage, en sus imageduplicates
-            if (GameManager.Instance.userData.stickerDuplicates.ContainsKey((GameManager.Instance.stages[stage].stickerSet,stickerFromStage))
-                &&
-                GameManager.Instance.userData.stickerDuplicates[(GameManager.Instance.stages[stage].stickerSet,stickerFromStage)] > 0) {
-                unlockedStickers.Add(stickerFromStage);
-            }
-        }
-        //SetAmountOfStickersCurrent(unlockedStickers.Count);
-        if (unlockedStickers.Count < GameManager.Instance.stages[stage].stickers.Count) {
-            unlockMessage.SetActive(true);
-            difficultyButton.transform.parent.gameObject.SetActive(false);
-        }
-        else {
-            unlockMessage.SetActive(false);
-            difficultyButton.transform.parent.gameObject.SetActive(true);
-        }
-        */
-
-        SetAmountOfStickersTotal(GameManager.Instance.stages[stage].stickers.Count);
+        SetAmountOfStickersTotal(level);
         unlockMessage.SetActive(false);
         difficultyButton.UpdateDifficultyUnlocked();
     }
 
-    public void OpenStickerPanel() {
-        StageManager.Instance.OpenStickerPanel(stage);
-    }
+    // public void OpenStickerPanel() {
+    //     StageManager.Instance.OpenStickerPanel(stage);
+    // }
 
     private void FixedUpdate()
     {
@@ -104,48 +81,48 @@ public class Stage : MonoBehaviour
 }
 
 [Serializable]
-public class StageData
-{
-    public int stageID;
-    public string title;
-    public int basePoints;
-    [JsonProperty("color")]
-    public string color; // Almacenar como string en formato hexadecimal
-    public List<int> stickers;
-    public Stage stageObject;
-    //int = stageID, int = chance de una carta de ese stage, la suma de todos los floats tiene que dar 100
-    public Dictionary<int, int> packOdds = new Dictionary<int, int>();
-    public int packCost;
-    [FormerlySerializedAs("imageSet")] public StickerSet stickerSet;
-    [NonSerialized]
-    public Color ColorValue; // Propiedad para acceder al valor de color
-
-    // Constructor sin parámetros
-    public StageData()
-    {
-    }
-
-    // Constructor con parámetros
-    public StageData(int stageID, string title, int basePoints, Color color, List<int> stickers, StickerSet stickerSet)
-    {
-        this.stageID = stageID;
-        this.title = title;
-        this.basePoints = basePoints;
-        this.ColorValue = color;
-        this.color = ColorUtility.ToHtmlStringRGBA(color);
-        this.stickers = stickers;
-        this.stickerSet = stickerSet;
-    }
-
-    // Método para convertir el string hexadecimal a Color después de la deserialización
-    public void ConvertColorStringToColorValue()
-    {
-        if (ColorUtility.TryParseHtmlString("#" + color, out Color colorValue))
-        {
-            ColorValue = colorValue;
-        }
-    }
-}
+// public class StageData
+// {
+//     public int stageID;
+//     public string title;
+//     public int basePoints;
+//     [JsonProperty("color")]
+//     public string color; // Almacenar como string en formato hexadecimal
+//     public List<int> stickers;
+//     public Stage stageObject;
+//     //int = stageID, int = chance de una carta de ese stage, la suma de todos los floats tiene que dar 100
+//     public Dictionary<int, int> packOdds = new Dictionary<int, int>();
+//     public int packCost;
+//     [FormerlySerializedAs("imageSet")] public StickerSet stickerSet;
+//     [NonSerialized]
+//     public Color ColorValue; // Propiedad para acceder al valor de color
+//
+//     // Constructor sin parámetros
+//     public StageData()
+//     {
+//     }
+//
+//     // Constructor con parámetros
+//     public StageData(int stageID, string title, int basePoints, Color color, List<int> stickers, StickerSet stickerSet)
+//     {
+//         this.stageID = stageID;
+//         this.title = title;
+//         this.basePoints = basePoints;
+//         this.ColorValue = color;
+//         this.color = ColorUtility.ToHtmlStringRGBA(color);
+//         this.stickers = stickers;
+//         this.stickerSet = stickerSet;
+//     }
+//
+//     // Método para convertir el string hexadecimal a Color después de la deserialización
+//     public void ConvertColorStringToColorValue()
+//     {
+//         if (ColorUtility.TryParseHtmlString("#" + color, out Color colorValue))
+//         {
+//             ColorValue = colorValue;
+//         }
+//     }
+// }
 
 //[JsonConverter(typeof(StringEnumConverter))]
 public enum Achievement {
@@ -229,7 +206,7 @@ public class Match
         CustomDebugger.Log("clearedImages " +clearedImages.Count);
         date = DateTime.Now;
         //Check achievements
-        int amountOfStickersInStage = GameManager.Instance.stages[stage].stickers.Count;
+        int amountOfStickersInStage = GameManager.Instance.selectedLevel;
         CustomDebugger.Log("-------------------Achievement ClearedEveryImage----------------------");
         CustomDebugger.Log("amountOfImagesInStage == clearedImages.Count");
         CustomDebugger.Log(amountOfStickersInStage +" == "+ clearedImages.Count);
@@ -309,20 +286,23 @@ public class UserData
     public Dictionary<UpgradeID, int> upgrades = new Dictionary<UpgradeID, int>();
     //historial de compras
 
-    public UserStageData GetUserStageData(int stage, int difficulty)
+    public UserStageData GetUserStageData(int level, int difficulty)
     {
-        if (stage < 0 || difficulty < 0 )
+        if (level < 0 || difficulty < 0 )
         {
             return null;
         }
         foreach (var userStageData in stages)
         {
-            if (userStageData.stage == stage && userStageData.difficulty == difficulty)
+            if (userStageData.level == level && userStageData.difficulty == difficulty)
             {
                 return userStageData;
             }
         }
-        return null;
+
+        var newUserStageData = new UserStageData(level, difficulty);
+        stages.Add(newUserStageData);
+        return newUserStageData;
     }
     public void ConvertStickerListToDictionary()
     {
@@ -446,7 +426,7 @@ public class UserData
 [Serializable]
 public class UserStageData
 {
-    public int stage;
+    public int level;
     public int difficulty;
     //public List<int> clearedStickers = new List<int>();
     public int highScore = 0;
@@ -458,9 +438,9 @@ public class UserStageData
     
     public List<Match> matches = new List<Match>();
 
-    public UserStageData(int stage, int difficulty)
+    public UserStageData(int level, int difficulty)
     {
-        this.stage = stage;
+        this.level = level;
         this.difficulty = difficulty;
     }
     public List<Achievement> AddMatch(Match currentMatch)
