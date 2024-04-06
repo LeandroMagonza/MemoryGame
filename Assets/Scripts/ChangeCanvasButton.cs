@@ -32,5 +32,6 @@ public enum CanvasName
     SHOP,
     CONFIG,
     RETURN,
-    LANGUAGE
+    LANGUAGE,
+    EXIT
 }

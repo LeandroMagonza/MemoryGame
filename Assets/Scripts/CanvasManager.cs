@@ -44,6 +44,7 @@ public class CanvasManager : MonoBehaviour
     public Canvas shopCanvas;
     public Canvas configCanvas;
     public Canvas languageCanvas;
+    public Canvas exitCanvas;
 
     public CanvasName previousCanvas;
     public CanvasName currentCanvas;
@@ -56,6 +57,7 @@ public class CanvasManager : MonoBehaviour
         allCanvas.Add(CanvasName.SHOP,shopCanvas);
         allCanvas.Add(CanvasName.CONFIG,configCanvas);
         allCanvas.Add(CanvasName.LANGUAGE,languageCanvas);
+        allCanvas.Add(CanvasName.EXIT,exitCanvas);
         currentCanvas = CanvasName.MENU;
         ChangeCanvas(initialCanvas);
     }
@@ -94,11 +96,8 @@ public class CanvasManager : MonoBehaviour
     }
 
     private void Update() {
-        if (Input.GetKeyUp(KeyCode.Escape) ) {
-            if (allCanvas[CanvasName.MENU].gameObject.activeInHierarchy) {
-                CustomDebugger.Log("Application quit called");
-                Application.Quit();
-            }
+        if (Input.GetKeyUp(KeyCode.Escape) && currentCanvas == CanvasName.MENU) {
+            ChangeCanvas(CanvasName.EXIT);
         }
     }
 
