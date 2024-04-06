@@ -45,7 +45,7 @@ public class StickerManager : MonoBehaviour
     
     //para cada sticker set tenemos varios grupos, si el sticker set es worldflags los grupos serian los continentes
     // cada continente tiene una lista de stickers en el
-    public Dictionary<StickerSet, Dictionary<string, List<int>>> currentLoadedStickerGroups = new ();
+    public Dictionary<StickerSet, Dictionary<string, (List<int> stickers, Color color)>> currentLoadedStickerGroups = new ();
     // Update is called once per frame
     public Sticker GetStickerHolder()
     {
@@ -151,7 +151,7 @@ public class StickerManager : MonoBehaviour
             ColorUtility.TryParseHtmlString(fields[3].Trim(), out Color color);
             //ColorUtility.TryParseHtmlString("#FF0000", out Color color);
             //ColorUtility.TryParseHtmlString("#71558e", out Color color);
-            CustomDebugger.Log("creating sticker " +id+" "+fields[3]+" "+color);
+//            CustomDebugger.Log("creating sticker " +id+" "+fields[3]+" "+color);
             Sprite sprite = null;
             if (setType == "SPRITESHEET")
             {
@@ -178,20 +178,20 @@ public class StickerManager : MonoBehaviour
             dictionary.Add(id, stickerData);
 
             if (!currentLoadedStickerGroups.ContainsKey(setToLoad)) {
-                currentLoadedStickerGroups.Add(setToLoad,new Dictionary<string, List<int>>());
+                currentLoadedStickerGroups.Add(setToLoad,new Dictionary<string, (List<int> stickers, Color color)>());
             }
 
             if (!currentLoadedStickerGroups[setToLoad].ContainsKey(type)) {
-                currentLoadedStickerGroups[setToLoad].Add(type,new List<int>());
+                currentLoadedStickerGroups[setToLoad].Add(type, (new List<int>(),color));
             }
-            currentLoadedStickerGroups[setToLoad][type].Add(id);            
+            currentLoadedStickerGroups[setToLoad][type].stickers.Add(id);            
         }
 
         currentLoadedSetStickerData.Add(setToLoad, dictionary);
         Debug.Log("Loaded stickers from set " + setToLoad);
         foreach (var set in currentLoadedStickerGroups) {
             foreach (var group in set.Value) {
-                CustomDebugger.Log(set.Key + " " + group.Key + " " + group.Value.Count);
+                //CustomDebugger.Log(set.Key + " " + group.Key + " " + group.Value.Count);
             }
         }
     }

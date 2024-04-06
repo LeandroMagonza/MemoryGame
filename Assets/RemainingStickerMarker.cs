@@ -1,12 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class RemainingStickerMarker : MonoBehaviour {
     public TextMeshProUGUI number;
-    public Image asd;
+    [FormerlySerializedAs("asd")] public Image markerIcon;
 
     public void DisplayText(bool display) {
         number.gameObject.SetActive(display);

@@ -98,7 +98,7 @@ public class GameManager : MonoBehaviour {
 
 
     //[Header("Pause")] 
-    public GameObject pausePanel => GameCanvas.pausePanel;
+    public GameObject pausePanel => GameCanvas.Instance.pausePanel;
     
     [Header("NumpadQuizOptionsPad")]
     public GameObject numpad;
@@ -143,7 +143,7 @@ public class GameManager : MonoBehaviour {
     #region References
     #region Game Canvas Header
     public GameCanvasHeader gameCanvasHeader;
-    
+    public StageGroupIntroPanel stageGroupIntroPanel => GameCanvas.Instance.stageGroupIntroPanel;
     public LifeCounter lifeCounter  => gameCanvasHeader.lifeCounter ;
     public TextMeshProUGUI timerText => gameCanvasHeader.timerText; 
     public TextMeshProUGUI scoreText => gameCanvasHeader.scoreText;
@@ -156,7 +156,6 @@ public class GameManager : MonoBehaviour {
     private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.StickerLevels;
     public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> matchInventory = new Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)>();
     public PacksData packs => PersistanceManager.Instance.packs;
-    public GameCanvas GameCanvas => GameCanvas.Instance;
     public int selectedLevel => StageManager.Instance.selectedStage;
     public int selectedDifficulty => StageManager.Instance.selectedDifficulty;
     #endregion
@@ -465,13 +464,13 @@ public class GameManager : MonoBehaviour {
         //StickerManager.Instance.currentLoadedSetStickerData
   
         
-        var randomGroupSelectedName = StageManager.Instance.selectedStickerGroup;
+        var randomGroupSelected = StageManager.Instance.selectedStickerGroup;
 
-        if (StickerManager.Instance.currentLoadedStickerGroups[StageManager.Instance.gameVersion][randomGroupSelectedName].Count < amountOfStickersToSelect) {
+        if (StickerManager.Instance.currentLoadedStickerGroups[StageManager.Instance.gameVersion][randomGroupSelected.name].stickers.Count < amountOfStickersToSelect) {
             Debug.LogError("Se intentaron seleccionar mas stickers que los que hay en el grupo");
         }
 
-        var shuffledStickers = StickerManager.Instance.currentLoadedStickerGroups[StageManager.Instance.gameVersion][randomGroupSelectedName].ToList().Shuffle();
+        var shuffledStickers = StickerManager.Instance.currentLoadedStickerGroups[StageManager.Instance.gameVersion][randomGroupSelected.name].stickers.ToList().Shuffle();
 
         for (int currentStickerSelectedIndex = 0; currentStickerSelectedIndex < amountOfStickersToSelect; currentStickerSelectedIndex++) {
             int selectedStickerID = shuffledStickers[currentStickerSelectedIndex];
@@ -558,7 +557,7 @@ public class GameManager : MonoBehaviour {
     public void RemoveStickerFromPool() {
         //currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences = 0;
         currentlyInGameStickers.Remove(_currentlySelectedSticker);
-        GameCanvas.barController.IncreaseCounter();
+        GameCanvas.Instance.barController.IncreaseCounter();
         // aca se setea si la imagen vuelve al set general o no  
         //_remainingStickersFromStage.Remove(_currentlySelectedSticker.stickerID);
     }
@@ -746,7 +745,6 @@ public class GameManager : MonoBehaviour {
 
     public void Reset() 
     {
-
         switch (currentGameMode)
         {
             case GameMode.MEMORY:
@@ -758,6 +756,8 @@ public class GameManager : MonoBehaviour {
                 quizOptionPad.SetActive(true);
                 break;
         }
+        
+        pause = true;
         startMatchTime = Time.time;
         endMatchTime = 0;
         AdmobAdsManager.Instance.LoadInterstitialAd();
@@ -792,13 +792,9 @@ public class GameManager : MonoBehaviour {
 
         StageManager.Instance.AssignRandomStickerGroup();
         LoadStickers();
-        
-        GameCanvas.barController.SetBar(_remainingStickersFromStage.Count);
+        GameCanvas.Instance.barController.SetBar(_remainingStickersFromStage.Count);
         currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
         AddStickers(4);
-        //TODO: Arreglar este hardcodeo horrible, ver dentro de set random image como dividir la funcion
-        //TODO: recordar para que era el comentario de arriba, poirque capaz esta arreglado ya y no me acuerdo
-        //TODO: JAJAJ
         _currentlySelectedSticker = null;
         SetRandomImage();
         disableInput = false;
@@ -806,7 +802,7 @@ public class GameManager : MonoBehaviour {
         _currentCombo = 0;
         endGameAchievementStars.ResetStars();
         PowerPanelButtonHolder.Instance.UpdateUI();
-        pause = false;
+        
         pausePanel.SetActive(false);
         tutorialPanel.SetActive(false);
         
@@ -826,6 +822,19 @@ public class GameManager : MonoBehaviour {
                 }
             }                
         }
+        stageGroupIntroPanel.gameObject.SetActive(true);
+        stageGroupIntroPanel.SetGroup(StageManager.Instance.selectedStickerGroup);
+        StartCoroutine(StartMatchCountdown());
+    }
+
+    private IEnumerator StartMatchCountdown() {
+        for (int i = 3; i > 0; i--) {
+            stageGroupIntroPanel.SetCountdown(i);
+            AudioManager.Instance.PlayClip(GameClip.enterStages);
+            yield return new WaitForSeconds(1f);
+        }
+        stageGroupIntroPanel.gameObject.SetActive(false);
+        pause = false;
     }
 
     private void ResetTimer()
@@ -1026,7 +1035,7 @@ public class GameManager : MonoBehaviour {
         return calculatedComboBonus;
     }
     public Canvas GetGameCanvas() {
-        return GameCanvas.gameObject.GetComponent<Canvas>();
+        return GameCanvas.Instance.gameObject.GetComponent<Canvas>();
     }
 
     public void SetMatchInventory()

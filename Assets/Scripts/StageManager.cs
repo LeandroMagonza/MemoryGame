@@ -39,7 +39,8 @@ public class StageManager : MonoBehaviour
     
     public int selectedStage = 0;
     public int selectedDifficulty = 3;
-    public string selectedStickerGroup = "";
+    public (string name, Color color) selectedStickerGroup = ("",Color.white);
+    public List<string> forbiddenGroups = new();
     public GameObject stageHolder => selectStageCanvas.stageHolder;
     public GameObject stageDisplayPrefab;
 
@@ -127,26 +128,31 @@ public class StageManager : MonoBehaviour
         selectedStage = stage;
     }
 
-    private string SelectRandomGroup() {
+    private (string randomGroupSelectedName, Color randomGroupSelectedColor) SelectRandomGroup() {
         if (!StickerManager.Instance.currentLoadedStickerGroups.ContainsKey(gameVersion))
         {
             StickerManager.Instance.LoadAllStickersFromSet(gameVersion);
         }
         
         int randomGroupSelectedIndex = Random.Range(0,
-            StickerManager.Instance.currentLoadedStickerGroups[gameVersion].Keys.Count);
+            StickerManager.Instance.currentLoadedStickerGroups[gameVersion].Keys.Count-forbiddenGroups.Count);
         string randomGroupSelectedName = "";
+        Color randomGroupSelectedColor = Color.white;
+        
         int currentGroup = 0;
         foreach (var VARIABLE in StickerManager.Instance.currentLoadedStickerGroups[gameVersion]) {
+            if (forbiddenGroups.Contains(VARIABLE.Key)) continue;
+            
             if (currentGroup == randomGroupSelectedIndex) {
                 randomGroupSelectedName = VARIABLE.Key;
+                randomGroupSelectedColor = VARIABLE.Value.color;
+                CustomDebugger.Log("sticker color = "+VARIABLE.Value.color);
                 break;
             }
-
             currentGroup++;
         }
 
-        return randomGroupSelectedName;
+        return (randomGroupSelectedName,randomGroupSelectedColor);
     }
 
     public IEnumerator SelectRandomGroupRoulette() {
@@ -160,6 +166,10 @@ public class StageManager : MonoBehaviour
 
     public void AssignRandomStickerGroup() {
         selectedStickerGroup = SelectRandomGroup();
+        forbiddenGroups.Add(selectedStickerGroup.name);
+        while (forbiddenGroups.Count > 2) {
+            forbiddenGroups.RemoveAt(0);
+        }
     }
     // public void OpenStickerPanel(int stage) {
     //     CloseStickerPanel();

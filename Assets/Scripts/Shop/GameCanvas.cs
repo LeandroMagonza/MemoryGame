@@ -1,11 +1,44 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
+public class GameCanvas : MonoBehaviour
+{
+    [SerializeField] public GameObject pausePanel;
+    public GameCanvasHeader gameCanvasHeader;
+    public StageGroupIntroPanel stageGroupIntroPanel;
+    public RemainingBarController barController => gameCanvasHeader.barController;
+    #region Singleton
+    private static GameCanvas _instance;
+    public static GameCanvas Instance {
+        get {
+            if (_instance == null)
+                _instance = FindObjectOfType<GameCanvas>();
+            if (_instance == null)
+                CustomDebugger.LogError("Singleton<" + typeof(GameCanvas) + "> instance has been not found.");
+            return _instance;
+        }
+    }
+    protected void Awake() {
+        if (_instance == null) {
+            _instance = this as GameCanvas;
+        }
+        else if (_instance != this)
+            DestroySelf();
+    }
+    private void DestroySelf() {
+        if (Application.isPlaying)
+            Destroy(this);
+        else
+            DestroyImmediate(this);
+    }
+    #endregion
+    private void OnEnable()
+    {
+        if (GameManager.Instance.startScale != Vector3.zero)
+            GameManager.Instance.stickerDisplay.spriteHolder.transform.localScale = GameManager.Instance.startScale;
+    }
+}
 [System.Serializable]
 public struct ConsumableButtonData
 {
@@ -50,23 +83,4 @@ public struct ConsumableButtonData
     }
 
 
-}
-public class GameCanvas : MonoBehaviour
-{
-    private GameManager GameManager => GameManager.Instance;
-    public static GameCanvas Instance;    
-    [SerializeField] public GameObject pausePanel;
-    public GameCanvasHeader gameCanvasHeader;
-    public RemainingBarController barController => gameCanvasHeader.barController;
-
-    private GameCanvas()
-    {
-        if (Instance == null)
-            Instance = this;
-    }
-    private void OnEnable()
-    {
-        if (GameManager.startScale != Vector3.zero)
-            GameManager.stickerDisplay.spriteHolder.transform.localScale = GameManager.startScale;
-    }
 }

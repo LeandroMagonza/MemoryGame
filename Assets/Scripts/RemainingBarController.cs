@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,16 +13,18 @@ public class RemainingBarController : MonoBehaviour {
     {
         CustomDebugger.Log("called setbar with amount "+amount);
         currentCount = 0;
-        foreach (var marker in markers) {
-            marker.gameObject.SetActive(false);
+        foreach (var marker in markers.ToList()) {
+            if (marker is not null) Destroy(marker.gameObject);
         }
+        markers = new ();
 
         CustomDebugger.Log("markers = "+markers.Count);
         RemainingStickerMarker lastRemainingStickerMarker = null;
         for (int i = 0; i < amount; i++)
         {
             if (markers.Count <= i) {
-                markers.Add(Instantiate(remainingStickerMarker,markerContainer.transform));
+                RemainingStickerMarker newMarker = Instantiate(remainingStickerMarker, markerContainer.transform);
+                markers.Add(newMarker);
             }
             CustomDebugger.Log("marker"+i+ " set active");
             markers[i].gameObject.SetActive(true);
