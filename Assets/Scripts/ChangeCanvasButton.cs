@@ -29,9 +29,10 @@ public enum CanvasName
     MENU,
     GAME,
     SELECT_STAGE,
-    SHOP,
+    PLAYER_LEVEL,
     CONFIG,
     RETURN,
     LANGUAGE,
+    SHOP,
     EXIT
 }

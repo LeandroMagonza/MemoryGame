@@ -16,7 +16,7 @@ public class ShopManager : MonoBehaviour
     public GameObject consumablePanel;
     public GameObject consumableTittle;
     public GameObject upgradePanel;
-    public GameObject upgradeTittle;
+    public GameObject upgradeTitle;
     public TextMeshProUGUI moneyDisplay;
     public ShopButton[] shopButtons;
     public Animator animatorMessage;
@@ -69,7 +69,7 @@ public class ShopManager : MonoBehaviour
         consumablePanel.SetActive(false);
         consumableTittle.SetActive(false);
         upgradePanel.SetActive(true);
-        upgradeTittle.SetActive(true);
+        upgradeTitle.SetActive(true);
     }
 
     public void BuyItemConsumable(int itemID)

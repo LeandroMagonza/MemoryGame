@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class CanvasManager : MonoBehaviour
@@ -41,7 +42,7 @@ public class CanvasManager : MonoBehaviour
     public Canvas menuCanvas;
     public Canvas selectStageCanvas;
     public Canvas gameCanvas;
-    public Canvas shopCanvas;
+    [FormerlySerializedAs("shopCanvas")] public Canvas playerLevelCanvas;
     public Canvas configCanvas;
     public Canvas languageCanvas;
     public Canvas exitCanvas;
@@ -54,7 +55,7 @@ public class CanvasManager : MonoBehaviour
         allCanvas.Add(CanvasName.MENU,menuCanvas);
         allCanvas.Add(CanvasName.SELECT_STAGE,selectStageCanvas);
         allCanvas.Add(CanvasName.GAME,gameCanvas);
-        allCanvas.Add(CanvasName.SHOP,shopCanvas);
+        allCanvas.Add(CanvasName.PLAYER_LEVEL,playerLevelCanvas);
         allCanvas.Add(CanvasName.CONFIG,configCanvas);
         allCanvas.Add(CanvasName.LANGUAGE,languageCanvas);
         allCanvas.Add(CanvasName.EXIT,exitCanvas);

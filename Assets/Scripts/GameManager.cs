@@ -438,7 +438,9 @@ public class GameManager : MonoBehaviour {
         ModifyScore(scoreModificationBonus);
         bonusMultiplicator++;
         AudioManager.Instance.PlayClip(GameClip.bonus);
-        lifeCounter.GainLive();
+        if (userData.upgrades.ContainsKey(UpgradeID.HealOnClear) && userData.upgrades[UpgradeID.HealOnClear] > 0) {
+            lifeCounter.GainLive();
+        }
         return scoreModificationBonus;
     }
 

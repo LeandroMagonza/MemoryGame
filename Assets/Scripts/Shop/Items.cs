@@ -19,7 +19,8 @@ public enum UpgradeID
     LifeProtector,
     ExtraClue,
     BetterClue,
-
+    HealOnClear,
+    
     ExtraRemove,
     ExtraCut,
     BetterCut,
