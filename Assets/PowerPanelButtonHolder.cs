@@ -171,7 +171,7 @@ public class PowerPanelButtonHolder : MonoBehaviour
         switch (itemID)
         {
             case ConsumableID.Clue:
-                if (GameManager.userData.upgrades.ContainsKey(UpgradeID.BetterClue) && GameManager.userData.upgrades[UpgradeID.BetterClue] > 0)
+                if (GameManager.userData.unlockedUpgrades.ContainsKey(UpgradeID.BetterClue) && GameManager.userData.unlockedUpgrades[UpgradeID.BetterClue] > 0)
                     UseBetterClue();
                 else
                     UseClue();

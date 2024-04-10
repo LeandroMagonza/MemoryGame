@@ -113,9 +113,9 @@ public class ShopManager : MonoBehaviour
         UpgradeID item = (UpgradeID)itemID;
         CustomDebugger.Log("Added Item:" + item.ToString());
         int currentLevel = 0;
-        if (userData.upgrades.ContainsKey(item))
+        if (userData.unlockedUpgrades.ContainsKey(item))
         {
-            currentLevel = userData.upgrades[item];
+            currentLevel = userData.unlockedUpgrades[item];
         }
 
         int price = UpgradeData.GetUpgrade(item).GetPrice(currentLevel);
@@ -131,7 +131,7 @@ public class ShopManager : MonoBehaviour
         }
 
         CustomDebugger.Log("Added Item:" + nameof(itemID));
-        GameManager.Instance.userData.AddUpgradeObject(item);
+        GameManager.Instance.userData.AddUpgradeToUser(item);
         PersistanceManager.Instance.SaveUserData();
         UpdateMoneyDisplay();
         UpdateConsumableButtonsUI();
@@ -189,9 +189,9 @@ public class ShopManager : MonoBehaviour
 
         int currentLevel = 0;
 
-        if (userData.upgrades.ContainsKey(upgradeID))
+        if (userData.unlockedUpgrades.ContainsKey(upgradeID))
         {
-            currentLevel = userData.upgrades[upgradeID];       
+            currentLevel = userData.unlockedUpgrades[upgradeID];       
         }
         bool isMaxLevel = UpgradeData.GetUpgrade(upgradeID).IsMaxLevel(currentLevel);
 
@@ -212,7 +212,7 @@ public class ShopManager : MonoBehaviour
             UpgradeID requirementID = requirement.Key;
             int requirementLevel = requirement.Value;
 
-            if (!userData.upgrades.ContainsKey(requirementID) || userData.upgrades[requirementID] < requirementLevel)
+            if (!userData.unlockedUpgrades.ContainsKey(requirementID) || userData.unlockedUpgrades[requirementID] < requirementLevel)
             {
                 requirementsMet = false;
                 break;

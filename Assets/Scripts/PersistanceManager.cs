@@ -443,6 +443,21 @@ public class PersistanceManager : MonoBehaviour
 
         return 0;
     }
+    
+    public int GetUpgradeLevel(UpgradeID upgrade) {
+        if (userData.unlockedUpgrades.ContainsKey(upgrade))
+        {
+            return userData.unlockedUpgrades[upgrade];
+        }
+        return 0; 
+    }    
+    public int GetAmountOfConsumables(ConsumableID consumable) {
+        if (userData.consumables.ContainsKey(consumable))
+        {
+            return userData.consumables[consumable];
+        }
+        return 0; 
+    }
 
 }
 
@@ -473,6 +488,7 @@ public class StickerSetConverter : JsonConverter
         string enumString = value.ToString();
         writer.WriteValue(enumString);
     }
+
 }
 public enum DataLocation
 {

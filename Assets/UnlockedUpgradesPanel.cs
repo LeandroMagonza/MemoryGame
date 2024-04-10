@@ -27,15 +27,26 @@ public class UnlockedUpgradesPanel : MonoBehaviour {
             VARIABLE.gameObject.SetActive(false);
         }
 
-        int upgradeItemID = 0;
-        foreach (var VARIABLE in userData.upgrades) {
-            if (VARIABLE.Value == 0) continue;
-            if (unlockedUpgrades.Count<=upgradeItemID) {
-                UpgradeItem newUpgradeItem = Instantiate(UpgradeItemPrefab, unlockedUpgradesHolder.transform);
-                unlockedUpgrades.Add(newUpgradeItem);
+        foreach (var userDataUpgrade in userData.unlockedUpgrades) {
+            if (userDataUpgrade.Value == 0) continue;
+            
+            UpgradeItem currentUpgradeItem = null; 
+            
+            //Checkeo si ya existe el upgrade de user data en la lista de upgradeitems que se muestra
+            for (int unlockedUpgradeItemIndex = 0; unlockedUpgradeItemIndex < unlockedUpgrades.Count; unlockedUpgradeItemIndex++) {
+                if (unlockedUpgrades[unlockedUpgradeItemIndex].upgradeID == userDataUpgrade.Key) {
+                    currentUpgradeItem = unlockedUpgrades[unlockedUpgradeItemIndex];
+                }
             }
-            unlockedUpgrades[upgradeItemID].SetUpgradeButton(VARIABLE.Key);
-            upgradeItemID++;
+
+            //si no existe creo uno
+            if (currentUpgradeItem is null) {
+                currentUpgradeItem = Instantiate(UpgradeItemPrefab, unlockedUpgradesHolder.transform);
+                unlockedUpgrades.Add(currentUpgradeItem);
+            }
+            
+            currentUpgradeItem.gameObject.SetActive(true);
+            currentUpgradeItem.SetUpgradeButton(userDataUpgrade.Key);
         }
     }
     

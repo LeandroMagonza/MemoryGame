@@ -8,31 +8,32 @@ public class GameCanvas : MonoBehaviour
     public GameCanvasHeader gameCanvasHeader;
     public StageGroupIntroPanel stageGroupIntroPanel;
     public RemainingBarController barController => gameCanvasHeader.barController;
-    #region Singleton
-    private static GameCanvas _instance;
-    public static GameCanvas Instance {
-        get {
-            if (_instance == null)
-                _instance = FindObjectOfType<GameCanvas>();
-            if (_instance == null)
-                CustomDebugger.LogError("Singleton<" + typeof(GameCanvas) + "> instance has been not found.");
-            return _instance;
-        }
-    }
-    protected void Awake() {
-        if (_instance == null) {
-            _instance = this as GameCanvas;
-        }
-        else if (_instance != this)
-            DestroySelf();
-    }
-    private void DestroySelf() {
-        if (Application.isPlaying)
-            Destroy(this);
-        else
-            DestroyImmediate(this);
-    }
-    #endregion
+    
+    // #region Singleton
+    // private static GameCanvas _instance;
+    // public static GameCanvas Instance {
+    //     get {
+    //         if (_instance == null)
+    //             _instance = FindObjectOfType<GameCanvas>();
+    //         if (_instance == null)
+    //             CustomDebugger.LogError("Singleton<" + typeof(GameCanvas) + "> instance has been not found.");
+    //         return _instance;
+    //     }
+    // }
+    // protected void Awake() {
+    //     if (_instance == null) {
+    //         _instance = this as GameCanvas;
+    //     }
+    //     else if (_instance != this)
+    //         DestroySelf();
+    // }
+    // private void DestroySelf() {
+    //     if (Application.isPlaying)
+    //         Destroy(this);
+    //     else
+    //         DestroyImmediate(this);
+    // }
+    // #endregion
     private void OnEnable()
     {
         if (GameManager.Instance.startScale != Vector3.zero)

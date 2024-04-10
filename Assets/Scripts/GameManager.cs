@@ -98,7 +98,7 @@ public class GameManager : MonoBehaviour {
 
 
     //[Header("Pause")] 
-    public GameObject pausePanel => GameCanvas.Instance.pausePanel;
+    public GameObject pausePanel => gameCanvas.pausePanel;
     
     [Header("NumpadQuizOptionsPad")]
     public GameObject numpad;
@@ -139,11 +139,13 @@ public class GameManager : MonoBehaviour {
     public string[] currentlyInGameStickersNames;
     
 
-    [Header("References")]
+    //[Header("References")]
     #region References
     #region Game Canvas Header
-    public GameCanvasHeader gameCanvasHeader;
-    public StageGroupIntroPanel stageGroupIntroPanel => GameCanvas.Instance.stageGroupIntroPanel;
+    
+    public GameCanvas gameCanvas => CanvasManager.Instance.gameCanvas.GetComponent<GameCanvas>();
+    public GameCanvasHeader gameCanvasHeader => gameCanvas.gameCanvasHeader;
+    public StageGroupIntroPanel stageGroupIntroPanel => gameCanvas.stageGroupIntroPanel;
     public LifeCounter lifeCounter  => gameCanvasHeader.lifeCounter ;
     public TextMeshProUGUI timerText => gameCanvasHeader.timerText; 
     public TextMeshProUGUI scoreText => gameCanvasHeader.scoreText;
@@ -372,8 +374,8 @@ public class GameManager : MonoBehaviour {
         
         if (!protectedLife &&
             _currentCombo >= protectedLifeOnComboAmount && 
-            userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && 
-            userData.upgrades[UpgradeID.LifeProtector] > 0)
+            userData.unlockedUpgrades.ContainsKey(UpgradeID.LifeProtector) && 
+            userData.unlockedUpgrades[UpgradeID.LifeProtector] > 0)
         {
             protectedLife = true;
             lifeCounter.ProtectHearts();
@@ -438,7 +440,9 @@ public class GameManager : MonoBehaviour {
         ModifyScore(scoreModificationBonus);
         bonusMultiplicator++;
         AudioManager.Instance.PlayClip(GameClip.bonus);
-        if (userData.upgrades.ContainsKey(UpgradeID.HealOnClear) && userData.upgrades[UpgradeID.HealOnClear] > 0) {
+        if (userData.unlockedUpgrades.ContainsKey(UpgradeID.HealOnClear) && userData.unlockedUpgrades[UpgradeID.HealOnClear] > 0) {
+            //todo: ver si healonclear va a tener nivel, y te cura cada x imagenes tipo nivel 1 te cura cada 5, nivel 5 te cura cada 1
+            //maximo igual son 12 banderas por ahora
             lifeCounter.GainLive();
         }
         return scoreModificationBonus;
@@ -559,7 +563,7 @@ public class GameManager : MonoBehaviour {
     public void RemoveStickerFromPool() {
         //currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences = 0;
         currentlyInGameStickers.Remove(_currentlySelectedSticker);
-        GameCanvas.Instance.barController.IncreaseCounter();
+        gameCanvas.barController.IncreaseCounter();
         // aca se setea si la imagen vuelve al set general o no  
         //_remainingStickersFromStage.Remove(_currentlySelectedSticker.stickerID);
     }
@@ -615,7 +619,7 @@ public class GameManager : MonoBehaviour {
         float elapsedTime = endMatchTime - startMatchTime;
         AdmobAdsManager.Instance.ReduceInstertitialTime(elapsedTime);
         int formerCoins = userData.coins;
-        userData.coins += score;
+        userData.experiencePoints += score;
         var firstTimeAchievements = userData.GetUserStageData(selectedLevel, selectedDifficulty).AddMatch(_currentMatch);
 
 
@@ -687,7 +691,7 @@ public class GameManager : MonoBehaviour {
         {
             int result = matchInventory[consumable].initial.consumableValue - matchInventory[consumable].current;
             if (result > 0)
-                userData.modifyConsumableObject(consumable, -result);
+                userData.ModifyConsumableObject(consumable, -result);
         }
         
         PersistanceManager.Instance.SaveUserData();
@@ -770,9 +774,9 @@ public class GameManager : MonoBehaviour {
         startScale = stickerDisplay.spriteHolder.transform.parent.transform.localScale;
         stickerDisplay.ConfigureForGame(currentGameMode);
         SetMatchInventory();
-        protectedLife = userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && userData.upgrades[UpgradeID.LifeProtector] > 0;
-        deathDefy = userData.upgrades.ContainsKey(UpgradeID.DeathDefy) && userData.upgrades[UpgradeID.DeathDefy] > 0;
-        blockMistake = userData.upgrades.ContainsKey(UpgradeID.BlockMistake) && userData.upgrades[UpgradeID.BlockMistake] > 0;
+        protectedLife = userData.unlockedUpgrades.ContainsKey(UpgradeID.LifeProtector) && userData.unlockedUpgrades[UpgradeID.LifeProtector] > 0;
+        deathDefy = userData.unlockedUpgrades.ContainsKey(UpgradeID.DeathDefy) && userData.unlockedUpgrades[UpgradeID.DeathDefy] > 0;
+        blockMistake = userData.unlockedUpgrades.ContainsKey(UpgradeID.BlockMistake) && userData.unlockedUpgrades[UpgradeID.BlockMistake] > 0;
         SetNumpadByDifficulty(selectedDifficulty);
         gameEnded = false;
         stickerDisplay.gameObject.SetActive(true);
@@ -794,7 +798,7 @@ public class GameManager : MonoBehaviour {
 
         StageManager.Instance.AssignRandomStickerGroup();
         LoadStickers();
-        GameCanvas.Instance.barController.SetBar(_remainingStickersFromStage.Count);
+        gameCanvas.barController.SetBar(_remainingStickersFromStage.Count);
         currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
         AddStickers(4);
         _currentlySelectedSticker = null;
@@ -1036,10 +1040,6 @@ public class GameManager : MonoBehaviour {
         }
         return calculatedComboBonus;
     }
-    public Canvas GetGameCanvas() {
-        return GameCanvas.Instance.gameObject.GetComponent<Canvas>();
-    }
-
     public void SetMatchInventory()
     {
         matchInventory = userData.GetMatchInventory();

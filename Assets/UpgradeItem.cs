@@ -10,6 +10,7 @@ public class UpgradeItem : MonoBehaviour
 {
     public UpgradeID upgradeID;
     public Color upgradeColor;
+    public Image background;
     public TextMeshProUGUI upgradeName;
     public TextMeshProUGUI upgradeDescription;
     public TextMeshProUGUI level;
@@ -17,21 +18,26 @@ public class UpgradeItem : MonoBehaviour
     
     public UserData userData => PersistanceManager.Instance.userData;
     // Start is called before the first frame update
-    public void SetUpgradeButton(UpgradeID upgradeIDtoSet)
+    public void SetUpgradeButton(UpgradeID upgradeIDtoSet, bool addLevel = false)
     {
         int currentLevel = 0;
-
-        if (!userData.upgrades.ContainsKey(upgradeIDtoSet)) {
-            throw new Exception("Intentando setear upgrade item con upgrade id que el jugador no tiene");
+        if (userData.unlockedUpgrades.ContainsKey(upgradeIDtoSet)) {
+            currentLevel = userData.unlockedUpgrades[upgradeIDtoSet];
         }
+        if (addLevel) {
+            currentLevel++;
+        } 
         
-        currentLevel = userData.upgrades[upgradeIDtoSet];       
-        bool isMaxLevel = UpgradeData.GetUpgrade(upgradeIDtoSet).IsMaxLevel(currentLevel);
-        int max = UpgradeData.GetUpgrade(upgradeIDtoSet).GetMaxLevel();
-        string description = UpgradeData.GetUpgrade(upgradeIDtoSet).description;
+        UpgradeData upgradeData = UpgradeData.GetUpgrade(upgradeIDtoSet);
+        bool isMaxLevel = upgradeData.IsMaxLevel(currentLevel);
+        int max = upgradeData.GetMaxLevel();
+        
         upgradeID = upgradeIDtoSet;
+        string description = upgradeData.description;
+        upgradeName.text = upgradeData.name;
         level.text = currentLevel + "/" + max;
         level.color = (isMaxLevel) ? Color.yellow: Color.white;
+        background.color = upgradeData.backgroundColor;
         upgradeDescription.text = description;
     }
 }

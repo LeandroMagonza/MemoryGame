@@ -18,7 +18,7 @@ public class LifeCounter : MonoBehaviour
     {
         SetLives();
         UpdateHearts();
-        if (GameManager.Instance.userData.upgrades.ContainsKey(UpgradeID.LifeProtector) && GameManager.Instance.userData.upgrades[UpgradeID.LifeProtector] > 0)
+        if (GameManager.Instance.userData.unlockedUpgrades.ContainsKey(UpgradeID.LifeProtector) && GameManager.Instance.userData.unlockedUpgrades[UpgradeID.LifeProtector] > 0)
         {
             ProtectHearts();
         }
@@ -111,8 +111,8 @@ public class LifeCounter : MonoBehaviour
     }
     public void ResetLives() {
         int add = 0;
-        if (GameManager.Instance.userData.upgrades.ContainsKey(UpgradeID.ExtraLife))
-            add = GameManager.Instance.userData.upgrades[UpgradeID.ExtraLife];
+        if (GameManager.Instance.userData.unlockedUpgrades.ContainsKey(UpgradeID.ExtraLife))
+            add = GameManager.Instance.userData.unlockedUpgrades[UpgradeID.ExtraLife];
         currentLives = baseLives + add;
         Start();
     }    
@@ -132,8 +132,8 @@ public class LifeCounter : MonoBehaviour
     private Color GetHeartColor(int heartIndex)
     {
         int add = 0;
-        if (GameManager.Instance.userData.upgrades.ContainsKey(UpgradeID.ExtraLife))
-            add = GameManager.Instance.userData.upgrades[UpgradeID.ExtraLife];
+        if (GameManager.Instance.userData.unlockedUpgrades.ContainsKey(UpgradeID.ExtraLife))
+            add = GameManager.Instance.userData.unlockedUpgrades[UpgradeID.ExtraLife];
         
         return MyExtensions.GetLerpColor(heartIndex,baseLives+add-1,new List<Color>(){Color.red,Color.yellow,Color.green});
     }  
