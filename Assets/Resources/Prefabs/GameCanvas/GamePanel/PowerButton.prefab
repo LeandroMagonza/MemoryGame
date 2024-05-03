@@ -224,6 +224,7 @@ GameObject:
   - component: {fileID: 3135463766251303993}
   - component: {fileID: 2043053738593585392}
   - component: {fileID: 6936278549330151607}
+  - component: {fileID: 562950806139738338}
   m_Layer: 5
   m_Name: PowerButton
   m_TagString: Untagged
@@ -333,19 +334,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3135463766251303997}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: GameCanvas, Assembly-CSharp
-        m_MethodName: UseItem
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!95 &3135463766251303993
 Animator:
   serializedVersion: 5
@@ -401,3 +390,20 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &562950806139738338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3135463766251303986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ce5e65818bb8e544bb5234d8748100b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ID: 0
+  button: {fileID: 3135463766251303996}
+  text: {fileID: 4485749790506400476}
+  gameClip: 7
+  powerPanelButtonHolder: {fileID: 0}

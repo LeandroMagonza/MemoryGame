@@ -74,11 +74,10 @@ public class StageManager : MonoBehaviour
                // if (stageIndexAndData.Key != 0) break;
                 //Evita crear stages que ya estan creados. Si el que esta arriba, que es el de (dificultad,stageid) mas alto 
                 
-                
                 UserStageData currentUserStageData = userData.GetUserStageData(level, difficulty);
 
                 nextStageUnlocked = (currentUserStageData is not null && currentUserStageData.achievements.Count > 0);
-                //nextStageUnlocked = true;
+                nextStageUnlocked = true;
                 if (topmostStage is not null &&
                     (topmostStage.difficulty > difficulty || 
                      (topmostStage.difficulty == difficulty && topmostStage.level >= level))) continue;
@@ -99,11 +98,9 @@ public class StageManager : MonoBehaviour
                     
              
                     //TODO: mover esto a otro laod que tenga mas sentido
-                    if (ColorUtility.TryParseHtmlString("#00d561", out Color green))
-                         
-                    if (ColorUtility.TryParseHtmlString("#fedd30", out Color yellow))
-                         
-                    if (ColorUtility.TryParseHtmlString("#d60149", out Color red))
+                    if (ColorUtility.TryParseHtmlString("#00d561", out Color green)){}
+                    if (ColorUtility.TryParseHtmlString("#fedd30", out Color yellow)){}
+                    if (ColorUtility.TryParseHtmlString("#d60149", out Color red)){}
                     
                     newStage.difficultyButton.gameObject.GetComponent<Image>().color = 
                         MyExtensions.GetLerpColor(difficulty-2,9-2,new List<Color>()

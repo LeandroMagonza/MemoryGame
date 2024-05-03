@@ -71,8 +71,7 @@ public class GameManager : MonoBehaviour {
     [Header("Skills")]
     public bool protectedLife = false;
     public int protectedLifeOnComboAmount = 10;
-    public bool deathDefy = false;
-    public bool blockMistake = false;
+    public int deathDefyCharges = 0;
     private int deathDefyMagnitude = 0;
 
     [Header("Timer")]    
@@ -102,7 +101,6 @@ public class GameManager : MonoBehaviour {
     
     [Header("NumpadQuizOptionsPad")]
     public GameObject numpad;
-    public NumpadButton[] numpadButtons;
     
     [Header("QuizOptionsPad")]
     public GameObject quizOptionPad;
@@ -166,6 +164,10 @@ public class GameManager : MonoBehaviour {
     public bool perfectMode = false;
 
     public bool speedrunMode = false;
+    public int startingStickerAmount = 4;
+    public int amountOfTurnsBetweenAddingStickers = 10;
+    public int flatAmountOfStickerAdded = 0;
+    public int scalingAmountOfStickerAdded = 1;
 
 
     public void SetScoreTexts() {
@@ -181,16 +183,16 @@ public class GameManager : MonoBehaviour {
 
 
 
-    public IEnumerator ProcessTurnAction(int number)
+    public IEnumerator ProcessTurnAction(int guessNumber, bool ranOutOfTime = false)
     {
         disableInput = true;
         StickerMatchData currentStickerMatchData = currentlyInGameStickers[_currentlySelectedSticker];
-        CustomDebugger.Log("Guessed number " + number + ", amount of appearances " + currentStickerMatchData.amountOfAppearences);
+        CustomDebugger.Log("Guessed number " + guessNumber + ", amount of appearances " + currentStickerMatchData.amountOfAppearences);
         TurnAction turnAction;
         int scoreModification = 0;
         var turnSticker = _currentlySelectedSticker;
         bool defeat = false;
-        if (number == GetCorrectGuess(turnSticker,currentStickerMatchData))
+        if (guessNumber == GetCorrectGuess(turnSticker,currentStickerMatchData))
         {
             CustomDebugger.Log("CorrectGuess");
             scoreModification = OnCorrectGuess();
@@ -199,14 +201,22 @@ public class GameManager : MonoBehaviour {
         else
         {
             CustomDebugger.Log("IncorrectGuess");
-            int mistakeMagnitude = number - currentStickerMatchData.amountOfAppearences;
+            int mistakeMagnitude = guessNumber - currentStickerMatchData.amountOfAppearences;
             deathDefyMagnitude = Mathf.Abs(mistakeMagnitude);
-            defeat = OnIncorrectGuess(number);
+            defeat = OnIncorrectGuess(guessNumber);
             turnAction = TurnAction.GuessIncorrect;
+            if (ranOutOfTime) {
+                turnAction = TurnAction.RanOutOfTime;
+            }
+        }
+        
+        if (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
+        {
+            currentlyInGameStickers[_currentlySelectedSticker].cutNumbers = new List<int>();
         }
         
         //usar el dato del sticker tomado antes de la funcion oncorrectguess
-        yield return FinishProcessingTurnAction(number, turnAction, scoreModification, turnSticker,currentStickerMatchData,defeat);
+        yield return FinishProcessingTurnAction(guessNumber, turnAction, scoreModification, turnSticker,currentStickerMatchData,defeat);
     }
 
     public int GetCorrectGuess(StickerData turnSticker,StickerMatchData stickerMatchData)
@@ -258,6 +268,7 @@ public class GameManager : MonoBehaviour {
         }
         else if(turnAction != TurnAction.UseCut) {
             //yield return new WaitForSeconds(delayBetweenImages);
+            
             NextTurn();
         }
 
@@ -297,13 +308,13 @@ public class GameManager : MonoBehaviour {
         {
             AddStickers(1);
         }
-        else if (turnNumber % 10 == 0)
+        else if (turnNumber % amountOfTurnsBetweenAddingStickers == 0)
         {
-            AddStickers(turnNumber / 10);
+            AddStickers(flatAmountOfStickerAdded + (turnNumber / amountOfTurnsBetweenAddingStickers) * scalingAmountOfStickerAdded);
         }
 
         SetRandomImage();
-        PowerPanelButtonHolder.Instance.UpdateUI();
+        gameCanvas.UpdateUI();
     }
 
 
@@ -312,20 +323,13 @@ public class GameManager : MonoBehaviour {
 
     public bool OnIncorrectGuess(int number)
     {
-        if (!firstMistake)
-        {
-            firstMistake = true;
-            //OpenTutorialPanel(1);
+        if (currentlyInGameStickers[_currentlySelectedSticker].cutNumbers.Count > 0 ) {
+            currentlyInGameStickers[_currentlySelectedSticker].remainingCuts++;
         }
-        if (blockMistake)
+        if (userData.GetUpgradeLevel(UpgradeID.BlockMistake) > 0)
         {
             CustomDebugger.Log("Block");
-            if (!GetCurrentlySelectedSticker().matchData.blockedNumbers.Contains(number))
-            {
-                CustomDebugger.Log("Block In");
-                GetCurrentlySelectedSticker().matchData.AddBlockEffect(number);
-
-            }
+            GetCurrentlySelectedSticker().matchData.remainingCuts += userData.GetUpgradeLevel(UpgradeID.BlockMistake);
         }
         IncorrectGuessFX();
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
@@ -338,23 +342,30 @@ public class GameManager : MonoBehaviour {
         else {
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
         }
-        bool DeathDefy = GetDeathDefy(deathDefyMagnitude);
 
+       
         SetCurrentCombo(0);
-        return lifeCounter.LoseLive(ref protectedLife, DeathDefy);
+        bool hasDefiedDeath = GetDeathDefy(deathDefyMagnitude);
+
+        if (hasDefiedDeath) {
+            //TODO: Agregar death defy animation
+            return false;
+        }
+            
+        return lifeCounter.LoseLive(ref protectedLife);
     }
 
     private bool GetDeathDefy(float magnitude)
     {
-        bool canDefyDeath = false;
+        bool isSmallMistake = false;
         if (magnitude <= 1) 
         {
-            canDefyDeath = true;
+            isSmallMistake = true;
         }
-        bool DeathDefy = lifeCounter.currentLives == 1 && deathDefy && canDefyDeath;
-        if (DeathDefy)
-            deathDefy = false;
-        return DeathDefy;
+        bool hasDefiedDeath = lifeCounter.currentLives == 1 && deathDefyCharges > 0 && isSmallMistake;
+        if (hasDefiedDeath)
+            deathDefyCharges--;
+        return hasDefiedDeath;
     }
 
     public void SetCurrentCombo(int newCurrentComboAmount)
@@ -365,7 +376,6 @@ public class GameManager : MonoBehaviour {
         if (newCurrentComboAmount == 0 )
         {
             comboText.text = "";  
-            
         }
         else
         {
@@ -403,11 +413,7 @@ public class GameManager : MonoBehaviour {
         SetCurrentCombo(_currentCombo+1);
         ModifyScore(scoreModification);
         //Reset blocked and cut numbers for next appearence
-        if (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
-        {
-            currentlyInGameStickers[_currentlySelectedSticker].blockedNumbers = new List<int>();
-            currentlyInGameStickers[_currentlySelectedSticker].cutNumbers = new List<int>();
-        }
+
         scoreModification += CheckAmountOfAppearences();
         return scoreModification;
     }
@@ -558,6 +564,12 @@ public class GameManager : MonoBehaviour {
         */
         #endregion
         currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences++;
+        
+        //agrego un cut con 0 para que se apliquen los remaining cuts
+        currentlyInGameStickers[_currentlySelectedSticker].AddCutEffect(
+            currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
+            selectedDifficulty,
+            0);
     }
 
     public void RemoveStickerFromPool() {
@@ -717,23 +729,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private void OnRanOutOfTime() {
-        disableInput = true;
-        IncorrectGuessFX();
-        amountOfAppearencesText.SetAmountOfGuessesAndShowText(
-            currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
-            false);
-        if (increaseAmountOfAppearencesOnMistake) {
-            CheckAmountOfAppearences(false);
-        }
-        else {
-            currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
-        }
-
-        AudioManager.Instance.PlayClip(GameClip.incorrectGuess,1);
-        ResetTimer();
-        bool defeat = lifeCounter.LoseLive(ref protectedLife, false);
-        StartCoroutine(FinishProcessingTurnAction(0, TurnAction.RanOutOfTime, 0, _currentlySelectedSticker,
-            currentlyInGameStickers[_currentlySelectedSticker],defeat));
+        StartCoroutine(ProcessTurnAction(0, true));
     }
 
     public void PlayNextStage() {
@@ -774,10 +770,9 @@ public class GameManager : MonoBehaviour {
         startScale = stickerDisplay.spriteHolder.transform.parent.transform.localScale;
         stickerDisplay.ConfigureForGame(currentGameMode);
         SetMatchInventory();
-        protectedLife = userData.unlockedUpgrades.ContainsKey(UpgradeID.LifeProtector) && userData.unlockedUpgrades[UpgradeID.LifeProtector] > 0;
-        deathDefy = userData.unlockedUpgrades.ContainsKey(UpgradeID.DeathDefy) && userData.unlockedUpgrades[UpgradeID.DeathDefy] > 0;
-        blockMistake = userData.unlockedUpgrades.ContainsKey(UpgradeID.BlockMistake) && userData.unlockedUpgrades[UpgradeID.BlockMistake] > 0;
-        SetNumpadByDifficulty(selectedDifficulty);
+        protectedLife = userData.GetUpgradeLevel(UpgradeID.LifeProtector) > 0; 
+        deathDefyCharges = userData.GetUpgradeLevel(UpgradeID.DeathDefy); 
+        gameCanvas.numpad.SetNumpadByDifficulty(selectedDifficulty);
         gameEnded = false;
         stickerDisplay.gameObject.SetActive(true);
         endGameButtons.transform.parent.transform.parent.gameObject.SetActive(false);
@@ -800,18 +795,18 @@ public class GameManager : MonoBehaviour {
         LoadStickers();
         gameCanvas.barController.SetBar(_remainingStickersFromStage.Count);
         currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
-        AddStickers(4);
+        AddStickers(startingStickerAmount);
         _currentlySelectedSticker = null;
         SetRandomImage();
         disableInput = false;
         _currentMatch = new Match(selectedLevel,selectedDifficulty,false);
         _currentCombo = 0;
         endGameAchievementStars.ResetStars();
-        PowerPanelButtonHolder.Instance.UpdateUI();
+        gameCanvas.UpdateUI();
         
         pausePanel.SetActive(false);
         tutorialPanel.SetActive(false);
-        
+        /*
         if (userData.stages[0].matches.Count == 0)
         {
             //OpenTutorialPanel(0);
@@ -828,6 +823,7 @@ public class GameManager : MonoBehaviour {
                 }
             }                
         }
+        */
         stageGroupIntroPanel.gameObject.SetActive(true);
         stageGroupIntroPanel.SetGroup(StageManager.Instance.selectedStickerGroup);
         StartCoroutine(StartMatchCountdown());
@@ -854,23 +850,10 @@ public class GameManager : MonoBehaviour {
             SetTimer(maxTimer);
         }
     }
-    private void SetNumpadByDifficulty(int difficulty)
-    {
-        for (int i = 0; i < numpadButtons.Length; i++)
-        {
-            numpadButtons[i].gameObject.transform.parent.gameObject.SetActive(false);
-            numpadButtons[i].gameObject.SetActive(false);
-        }
-        for (int i = 0; i < difficulty; i++)
-        {
-            numpadButtons[i].gameObject.SetActive(true);
-            numpadButtons[i].gameObject.transform.parent.gameObject.SetActive(true);
-            numpadButtons[i].RefreshSize();
-        }
-    }
+
 
     private void FixedUpdate() {
-        if (gameEnded || pause) return;
+        if (gameEnded || pause || disableInput) return;
         SetTimer(timer - Time.deltaTime);
     }
 

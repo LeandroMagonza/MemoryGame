@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -10,54 +11,53 @@ public class StickerMatchData
     public int? lastClueAppearenceNumber = null;
     //Cut?
     public List<int> cutNumbers = new List<int>();
+    public int remainingCuts = 0;
     //Bloq
-    public List<int> blockedNumbers = new List<int>();
     public void AddBetterClueEffect(int lastClueAppearenceNumber)
     {
         this.lastClueAppearenceNumber = lastClueAppearenceNumber;
     }
-    public void AddCutEffect(int correctNumber, int difficulty)
+    public void AddCutEffect(int correctNumber, int difficulty, int amountOfCuts)
     {
+        CustomDebugger.Log("correctNumber "+correctNumber);
+        CustomDebugger.Log("difficulty "+difficulty);
+        CustomDebugger.Log("amountOfCuts "+amountOfCuts);
+        
+        if (amountOfCuts + remainingCuts < 1) return;
+        remainingCuts += amountOfCuts;
         int lastClue = 0;
-        int iterator = 0;
-        if (lastClueAppearenceNumber is not null)
+        if (lastClueAppearenceNumber != null)
         {
             lastClue = (int)lastClueAppearenceNumber;
         }
-        int options = difficulty - lastClue;
+
+        int totalOptions = difficulty;
         cutNumbers = new List<int>();
 
-        switch (options)
+        // Crear lista de opciones válidas
+        List<int> validOptions = new List<int>();
+        for (int num = 1; num <= totalOptions; num++)
         {
-            case int i when i <= 1:
-                iterator = 0;
-                break;
-            case int i when i <= 3:
-                iterator = 1;
-                break;
-            default:
-                iterator = Mathf.CeilToInt((options)/2);
-                break;
-            
-        }
-
-        while (iterator >= 0)
-        {
-            int random = Random.Range(lastClue+1, difficulty + 1 );
-            Debug.Log($"Random: {random} Correct: {correctNumber}");
-            if (random != correctNumber && !cutNumbers.Contains(random))
+            if (num > lastClue && num != correctNumber)
             {
-                cutNumbers.Add(random);
-                iterator--;
+                validOptions.Add(num);
             }
-            Debug.Log("iterator: "+iterator);
         }
-    }
+        CustomDebugger.Log("validOptions "+validOptions.Count);
+        // Mezclar la lista de opciones válidas
+        System.Random rng = new System.Random();
+        validOptions = validOptions.OrderBy(a => rng.Next()).ToList();
 
-    public void AddBlockEffect(int blockedNumber)
-    {
-        Debug.Log("Add Block: "+ blockedNumber);
-        blockedNumbers.Add(blockedNumber);
-        Debug.Log("Add: "+ blockedNumbers.Count);
+        // Determinar cuántos botones bloquear
+        int maxCuts = Mathf.Min(remainingCuts, validOptions.Count);
+        CustomDebugger.Log("maxCuts "+maxCuts);
+
+        // Añadir botones a bloquear desde las opciones mezcladas
+        for (int i = 0; i < maxCuts; i++)
+        {
+            cutNumbers.Add(validOptions[i]);
+        }
+        CustomDebugger.Log("cutNumbers "+cutNumbers.Count + cutNumbers.ToString());
+        remainingCuts--;
     }
 }

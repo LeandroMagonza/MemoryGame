@@ -59,12 +59,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buttons:
-  - name: 
-    ID: 0
-    button: {fileID: 0}
-    text: {fileID: 0}
-    gameClip: 0
-    peekCanvas: {fileID: 0}
+  - {fileID: 1388933031287967136}
+  - {fileID: 2671925126184605385}
+  - {fileID: 5001485058722427997}
+  - {fileID: 8813906455465406416}
+  - {fileID: 3159554095070046523}
+  - {fileID: 7265446147073111319}
   pausePanel: {fileID: 0}
 --- !u!1 &8070983542604318102
 GameObject:
@@ -197,6 +197,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4719886265704890165}
     m_Modifications:
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: button
+      value: 
+      objectReference: {fileID: 4545570545915601278}
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: powerPanelButtonHolder
+      value: 
+      objectReference: {fileID: 9197616496460016574}
+    - target: {fileID: 2644660873523850628, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: e2531dbb210c447358dfd4dd637545c5, type: 3}
     - target: {fileID: 3135463766251303986, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: m_Name
       value: PowerButton
@@ -284,13 +296,58 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7426424622022612428}
   m_SourcePrefab: {fileID: 100100000, guid: dac0063521f58d84eb673317628e283b, type: 3}
+--- !u!1 &220836076087497702 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
+  m_PrefabInstance: {fileID: 1483509454413714754}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7426424622022612428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 220836076087497702}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
+  m_EffectDistance: {x: 1, y: -1}
+  m_UseGraphicAlpha: 1
+--- !u!114 &1388933031287967136 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+  m_PrefabInstance: {fileID: 1483509454413714754}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ce5e65818bb8e544bb5234d8748100b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &4545570545915601265 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3135463766251303987, guid: dac0063521f58d84eb673317628e283b, type: 3}
   m_PrefabInstance: {fileID: 1483509454413714754}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4545570545915601278 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3135463766251303996, guid: dac0063521f58d84eb673317628e283b, type: 3}
+  m_PrefabInstance: {fileID: 1483509454413714754}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2505291637053591083
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -299,6 +356,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4719886265704890165}
     m_Modifications:
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: ID
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: powerPanelButtonHolder
+      value: 
+      objectReference: {fileID: 9197616496460016574}
     - target: {fileID: 3135463766251303986, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: m_Name
       value: PowerButton (1)
@@ -397,6 +462,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3135463766251303987, guid: dac0063521f58d84eb673317628e283b, type: 3}
   m_PrefabInstance: {fileID: 2505291637053591083}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2671925126184605385 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+  m_PrefabInstance: {fileID: 2505291637053591083}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ce5e65818bb8e544bb5234d8748100b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &3173064608193540569
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -405,6 +481,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4719886265704890165}
     m_Modifications:
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: ID
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: powerPanelButtonHolder
+      value: 
+      objectReference: {fileID: 9197616496460016574}
+    - target: {fileID: 2644660873523850628, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 07515e5138427408489d90b7e99c6b71, type: 3}
     - target: {fileID: 3135463766251303986, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: m_Name
       value: PowerButton (4)
@@ -496,13 +584,47 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3034933901599562414}
   m_SourcePrefab: {fileID: 100100000, guid: dac0063521f58d84eb673317628e283b, type: 3}
 --- !u!224 &543698457449793002 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3135463766251303987, guid: dac0063521f58d84eb673317628e283b, type: 3}
   m_PrefabInstance: {fileID: 3173064608193540569}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &3159554095070046523 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+  m_PrefabInstance: {fileID: 3173064608193540569}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ce5e65818bb8e544bb5234d8748100b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &4291393554832914301 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
+  m_PrefabInstance: {fileID: 3173064608193540569}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3034933901599562414
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4291393554832914301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
+  m_EffectDistance: {x: 2, y: -2}
+  m_UseGraphicAlpha: 1
 --- !u!1001 &4807831127444712639
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -511,6 +633,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4719886265704890165}
     m_Modifications:
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: ID
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: powerPanelButtonHolder
+      value: 
+      objectReference: {fileID: 9197616496460016574}
+    - target: {fileID: 2644660873523850628, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: cd845d1f9040eca4c9088dfd35f33a69, type: 3}
     - target: {fileID: 3135463766251303986, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: m_Name
       value: PowerButton (2)
@@ -602,8 +736,42 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6764830357868223375}
   m_SourcePrefab: {fileID: 100100000, guid: dac0063521f58d84eb673317628e283b, type: 3}
+--- !u!114 &5001485058722427997 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+  m_PrefabInstance: {fileID: 4807831127444712639}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ce5e65818bb8e544bb5234d8748100b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &6142402120917346843 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
+  m_PrefabInstance: {fileID: 4807831127444712639}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6764830357868223375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6142402120917346843}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
+  m_EffectDistance: {x: 1, y: -1}
+  m_UseGraphicAlpha: 1
 --- !u!224 &7582864684088039564 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3135463766251303987, guid: dac0063521f58d84eb673317628e283b, type: 3}
@@ -617,6 +785,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4719886265704890165}
     m_Modifications:
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: ID
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: powerPanelButtonHolder
+      value: 
+      objectReference: {fileID: 9197616496460016574}
+    - target: {fileID: 2644660873523850628, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: cda5d5686f6fb40b8aef8e24dc4a98b9, type: 3}
     - target: {fileID: 3135463766251303986, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: m_Name
       value: PowerButton (5)
@@ -708,13 +888,47 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5243481185634249895}
   m_SourcePrefab: {fileID: 100100000, guid: dac0063521f58d84eb673317628e283b, type: 3}
 --- !u!224 &5226264289995332038 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3135463766251303987, guid: dac0063521f58d84eb673317628e283b, type: 3}
   m_PrefabInstance: {fileID: 7134840905193713141}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7265446147073111319 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+  m_PrefabInstance: {fileID: 7134840905193713141}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ce5e65818bb8e544bb5234d8748100b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &8395526371127159633 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
+  m_PrefabInstance: {fileID: 7134840905193713141}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5243481185634249895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8395526371127159633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
+  m_EffectDistance: {x: 2, y: -2}
+  m_UseGraphicAlpha: 1
 --- !u!1001 &9043590889128277810
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -723,6 +937,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4719886265704890165}
     m_Modifications:
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: ID
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: powerPanelButtonHolder
+      value: 
+      objectReference: {fileID: 9197616496460016574}
+    - target: {fileID: 2644660873523850628, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: d0defff56c694bf47865d04db14c1cd0, type: 3}
     - target: {fileID: 3135463766251303986, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: m_Name
       value: PowerButton (3)
@@ -821,3 +1047,14 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3135463766251303987, guid: dac0063521f58d84eb673317628e283b, type: 3}
   m_PrefabInstance: {fileID: 9043590889128277810}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8813906455465406416 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+  m_PrefabInstance: {fileID: 9043590889128277810}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ce5e65818bb8e544bb5234d8748100b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

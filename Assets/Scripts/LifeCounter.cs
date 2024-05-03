@@ -64,15 +64,17 @@ public class LifeCounter : MonoBehaviour
 
         
     }
-    public bool LoseLive(ref bool protectedLife, bool deathDefy) 
+    public bool LoseLive(ref bool protectedLife) 
     {
         //Devuelve true si te quedaste sin vidas
         if (protectedLife)
         {
             protectedLife = false;
         }
-        else if (!deathDefy)
+        else {
             currentLives--;
+        }
+
         UpdateHearts();
         if (currentLives <= 0)
         {

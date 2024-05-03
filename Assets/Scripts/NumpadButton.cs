@@ -28,7 +28,7 @@ public class NumpadButton : MonoBehaviour {
     {
         yield return new WaitForEndOfFrame();
         RectTransform rectTransform = GetComponent<RectTransform>();
-        RectTransform rectReferrence = GameManager.Instance.numpadButtons[0].GetComponent<RectTransform>();
+        RectTransform rectReferrence = GameManager.Instance.gameCanvas.numpad.numpadButtons[0].GetComponent<RectTransform>();
         rectTransform.sizeDelta = new Vector2(rectReferrence.sizeDelta.x, rectTransform.sizeDelta.y);
     }
     public void OnClick()

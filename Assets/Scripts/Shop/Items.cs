@@ -14,7 +14,7 @@ public enum ConsumableID
     Cut,
     Peek,
     Highlight,
-    Shotgun
+    Bomb
 }
 public enum UpgradeID
 {
@@ -101,7 +101,7 @@ public class ConsumableData
                     amount = 1,
                 };
                 break;
-            case ConsumableID.Shotgun:
+            case ConsumableID.Bomb:
                 consumable = new ConsumableData()
                 {
                     itemID = itemID,
@@ -215,7 +215,7 @@ public class UpgradeData
                     itemId = itemId,
                     valuePerLevel = 1,
                     name = "EXTRA SHOTGUN",
-                    description = "Start each match with an extra Shotgun. \n" +ConsumableData.GetConsumable(ConsumableID.Shotgun).description,
+                    description = "Start each match with an extra Shotgun. \n" +ConsumableData.GetConsumable(ConsumableID.Bomb).description,
                     backgroundColor = Color.cyan,
                     userLevelRequired = new int[] { 1,6 },
                 };
@@ -239,7 +239,7 @@ public class UpgradeData
                     itemId = itemId,
                     valuePerLevel = 1,
                     name = "LIFE PROTECTOR",
-                    description = "Protect your life from one mistake. Recharges on 10 Combo - lv",
+                    description = "Protect your life from one mistake. Recharges on (10 - lv) Combo",
                     backgroundColor = Color.red,
                     userLevelRequired = new int[] {10,12,14,16,18},
                 };
@@ -303,7 +303,7 @@ public class UpgradeData
                     itemId = itemId,
                     valuePerLevel = 1,
                     name = "HEAL ON CLEAR",
-                    description = "Heal one heart per 4 - lv stickers cleared",
+                    description = "Heal one heart per (4 - lv) stickers cleared",
                     backgroundColor = Color.red,
                     userLevelRequired = new int[] { 0,4,8,12 },
 
