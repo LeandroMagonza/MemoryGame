@@ -17,20 +17,23 @@ public class PowerPanelButtonHolder : MonoBehaviour
             Instance = this;
     }
 
-    public void SetAllPowerButtonsText()
-    {
-        for (int i = 0; i < buttons.Length; i++)
-        {
-            for (int j = 0; j < Enum.GetNames(typeof(ConsumableID)).Length; j++)
-            {
-                if (buttons[i].ID == (ConsumableID)j)
-                {
-                    buttons[i].SetButtonText((ConsumableID)j);
-                    buttons[i].SetInteractable((ConsumableID)j);
-                }
+    public void SetAllPowerButtonsText(bool disableUnavailablePowers) {
+        foreach (var powerButton in buttons) {
+            powerButton.SetButtonText();
+            powerButton.SetInteractable();
+
+            if (!disableUnavailablePowers) continue; 
+            if (
+                GameManager.Instance.matchInventory.ContainsKey(powerButton.consumableID)
+                &&
+                GameManager.Instance.matchInventory[powerButton.consumableID].max < 1
+            ) {
+                powerButton.gameObject.SetActive(false);
+            }
+            else {
+                powerButton.gameObject.SetActive(true);
             }
         }
-        
     }
 
     private (StickerData sticker, StickerMatchData matchData) ActivatePower(ConsumableID ID)

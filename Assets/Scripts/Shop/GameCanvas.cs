@@ -18,9 +18,9 @@ public class GameCanvas : MonoBehaviour
         UpdateUI();
     }
 
-    public void UpdateUI()
+    public void UpdateUI(bool disableUnavailablePowers = false)
     {
-        powerPanelButtonHolder.SetAllPowerButtonsText();
+        powerPanelButtonHolder.SetAllPowerButtonsText(disableUnavailablePowers);
         numpad.SetNumpadButtons(GameManager.Instance.GetCurrentlySelectedSticker());
     }
 }

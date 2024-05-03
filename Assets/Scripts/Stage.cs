@@ -383,7 +383,7 @@ public class UserData
             (ConsumableID.Cut, UpgradeID.ExtraCut) ,
             (ConsumableID.Peek, UpgradeID.ExtraPeek) ,
             (ConsumableID.Highlight, UpgradeID.ExtraHighlight) ,
-            (ConsumableID.Bomb, UpgradeID.ExtraShotgun) ,
+            (ConsumableID.Bomb, UpgradeID.ExtraBomb) ,
         };
 
         foreach (var item in upgradeRelation)

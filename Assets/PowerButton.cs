@@ -5,13 +5,13 @@ using UnityEngine.UI;
 public class PowerButton : MonoBehaviour
 {
     //[SerializeField] public string name;
-    [SerializeField] public ConsumableID ID;
+    [SerializeField] public ConsumableID consumableID;
     [SerializeField] public Button button;
     [SerializeField] public TextMeshProUGUI text;
     [SerializeField] public GameClip gameClip;
     //[SerializeField] public GameObject peekCanvas;
     public PowerPanelButtonHolder powerPanelButtonHolder;
-    public void SetButtonText(ConsumableID consumableID) {
+    public void SetButtonText() {
         if (text == null) return;
 
         if (GameManager.Instance.matchInventory.ContainsKey(consumableID))
@@ -25,7 +25,7 @@ public class PowerButton : MonoBehaviour
         }
         text.color = text.text.Equals("0") ? Color.white : Color.yellow;
     }
-    public void SetInteractable(ConsumableID consumableID)
+    public void SetInteractable()
     {
         if (button != null)
         {
@@ -52,7 +52,7 @@ public class PowerButton : MonoBehaviour
             CustomDebugger.Log("Input is disabled");
             return;
         }
-        powerPanelButtonHolder.UsePower(ID);
+        powerPanelButtonHolder.UsePower(consumableID);
     }
 
 

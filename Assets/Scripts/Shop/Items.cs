@@ -31,7 +31,7 @@ public enum UpgradeID
     BlockMistake,
     DeathDefy,
     ExtraHighlight,
-    ExtraShotgun,
+    ExtraBomb,
     StickerMaster,
     ConsumableSlot,
 }
@@ -209,7 +209,7 @@ public class UpgradeData
 
                 };
                 break;     
-            case UpgradeID.ExtraShotgun:
+            case UpgradeID.ExtraBomb:
                 upgrade = new UpgradeData()
                 {
                     itemId = itemId,

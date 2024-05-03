@@ -65,6 +65,7 @@ MonoBehaviour:
   - {fileID: 8813906455465406416}
   - {fileID: 3159554095070046523}
   - {fileID: 7265446147073111319}
+  gameCanvas: {fileID: 0}
   pausePanel: {fileID: 0}
 --- !u!1 &8070983542604318102
 GameObject:
@@ -361,6 +362,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: consumableID
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: powerPanelButtonHolder
       value: 
       objectReference: {fileID: 9197616496460016574}
@@ -483,6 +488,10 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: ID
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: consumableID
       value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
@@ -638,6 +647,10 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: consumableID
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: powerPanelButtonHolder
       value: 
       objectReference: {fileID: 9197616496460016574}
@@ -790,6 +803,10 @@ PrefabInstance:
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: consumableID
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: powerPanelButtonHolder
       value: 
       objectReference: {fileID: 9197616496460016574}
@@ -939,6 +956,10 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: ID
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: consumableID
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}

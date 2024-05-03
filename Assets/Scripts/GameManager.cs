@@ -154,7 +154,7 @@ public class GameManager : MonoBehaviour {
     public UserData userData => PersistanceManager.Instance.userData;
     //public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
     private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.StickerLevels;
-    public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> matchInventory = new Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)>();
+    public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> matchInventory = new ();
     public PacksData packs => PersistanceManager.Instance.packs;
     public int selectedLevel => StageManager.Instance.selectedStage;
     public int selectedDifficulty => StageManager.Instance.selectedDifficulty;
@@ -802,10 +802,12 @@ public class GameManager : MonoBehaviour {
         _currentMatch = new Match(selectedLevel,selectedDifficulty,false);
         _currentCombo = 0;
         endGameAchievementStars.ResetStars();
-        gameCanvas.UpdateUI();
+        gameCanvas.UpdateUI(true);
         
         pausePanel.SetActive(false);
         tutorialPanel.SetActive(false);
+
+        #region FirstMistake
         /*
         if (userData.stages[0].matches.Count == 0)
         {
@@ -824,6 +826,8 @@ public class GameManager : MonoBehaviour {
             }                
         }
         */
+        #endregion
+
         stageGroupIntroPanel.gameObject.SetActive(true);
         stageGroupIntroPanel.SetGroup(StageManager.Instance.selectedStickerGroup);
         StartCoroutine(StartMatchCountdown());
