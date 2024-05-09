@@ -13,7 +13,7 @@ public class UnlockedUpgradesPanel : MonoBehaviour {
     public void OrderUpgradePanels()
     {
         var upgradesOrdered = unlockedUpgrades
-            .OrderByDescending(tuple => tuple.upgradeID)
+            .OrderBy(tuple => tuple.upgradeID)
             .ToList();
         foreach (var upgrade in upgradesOrdered)
         {

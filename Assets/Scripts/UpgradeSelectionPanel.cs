@@ -16,23 +16,23 @@ public class UpgradeSelectionPanel : MonoBehaviour {
         foreach (UpgradeID upgradeID in Enum.GetValues(typeof(UpgradeID))) {
             if (upgradeID == UpgradeID.NONE) continue;
 
-            var upgradeData = UpgradeData.GetUpgrade(upgradeID);
+            var upgradeData = UpgradeData.GetUpgrade(upgradeID,true);
 
             // Obtiene el nivel actual del upgrade para el jugador
             int currentLevel = userData.GetUpgradeLevel(upgradeID);
 
             // Verifica si el jugador tiene el nivel requerido para el próximo nivel del upgrade
             CustomDebugger.Log(upgradeData.name);
-            CustomDebugger.Log("upgradeData.userLevelRequired.Length >= currentLevel");
-            CustomDebugger.Log(upgradeData.userLevelRequired.Length + " >= " + currentLevel);
-            CustomDebugger.Log(upgradeData.userLevelRequired.Length >= currentLevel);
+            // CustomDebugger.Log("upgradeData.userLevelRequired.Length >= currentLevel");
+            // CustomDebugger.Log(upgradeData.userLevelRequired.Length + " >= " + currentLevel);
+            // CustomDebugger.Log(upgradeData.userLevelRequired.Length >= currentLevel);
+            //
+            // CustomDebugger.Log("playerLevel >= upgradeData.userLevelRequired[currentLevel]");
+            // CustomDebugger.Log(playerLevel + " >= " + (upgradeData.userLevelRequired[currentLevel] ? "" : ""));
+            // CustomDebugger.Log(playerLevel >= upgradeData.userLevelRequired[currentLevel]);
 
-            CustomDebugger.Log("playerLevel >= upgradeData.userLevelRequired[currentLevel]");
-            CustomDebugger.Log(playerLevel + " >= " + upgradeData.userLevelRequired[currentLevel]);
-            CustomDebugger.Log(playerLevel >= upgradeData.userLevelRequired[currentLevel]);
-
-            if (upgradeData.userLevelRequired.Length >= currentLevel &&
-                playerLevel >= upgradeData.userLevelRequired[currentLevel]) {
+            if (upgradeData.playerLevelRequired.Length > currentLevel &&
+                playerLevel >= upgradeData.playerLevelRequired[currentLevel]) {
                 // Verifica si el jugador cumple con los upgrades requeridos para este upgrade
                 bool requirementsMet = true;
                 foreach (var requirement in upgradeData.upgradeRequired) {
@@ -74,7 +74,7 @@ public class UpgradeSelectionPanel : MonoBehaviour {
         foreach (var VARIABLE in selectionOptions) {
             if (chosenUpgrades.Count > chosenOptionIndex) {
                 VARIABLE.gameObject.SetActive(true);
-                VARIABLE.SetUpgradeButton(chosenUpgrades[chosenOptionIndex].itemId);
+                VARIABLE.SetUpgradeButton(chosenUpgrades[chosenOptionIndex].itemId,true);
                 chosenOptionIndex++;
             }
             else {

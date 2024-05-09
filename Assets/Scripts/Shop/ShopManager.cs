@@ -89,7 +89,7 @@ public class ShopManager : MonoBehaviour
         if (itemID < 0) return;
         ConsumableID consumableID = (ConsumableID)itemID;
         CustomDebugger.Log("Added Item:" + nameof(consumableID));
-        GameManager.Instance.userData.AddConsumableObject(consumableID);
+        PersistanceManager.Instance.userConsumableData.ModifyConsumable(consumableID,1);
         PersistanceManager.Instance.SaveUserData();
         UpdateMoneyDisplay();
         UpdateConsumableButtonsUI();
@@ -160,14 +160,9 @@ public class ShopManager : MonoBehaviour
     private void SetConsumableButton(ConsumableID consumableID)
     {
         ShopButton shopButton = shopConsumableButtons[consumableID].button;
-        if (userData.consumables.ContainsKey(consumableID))
-        {
-            shopButton.currentText.text = "Owned: " + userData.consumables[consumableID].ToString();
-        }
-        else
-        {
-            shopButton.currentText.text = "Owned: 0";
-        }
+            shopButton.currentText.text = 
+                "Owned: " +
+            PersistanceManager.Instance.userConsumableData.GetConsumableData(consumableID).amount;
 
         shopButton.priceText.text = ConsumableData.GetConsumable(consumableID).price.ToString();
         shopButton.descriptionText.text  = ConsumableData.GetConsumable(consumableID).description;
@@ -233,11 +228,13 @@ public class ShopManager : MonoBehaviour
             }
             description += requirementData; 
         }
-        shopUpgradeButtons[upgradeID].button.button.interactable = requirementsMet && !isMaxLevel;
-        shopUpgradeButtons[upgradeID].button.currentText.text = currentLevel.ToString() + "/" + max;
-        shopUpgradeButtons[upgradeID].button.priceText.text = price;
-        shopUpgradeButtons[upgradeID].button.priceText.color = shopUpgradeButtons[upgradeID].button.button.interactable? Color.white : Color.gray;
-        shopUpgradeButtons[upgradeID].button.descriptionText.text = description;
+
+        var upgradeButton = shopUpgradeButtons[upgradeID].button;
+        upgradeButton.button.interactable = requirementsMet && !isMaxLevel;
+        upgradeButton.currentText.text = currentLevel.ToString() + "/" + max;
+        upgradeButton.priceText.text = price;
+        upgradeButton.priceText.color = shopUpgradeButtons[upgradeID].button.button.interactable? Color.white : Color.gray;
+        upgradeButton.descriptionText.text = description;
     }
 }
 

@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using UnityEngine.Networking;
 using Newtonsoft.Json.Linq;
 
+
 public class PersistanceManager : MonoBehaviour
 {
     #region Singleton
@@ -49,6 +50,7 @@ public class PersistanceManager : MonoBehaviour
     
     //public Dictionary<int, StageData> stages;
     private Dictionary<int, StickerLevelsData> stickerLevels = new Dictionary<int, StickerLevelsData>();
+    private Dictionary<FileName, string> loadedFiles = new Dictionary<FileName, string>();
 
     public Dictionary<int, StickerLevelsData> StickerLevels
     {
@@ -58,6 +60,7 @@ public class PersistanceManager : MonoBehaviour
     
     public PacksData packs = new PacksData();
     public UserData userData;
+    public UserConsumableData userConsumableData;
     private int eraseCounter = 3;
     
     private int stagesVersion = 0;
@@ -74,6 +77,7 @@ public class PersistanceManager : MonoBehaviour
         yield return StartCoroutine(LoadStages());
         yield return StartCoroutine(LoadStickerLevels());
         yield return StartCoroutine(LoadPacks());
+        yield return StartCoroutine(LoadUserConsumableData());
 
 
     }
@@ -81,18 +85,18 @@ public class PersistanceManager : MonoBehaviour
     private IEnumerator LoadUIMenuConfiguration()
     {
         string setName = StageManager.Instance.gameVersion.ToString();
-        string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
+        string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.Stages+".json");
         string latestFilePath = Path.Combine(Application.persistentDataPath, setName, "latestStages.json");
         string json;
 
         if (!File.Exists(filePath))
         {
             CustomDebugger.Log("No saved stages found at " + filePath);
-            yield return StartCoroutine(GetJson("stages"));
+            yield return StartCoroutine(GetJson(FileName.Stages));
         }
         else
         {
-            yield return StartCoroutine(GetJson("stages", "latestStages"));
+            yield return StartCoroutine(GetJson(FileName.Stages, "latestStages"));
         }
 
         // Cargar la configuración actual
@@ -144,6 +148,7 @@ public class PersistanceManager : MonoBehaviour
     {
         //SaveStages(stages);
         SaveUserData();
+        SaveUserConsumableData();
     }
 
     /*public void SaveStages(Dictionary<int, StageData> stagesToSave)
@@ -216,7 +221,7 @@ public class PersistanceManager : MonoBehaviour
         }*/
         userData.ConvertStickerDictionaryToList();
         string setName = StageManager.Instance.gameVersion.ToString();
-        string filePath = Path.Combine(Application.persistentDataPath, setName, "userData.json");
+        string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.UserData+".json");
         
         // Utilizar SerializeUserData para serializar los datos
         string json = SerializeUserData();
@@ -228,7 +233,7 @@ public class PersistanceManager : MonoBehaviour
     public IEnumerator LoadUserData()
     {
         string setName = StageManager.Instance.gameVersion.ToString();
-        string filePath = Path.Combine(Application.persistentDataPath, setName, "userData.json");
+        string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.UserData+".json");
         string json;
 
         if (dataLocation == DataLocation.LocalStorage)
@@ -236,7 +241,7 @@ public class PersistanceManager : MonoBehaviour
             if (!File.Exists(filePath))
             {
                 Debug.LogError("No userdata found at " + filePath);
-                yield return StartCoroutine(GetJson("userData"));
+                yield return StartCoroutine(GetJson(FileName.UserData));
             }
             json = File.ReadAllText(filePath);
         }
@@ -245,10 +250,13 @@ public class PersistanceManager : MonoBehaviour
             TextAsset file = Resources.Load<TextAsset>("Storage/" + setName + "/userData");
             if (file == null)
             {
+                yield return StartCoroutine(GetJson(FileName.UserData));
+                json = loadedFiles[FileName.UserData];
                 Debug.LogError("No userdata found in Resources.");
-                yield break;
             }
-            json = file.text;
+            else {
+                json = file.text;
+            }
         }
         else
         {
@@ -277,7 +285,7 @@ public class PersistanceManager : MonoBehaviour
         // Clonar userData para no modificar el original
 
         // Convertir enums a strings antes de serializar
-//        userData.stickerDuplicates;
+        //userData.stickerDuplicates;
         foreach (var stageData in userData.stages)
         {
             //CustomDebugger.Log("stage "+stageData.stage+" has achievements: "+stageData.achievements.Count);
@@ -291,7 +299,7 @@ public class PersistanceManager : MonoBehaviour
         
 
         return JsonConvert.SerializeObject(userData);
-    }
+    } 
 
     public UserData DeserializeUserData(string json)
     {
@@ -313,12 +321,12 @@ public class PersistanceManager : MonoBehaviour
     public IEnumerator LoadStickerLevels()
     {
         string setName = StageManager.Instance.gameVersion.ToString();
-        string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
+        string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.Stages+".json");
         string json;
         if (!File.Exists(filePath))
         {
             CustomDebugger.Log("No saved stages found at " + filePath);
-            yield return StartCoroutine(GetJson("stages"));
+            yield return StartCoroutine(GetJson(FileName.Stages));
         }
 
         CustomDebugger.Log(filePath);
@@ -353,7 +361,7 @@ public class PersistanceManager : MonoBehaviour
         if (!File.Exists(filePath))
         {
             CustomDebugger.Log("No saved stages found at " + filePath);
-            yield return StartCoroutine(GetJson("stages"));
+            yield return StartCoroutine(GetJson(FileName.Stages));
         }
 
         CustomDebugger.Log(filePath);
@@ -382,10 +390,10 @@ public class PersistanceManager : MonoBehaviour
         yield return null;
     }
 
-    IEnumerator GetJson(string file_name,string save_name = "")
+    IEnumerator GetJson(FileName file_name,string save_name = "")
     {
         if (save_name == "") {
-            save_name = file_name;
+            save_name = file_name.ToString();
         }
         string setName = StageManager.Instance.gameVersion.ToString();
         string url = "https://leandromagonza.github.io/MemoGram/" + setName + "/" + file_name + ".json";
@@ -415,6 +423,12 @@ public class PersistanceManager : MonoBehaviour
         
                 // Escribe el texto en el archivo
                 File.WriteAllText(filePath, www.downloadHandler.text);
+                if (!loadedFiles.ContainsKey(file_name)) {
+                    loadedFiles.Add(file_name,www.downloadHandler.text);
+                }
+                else {
+                    loadedFiles[file_name] = www.downloadHandler.text;
+                }
                 Debug.Log("File saved to " + filePath);
             }
         }
@@ -430,7 +444,7 @@ public class PersistanceManager : MonoBehaviour
 
     public IEnumerator ResetUserData() {
         //TODO: Agregar chequeo/confirm
-        yield return StartCoroutine(GetJson("userData"));
+        yield return StartCoroutine(GetJson(FileName.UserData));
         yield return StartCoroutine(LoadUserData());
     }
     public int GetStickerDuplicates(StickerSet stickerSet,int stickerID)
@@ -452,13 +466,76 @@ public class PersistanceManager : MonoBehaviour
         return 0; 
     }    
     public int GetAmountOfConsumables(ConsumableID consumable) {
-        if (userData.consumables.ContainsKey(consumable))
+        return userConsumableData.GetConsumableData(consumable).amount;
+    }
+    public IEnumerator LoadUserConsumableData()
+    {
+        string setName = StageManager.Instance.gameVersion.ToString();
+        string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.UserConsumableData+".json");
+        string json = String.Empty;
+
+        if (dataLocation == DataLocation.LocalStorage)
         {
-            return userData.consumables[consumable];
+            if (!File.Exists(filePath))
+            {
+                Debug.LogError("No consumable data found at " + filePath);
+                yield return StartCoroutine(GetJson(FileName.UserConsumableData));
+            }
+
+            if (File.Exists(filePath)) {
+                json = File.ReadAllText(filePath);
+            }
         }
-        return 0; 
+        else if (dataLocation == DataLocation.ResourcesFolder)
+        {
+            TextAsset file = Resources.Load<TextAsset>("Storage/" + setName + "/userConsumableData");
+            if (file == null)
+            {
+                yield return StartCoroutine(GetJson(FileName.UserConsumableData));
+                json = loadedFiles[FileName.UserConsumableData];
+                Debug.LogError("No consumable data found in Resources.");
+            }
+            else
+            {
+                json = file.text;
+            }
+        }
+        else
+        {
+            Debug.LogError("Invalid data location.");
+            yield break;
+        }
+
+        // Deserializar los datos JSON a un objeto UserConsumableData
+        if (json != string.Empty) {
+            userConsumableData = JsonConvert.DeserializeObject<UserConsumableData>(json);
+        }
+        else {
+            userConsumableData = new UserConsumableData();
+        }
+        if (userConsumableData != null)
+        {
+            Debug.Log("User consumable data loaded successfully.");
+        }
+        else
+        {
+            Debug.LogError("Failed to load user consumable data.");
+        }
+
+        yield return null;
     }
 
+    public void SaveUserConsumableData() {
+            string setName = StageManager.Instance.gameVersion.ToString();
+            string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.UserConsumableData+".json");
+        
+            // Utilizar SerializeUserData para serializar los datos
+            string json = JsonConvert.SerializeObject(userConsumableData);
+            CustomDebugger.Log("SaveUserConsumableData :"+json);
+            File.WriteAllText(filePath, json);
+            
+            CustomDebugger.Log("UserConsumableData saved to " + filePath+ " Clues: "+userConsumableData.GetConsumableData(ConsumableID.Clue).amount);
+    }
 }
 
    
@@ -488,6 +565,7 @@ public class StickerSetConverter : JsonConverter
         string enumString = value.ToString();
         writer.WriteValue(enumString);
     }
+    
 
 }
 public enum DataLocation
@@ -500,3 +578,96 @@ public class ConfigData {
     public int version = 0; // Valor predeterminado 0 para versiones sin este campo
     public string backgroundColor;
 }
+public enum FileName {
+    UserData,
+    Stages,
+    /*Matches*/
+    UserConsumableData
+}
+[Serializable]
+public class UserConsumableEntry
+{
+    public int amount; // Cantidad de consumibles que el jugador tiene
+    public List<(DateTime scheduledTime, int notificationId)> nextGenerationTimes = new (); // Lista de tiempos para generar próximos consumibles
+
+    public UserConsumableEntry(int initialAmount, List<(DateTime scheduledTime, int notificationId)> nextGenerationTimes)
+    {
+        amount = initialAmount;
+        if (nextGenerationTimes is not null) {
+            this.nextGenerationTimes = new List<(DateTime scheduledTime, int notificationId)>(nextGenerationTimes);
+        }
+    }
+}
+
+[Serializable]
+public class UserConsumableData
+{
+    // Usa JsonProperty para serializar el diccionario de consumables
+    [JsonProperty]
+    private Dictionary<ConsumableID, UserConsumableEntry> consumables = new Dictionary<ConsumableID, UserConsumableEntry>();
+
+    public void ModifyConsumable(ConsumableID type, int amount, List<(DateTime scheduledTime, int notificationId)> nextGenerationTimes = null)
+    {
+        if (consumables.ContainsKey(type))
+        {
+            // Actualizar los valores existentes
+            consumables[type].amount += amount;
+            if (nextGenerationTimes is not null) {
+                consumables[type].nextGenerationTimes = new List<(DateTime scheduledTime, int notificationId)>(nextGenerationTimes);
+            }
+            else {
+                consumables[type].nextGenerationTimes = new List<(DateTime scheduledTime, int notificationId)>();
+            }
+        }
+        else
+        {
+            // Añadir un nuevo tipo de consumible
+            consumables[type] = new UserConsumableEntry(amount, nextGenerationTimes);
+        }
+    }
+
+    public UserConsumableEntry GetConsumableData(ConsumableID type)
+    {
+        if (consumables.TryGetValue(type, out var entry))
+        {
+            return entry;
+        }
+        else {
+            var newUserConsumableEntry = new UserConsumableEntry(0, new List<(DateTime scheduledTime, int notificationId)>());
+            consumables.Add(type, newUserConsumableEntry);
+            return newUserConsumableEntry;
+        }
+    }
+
+    public int RemovePastGenerationTimes(ConsumableID type)
+    {
+        var entry = GetConsumableData(type);
+        int removedCount = 0;
+
+        if (entry != null)
+        {
+            removedCount = entry.nextGenerationTimes.RemoveAll(time => time.scheduledTime < DateTime.Now);
+        }
+
+        return removedCount;
+    }
+
+    public void RemovePastGenerationsFromAllConsumables()
+    {
+        foreach (ConsumableID type in Enum.GetValues(typeof(ConsumableID)))
+        {
+            if (type == ConsumableID.NONE)
+                continue;
+
+            int generatedCount = RemovePastGenerationTimes(type);
+            Debug.Log($"Consumible {type}: {generatedCount} tiempos de generación pasados eliminados.");
+        }
+    }
+
+    public List<(DateTime scheduledTime, int notificationId)> GetNextGenerationTimes(ConsumableID type)
+    {
+        var entry = GetConsumableData(type);
+        return entry != null ? entry.nextGenerationTimes : new List<(DateTime scheduledTime, int notificationId)>();
+    }
+}
+

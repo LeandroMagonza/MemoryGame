@@ -73,6 +73,8 @@ public class GameManager : MonoBehaviour {
     public int protectedLifeOnComboAmount = 10;
     public int deathDefyCharges = 0;
     private int deathDefyMagnitude = 0;
+    public int baseClearsToHeal = 5;
+    public int currentClears = 0;
 
     [Header("Timer")]    
     public float timer = 3;
@@ -152,6 +154,7 @@ public class GameManager : MonoBehaviour {
 
     #endregion
     public UserData userData => PersistanceManager.Instance.userData;
+    public UserConsumableData userConsumableData => PersistanceManager.Instance.userConsumableData;
     //public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
     private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.StickerLevels;
     public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> matchInventory = new ();
@@ -445,10 +448,10 @@ public class GameManager : MonoBehaviour {
                 Mathf.Clamp((int)Math.Floor((float)bonusMultiplicator / 2), 0, selectedDifficulty));
         ModifyScore(scoreModificationBonus);
         bonusMultiplicator++;
+        currentClears++;
         AudioManager.Instance.PlayClip(GameClip.bonus);
-        if (userData.unlockedUpgrades.ContainsKey(UpgradeID.HealOnClear) && userData.unlockedUpgrades[UpgradeID.HealOnClear] > 0) {
-            //todo: ver si healonclear va a tener nivel, y te cura cada x imagenes tipo nivel 1 te cura cada 5, nivel 5 te cura cada 1
-            //maximo igual son 12 banderas por ahora
+        if (userData.GetUpgradeLevel(UpgradeID.HealOnClear) > 0 && 
+            (currentClears % (baseClearsToHeal - userData.GetUpgradeLevel(UpgradeID.HealOnClear)) ) == 0) {
             lifeCounter.GainLive();
         }
         return scoreModificationBonus;
@@ -698,14 +701,17 @@ public class GameManager : MonoBehaviour {
 
     private void UpdateInventoryAndSave() {
         
-
-        foreach (ConsumableID consumable in matchInventory.Keys)
-        {
-            int result = matchInventory[consumable].initial.consumableValue - matchInventory[consumable].current;
-            if (result > 0)
-                userData.ModifyConsumableObject(consumable, -result);
-        }
+        // Desactivado que el update de los consumibles se haga al final de las partidas para que se haga en cada turno
+        // ya que no hay consumibles gratis por upgrade, si no que se generan cada x tiempo en factory
         
+        // foreach (ConsumableID consumable in matchInventory.Keys)
+        // {
+        //     int result = matchInventory[consumable].initial.consumableValue - matchInventory[consumable].current;
+        //     if (result > 0)
+        //         userConsumableData.ModifyConsumable(consumable, -result);
+        // }
+        
+        PersistanceManager.Instance.SaveUserConsumableData();
         PersistanceManager.Instance.SaveUserData();
     }
     private IEnumerator SetHighScore(int highScoreToSet)
@@ -745,8 +751,8 @@ public class GameManager : MonoBehaviour {
         Reset();
     }
 
-    public void Reset() 
-    {
+    public void Reset() {
+        CustomDebugger.Log("Amount of clues "+userConsumableData.GetConsumableData(ConsumableID.Clue).amount);
         switch (currentGameMode)
         {
             case GameMode.MEMORY:

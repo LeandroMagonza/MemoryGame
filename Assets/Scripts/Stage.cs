@@ -277,13 +277,22 @@ public class UserData
     public int coins;
     public int experiencePoints;
     public List<UserStageData> stages;
-    
+    [JsonIgnore] // Ignora esta propiedad durante la deserialización
+    public int playerLevel => CalculatePlayerLevel();
+    public int CalculatePlayerLevel() {
+        int playerLevel = 0;
+        foreach (var VARIABLE in unlockedUpgrades) {
+            playerLevel += VARIABLE.Value;
+        }
+        return playerLevel;
+    }
+
     [JsonIgnore] // Ignora esta propiedad durante la deserialización
     public Dictionary<(StickerSet,int),int> stickerDuplicates = new Dictionary<(StickerSet, int), int>();
 
     public List<DuplicateEntry> readStickerDuplicates = new List<DuplicateEntry>();
     //upgrades, inventario
-    public Dictionary<ConsumableID, int> consumables = new Dictionary<ConsumableID, int>();
+    //public Dictionary<ConsumableID, int> consumables = new Dictionary<ConsumableID, int>();
     public Dictionary<UpgradeID, int> unlockedUpgrades = new Dictionary<UpgradeID, int>();
     //historial de compras
 
@@ -353,40 +362,15 @@ public class UserData
             unlockedUpgrades.Add(upgradeID, 1);
         }
     }
-    public void AddConsumableObject(ConsumableID consumableID)
-    {
-        if (consumables.ContainsKey(consumableID))
-        {
-            consumables[consumableID]++;
-        }
-        else
-        {
-            consumables.Add(consumableID, 1);
-        }
-    }
-    public void ModifyConsumableObject(ConsumableID consumableID, int amount)
-    {
-        if (consumables.ContainsKey(consumableID))
-        {
-            consumables[consumableID] += amount;
-        }
-    }
+   
 
 
     public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> GetMatchInventory()
     {
         Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> temp_inventory = new Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)>();
 
-        List<(ConsumableID consumable, UpgradeID upgrade)> upgradeRelation = new () {
-            (ConsumableID.Clue, UpgradeID.ExtraClue) ,
-            (ConsumableID.Remove, UpgradeID.ExtraRemove) ,
-            (ConsumableID.Cut, UpgradeID.ExtraCut) ,
-            (ConsumableID.Peek, UpgradeID.ExtraPeek) ,
-            (ConsumableID.Highlight, UpgradeID.ExtraHighlight) ,
-            (ConsumableID.Bomb, UpgradeID.ExtraBomb) ,
-        };
-
-        foreach (var item in upgradeRelation)
+        //posible cambiar para que en vez de iterar en upgrade relation, itere en consumables y llame a itemhelper getcorrespondingupgrade
+        foreach (var item in ItemHelper.upgradeRelation)
         {
             ConsumableID consumableID = item.consumable;
             UpgradeID upgradeID = item.upgrade;
@@ -394,19 +378,20 @@ public class UserData
             int currentUpgradeLevel = PersistanceManager.Instance.GetUpgradeLevel(upgradeID);
             UpgradeData upgradeData = UpgradeData.GetUpgrade(upgradeID);
             int max = PersistanceManager.Instance.GetUpgradeLevel(UpgradeID.ConsumableSlot) + upgradeData.GetValue(currentUpgradeLevel);
-            int upgradeBaseAmount = upgradeData.GetValue(currentUpgradeLevel);
             int consumableAmount = PersistanceManager.Instance.GetAmountOfConsumables(consumableID);
-            
-            int total = consumableAmount + upgradeBaseAmount;
+
+            int total = consumableAmount;
             total = Mathf.Clamp(total, 0, max);
             
-            temp_inventory.Add(consumableID, (total, max, (upgradeBaseAmount, consumableAmount)));
+            temp_inventory.Add(consumableID, (total, max, (0, consumableAmount)));
+                CustomDebugger.Log("Clues added to inventory "+consumableAmount);
         }
+        
         CustomDebugger.Log("tempCount" + temp_inventory.Count);
         return temp_inventory;
     }
 
-    public int ExperiencePointsToLevel() {
+    public (int calculatedLv, int remainingExp) ExperiencePointsToLevelUp() {
         int currentExpPerLv = 1000;
         int remainingExp = experiencePoints;
         int calculatedLv = 0;
@@ -416,15 +401,15 @@ public class UserData
             currentExpPerLv = (int)(currentExpPerLv * 1.2f);
         }
 
-        return calculatedLv;
+        return (calculatedLv, remainingExp);
     }
 
     public int AmountOfPendingUpgrades() {
         CustomDebugger.Log("Experience points "+experiencePoints,DebugCategory.PLAYER_LEVEL);
         CustomDebugger.Log("Current Upgrades "+unlockedUpgrades.Count,DebugCategory.PLAYER_LEVEL);
-        CustomDebugger.Log("ExperiencePointsToLevel "+ExperiencePointsToLevel(),DebugCategory.PLAYER_LEVEL);
+        CustomDebugger.Log("ExperiencePointsToLevel "+ExperiencePointsToLevelUp(),DebugCategory.PLAYER_LEVEL);
         
-        return ((ExperiencePointsToLevel() - unlockedUpgrades.Count) > 0) ? (ExperiencePointsToLevel() - unlockedUpgrades.Count) : 0;
+        return ((ExperiencePointsToLevelUp().calculatedLv -playerLevel) > 0) ? (ExperiencePointsToLevelUp().calculatedLv - playerLevel) : 0;
     }
 
     public int GetUpgradeLevel(UpgradeID upgradeID) {

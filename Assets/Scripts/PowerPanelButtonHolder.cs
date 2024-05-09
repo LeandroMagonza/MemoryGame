@@ -36,19 +36,21 @@ public class PowerPanelButtonHolder : MonoBehaviour
         }
     }
 
-    private (StickerData sticker, StickerMatchData matchData) ActivatePower(ConsumableID ID)
+    private (StickerData sticker, StickerMatchData matchData) ActivatePower(ConsumableID consumableID)
     {
-        CustomDebugger.Log("USE: " + ID.ToString());
+        CustomDebugger.Log("USE: " + consumableID.ToString());
         var turnSticker = GameManager.GetCurrentlySelectedSticker();
-        if (!GameManager.matchInventory.ContainsKey(ID) || GameManager.matchInventory[ID].current <= 0) return (turnSticker);
-        AudioManager.Instance.PlayClip((buttons[(int)ID].gameClip));
+        if (!GameManager.matchInventory.ContainsKey(consumableID) || GameManager.matchInventory[consumableID].current <= 0) return (turnSticker);
+        AudioManager.Instance.PlayClip((buttons[(int)consumableID].gameClip));
         //anim
-        var consumable = GameManager.matchInventory[ID];
-        GameManager.matchInventory[ID] = (consumable.current - 1, consumable.max, consumable.initial);
-        if (GameManager.matchInventory[ID].current <= 0)
+        var consumable = GameManager.matchInventory[consumableID];
+        GameManager.matchInventory[consumableID] = (consumable.current - 1, consumable.max, consumable.initial);
+        if (GameManager.matchInventory[consumableID].current <= 0)
         {
-            GameManager.matchInventory[ID] = (0, consumable.max, consumable.initial);
+            GameManager.matchInventory[consumableID] = (0, consumable.max, consumable.initial);
         }
+        PersistanceManager.Instance.userConsumableData.ModifyConsumable(consumableID, -1);
+        PersistanceManager.Instance.SaveUserConsumableData();
         return (turnSticker);
     }
 

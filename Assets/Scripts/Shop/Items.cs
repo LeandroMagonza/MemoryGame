@@ -14,24 +14,26 @@ public enum ConsumableID
     Cut,
     Peek,
     Highlight,
-    Bomb
+    Bomb,
+    EnergyPotion
 }
 public enum UpgradeID
 {
     NONE=-1,
+    FactoryClue,
+    FactoryRemove,
+    FactoryPeek,
+    FactoryHighlight,
+    FactoryBomb,
+    
     ExtraLife,
     LifeProtector,
-    ExtraClue,
     BetterClue,
     HealOnClear,
-    ExtraRemove,
-    ExtraCut,
+    FactoryCut,
     BetterCut,
-    ExtraPeek,
     BlockMistake,
     DeathDefy,
-    ExtraHighlight,
-    ExtraBomb,
     StickerMaster,
     ConsumableSlot,
 }
@@ -45,6 +47,8 @@ public class ConsumableData
     public string name;
     public string description;
     public int price;
+    public int generationMinutes;
+    public int initialStorage;
     public int ID => (int)itemID;
     public static ConsumableData GetConsumable(ConsumableID itemID)
     {
@@ -59,6 +63,8 @@ public class ConsumableData
                     name = "CLUE",
                     description = "Correctly guess the current sticker.",
                     amount = 1,
+                    generationMinutes = 180,
+                    initialStorage =  1
                 };
                 break;
             case ConsumableID.Remove:
@@ -69,6 +75,8 @@ public class ConsumableData
                     name = "REMOVE",
                     description = "REMOVE the current Sticker from the match.",
                     amount = 1,
+                    generationMinutes = 480,
+                    initialStorage =  0
                 };
                 break;
             case ConsumableID.Cut:
@@ -79,6 +87,8 @@ public class ConsumableData
                     name = "CUT",
                     description = "Block one incorrect option per level.",
                     amount = 1,
+                    generationMinutes = 60,
+                    initialStorage =  2
                 };
                 break;
             case ConsumableID.Peek:
@@ -89,6 +99,8 @@ public class ConsumableData
                     name = "PEEK",
                     description = "See how many times each Sticker hast appeared",
                     amount = 1,
+                    generationMinutes = 480,
+                    initialStorage =  0
                 };
                 break;  
             case ConsumableID.Highlight:
@@ -96,9 +108,11 @@ public class ConsumableData
                 {
                     itemID = itemID,
                     price= 3,
-                    name = "Highlight",
+                    name = "HIGHLIGHT",
                     description = "If the next guess is correct, reduce Sticker options for the match.",
                     amount = 1,
+                    generationMinutes = 60,
+                    initialStorage =  2
                 };
                 break;
             case ConsumableID.Bomb:
@@ -106,9 +120,23 @@ public class ConsumableData
                 {
                     itemID = itemID,
                     price= 5,
-                    name = "Shotgun",
+                    name = "BOMB",
                     description = "If the next guess is a Small Mistake, it will count as correct.",
                     amount = 1,
+                    generationMinutes = 120,
+                    initialStorage =  1
+                };
+                break;  
+            case ConsumableID.EnergyPotion:
+                consumable = new ConsumableData()
+                {
+                    itemID = itemID,
+                    price= 5,
+                    name = "Energy Potion",
+                    description = "Recharges your energy to the MAX!",
+                    amount = 1,
+                    generationMinutes = 480,
+                    initialStorage = 10,
                 };
                 break;
         }
@@ -125,12 +153,14 @@ public class UpgradeData
     public string description;
     public Color backgroundColor;
     public int[] levelPrices = { 100, 200, 1500 };
-    public int[] userLevelRequired = new []{1};
+    public int[] playerLevelRequired = new []{1};
     public Dictionary<UpgradeID, int> upgradeRequired = new();
+    public IconName iconMain;
+    public IconName iconSecondary;
     public int ID => (int)itemId;
     public int GetMaxLevel()
     {
-        return userLevelRequired.Length;
+        return playerLevelRequired.Length;
     }
     public int GetValue(int currentLevel)
     {
@@ -144,80 +174,126 @@ public class UpgradeData
 
     public bool IsMaxLevel(int currentLevel)
     {
-        return currentLevel >= userLevelRequired.Length;
+        return currentLevel >= playerLevelRequired.Length;
     }
-    public static UpgradeData GetUpgrade(UpgradeID itemId)
+    public static UpgradeData GetUpgrade(UpgradeID upgradeID, bool nextLevel = false)
     {
         UpgradeData upgrade;
-        switch (itemId)
+        int upgradeLevel = PersistanceManager.Instance.userData.GetUpgradeLevel(upgradeID);
+        if (nextLevel) { upgradeLevel++; }
+        
+        ConsumableData correspondingConsumable = ConsumableData.GetConsumable(
+            ItemHelper.GetCorrespondingConsumable(upgradeID));
+
+        string generationTimeText = "";
+        string storageText = "";
+        string fullFactoryDescription = "";
+
+        string textHighlighColor;
+        if (nextLevel) {
+            textHighlighColor = 	"#00ff00ff"; //lime
+        }
+        else {
+            textHighlighColor = 	"#00ffffff"; //cyan
+        }
+        if (correspondingConsumable.itemID != ConsumableID.NONE) {
+            //CustomDebugger.Log("nextLevel: "+nextLevel+" upgradeLevel:"+upgradeLevel);
+            generationTimeText = "<color="+textHighlighColor+">"+ItemHelper.FormatGenerationTime(
+            correspondingConsumable.generationMinutes,
+            upgradeLevel)+"</color>";
+            var totalStorageAmount = (ConsumableData.GetConsumable(
+                ItemHelper.GetCorrespondingConsumable(upgradeID)).initialStorage + upgradeLevel);
+            
+            storageText = "<color="+textHighlighColor+">"+totalStorageAmount +"</color> "+correspondingConsumable.name+ ((totalStorageAmount == 1) ? "" : "S");
+
+
+            fullFactoryDescription = "Generates a " + correspondingConsumable.name + " every " + generationTimeText +
+                                     ", stores " + storageText + ". \n"+ 
+                                     "<color=white>"+correspondingConsumable.name+"</color>: "+correspondingConsumable.description;
+        }
+        switch (upgradeID)
         {
-            case UpgradeID.ExtraClue:
+            //Factories
+            case UpgradeID.FactoryClue:
                 upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
+                    itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "EXTRA CLUE",
-                    description = "Start each match with an extra Clue. \n"+ConsumableData.GetConsumable(ConsumableID.Clue).description,
+                    name = "CLUE FACTORY",
+                    description = fullFactoryDescription,
                     backgroundColor = Color.blue,
-                    levelPrices = new [] { 1000, 2000, 3000 },
-                    userLevelRequired = new []{ 3,10,15 }
+                    playerLevelRequired = new []{ 3,8,15 },
+                    iconMain = IconName.CLUE,
+                    iconSecondary = IconName.FACTORY
+                    
                 };
                 break;
-            case UpgradeID.ExtraRemove:
+            case UpgradeID.FactoryRemove:
+
                 upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
+                    itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "EXTRA REMOVE",
-                    description = "Start each match with an extra Remove. \n" +ConsumableData.GetConsumable(ConsumableID.Remove).description,
+                    name = "REMOVE FACTORY",
+                    description = fullFactoryDescription,
                     backgroundColor = Color.green,
-                    userLevelRequired = new int[] { 7 },
+                    playerLevelRequired = new int[] { 7 },
+                    iconMain = IconName.REMOVE,
+                    iconSecondary = IconName.FACTORY
                 };
                 break;
-            case UpgradeID.ExtraCut:
+            case UpgradeID.FactoryCut:
                 upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
+                    itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "EXTRA CUT",
-                    description = "Start each match with an extra Cut. \n" +ConsumableData.GetConsumable(ConsumableID.Cut).description,
+                    name = "CUT FACTORY",
+                    description = fullFactoryDescription,
                     backgroundColor = Color.yellow,
-                    userLevelRequired = new int[] { 1, 2, 6, 10 },
+                    playerLevelRequired = new int[] { 1, 2, 6, 8 },
+                    iconMain = IconName.CUT,
+                    iconSecondary = IconName.FACTORY
                 };
                 break;
-            case UpgradeID.ExtraPeek:
+            case UpgradeID.FactoryPeek:
                 upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
+                    itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "EXTRA PEEK",
-                    description = "Start each match with an extra Peek. \n" +ConsumableData.GetConsumable(ConsumableID.Peek).description,
+                    name = "PEEK FACTORY",
+                    description = fullFactoryDescription,
                     backgroundColor = Color.magenta,
-                    userLevelRequired = new int[] { 15 },
+                    playerLevelRequired = new int[] { 12 },
+                    iconMain = IconName.PEEK,
+                    iconSecondary = IconName.FACTORY
 
                 };
                 break;    
-            case UpgradeID.ExtraHighlight:
+            case UpgradeID.FactoryHighlight:
                 upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
+                    itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "EXTRA HIGHLIGHT",
-                    description = "Start each match with an extra Highlight. \n" +ConsumableData.GetConsumable(ConsumableID.Highlight).description,
+                    name = "HIGHLIGHT FACTORY",
+                    description = fullFactoryDescription,
                     backgroundColor = Color.green,
-                    levelPrices = new int[] { 1,3,6,10 },
+                    levelPrices = new int[] { 1,3,6,8 },
+                    iconMain = IconName.HIGHLIGHT,
+                    iconSecondary = IconName.FACTORY
 
                 };
                 break;     
-            case UpgradeID.ExtraBomb:
+            case UpgradeID.FactoryBomb:
                 upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
+                    itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "EXTRA SHOTGUN",
-                    description = "Start each match with an extra Shotgun. \n" +ConsumableData.GetConsumable(ConsumableID.Bomb).description,
+                    name = "BOMB FACTORY",
+                    description = fullFactoryDescription,
                     backgroundColor = Color.cyan,
-                    userLevelRequired = new int[] { 1,6 },
+                    playerLevelRequired = new int[] { 1,6 },
+                    iconMain = IconName.BOMB,
+                    iconSecondary = IconName.FACTORY
                 };
                 break;
             
@@ -225,110 +301,136 @@ public class UpgradeData
             case UpgradeID.ExtraLife:
                 upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
+                    itemId = upgradeID,
                     valuePerLevel = 1,
                     name = "EXTRA LIFE",
-                    description = "Increase the amount of lives you have.",
+                    description = "Increase the amount of lives you start each game with to <color="+textHighlighColor+">"+ (upgradeLevel + 3)+"</color>.",
                     backgroundColor = Color.red,
-                    userLevelRequired = new int[] { 1,5,10,15},
+                    playerLevelRequired = new int[] { 1,5,9,12},
+                    iconMain = IconName.HEART,
+                    iconSecondary = IconName.PLUS
                 };
                 break;
-            case UpgradeID.LifeProtector:
-                upgrade = new UpgradeData()
-                {
-                    itemId = itemId,
-                    valuePerLevel = 1,
-                    name = "LIFE PROTECTOR",
-                    description = "Protect your life from one mistake. Recharges on (10 - lv) Combo",
-                    backgroundColor = Color.red,
-                    userLevelRequired = new int[] {10,12,14,16,18},
-                };
-                break;
+           
             case UpgradeID.BetterClue:
                 upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
+                    itemId = upgradeID,
                     valuePerLevel = 1,
                     name = "BETTER CLUE",
                     description = "Clues mark the number they were used on.",
                     backgroundColor = Color.blue,
-                    userLevelRequired = new int[] { 10 },
+                    playerLevelRequired = new int[] { 10 },
                     upgradeRequired = new Dictionary<UpgradeID, int>()
                     {
-                        { UpgradeID.ExtraClue, 1 }
-                    }
+                        { UpgradeID.FactoryClue, 1 }
+                    },
+                    iconMain = IconName.CLUE,
+                    iconSecondary = IconName.PLUS
+
                 };
                 break;
             case UpgradeID.BetterCut:
                 upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
+                    itemId = upgradeID,
                     valuePerLevel = 1,
                     name = "BETTER CUT",
-                    description = "Cut blocks one extra option per level.",
+                    description = "Cut blocks <color="+textHighlighColor+">"+ (upgradeLevel + 1)+" options.",
                     backgroundColor = Color.blue,
-                    userLevelRequired = new int[] { 6,10,14,18,22,26,30,34 },
+                    playerLevelRequired = new int[] { 6,9,12,15,18,20,22,24 },
                     upgradeRequired = new Dictionary<UpgradeID, int>()
                     {
-                        { UpgradeID.ExtraCut, 1 }
-                    }
+                        { UpgradeID.FactoryCut, 1 }
+                    },
+                    iconMain = IconName.CUT,
+                    iconSecondary = IconName.PLUS
                 };
                 break;
-          
+            case UpgradeID.LifeProtector:
+                upgrade = new UpgradeData()
+                {
+                    itemId = upgradeID,
+                    valuePerLevel = 1,
+                    name = "LIFE PROTECTOR",
+                    description = "Protect your life from one mistake. Recharges on <color="+textHighlighColor+">"+(11 - upgradeLevel)+" COMBO",
+                    backgroundColor = Color.red,
+                    playerLevelRequired = new int[] {9,11,13,15,17},
+                    iconMain = IconName.HEART,
+                    iconSecondary = IconName.SHIELD
+                };
+                break;
             case UpgradeID.BlockMistake:
                 upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
+                    itemId = upgradeID,
                     valuePerLevel = 1,
                     name = "BLOCK MISTAKE",
-                    description = "On mistake, add a Cut lv 1 to the sticker.",
+                    description = "On mistake, add a <color="+textHighlighColor+">Cut lv. "+upgradeLevel+" </color> to the sticker.",
                     backgroundColor = Color.yellow,
-                    userLevelRequired = new int[] { 10,14,18 },
+                    playerLevelRequired = new int[] { 9,12,15 },
+                    iconMain = IconName.CUT,
+                    iconSecondary = IconName.SHIELD
                 };
                 break;
             case UpgradeID.DeathDefy:
                 upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
+                    itemId = upgradeID,
                     valuePerLevel = 1,
                     name = "DEATH DEFY",
                     description = "Cheat death on a SMALL mistake once per lv",
                     backgroundColor = Color.red,
-                    userLevelRequired = new int[] { 15,18,20 },
+                    playerLevelRequired = new int[] { 12,15,18 },
+                    iconMain = IconName.HEART,
+                    iconSecondary = IconName.SKULL
                 };
                 break;           
             case UpgradeID.HealOnClear:
+                string descriptionHealOnClear;
+                if (5 - upgradeLevel != 1) {
+                    descriptionHealOnClear = "Heal one heart per <color="+textHighlighColor+">"+  (5 - upgradeLevel) + " stickers cleared</color>.";
+                }
+                else {
+                    descriptionHealOnClear = "Heal one heart per <color="+textHighlighColor+">sticker cleared</color>.";
+                }
                 upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
+                    itemId = upgradeID,
                     valuePerLevel = 1,
                     name = "HEAL ON CLEAR",
-                    description = "Heal one heart per (4 - lv) stickers cleared",
+                    description = descriptionHealOnClear,
                     backgroundColor = Color.red,
-                    userLevelRequired = new int[] { 0,4,8,12 },
+                    playerLevelRequired = new int[] { 0,4,8,12 },
+                    iconMain = IconName.HEART,
+                    iconSecondary = IconName.STICKER
 
                 };
                 break;            
             case UpgradeID.StickerMaster:
                 upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
+                    itemId = upgradeID,
                     valuePerLevel = 1,
                     name = "STICKER MASTER",
                     description = "Stickers on match come with bonuses, per sticker level",
                     backgroundColor = Color.red,
-                    userLevelRequired = new int[] { 25 },
+                    playerLevelRequired = new int[] { 20 },
+                    iconMain = IconName.STICKER,
+                    iconSecondary = IconName.PLUS
                 };
                 break;
             case UpgradeID.ConsumableSlot:
                 upgrade = new UpgradeData()
                 {
-                    itemId = itemId,
+                    itemId = upgradeID,
                     valuePerLevel = 1,
                     name = "CONSUMABLE SLOT",
-                    description = "Allows you to bring (level) consumables ",
+                    description = "Allows you to bring <color="+textHighlighColor+">"+ upgradeLevel+" extra consumables</color> to the match, and store <color="+textHighlighColor+">"+ 3*(upgradeLevel)+" extra consumables</color> on each factory.",
                     backgroundColor = Color.red,
-                    userLevelRequired = new int[] { 5,10 },
+                    playerLevelRequired = new int[] { 5,10 },
+                    iconMain = IconName.BAG,
+                    iconSecondary = IconName.PLUS
                 };
                 break;
 
@@ -339,3 +441,7 @@ public class UpgradeData
         return upgrade;
     }
 }
+
+
+
+
