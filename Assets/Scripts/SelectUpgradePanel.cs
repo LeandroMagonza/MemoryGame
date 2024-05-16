@@ -3,10 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UpgradeSelectionPanel : MonoBehaviour {
-    public PlayerLevelManager playerLevelManager;
+public class SelectUpgradePanel : MonoBehaviour {
+    public PlayerLevelManager playerLevelManager => PlayerLevelManager.Instance;
     public UserData userData => PersistanceManager.Instance.userData;
     public List<UpgradeSelectionItem> selectionOptions;
+    public int playerLevel => PersistanceManager.Instance.userData.playerLevel;
 
     public void GetRandomUpgradesForPlayerSelection(int playerLevel) {
         // Lista para almacenar los upgrades disponibles
@@ -86,4 +87,11 @@ public class UpgradeSelectionPanel : MonoBehaviour {
     public void SelectUpgrade(UpgradeID upgradeID) {
         playerLevelManager.SelectUpgradeToGet(upgradeID);
     }
+
+
+    public void OnEnable() {
+        GetRandomUpgradesForPlayerSelection(playerLevel);
+    }
+
+
 }

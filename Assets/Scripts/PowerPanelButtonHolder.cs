@@ -26,12 +26,12 @@ public class PowerPanelButtonHolder : MonoBehaviour
             if (
                 GameManager.Instance.matchInventory.ContainsKey(powerButton.consumableID)
                 &&
-                GameManager.Instance.matchInventory[powerButton.consumableID].max < 1
+                GameManager.Instance.matchInventory[powerButton.consumableID].max > 0
             ) {
-                powerButton.gameObject.SetActive(false);
+                powerButton.gameObject.SetActive(true);
             }
             else {
-                powerButton.gameObject.SetActive(true);
+                powerButton.gameObject.SetActive(false);
             }
         }
     }

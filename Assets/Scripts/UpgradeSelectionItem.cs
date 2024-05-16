@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class UpgradeSelectionItem : UpgradeItem {
-    public UpgradeSelectionPanel upgradeSelectionPanel;
+    public SelectUpgradePanel selectUpgradePanel;
 
     public void SelectThisUpgrade() {
-        upgradeSelectionPanel.SelectUpgrade(upgradeID);
+        selectUpgradePanel.SelectUpgrade(upgradeID);
     }
 }

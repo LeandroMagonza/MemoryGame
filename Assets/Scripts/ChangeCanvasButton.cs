@@ -7,9 +7,21 @@ using UnityEngine.UI;
 public class ChangeCanvasButton : MonoBehaviour {
     public CanvasName canvasToSet;
     public GameClip clip;
+    /*
+    public Image iconImage;
+    public Image backgroundImage;
+
+    public static Dictionary<CanvasName, (IconName, Color)> canvasButtonStyleConfig = new ()
+    {
+        { CanvasName.MENU, (IconName.MENU, Color.yellow) },
+        { CanvasName., (IconName.MENU, Color.yellow) },
+        
+    };
+    */
     public virtual void Start()
     {
         GetComponent<Button>().onClick.AddListener(OnClick);
+        //ConfigStyle(canvasName);
     }
 
     public virtual void OnClick() {
@@ -33,6 +45,8 @@ public enum CanvasName
     CONFIG,
     RETURN,
     LANGUAGE,
+    SELECT_UPGRADE,
     SHOP,
     EXIT
 }
+

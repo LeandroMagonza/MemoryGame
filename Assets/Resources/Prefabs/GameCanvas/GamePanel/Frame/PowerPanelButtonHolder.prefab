@@ -209,7 +209,7 @@ PrefabInstance:
     - target: {fileID: 2644660873523850628, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: e2531dbb210c447358dfd4dd637545c5, type: 3}
+      objectReference: {fileID: 21300000, guid: da7409b55382e0d4e8b62c772e143eb1, type: 3}
     - target: {fileID: 3135463766251303986, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: m_Name
       value: PowerButton
@@ -297,31 +297,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 7426424622022612428}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dac0063521f58d84eb673317628e283b, type: 3}
---- !u!1 &220836076087497702 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
-  m_PrefabInstance: {fileID: 1483509454413714754}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &7426424622022612428
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 220836076087497702}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 1, y: -1}
-  m_UseGraphicAlpha: 1
 --- !u!114 &1388933031287967136 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 562950806139738338, guid: dac0063521f58d84eb673317628e283b, type: 3}
@@ -369,6 +346,10 @@ PrefabInstance:
       propertyPath: powerPanelButtonHolder
       value: 
       objectReference: {fileID: 9197616496460016574}
+    - target: {fileID: 2644660873523850628, guid: dac0063521f58d84eb673317628e283b, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 198498cf79b09494ba5919522859c2d3, type: 3}
     - target: {fileID: 3135463766251303986, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: m_Name
       value: PowerButton (1)
@@ -501,7 +482,7 @@ PrefabInstance:
     - target: {fileID: 2644660873523850628, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 07515e5138427408489d90b7e99c6b71, type: 3}
+      objectReference: {fileID: 21300000, guid: 3ec0f88f504843c44889c77869fa3583, type: 3}
     - target: {fileID: 3135463766251303986, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: m_Name
       value: PowerButton (4)
@@ -593,10 +574,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 3034933901599562414}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dac0063521f58d84eb673317628e283b, type: 3}
 --- !u!224 &543698457449793002 stripped
 RectTransform:
@@ -614,26 +592,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ce5e65818bb8e544bb5234d8748100b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &4291393554832914301 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
-  m_PrefabInstance: {fileID: 3173064608193540569}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &3034933901599562414
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4291393554832914301}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 2, y: -2}
-  m_UseGraphicAlpha: 1
 --- !u!1001 &4807831127444712639
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -749,10 +707,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 6764830357868223375}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dac0063521f58d84eb673317628e283b, type: 3}
 --- !u!114 &5001485058722427997 stripped
 MonoBehaviour:
@@ -765,26 +720,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ce5e65818bb8e544bb5234d8748100b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &6142402120917346843 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
-  m_PrefabInstance: {fileID: 4807831127444712639}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &6764830357868223375
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6142402120917346843}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 1, y: -1}
-  m_UseGraphicAlpha: 1
 --- !u!224 &7582864684088039564 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3135463766251303987, guid: dac0063521f58d84eb673317628e283b, type: 3}
@@ -813,7 +748,7 @@ PrefabInstance:
     - target: {fileID: 2644660873523850628, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: cda5d5686f6fb40b8aef8e24dc4a98b9, type: 3}
+      objectReference: {fileID: 21300000, guid: 2024a04e2f79b014fbb53544fea4dca8, type: 3}
     - target: {fileID: 3135463766251303986, guid: dac0063521f58d84eb673317628e283b, type: 3}
       propertyPath: m_Name
       value: PowerButton (5)
@@ -905,10 +840,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5243481185634249895}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dac0063521f58d84eb673317628e283b, type: 3}
 --- !u!224 &5226264289995332038 stripped
 RectTransform:
@@ -926,26 +858,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ce5e65818bb8e544bb5234d8748100b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &8395526371127159633 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1695300422782813860, guid: dac0063521f58d84eb673317628e283b, type: 3}
-  m_PrefabInstance: {fileID: 7134840905193713141}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &5243481185634249895
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8395526371127159633}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 2, y: -2}
-  m_UseGraphicAlpha: 1
 --- !u!1001 &9043590889128277810
 PrefabInstance:
   m_ObjectHideFlags: 0

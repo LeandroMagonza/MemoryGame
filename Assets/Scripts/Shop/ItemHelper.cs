@@ -95,5 +95,6 @@ public enum IconName {
     SHIELD,
     SKULL,
     STICKER,
-    BAG
+    BAG,
+    MENU
 }

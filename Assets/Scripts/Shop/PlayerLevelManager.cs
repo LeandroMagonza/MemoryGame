@@ -7,42 +7,53 @@ using UnityEngine.UI;
 
 public class PlayerLevelManager : MonoBehaviour
 {
+    
+    #region Singleton
+    private static PlayerLevelManager _instance;
+    public static PlayerLevelManager Instance {
+        get {
+            if (_instance == null)
+                _instance = FindObjectOfType<PlayerLevelManager>();
+            if (_instance == null) {
+                //CustomDebugger.LogError("Singleton<" + typeof(PlayerLevelManager) + "> instance has been not found.");
+            }
+                
+            return _instance;
+        }
+    }
+    protected void Awake() {
+        if (_instance == null) {
+            _instance = this as PlayerLevelManager;
+        }
+        else if (_instance != this)
+            DestroySelf();
+    }
+    private void DestroySelf() {
+        if (Application.isPlaying)
+            Destroy(this);
+        else
+            DestroyImmediate(this);
+    }
+    
 
-    public UnlockedUpgradesPanel unlockedUpgradesPanel;
-    public UpgradeSelectionPanel upgradeSelectionPanel;
+    #endregion
+
+    [FormerlySerializedAs("upgradeSelectionPanel")] public SelectUpgradePanel selectUpgradePanel;
+    public PlayerLevelPanel playerLevelPanel;
+    public UnlockedUpgradesPanel unlockedUpgradesPanel => playerLevelPanel.unlockedUpgradesPanel;
     public PlayerLevelDisplayButton playerLevelDisplayButton;
     public int playerLevel => GameManager.Instance.userData.playerLevel;
-    private void Start()
-    {
-        unlockedUpgradesPanel.OrderUpgradePanels();
-        unlockedUpgradesPanel.GenerateUpgradeItemForUnlocks();
-        playerLevelDisplayButton.gameObject.SetActive(true);
-        playerLevelDisplayButton.UpdateLevelDisplay();
-    }
-    private void OnEnable()
-    {
-        unlockedUpgradesPanel.gameObject.SetActive(true);
-        upgradeSelectionPanel.gameObject.SetActive(false);
-        playerLevelDisplayButton.gameObject.SetActive(true);
-        playerLevelDisplayButton.UpdateLevelDisplay();
-        unlockedUpgradesPanel.GenerateUpgradeItemForUnlocks();
-        unlockedUpgradesPanel.OrderUpgradePanels();
-    }
 
+    // Delegado que define la firma para el evento OnPlayerLevelUp
+    public delegate void PlayerLevelUpHandler(int newLevel);
 
-    public void OpenUpgradeSelectionPanel() {
-        upgradeSelectionPanel.gameObject.SetActive(true);
-        unlockedUpgradesPanel.gameObject.SetActive(false);
-
-        upgradeSelectionPanel.GetRandomUpgradesForPlayerSelection(playerLevel);
-        
-}
+    // Evento que otros componentes pueden suscribirse
+    public event PlayerLevelUpHandler OnPlayerLevelUp;
 
 
     public void SelectUpgradeToGet(UpgradeID selectedUpgradeID) {
         UnlockUpgrade(selectedUpgradeID);
-        upgradeSelectionPanel.gameObject.SetActive(false);
-        unlockedUpgradesPanel.gameObject.SetActive(true);
+        OnPlayerLevelUp?.Invoke(GameManager.Instance.userData.playerLevel);
     }
 
     public UpgradeID upgradeToAddTest;
@@ -55,10 +66,9 @@ public class PlayerLevelManager : MonoBehaviour
         CustomDebugger.Log("Added Item:" + nameof(upgradeID));
         GameManager.Instance.userData.AddUpgradeToUser(upgradeID);
         PersistanceManager.Instance.SaveUserData();
-        OnEnable();
-        //UpdateMoneyDisplay();
-        //UpdateConsumableButtonsUI();
-        //UpdateUpgradeButtonsIU();
+        unlockedUpgradesPanel.GenerateUpgradeItemForUnlocks();
+        unlockedUpgradesPanel.OrderUpgradePanels();
+        CanvasManager.Instance.ChangeCanvas(CanvasName.RETURN);
 
     }
     [ContextMenu("LogUpgradeLevelRequiredTable")]

@@ -376,6 +376,8 @@ public class UserData
             UpgradeID upgradeID = item.upgrade;
 
             int currentUpgradeLevel = PersistanceManager.Instance.GetUpgradeLevel(upgradeID);
+            if (currentUpgradeLevel == 0) { continue; }
+            
             UpgradeData upgradeData = UpgradeData.GetUpgrade(upgradeID);
             int max = PersistanceManager.Instance.GetUpgradeLevel(UpgradeID.ConsumableSlot) + upgradeData.GetValue(currentUpgradeLevel);
             int consumableAmount = PersistanceManager.Instance.GetAmountOfConsumables(consumableID);
@@ -384,7 +386,7 @@ public class UserData
             total = Mathf.Clamp(total, 0, max);
             
             temp_inventory.Add(consumableID, (total, max, (0, consumableAmount)));
-                CustomDebugger.Log("Clues added to inventory "+consumableAmount);
+            CustomDebugger.Log("Clues added to inventory "+consumableAmount);
         }
         
         CustomDebugger.Log("tempCount" + temp_inventory.Count);
