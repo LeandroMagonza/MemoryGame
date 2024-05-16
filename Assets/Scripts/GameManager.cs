@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Firebase.Auth;
 using TMPro;
 using Unity.Mathematics;
 using Unity.VisualScripting;
@@ -67,6 +68,8 @@ public class GameManager : MonoBehaviour {
     private float startMatchTime = 0;
     private float endMatchTime = 0; 
     public bool disableInput = false;
+    public bool highlightActive;
+    public bool bombActive;
     
     [Header("Skills")]
     public bool protectedLife = false;
@@ -195,11 +198,32 @@ public class GameManager : MonoBehaviour {
         int scoreModification = 0;
         var turnSticker = _currentlySelectedSticker;
         bool defeat = false;
-        if (guessNumber == GetCorrectGuess(turnSticker,currentStickerMatchData))
+        bool guessedCorrectly;
+        if (bombActive) {
+            guessedCorrectly = 
+                guessNumber - 1 == GetCorrectGuess(turnSticker, currentStickerMatchData)
+                ||
+                guessNumber == GetCorrectGuess(turnSticker, currentStickerMatchData)
+                ||
+                guessNumber + 1 == GetCorrectGuess(turnSticker, currentStickerMatchData)
+                ;
+            ActivatePower(ConsumableID.Bomb, GameClip.bombExplosion);
+        }
+        else {
+            guessedCorrectly = guessNumber == GetCorrectGuess(turnSticker, currentStickerMatchData);
+        }
+        if (guessedCorrectly)
         {
             CustomDebugger.Log("CorrectGuess");
             scoreModification = OnCorrectGuess();
-            turnAction = TurnAction.GuessCorrect;
+            if (highlightActive) {
+                turnAction = TurnAction.HighlightCorrect;
+                ActivatePower(ConsumableID.Highlight, GameClip.none);
+                currentlyInGameStickers[_currentlySelectedSticker].AddBetterClueEffect(guessNumber);
+            }
+            else {
+                turnAction = TurnAction.GuessCorrect;
+            }
         }
         else
         {
@@ -208,7 +232,11 @@ public class GameManager : MonoBehaviour {
             deathDefyMagnitude = Mathf.Abs(mistakeMagnitude);
             defeat = OnIncorrectGuess(guessNumber);
             turnAction = TurnAction.GuessIncorrect;
-            if (ranOutOfTime) {
+            if (highlightActive) {
+                turnAction = TurnAction.HighlightIncorrect;
+                ActivatePower(ConsumableID.Highlight, GameClip.none);
+            }
+            else if (ranOutOfTime) {
                 turnAction = TurnAction.RanOutOfTime;
             }
         }
@@ -242,7 +270,9 @@ public class GameManager : MonoBehaviour {
         ResetTimer();
         SaveTurn(number, timerModification, turnAction, scoreModification, stickerData, stickerMatchData);
         //Checkeamos si el sticker que adivinamos recien es el ultimo que queda en el pool, y de ser asi le damos todos los puntos de una y sacamos el sticker
-        if ((turnAction == TurnAction.GuessCorrect || turnAction== TurnAction.UseClue)&& currentlyInGameStickers.Count == 1 && currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
+        if ((turnAction == TurnAction.GuessCorrect || turnAction== TurnAction.UseClue || turnAction == TurnAction.HighlightCorrect || turnAction == TurnAction.BombCorrect) 
+            && currentlyInGameStickers.Count == 1
+            && currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
         {
             //se repite este while hasta que el sticker salga del pool, para sumar sus puntos, el check amount of appearences lo saca del pool cuando llega
             //a la cant de apariciones de la dificultad 
@@ -316,6 +346,9 @@ public class GameManager : MonoBehaviour {
             AddStickers(flatAmountOfStickerAdded + (turnNumber / amountOfTurnsBetweenAddingStickers) * scalingAmountOfStickerAdded);
         }
 
+        highlightActive = false;
+        bombActive = false;
+        
         SetRandomImage();
         gameCanvas.UpdateUI();
     }
@@ -1079,6 +1112,26 @@ public class GameManager : MonoBehaviour {
     {
         pause = false;
         tutorialPanel.SetActive(pause);
+    }
+    
+    public (StickerData sticker, StickerMatchData matchData) ActivatePower(ConsumableID consumableID,GameClip clip)
+    {
+        bombActive = false;
+        highlightActive = false;
+        CustomDebugger.Log("USE: " + consumableID.ToString());
+        var turnSticker = GetCurrentlySelectedSticker();
+        if (!matchInventory.ContainsKey(consumableID) || matchInventory[consumableID].current <= 0) return (turnSticker);
+        AudioManager.Instance.PlayClip(clip);
+        //anim
+        var consumable = matchInventory[consumableID];
+        matchInventory[consumableID] = (consumable.current - 1, consumable.max, consumable.initial);
+        if (matchInventory[consumableID].current <= 0)
+        {
+            matchInventory[consumableID] = (0, consumable.max, consumable.initial);
+        }
+        PersistanceManager.Instance.userConsumableData.ModifyConsumable(consumableID, -1);
+        PersistanceManager.Instance.SaveUserConsumableData();
+        return (turnSticker);
     }
 }
 public enum StickerSet {

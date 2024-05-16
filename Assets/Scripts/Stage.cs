@@ -178,7 +178,8 @@ public class Match
                 (
                  GameManager.Instance.increaseAmountOfAppearencesOnMistake
                  || 
-                 turn.action == TurnAction.GuessCorrect || turn.action == TurnAction.UseClue)
+                 turn.action == TurnAction.GuessCorrect || turn.action == TurnAction.UseClue || turn.action == TurnAction.HighlightCorrect
+                 || turn.action == TurnAction.BombCorrect)
                 ) {
                 clearedImages.Add(turn.imageID);
                 CustomDebugger.Log("Ädding clearedImages stickerID"+turn.imageID);
@@ -495,6 +496,9 @@ public enum TurnAction {
     UseCut,
     UsePeek,
     RanOutOfTime,
+    HighlightCorrect,
+    HighlightIncorrect,
+    BombCorrect
 }
 
 public class StickerLevelsData

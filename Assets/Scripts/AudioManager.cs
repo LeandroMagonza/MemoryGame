@@ -138,5 +138,6 @@ public enum GameClip {
     enterShop,
     getAchievementStar0,
     getAchievementStar1,
-    getAchievementStar2
+    getAchievementStar2,
+    bombExplosion
 }

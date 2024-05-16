@@ -21,7 +21,7 @@ public class PowerPanelButtonHolder : MonoBehaviour
         foreach (var powerButton in buttons) {
             powerButton.SetButtonText();
             powerButton.SetInteractable();
-
+            powerButton.markedActive = false;
             if (!disableUnavailablePowers) continue; 
             if (
                 GameManager.Instance.matchInventory.ContainsKey(powerButton.consumableID)
@@ -36,23 +36,7 @@ public class PowerPanelButtonHolder : MonoBehaviour
         }
     }
 
-    private (StickerData sticker, StickerMatchData matchData) ActivatePower(ConsumableID consumableID)
-    {
-        CustomDebugger.Log("USE: " + consumableID.ToString());
-        var turnSticker = GameManager.GetCurrentlySelectedSticker();
-        if (!GameManager.matchInventory.ContainsKey(consumableID) || GameManager.matchInventory[consumableID].current <= 0) return (turnSticker);
-        AudioManager.Instance.PlayClip((buttons[(int)consumableID].gameClip));
-        //anim
-        var consumable = GameManager.matchInventory[consumableID];
-        GameManager.matchInventory[consumableID] = (consumable.current - 1, consumable.max, consumable.initial);
-        if (GameManager.matchInventory[consumableID].current <= 0)
-        {
-            GameManager.matchInventory[consumableID] = (0, consumable.max, consumable.initial);
-        }
-        PersistanceManager.Instance.userConsumableData.ModifyConsumable(consumableID, -1);
-        PersistanceManager.Instance.SaveUserConsumableData();
-        return (turnSticker);
-    }
+ 
 
     private void SaveAction((StickerData sticker, StickerMatchData matchData) turnSticker, int scoreModification,TurnAction turnAction)
     {
@@ -69,7 +53,8 @@ public class PowerPanelButtonHolder : MonoBehaviour
     {
         CustomDebugger.Log("Common");
 
-        var turnSticker = ActivatePower(ConsumableID.Clue);
+        ConsumableID consumableID = ConsumableID.Clue;
+        var turnSticker = GameManager.ActivatePower(consumableID,(buttons[(int)consumableID].gameClip));
         int scoreModification = GameManager.OnCorrectGuess();
 
         SaveAction(turnSticker, scoreModification,TurnAction.UseClue);
@@ -78,7 +63,8 @@ public class PowerPanelButtonHolder : MonoBehaviour
     {
         CustomDebugger.Log("Better");
 
-        var turnSticker = ActivatePower(ConsumableID.Clue);
+        ConsumableID consumableID = ConsumableID.Clue;
+        var turnSticker = GameManager.ActivatePower(consumableID,(buttons[(int)consumableID].gameClip));
         int amountOfAppears = GameManager.GetCurrentlySelectedSticker().matchData.amountOfAppearences;
         Debug.Log("amount of appears: " + amountOfAppears);
         // por que crea uno nuevo?
@@ -90,7 +76,8 @@ public class PowerPanelButtonHolder : MonoBehaviour
     }
     public void UseRemove()
     {
-        var turnSticker = ActivatePower(ConsumableID.Remove);
+        ConsumableID consumableID = ConsumableID.Remove;
+        var turnSticker = GameManager.ActivatePower(consumableID,(buttons[(int)consumableID].gameClip));
         GameManager.RemoveStickerFromPool();
         SaveAction(turnSticker, 0,TurnAction.UseRemove);
 
@@ -98,7 +85,8 @@ public class PowerPanelButtonHolder : MonoBehaviour
     public void UseCut()
     {
         CustomDebugger.Log("intetno usar cut");
-        var turnSticker = ActivatePower(ConsumableID.Cut);
+        ConsumableID consumableID = ConsumableID.Cut;
+        var turnSticker = GameManager.ActivatePower(consumableID,(buttons[(int)consumableID].gameClip));
         int amountOfAppearences = turnSticker.matchData.amountOfAppearences;
         int amountOfCuts = 1;
         if (GameManager.userData.unlockedUpgrades.ContainsKey(UpgradeID.BetterCut)) {
@@ -131,10 +119,47 @@ public class PowerPanelButtonHolder : MonoBehaviour
             case ConsumableID.Peek:
                 UsePeek();
                 break;
+            case ConsumableID.Highlight:
+                ToggleHighlight();
+                break; 
+            case ConsumableID.Bomb:
+                ToggleBomb();
+                break;
             default:
                 break;
         }
 
         gameCanvas.UpdateUI();
+    }
+
+    private void ToggleHighlight() {
+        ConsumableID consumableID = ConsumableID.Highlight;
+        GameManager.highlightActive = !GameManager.highlightActive;
+        if (GameManager.highlightActive) {
+            AudioManager.Instance.PlayClip(buttons[(int)consumableID].gameClip,1);
+            GameManager.bombActive = false;
+        }
+        else {
+            AudioManager.Instance.PlayClip(buttons[(int)consumableID].gameClip,.8f);
+        }
+
+        SetAllPowerButtonsText(false);
+        CustomDebugger.Log(GameManager.highlightActive+" HighlightActive");
+        buttons[(int)consumableID].MarkActive(GameManager.highlightActive);
+    }   
+    private void ToggleBomb() {
+        ConsumableID consumableID = ConsumableID.Bomb;
+        GameManager.bombActive = !GameManager.bombActive;
+        if (GameManager.bombActive) {
+            AudioManager.Instance.PlayClip(buttons[(int)consumableID].gameClip,1);
+            GameManager.highlightActive = false;
+        }
+        else {
+            AudioManager.Instance.PlayClip(buttons[(int)consumableID].gameClip,.8f);
+        }
+
+        SetAllPowerButtonsText(false);
+        CustomDebugger.Log(GameManager.bombActive+" HighlightActive");
+        buttons[(int)consumableID].MarkActive(GameManager.bombActive);
     }
 }

@@ -1,4 +1,5 @@
 
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +10,7 @@ public class PowerButton : MonoBehaviour
     [SerializeField] public Button button;
     [SerializeField] public TextMeshProUGUI text;
     [SerializeField] public GameClip gameClip;
+    public bool markedActive = false;
     //[SerializeField] public GameObject peekCanvas;
     public PowerPanelButtonHolder powerPanelButtonHolder;
     public void SetButtonText() {
@@ -38,7 +40,7 @@ public class PowerButton : MonoBehaviour
             {
                 button.interactable = false;
             }
-            button.GetComponent<Image>().color = button.interactable ? Color.white : Color.gray;
+            button.GetComponent<Image>().color = button.interactable ? ((markedActive)?Color.yellow:Color.white) : Color.gray;
         }
     }
     
@@ -56,4 +58,16 @@ public class PowerButton : MonoBehaviour
     }
 
 
+    public void MarkActive(bool active) {
+        markedActive = active;
+        CustomDebugger.Log(active+" marked button as");
+        button.GetComponent<Image>().color = button.interactable ? ((markedActive)?Color.yellow:Color.white) : Color.gray;
+        CustomDebugger.Log(button.GetComponent<Image>().color+" button color");
+    }
+ // public void Update() {
+    //     if (markedActive) {
+    //         throw new NotImplementedException();
+    //     }
+    // }
+   
 }
