@@ -274,6 +274,7 @@ public class TurnData
 public class UserData
 {
     public string name;
+    public string language = "english";
     public int id;
     public int coins;
     public int experiencePoints;
@@ -281,11 +282,7 @@ public class UserData
     [JsonIgnore] // Ignora esta propiedad durante la deserialización
     public int playerLevel => CalculatePlayerLevel();
     public int CalculatePlayerLevel() {
-        int playerLevel = 0;
-        foreach (var VARIABLE in unlockedUpgrades) {
-            playerLevel += VARIABLE.Value;
-        }
-        return playerLevel;
+        return ExperiencePointsToLevelUp().calculatedLv;
     }
 
     [JsonIgnore] // Ignora esta propiedad durante la deserialización
@@ -394,29 +391,64 @@ public class UserData
         return temp_inventory;
     }
 
-    public (int calculatedLv, int remainingExp) ExperiencePointsToLevelUp() {
-        int currentExpPerLv = 1000;
-        int remainingExp = experiencePoints;
+    public (int calculatedLv, int remainingExp) ExperiencePointsToLevelUp(int expToCheck = 0) {
+        if (expToCheck == 0) {
+            // si se llama con 0, se chequea para la exp actual del jugador
+            expToCheck = experiencePoints;
+        }
+
+        int currentExpPerLv = PersistanceManager.Instance.configData.baseExperiencePoints;
+        float experienceIncreasePerLevel = PersistanceManager.Instance.configData.experienceIncreasePerLevel;
+        
+        int remainingExp = expToCheck;
         int calculatedLv = 0;
         while (remainingExp > currentExpPerLv) {
             remainingExp -= currentExpPerLv;
             calculatedLv++;
-            currentExpPerLv = (int)(currentExpPerLv * 1.2f);
+            currentExpPerLv = (int)(currentExpPerLv * experienceIncreasePerLevel);
         }
 
         return (calculatedLv, remainingExp);
+    }    
+    public int ExperienceAccordingToLevel(int level) {
+
+        int experienceAtLevel = 0;
+        int currentExpPerLv = PersistanceManager.Instance.configData.baseExperiencePoints;
+        float experienceIncreasePerLevel = PersistanceManager.Instance.configData.experienceIncreasePerLevel;
+        
+        for (int i = 0; i < level; i++) {
+            experienceAtLevel += currentExpPerLv;
+            currentExpPerLv = (int)(currentExpPerLv * experienceIncreasePerLevel);
+        }
+
+        return experienceAtLevel;
     }
 
     public int AmountOfPendingUpgrades() {
+        
         CustomDebugger.Log("Experience points "+experiencePoints,DebugCategory.PLAYER_LEVEL);
-        CustomDebugger.Log("Current Upgrades "+unlockedUpgrades.Count,DebugCategory.PLAYER_LEVEL);
+        CustomDebugger.Log("Current Upgrades "+playerLevel,DebugCategory.PLAYER_LEVEL);
         CustomDebugger.Log("ExperiencePointsToLevel "+ExperiencePointsToLevelUp(),DebugCategory.PLAYER_LEVEL);
         
-        return ((ExperiencePointsToLevelUp().calculatedLv -playerLevel) > 0) ? (ExperiencePointsToLevelUp().calculatedLv - playerLevel) : 0;
+        return ((playerLevel - GetAmountOfUpgrades()) > 0) ? (playerLevel - GetAmountOfUpgrades()) : 0;
     }
 
     public int GetUpgradeLevel(UpgradeID upgradeID) {
         return unlockedUpgrades.ContainsKey(upgradeID) ? unlockedUpgrades[upgradeID] : 0;
+    }
+
+    public void GainExp(int expToGain) {
+        
+        experiencePoints += expToGain;
+        PlayerLevelManager.Instance.UpdatePlayerLevelButtons();
+        PersistanceManager.Instance.SaveUserData();
+    }
+    public int GetAmountOfUpgrades() {
+        int amountOfUpgrades = 0;
+        foreach (var VARIABLE in unlockedUpgrades) {
+            amountOfUpgrades += VARIABLE.Value;
+        }
+        return amountOfUpgrades;
     }
 }
     

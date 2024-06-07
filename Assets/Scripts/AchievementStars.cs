@@ -30,7 +30,6 @@ public class AchievementStars : MonoBehaviour
         }
         
         
-        
     }
     public IEnumerator SetAchievements(List<Achievement> achievements,float delay)
     {
@@ -39,6 +38,11 @@ public class AchievementStars : MonoBehaviour
             yield return new WaitForSeconds(delay);
             SetAchievement(achievementToSet, delay);
             
+        }
+
+        yield return new WaitForSeconds(.5f);
+        if (stars[2].GetComponent<Image>().sprite == starOn) {
+            AudioManager.Instance.PlayClip(GameClip.highScore);
         }
     }    
     public void SetAchievements(List<Achievement> achievements)

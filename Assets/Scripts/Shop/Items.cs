@@ -44,15 +44,15 @@ public class ConsumableData
 {
     public ConsumableID itemID;
     [FormerlySerializedAs("max")] public int amount;
-    public string name;
-    public string description;
+    private GameText name;
+    private GameText description;
     public int price;
     public int generationMinutes;
     public int initialStorage;
     public int ID => (int)itemID;
     public static ConsumableData GetConsumable(ConsumableID itemID)
     {
-        ConsumableData consumable = new ConsumableData();
+        ConsumableData consumable = null;
         switch (itemID)
         {
             case ConsumableID.Clue:
@@ -60,8 +60,8 @@ public class ConsumableData
                 {
                     itemID = itemID,
                     price = 8,
-                    name = "CLUE",
-                    description = "Correctly guess the current sticker.",
+                    name = GameText.ItemClueName,
+                    description = GameText.ItemClueDescription,
                     amount = 1,
                     generationMinutes = 180,
                     initialStorage =  1
@@ -72,8 +72,8 @@ public class ConsumableData
                 {
                     itemID = itemID,
                     price = 20,
-                    name = "REMOVE",
-                    description = "REMOVE the current Sticker from the match.",
+                    name = GameText.ItemRemoveName,
+                    description = GameText.ItemRemoveDescription,
                     amount = 1,
                     generationMinutes = 480,
                     initialStorage =  0
@@ -84,8 +84,8 @@ public class ConsumableData
                 {
                     itemID = itemID,
                     price = 3,
-                    name = "CUT",
-                    description = "Block one incorrect option per level.",
+                    name = GameText.ItemCutName,
+                    description = GameText.ItemCutDescription,
                     amount = 1,
                     generationMinutes = 60,
                     initialStorage =  2
@@ -96,8 +96,8 @@ public class ConsumableData
                 {
                     itemID = itemID,
                     price= 30,
-                    name = "PEEK",
-                    description = "See how many times each Sticker hast appeared",
+                    name = GameText.ItemPeekName,
+                    description = GameText.ItemPeekDescription,
                     amount = 1,
                     generationMinutes = 480,
                     initialStorage =  0
@@ -108,8 +108,8 @@ public class ConsumableData
                 {
                     itemID = itemID,
                     price= 3,
-                    name = "HIGHLIGHT",
-                    description = "If the next guess is correct, reduce Sticker options for the match.",
+                    name = GameText.ItemHighlightName,
+                    description = GameText.ItemHighlightDescription,
                     amount = 1,
                     generationMinutes = 60,
                     initialStorage =  2
@@ -120,8 +120,8 @@ public class ConsumableData
                 {
                     itemID = itemID,
                     price= 5,
-                    name = "BOMB",
-                    description = "If the next guess is a Small Mistake, it will count as correct.",
+                    name = GameText.ItemBombName,
+                    description = GameText.ItemBombDescription,
                     amount = 1,
                     generationMinutes = 120,
                     initialStorage =  1
@@ -132,8 +132,8 @@ public class ConsumableData
                 {
                     itemID = itemID,
                     price= 5,
-                    name = "Energy Potion",
-                    description = "Recharges your energy to the MAX!",
+                    name = GameText.ItemEnergyPotionName,
+                    description = GameText.ItemEnergyPotionDescription,
                     amount = 1,
                     generationMinutes = 480,
                     initialStorage = 10,
@@ -142,6 +142,14 @@ public class ConsumableData
         }
         return consumable;
     }
+
+    public string GenerateDescription() {
+        return LocalizationManager.Instance.GetGameText(description);
+    }
+    public string GetName() {
+        return LocalizationManager.Instance.GetGameText(name);
+    }
+    
 }
 [System.Serializable]
 public class UpgradeData
@@ -149,8 +157,8 @@ public class UpgradeData
     public UpgradeID itemId;
     public int valuePerLevel;
     public int baseValue;
-    public string name;
-    public string description;
+    public GameText name;
+    public GameText description;
     public Color backgroundColor;
     public int[] levelPrices = { 100, 200, 1500 };
     public int[] playerLevelRequired = new []{1};
@@ -176,41 +184,77 @@ public class UpgradeData
     {
         return currentLevel >= playerLevelRequired.Length;
     }
-    public static UpgradeData GetUpgrade(UpgradeID upgradeID, bool nextLevel = false)
-    {
-        UpgradeData upgrade;
-        int upgradeLevel = PersistanceManager.Instance.userData.GetUpgradeLevel(upgradeID);
+
+    public string GenerateDescription(bool nextLevel) {
+        int upgradeLevel = PersistanceManager.Instance.userData.GetUpgradeLevel(itemId);
         if (nextLevel) { upgradeLevel++; }
         
         ConsumableData correspondingConsumable = ConsumableData.GetConsumable(
-            ItemHelper.GetCorrespondingConsumable(upgradeID));
+            ItemHelper.GetCorrespondingConsumable(itemId));
 
         string generationTimeText = "";
         string storageText = "";
         string fullFactoryDescription = "";
 
-        string textHighlighColor;
+        string textHighlightColor;
         if (nextLevel) {
-            textHighlighColor = 	"#00ff00ff"; //lime
+            textHighlightColor = 	"#00ff00ff"; //lime
         }
         else {
-            textHighlighColor = 	"#00ffffff"; //cyan
+            textHighlightColor = 	"#00ffffff"; //cyan
         }
-        if (correspondingConsumable.itemID != ConsumableID.NONE) {
+        
+        
+        if (correspondingConsumable != null) {
             //CustomDebugger.Log("nextLevel: "+nextLevel+" upgradeLevel:"+upgradeLevel);
-            generationTimeText = "<color="+textHighlighColor+">"+ItemHelper.FormatGenerationTime(
+            generationTimeText = "<color="+textHighlightColor+">"+ItemHelper.FormatGenerationTime(
             correspondingConsumable.generationMinutes,
             upgradeLevel)+"</color>";
             var totalStorageAmount = (ConsumableData.GetConsumable(
-                ItemHelper.GetCorrespondingConsumable(upgradeID)).initialStorage + upgradeLevel);
+                ItemHelper.GetCorrespondingConsumable(itemId)).initialStorage + upgradeLevel);
             
-            storageText = "<color="+textHighlighColor+">"+totalStorageAmount +"</color> "+correspondingConsumable.name+ ((totalStorageAmount == 1) ? "" : "S");
+            storageText = LocalizationManager.Instance.GetGameText(GameText.UpgradeFactoryStorage);
+            string localizedName = correspondingConsumable.GetName();
+            string localizedDescription = correspondingConsumable.GenerateDescription();
+            
+            storageText = ItemHelper.ReplacePlaceholders(storageText, new() {
+                { "textHighlightColor", textHighlightColor },
+                { "correspondingConsumable.name", localizedName+((totalStorageAmount == 1) ? "" : "S")},
+                { "totalStorageAmount", totalStorageAmount.ToString() }
+            });
 
-
-            fullFactoryDescription = "Generates a " + correspondingConsumable.name + " every " + generationTimeText +
-                                     ", stores " + storageText + ". \n"+ 
-                                     "<color=white>"+correspondingConsumable.name+"</color>: "+correspondingConsumable.description;
+            fullFactoryDescription = LocalizationManager.Instance.GetGameText(GameText.UpgradeFactoryDescription);
+            
+            fullFactoryDescription = ItemHelper.ReplacePlaceholders(fullFactoryDescription, new() {
+                {"generationTimeText",generationTimeText},
+                {"storageText",storageText},
+                {"correspondingConsumable.name",localizedName},
+                {"correspondingConsumable.description",localizedDescription},
+                {"upgradeLevel",upgradeLevel.ToString()}, // sumar aca valor sacado del string
+            });
+            return fullFactoryDescription;
         }
+        else {
+            string descriptionText = LocalizationManager.Instance.GetGameText(this.description);
+            descriptionText = ItemHelper.ReplacePlaceholders(descriptionText, new() {
+                {"textHighlightColor",textHighlightColor},
+                {"upgradeLevel",upgradeLevel.ToString()}, // sumar aca valor sacado del string
+            },
+                new () {
+                {"upgradeLevel",upgradeLevel}, // sumar aca valor sacado del string
+                }
+            
+            );
+            return descriptionText;
+        }
+    }
+
+    public string GetName() {
+        return LocalizationManager.Instance.GetGameText(this.name);
+    }
+    public static UpgradeData GetUpgrade(UpgradeID upgradeID)
+    {
+        UpgradeData upgrade;
         switch (upgradeID)
         {
             //Factories
@@ -219,8 +263,8 @@ public class UpgradeData
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "CLUE FACTORY",
-                    description = fullFactoryDescription,
+                    name = GameText.UpgradeFactoryClueName,
+                    description = GameText.UpgradeFactoryDescription,
                     backgroundColor = Color.blue,
                     playerLevelRequired = new []{ 3,8,15 },
                     iconMain = IconName.CLUE,
@@ -234,8 +278,8 @@ public class UpgradeData
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "REMOVE FACTORY",
-                    description = fullFactoryDescription,
+                    name = GameText.UpgradeFactoryRemoveName,
+                    description = GameText.UpgradeFactoryDescription,
                     backgroundColor = Color.green,
                     playerLevelRequired = new int[] { 7 },
                     iconMain = IconName.REMOVE,
@@ -247,8 +291,8 @@ public class UpgradeData
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "CUT FACTORY",
-                    description = fullFactoryDescription,
+                    name = GameText.UpgradeFactoryCutName,
+                    description = GameText.UpgradeFactoryDescription,
                     backgroundColor = Color.yellow,
                     playerLevelRequired = new int[] { 1, 2, 6, 8 },
                     iconMain = IconName.CUT,
@@ -260,8 +304,8 @@ public class UpgradeData
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "PEEK FACTORY",
-                    description = fullFactoryDescription,
+                    name = GameText.UpgradeFactoryPeekName,
+                    description = GameText.UpgradeFactoryDescription,
                     backgroundColor = Color.magenta,
                     playerLevelRequired = new int[] { 12 },
                     iconMain = IconName.PEEK,
@@ -274,8 +318,8 @@ public class UpgradeData
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "HIGHLIGHT FACTORY",
-                    description = fullFactoryDescription,
+                    name =GameText.UpgradeFactoryHighlightName,
+                    description = GameText.UpgradeFactoryDescription,
                     backgroundColor = Color.green,
                     levelPrices = new int[] { 1,3,6,8 },
                     iconMain = IconName.HIGHLIGHT,
@@ -288,8 +332,8 @@ public class UpgradeData
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "BOMB FACTORY",
-                    description = fullFactoryDescription,
+                    name = GameText.UpgradeFactoryBombName,
+                    description = GameText.UpgradeFactoryDescription,
                     backgroundColor = Color.cyan,
                     playerLevelRequired = new int[] { 1,6 },
                     iconMain = IconName.BOMB,
@@ -303,8 +347,8 @@ public class UpgradeData
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "EXTRA LIFE",
-                    description = "Increase the amount of lives you start each game with to <color="+textHighlighColor+">"+ (upgradeLevel + 3)+"</color>.",
+                    name = GameText.UpgradeExtraLifeName,
+                    description = GameText.UpgradeExtraLifeDescription,
                     backgroundColor = Color.red,
                     playerLevelRequired = new int[] { 1,5,9,12},
                     iconMain = IconName.HEART,
@@ -317,8 +361,8 @@ public class UpgradeData
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "BETTER CLUE",
-                    description = "Clues mark the number they were used on.",
+                    name = GameText.UpgradeBetterClueName,
+                    description = GameText.UpgradeBetterClueDescription,
                     backgroundColor = Color.blue,
                     playerLevelRequired = new int[] { 10 },
                     upgradeRequired = new Dictionary<UpgradeID, int>()
@@ -335,8 +379,8 @@ public class UpgradeData
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "BETTER CUT",
-                    description = "Cut blocks <color="+textHighlighColor+">"+ (upgradeLevel + 1)+" options.",
+                    name = GameText.UpgradeBetterCutName,
+                    description = GameText.UpgradeBetterCutDescription,
                     backgroundColor = Color.blue,
                     playerLevelRequired = new int[] { 6,9,12,15,18,20,22,24 },
                     upgradeRequired = new Dictionary<UpgradeID, int>()
@@ -352,8 +396,8 @@ public class UpgradeData
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "LIFE PROTECTOR",
-                    description = "Protect your life from one mistake. Recharges on <color="+textHighlighColor+">"+(11 - upgradeLevel)+" COMBO",
+                    name = GameText.UpgradeLifeProtectorName,
+                    description = GameText.UpgradeLifeProtectorDescription,
                     backgroundColor = Color.red,
                     playerLevelRequired = new int[] {9,11,13,15,17},
                     iconMain = IconName.HEART,
@@ -365,8 +409,8 @@ public class UpgradeData
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "BLOCK MISTAKE",
-                    description = "On mistake, add a <color="+textHighlighColor+">Cut lv. "+upgradeLevel+" </color> to the sticker.",
+                    name = GameText.UpgradeBlockMistakeName,
+                    description = GameText.UpgradeBlockMistakeDescription,
                     backgroundColor = Color.yellow,
                     playerLevelRequired = new int[] { 9,12,15 },
                     iconMain = IconName.CUT,
@@ -378,8 +422,8 @@ public class UpgradeData
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "DEATH DEFY",
-                    description = "Cheat death on a SMALL mistake once per lv",
+                    name = GameText.UpgradeDeathDefyName,
+                    description = GameText.UpgradeDeathDefyDescription,
                     backgroundColor = Color.red,
                     playerLevelRequired = new int[] { 12,15,18 },
                     iconMain = IconName.HEART,
@@ -387,19 +431,12 @@ public class UpgradeData
                 };
                 break;           
             case UpgradeID.HealOnClear:
-                string descriptionHealOnClear;
-                if (5 - upgradeLevel != 1) {
-                    descriptionHealOnClear = "Heal one heart per <color="+textHighlighColor+">"+  (5 - upgradeLevel) + " stickers cleared</color>.";
-                }
-                else {
-                    descriptionHealOnClear = "Heal one heart per <color="+textHighlighColor+">sticker cleared</color>.";
-                }
                 upgrade = new UpgradeData()
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "HEAL ON CLEAR",
-                    description = descriptionHealOnClear,
+                    name = GameText.UpgradeHealOnClearName,
+                    description = GameText.UpgradeHealOnClearDescription,
                     backgroundColor = Color.red,
                     playerLevelRequired = new int[] { 0,4,8,12 },
                     iconMain = IconName.HEART,
@@ -412,8 +449,8 @@ public class UpgradeData
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "STICKER MASTER",
-                    description = "Stickers on match come with bonuses, per sticker level",
+                    name = GameText.UpgradeStickerMasterName,
+                    description = GameText.UpgradeStickerMasterDescription,
                     backgroundColor = Color.red,
                     playerLevelRequired = new int[] { 20 },
                     iconMain = IconName.STICKER,
@@ -425,8 +462,8 @@ public class UpgradeData
                 {
                     itemId = upgradeID,
                     valuePerLevel = 1,
-                    name = "CONSUMABLE SLOT",
-                    description = "Allows you to bring <color="+textHighlighColor+">"+ upgradeLevel+" extra consumables</color> to the match, and store <color="+textHighlighColor+">"+ 3*(upgradeLevel)+" extra consumables</color> on each factory.",
+                    name = GameText.UpgradeConsumableSlotName,
+                    description = GameText.UpgradeConsumableSlotDescription,
                     backgroundColor = Color.red,
                     playerLevelRequired = new int[] { 5,10 },
                     iconMain = IconName.BAG,

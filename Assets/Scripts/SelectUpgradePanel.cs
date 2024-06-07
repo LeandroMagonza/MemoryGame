@@ -7,7 +7,6 @@ public class SelectUpgradePanel : MonoBehaviour {
     public PlayerLevelManager playerLevelManager => PlayerLevelManager.Instance;
     public UserData userData => PersistanceManager.Instance.userData;
     public List<UpgradeSelectionItem> selectionOptions;
-    public int playerLevel => PersistanceManager.Instance.userData.playerLevel;
 
     public void GetRandomUpgradesForPlayerSelection(int playerLevel) {
         // Lista para almacenar los upgrades disponibles
@@ -17,7 +16,7 @@ public class SelectUpgradePanel : MonoBehaviour {
         foreach (UpgradeID upgradeID in Enum.GetValues(typeof(UpgradeID))) {
             if (upgradeID == UpgradeID.NONE) continue;
 
-            var upgradeData = UpgradeData.GetUpgrade(upgradeID,true);
+            var upgradeData = UpgradeData.GetUpgrade(upgradeID);
 
             // Obtiene el nivel actual del upgrade para el jugador
             int currentLevel = userData.GetUpgradeLevel(upgradeID);
@@ -90,7 +89,7 @@ public class SelectUpgradePanel : MonoBehaviour {
 
 
     public void OnEnable() {
-        GetRandomUpgradesForPlayerSelection(playerLevel);
+        GetRandomUpgradesForPlayerSelection(userData.GetAmountOfUpgrades());
     }
 
 

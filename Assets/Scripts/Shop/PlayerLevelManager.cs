@@ -41,19 +41,21 @@ public class PlayerLevelManager : MonoBehaviour
     [FormerlySerializedAs("upgradeSelectionPanel")] public SelectUpgradePanel selectUpgradePanel;
     public PlayerLevelPanel playerLevelPanel;
     public UnlockedUpgradesPanel unlockedUpgradesPanel => playerLevelPanel.unlockedUpgradesPanel;
-    public PlayerLevelDisplayButton playerLevelDisplayButton;
-    public int playerLevel => GameManager.Instance.userData.playerLevel;
 
     // Delegado que define la firma para el evento OnPlayerLevelUp
     public delegate void PlayerLevelUpHandler(int newLevel);
 
     // Evento que otros componentes pueden suscribirse
-    public event PlayerLevelUpHandler OnPlayerLevelUp;
+    public event PlayerLevelUpHandler OnPlayerGainExp;
 
 
     public void SelectUpgradeToGet(UpgradeID selectedUpgradeID) {
         UnlockUpgrade(selectedUpgradeID);
-        OnPlayerLevelUp?.Invoke(GameManager.Instance.userData.playerLevel);
+        UpdatePlayerLevelButtons();
+    }
+
+    public void UpdatePlayerLevelButtons() {
+        OnPlayerGainExp?.Invoke(GameManager.Instance.userData.playerLevel);
     }
 
     public UpgradeID upgradeToAddTest;
@@ -61,14 +63,17 @@ public class PlayerLevelManager : MonoBehaviour
     public void UnlockUpgradeTest() {
         UnlockUpgrade(upgradeToAddTest);
     }
-    public void UnlockUpgrade(UpgradeID upgradeID)
-    {
+    public void UnlockUpgrade(UpgradeID upgradeID) {
+        
+        AudioManager.Instance.PlayClip(GameClip.highScore);
         CustomDebugger.Log("Added Item:" + nameof(upgradeID));
         GameManager.Instance.userData.AddUpgradeToUser(upgradeID);
         PersistanceManager.Instance.SaveUserData();
         unlockedUpgradesPanel.GenerateUpgradeItemForUnlocks();
         unlockedUpgradesPanel.OrderUpgradePanels();
-        CanvasManager.Instance.ChangeCanvas(CanvasName.RETURN);
+        var previousCanvas = CanvasManager.Instance.previousCanvas;
+        CanvasManager.Instance.ChangeCanvas(CanvasName.PLAYER_LEVEL);
+        CanvasManager.Instance.previousCanvas = previousCanvas;
 
     }
     [ContextMenu("LogUpgradeLevelRequiredTable")]
@@ -80,7 +85,7 @@ public class PlayerLevelManager : MonoBehaviour
             CustomDebugger.Log(upgradeID);
             if (upgradeID == UpgradeID.NONE) continue;
 
-            UpgradeData currentUpgradeData = UpgradeData.GetUpgrade(upgradeID,true);
+            UpgradeData currentUpgradeData = UpgradeData.GetUpgrade(upgradeID);
             CustomDebugger.Log("Levels:"+currentUpgradeData.playerLevelRequired.Length);
             
             foreach (var VARIABLE in currentUpgradeData.playerLevelRequired) {

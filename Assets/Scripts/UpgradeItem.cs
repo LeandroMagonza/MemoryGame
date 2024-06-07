@@ -29,17 +29,16 @@ public class UpgradeItem : MonoBehaviour
             currentLevel++;
         } 
         
-        UpgradeData upgradeData = UpgradeData.GetUpgrade(upgradeIDtoSet,addLevel);
+        UpgradeData upgradeData = UpgradeData.GetUpgrade(upgradeIDtoSet);
         bool isMaxLevel = upgradeData.IsMaxLevel(currentLevel);
         int max = upgradeData.GetMaxLevel();
         
         upgradeID = upgradeIDtoSet;
-        string description = upgradeData.description;
-        upgradeName.text = upgradeData.name;
+        upgradeName.text = upgradeData.GetName();
         level.text = currentLevel + "/" + max;
         level.color = (isMaxLevel) ? Color.yellow: Color.white;
         background.color = upgradeData.backgroundColor;
-        upgradeDescription.text = description;
+        upgradeDescription.text = upgradeData.GenerateDescription(addLevel);
         iconMainHolder.sprite = ItemHelper.GetIconSprite(upgradeData.iconMain);
         if (upgradeData.iconSecondary != IconName.NONE) {
             iconSecondaryHolder.sprite = ItemHelper.GetIconSprite(upgradeData.iconSecondary);

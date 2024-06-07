@@ -70,7 +70,7 @@ public class GameManager : MonoBehaviour {
     public bool disableInput = false;
     public bool highlightActive;
     public bool bombActive;
-    
+    private Coroutine currentStickerCoroutine;
     [Header("Skills")]
     public bool protectedLife = false;
     public int protectedLifeOnComboAmount = 10;
@@ -174,6 +174,7 @@ public class GameManager : MonoBehaviour {
     public int amountOfTurnsBetweenAddingStickers = 10;
     public int flatAmountOfStickerAdded = 0;
     public int scalingAmountOfStickerAdded = 1;
+    private int maxLevel => StageManager.Instance.maxLevel;
 
 
     public void SetScoreTexts() {
@@ -192,6 +193,7 @@ public class GameManager : MonoBehaviour {
     public IEnumerator ProcessTurnAction(int guessNumber, bool ranOutOfTime = false)
     {
         disableInput = true;
+        if (currentStickerCoroutine != null) { StopCoroutine(currentStickerCoroutine); }
         StickerMatchData currentStickerMatchData = currentlyInGameStickers[_currentlySelectedSticker];
         CustomDebugger.Log("Guessed number " + guessNumber + ", amount of appearances " + currentStickerMatchData.amountOfAppearences);
         TurnAction turnAction;
@@ -217,6 +219,7 @@ public class GameManager : MonoBehaviour {
             CustomDebugger.Log("CorrectGuess");
             scoreModification = OnCorrectGuess();
             if (highlightActive) {
+                //TODO: Agregar Animacion de highlight correct
                 turnAction = TurnAction.HighlightCorrect;
                 ActivatePower(ConsumableID.Highlight, GameClip.none);
                 currentlyInGameStickers[_currentlySelectedSticker].AddBetterClueEffect(guessNumber);
@@ -464,12 +467,12 @@ public class GameManager : MonoBehaviour {
 
     private void CorrectGuessFX()
     {
-        StartCoroutine(Squash(stickerDisplay.spriteHolder.transform.parent.transform, squashDelay, squashAmount, squashSpeed));
+        currentStickerCoroutine = StartCoroutine(Squash(stickerDisplay.spriteHolder.transform.parent.transform, squashDelay, squashAmount, squashSpeed));
         correctGuessParticle.Play();
     }
     private void IncorrectGuessFX()
     {
-        StartCoroutine(Shake(stickerDisplay.spriteHolder.transform, shakeDelay, shakeAmount, shakeSpeed));
+        currentStickerCoroutine = StartCoroutine(Shake(stickerDisplay.spriteHolder.transform, shakeDelay, shakeAmount, shakeSpeed));
         incorrectGuessParticle.Play();
     }
 
@@ -514,11 +517,11 @@ public class GameManager : MonoBehaviour {
         
         var randomGroupSelected = StageManager.Instance.selectedStickerGroup;
 
-        if (StickerManager.Instance.currentLoadedStickerGroups[StageManager.Instance.gameVersion][randomGroupSelected.name].stickers.Count < amountOfStickersToSelect) {
+        if (StickerManager.Instance.currentLoadedStickerGroups[(StageManager.Instance.gameVersion,userData.language)][randomGroupSelected.name].stickers.Count < amountOfStickersToSelect) {
             Debug.LogError("Se intentaron seleccionar mas stickers que los que hay en el grupo");
         }
 
-        var shuffledStickers = StickerManager.Instance.currentLoadedStickerGroups[StageManager.Instance.gameVersion][randomGroupSelected.name].stickers.ToList().Shuffle();
+        var shuffledStickers = StickerManager.Instance.currentLoadedStickerGroups[(StageManager.Instance.gameVersion,userData.language)][randomGroupSelected.name].stickers.ToList().Shuffle();
 
         for (int currentStickerSelectedIndex = 0; currentStickerSelectedIndex < amountOfStickersToSelect; currentStickerSelectedIndex++) {
             int selectedStickerID = shuffledStickers[currentStickerSelectedIndex];
@@ -666,13 +669,13 @@ public class GameManager : MonoBehaviour {
         endMatchTime = Time.time;
         float elapsedTime = endMatchTime - startMatchTime;
         AdmobAdsManager.Instance.ReduceInstertitialTime(elapsedTime);
-        int formerCoins = userData.coins;
-        userData.experiencePoints += score;
+        //int formerCoins = userData.coins;
+        //userData.GainExp(score);
         var firstTimeAchievements = userData.GetUserStageData(selectedLevel, selectedDifficulty).AddMatch(_currentMatch);
 
 
         //si no hay proximo stage desactivo el boton play next stage
-        if ((selectedLevel < 13 || selectedDifficulty < 9)
+        if ((selectedLevel < maxLevel - 1 || selectedDifficulty < 9)
             &&
             (userData.GetUserStageData(selectedLevel, selectedDifficulty).achievements
                 .Contains(Achievement.BarelyClearedStage))
@@ -696,7 +699,7 @@ public class GameManager : MonoBehaviour {
         
         //Grant first time Achievemnts bonus
         yield return new WaitForSeconds(0.2f);
-
+        /*
         const int steps = 10;
         int scoreIncrement = (score)/steps;
         for (int i = 0; i < steps; i++) {
@@ -707,16 +710,18 @@ public class GameManager : MonoBehaviour {
         }
         currentCoins.text = userData.coins.ToString();
         endGameScoreText.text = score.ToString();
-
+        */
         yield return endGameAchievementStars.SetAchievements(_currentMatch.achievementsFulfilled,.35f);
         
         delay -= .35f * firstTimeAchievements.Count;
         delay -= 5f;
         yield return new WaitForSeconds(delay);
+        userData.GainExp(score);
         
         if (lastHighScore < score)
         {
-            yield return StartCoroutine(SetHighScore(score));
+            //yield return StartCoroutine(SetHighScore(score));
+            StageManager.Instance.stages[(selectedLevel,selectedDifficulty)].SetScore(score);
         }
         
        
@@ -772,11 +777,11 @@ public class GameManager : MonoBehaviour {
     }
 
     public void PlayNextStage() {
-        if (selectedLevel < 13) {
+        if (selectedLevel < maxLevel - 1) {
             StageManager.Instance.SetStageAndDifficulty(selectedLevel + 1, selectedDifficulty);
         }
         else if (selectedDifficulty<9) {
-            StageManager.Instance.SetStageAndDifficulty(0, selectedDifficulty+1);
+            StageManager.Instance.SetStageAndDifficulty(4, selectedDifficulty+1);
         }
         else {
             throw new Exception("Play Next stage called but there is no next stage");
@@ -832,7 +837,7 @@ public class GameManager : MonoBehaviour {
 
         StageManager.Instance.AssignRandomStickerGroup();
         LoadStickers();
-        gameCanvas.barController.SetBar(_remainingStickersFromStage.Count);
+        gameCanvas.barController.SetBar(selectedLevel);
         currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
         AddStickers(startingStickerAmount);
         _currentlySelectedSticker = null;

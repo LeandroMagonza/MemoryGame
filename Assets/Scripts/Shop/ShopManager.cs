@@ -165,7 +165,7 @@ public class ShopManager : MonoBehaviour
             PersistanceManager.Instance.userConsumableData.GetConsumableData(consumableID).amount;
 
         shopButton.priceText.text = ConsumableData.GetConsumable(consumableID).price.ToString();
-        shopButton.descriptionText.text  = ConsumableData.GetConsumable(consumableID).description;
+        shopButton.descriptionText.text  = ConsumableData.GetConsumable(consumableID).GenerateDescription();
 
     }
 
@@ -217,7 +217,7 @@ public class ShopManager : MonoBehaviour
         price = !requirementsMet ? _lock : price;
         price = isMaxLevel ? _max : price;
         
-        string description = UpgradeData.GetUpgrade(upgradeID).description;
+        string description = UpgradeData.GetUpgrade(upgradeID).GenerateDescription(false);
         if (!requirementsMet)
         {
             string requirementData = "\n YOU NEED: ";

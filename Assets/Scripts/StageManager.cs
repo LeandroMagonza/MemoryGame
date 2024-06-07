@@ -44,6 +44,9 @@ public class StageManager : MonoBehaviour
     public GameObject stageHolder => selectStageCanvas.stageHolder;
     public GameObject stageDisplayPrefab;
 
+    public bool unlockAllStages;
+    public int maxLevel = 13;
+
     //public GameObject stickerHolder;
     //public GameObject stickerPanel;
     public UserData userData => PersistanceManager.Instance.userData;
@@ -65,19 +68,20 @@ public class StageManager : MonoBehaviour
         // Recorro las dificultades, arrancando por 3, hasta 9, creando los stages para cada una, y cortando cuando la dificultad este bloqueada
         // que es cuando la dificultad anterior no tenga por lo menos 1 achievement
         bool nextStageUnlocked = true;
+        int absoluteStageNumber = 1;
         for (int difficulty = 2; difficulty < 10; difficulty++)
         {
+            
             if (!nextStageUnlocked) break;
             //foreach (var stageIndexAndData in stages) {
-                for (int level = 4; level < 13; level++){
+                for (int level = 4; level < maxLevel; level++){
                 if (!nextStageUnlocked) break;
                // if (stageIndexAndData.Key != 0) break;
                 //Evita crear stages que ya estan creados. Si el que esta arriba, que es el de (dificultad,stageid) mas alto 
                 
                 UserStageData currentUserStageData = userData.GetUserStageData(level, difficulty);
 
-                nextStageUnlocked = (currentUserStageData is not null && currentUserStageData.achievements.Count > 0);
-                nextStageUnlocked = true;
+                nextStageUnlocked = unlockAllStages || (currentUserStageData is not null && currentUserStageData.achievements.Count > 0);
                 if (topmostStage is not null &&
                     (topmostStage.difficulty > difficulty || 
                      (topmostStage.difficulty == difficulty && topmostStage.level >= level))) continue;
@@ -87,7 +91,9 @@ public class StageManager : MonoBehaviour
                 Stage newStage = stageDisplay.GetComponent<Stage>();
                 //stageData.stageObject = newStage;
 
-                newStage.SetTitle(level+" "+difficultyDisplayLabel+ (difficulty - difficultyDisplayOffset));
+                //newStage.SetTitle(level+" "+difficultyDisplayLabel+ (difficulty - difficultyDisplayOffset));
+                newStage.SetTitle(absoluteStageNumber.ToString());
+                absoluteStageNumber++;
                 //newStage.SetColor(stageData.ColorValue);
                 newStage.SetStage(level, difficulty);
                 stages.Add((level, difficulty),newStage);
@@ -126,18 +132,18 @@ public class StageManager : MonoBehaviour
     }
 
     private (string randomGroupSelectedName, Color randomGroupSelectedColor) SelectRandomGroup() {
-        if (!StickerManager.Instance.currentLoadedStickerGroups.ContainsKey(gameVersion))
+        if (!StickerManager.Instance.currentLoadedStickerGroups.ContainsKey((gameVersion,userData.language)))
         {
             StickerManager.Instance.LoadAllStickersFromSet(gameVersion);
         }
         
         int randomGroupSelectedIndex = Random.Range(0,
-            StickerManager.Instance.currentLoadedStickerGroups[gameVersion].Keys.Count-forbiddenGroups.Count);
+            StickerManager.Instance.currentLoadedStickerGroups[(gameVersion,userData.language)].Keys.Count-forbiddenGroups.Count);
         string randomGroupSelectedName = "";
         Color randomGroupSelectedColor = Color.white;
         
         int currentGroup = 0;
-        foreach (var VARIABLE in StickerManager.Instance.currentLoadedStickerGroups[gameVersion]) {
+        foreach (var VARIABLE in StickerManager.Instance.currentLoadedStickerGroups[(gameVersion,userData.language)]) {
             if (forbiddenGroups.Contains(VARIABLE.Key)) continue;
             
             if (currentGroup == randomGroupSelectedIndex) {

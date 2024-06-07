@@ -1449,7 +1449,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5760779405790836975, guid: ff2792e898d737146bede0af4abc4d53, type: 3}
       propertyPath: m_fontSize
-      value: 17.5
+      value: 17.55
       objectReference: {fileID: 0}
     - target: {fileID: 5770468294565839607, guid: ff2792e898d737146bede0af4abc4d53, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1573,7 +1573,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6964743327490427713, guid: ff2792e898d737146bede0af4abc4d53, type: 3}
       propertyPath: m_fontSize
-      value: 17.5
+      value: 17.55
       objectReference: {fileID: 0}
     - target: {fileID: 7129089658391023839, guid: ff2792e898d737146bede0af4abc4d53, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1873,7 +1873,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8374249141030116963, guid: ff2792e898d737146bede0af4abc4d53, type: 3}
       propertyPath: m_fontSize
-      value: 45.8
+      value: 45.85
       objectReference: {fileID: 0}
     - target: {fileID: 8374249141137157504, guid: ff2792e898d737146bede0af4abc4d53, type: 3}
       propertyPath: m_SortingLayer
@@ -1901,11 +1901,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8374249141249627165, guid: ff2792e898d737146bede0af4abc4d53, type: 3}
       propertyPath: m_fontSize
-      value: 17.5
+      value: 17.55
       objectReference: {fileID: 0}
     - target: {fileID: 8492697795042903663, guid: ff2792e898d737146bede0af4abc4d53, type: 3}
       propertyPath: m_fontSize
-      value: 17.5
+      value: 17.55
       objectReference: {fileID: 0}
     - target: {fileID: 8529627238627559599, guid: ff2792e898d737146bede0af4abc4d53, type: 3}
       propertyPath: m_AnchorMax.y
@@ -2120,6 +2120,10 @@ PrefabInstance:
       propertyPath: canvasToSet
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 3436782719418387743, guid: 87bec61a2ce9efd449ff0c0fcbcc3a62, type: 3}
+      propertyPath: m_fontSize
+      value: 40
+      objectReference: {fileID: 0}
     - target: {fileID: 5061214764342510426, guid: 87bec61a2ce9efd449ff0c0fcbcc3a62, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -2203,6 +2207,22 @@ PrefabInstance:
     - target: {fileID: 5061214764342510427, guid: 87bec61a2ce9efd449ff0c0fcbcc3a62, type: 3}
       propertyPath: m_Name
       value: PendingUpgradeButton / Level Display
+      objectReference: {fileID: 0}
+    - target: {fileID: 5061214765307797992, guid: 87bec61a2ce9efd449ff0c0fcbcc3a62, type: 3}
+      propertyPath: m_fontSize
+      value: 72
+      objectReference: {fileID: 0}
+    - target: {fileID: 6994875158558729959, guid: 87bec61a2ce9efd449ff0c0fcbcc3a62, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6994875158558729959, guid: 87bec61a2ce9efd449ff0c0fcbcc3a62, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6994875158558729959, guid: 87bec61a2ce9efd449ff0c0fcbcc3a62, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7849079940760962162, guid: 87bec61a2ce9efd449ff0c0fcbcc3a62, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size

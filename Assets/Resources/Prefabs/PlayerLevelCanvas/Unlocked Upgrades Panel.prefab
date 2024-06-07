@@ -229,6 +229,7 @@ GameObject:
   - component: {fileID: 8374249141030116960}
   - component: {fileID: 8374249141030116962}
   - component: {fileID: 8374249141030116963}
+  - component: {fileID: 1106722331842019851}
   m_Layer: 5
   m_Name: Upgrade Title
   m_TagString: Untagged
@@ -285,8 +286,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: UNLOCKED UPGRADES
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
-  m_sharedMaterial: {fileID: 7374927986402738804, guid: 681ae3f110d10804f8b32771db8eb71d, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 493977f7bd3a5aa4d8835aa053f20d1b, type: 2}
+  m_sharedMaterial: {fileID: -6360588970910393389, guid: 493977f7bd3a5aa4d8835aa053f20d1b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -352,6 +353,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1106722331842019851
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8374249141030116961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e3f9f8f1b9f238469330aebe8e3ae9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameText: 3
 --- !u!1 &8374249142045974345
 GameObject:
   m_ObjectHideFlags: 0

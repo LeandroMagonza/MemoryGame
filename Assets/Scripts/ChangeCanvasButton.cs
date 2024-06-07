@@ -47,6 +47,7 @@ public enum CanvasName
     LANGUAGE,
     SELECT_UPGRADE,
     SHOP,
-    EXIT
+    EXIT,
+    LOADING
 }
 

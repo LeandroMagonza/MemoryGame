@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Transactions;
 using UnityEngine;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
@@ -60,88 +61,123 @@ public class PersistanceManager : MonoBehaviour
     
     public PacksData packs = new PacksData();
     public UserData userData;
+    public ConfigData configData;
     public UserConsumableData userConsumableData;
     private int eraseCounter = 3;
     
     private int stagesVersion = 0;
+    private readonly string fileHostUrl = "https://leandromagonza.github.io/MemoGram/";
+    
+    [System.Serializable]
+    private class LanguagesList
+    {
+        public List<string> languages;
+    }
 
     void Start() {
         StartCoroutine(LoadDataAndSetup());
     }
 
     public IEnumerator LoadDataAndSetup() {
+        
+        yield return StartCoroutine(LoadUIMenuConfiguration());
         yield return StartCoroutine(LoadUserData());
         // LOAD UI TIENE QUE LLAMARSE PRIMERO PORQUE AHI VIENE LA VERSION DEL STAGES
         // SE FIJA SI HAY UNO MAS NUEVO Y LO REEMPLAZA
-        yield return StartCoroutine(LoadUIMenuConfiguration());
+        
         yield return StartCoroutine(LoadStages());
         yield return StartCoroutine(LoadStickerLevels());
         yield return StartCoroutine(LoadPacks());
         yield return StartCoroutine(LoadUserConsumableData());
 
-
+        // initialize tiene que ir dsp de loaduserdata porque usa el idioma de userdata para saber cual cargar
+        ;
+        yield return StartCoroutine(LocalizationManager.Instance.InitializeLocalizationManager());
+        PlayerLevelManager.Instance.UpdatePlayerLevelButtons();
+        
+        CanvasManager.Instance.ChangeCanvas(CanvasName.MENU);
+        // loading screen ends
     }
 
-    private IEnumerator LoadUIMenuConfiguration()
+   private IEnumerator LoadUIMenuConfiguration()
+{
+    string setName = StageManager.Instance.gameVersion.ToString();
+    string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.Stages + ".json");
+    string latestFilePath = Path.Combine(Application.persistentDataPath, setName, "latestStages.json");
+    string json;
+
+    if (!File.Exists(filePath))
     {
-        string setName = StageManager.Instance.gameVersion.ToString();
-        string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.Stages+".json");
-        string latestFilePath = Path.Combine(Application.persistentDataPath, setName, "latestStages.json");
-        string json;
-
-        if (!File.Exists(filePath))
-        {
-            CustomDebugger.Log("No saved stages found at " + filePath);
-            yield return StartCoroutine(GetJson(FileName.Stages));
-        }
-        else
-        {
-            yield return StartCoroutine(GetJson(FileName.Stages, "latestStages"));
-        }
-
-        // Cargar la configuración actual
-        json = File.ReadAllText(filePath);
-        JObject jsonData = JObject.Parse(json);
-        ConfigData currentConfig = jsonData["config"].ToObject<ConfigData>();
-
-        // Cargar la última configuración, si está disponible
-        ConfigData latestConfig = null;
-        if (File.Exists(latestFilePath))
-        {
-            json = File.ReadAllText(latestFilePath);
-            JObject latestJsonData = JObject.Parse(json);
-            latestConfig = latestJsonData["config"].ToObject<ConfigData>();
-        }
-
-        // Inicializar finalConfig con la configuración actual
-        ConfigData finalConfig = currentConfig;
-
-        // Verificar si existe una última configuración y si su versión es más reciente
-        if (latestConfig != null && latestConfig.version > currentConfig.version)
-        {
-            // Si la última configuración es más reciente, utilizar esa
-            finalConfig = latestConfig;
-        }
-
-
-        // Aplicar la configuración
-        if (!string.IsNullOrEmpty(finalConfig.backgroundColor))
-        {
-            CanvasManager.Instance.SetMainMenuCanvasColor(finalConfig.backgroundColor);
-        }
-        else
-        {
-            CustomDebugger.LogError("No valid configuration found.");
-        }
-
-        // Opcional: reemplazar la configuración actual por la última si es más nueva
-        if (finalConfig == latestConfig)
-        {
-           File.Copy(latestFilePath, filePath, true);
-        }
-
-        yield return null;
+        CustomDebugger.Log("No saved stages found at " + filePath);
+        yield return StartCoroutine(GetJson(FileName.Stages));
     }
+    else
+    {
+        yield return StartCoroutine(GetJson(FileName.Stages, "latestStages"));
+    }
+
+    // Cargar la configuración actual
+    json = File.ReadAllText(filePath);
+    JObject jsonData = JObject.Parse(json);
+    ConfigData currentConfig = jsonData["config"].ToObject<ConfigData>();
+
+    // Cargar la última configuración, si está disponible
+    ConfigData latestConfig = null;
+    if (File.Exists(latestFilePath))
+    {
+        json = File.ReadAllText(latestFilePath);
+        JObject latestJsonData = JObject.Parse(json);
+        latestConfig = latestJsonData["config"].ToObject<ConfigData>();
+    }
+
+    // Inicializar finalConfig con la configuración actual
+    ConfigData finalConfig = currentConfig;
+
+    // Verificar si existe una última configuración y si su versión es más reciente
+    if (latestConfig != null && latestConfig.version > currentConfig.version)
+    {
+        // Si la última configuración es más reciente, utilizar esa
+        finalConfig = latestConfig;
+    }
+
+    configData = finalConfig;
+    
+    // Aplicar la configuración
+    if (!string.IsNullOrEmpty(finalConfig.backgroundColor))
+    {
+        CanvasManager.Instance.SetMainMenuCanvasColor(finalConfig.backgroundColor);
+    }
+    else
+    {
+        CustomDebugger.LogError("No valid configuration found.");
+    }
+
+    // Opcional: reemplazar la configuración actual por la última si es más nueva
+    if (finalConfig == latestConfig)
+    {
+        File.Copy(latestFilePath, filePath, true);
+
+        // Borrar todos los archivos que contengan additionalInfo en el nombre dentro de la carpeta con el mismo nombre que el setName
+        string setFolderPath = Path.Combine(Application.persistentDataPath, setName);
+        foreach (var file in Directory.GetFiles(setFolderPath, "additionalInfo*"))
+        {
+            File.Delete(file);
+        }
+
+        // Borrar la carpeta languages que está en el Application.persistentDataPath
+        string languagesFolderPath = Path.Combine(Application.persistentDataPath, "Languages");
+        if (Directory.Exists(languagesFolderPath))
+        {
+            Directory.Delete(languagesFolderPath, true);
+        }
+
+        // Descarga de los archivos necesarios después de la eliminación
+    }
+
+    yield return null;
+}
+
+
 
 
     private void OnApplicationQuit()
@@ -276,25 +312,24 @@ public class PersistanceManager : MonoBehaviour
             Debug.LogError("Failed to load UserData.");
         }
 
+        int levelAccordingToExp = userData.ExperiencePointsToLevelUp().calculatedLv;
+        int levelAccordingToUpgrades = userData.GetAmountOfUpgrades();
+        //si esta condicion es verdadera, el usuario tiene un userdata que es anterior al cambio de monedas a lv
+        if (levelAccordingToUpgrades > levelAccordingToExp) {
+            userData.experiencePoints = userData.ExperienceAccordingToLevel(levelAccordingToUpgrades) + userData.coins;
+        }
         this.userData = userData;
+        
         yield return null;
     }
 
     public string SerializeUserData()
     {
-        // Clonar userData para no modificar el original
-
-        // Convertir enums a strings antes de serializar
-        //userData.stickerDuplicates;
         foreach (var stageData in userData.stages)
         {
-            //CustomDebugger.Log("stage "+stageData.stage+" has achievements: "+stageData.achievements.Count);
-            //CustomDebugger.Log("stage "+stageData.stage+" has achievementsUnparsed: "+stageData.achievements.Count);
             stageData.achievementsUnparsed = stageData.achievements
                 .Select(a => a.ToString())
                 .ToList();
-            //CustomDebugger.Log("stage "+stageData.stage+" has achievements: "+stageData.achievements.Count);
-            //CustomDebugger.Log("stage "+stageData.stage+" has achievementsUnparsed: "+stageData.achievements.Count);
         }
         
 
@@ -396,7 +431,7 @@ public class PersistanceManager : MonoBehaviour
             save_name = file_name.ToString();
         }
         string setName = StageManager.Instance.gameVersion.ToString();
-        string url = "https://leandromagonza.github.io/MemoGram/" + setName + "/" + file_name + ".json";
+        string url = fileHostUrl + setName + "/" + file_name + ".json";
 
         // Construye la ruta completa del directorio donde se guardará el archivo
         string directoryPath = Path.Combine(Application.persistentDataPath, setName);
@@ -507,7 +542,7 @@ public class PersistanceManager : MonoBehaviour
         }
 
         // Deserializar los datos JSON a un objeto UserConsumableData
-        if (json != string.Empty) {
+        if (!string.IsNullOrEmpty(json)) {
             userConsumableData = JsonConvert.DeserializeObject<UserConsumableData>(json);
         }
         else {
@@ -536,6 +571,99 @@ public class PersistanceManager : MonoBehaviour
             
             CustomDebugger.Log("UserConsumableData saved to " + filePath+ " Clues: "+userConsumableData.GetConsumableData(ConsumableID.Clue).amount);
     }
+    
+     public IEnumerator LoadLanguageList()
+    {
+        string directoryPath = Path.Combine(Application.persistentDataPath, "Languages");
+        string languagesPath = Path.Combine(Application.persistentDataPath, "Languages", "languages.json");
+
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+        }
+        
+        if (!File.Exists(languagesPath))
+        {
+            using (UnityWebRequest webRequest = UnityWebRequest.Get(fileHostUrl + "Languages/languages.json"))
+            {
+                yield return webRequest.SendWebRequest();
+
+                if (webRequest.result == UnityWebRequest.Result.Success)
+                {
+                    File.WriteAllText(languagesPath, webRequest.downloadHandler.text);
+                }
+                else
+                {
+                    Debug.LogError("Failed to download languages.json");
+                    yield break;
+                }
+            }
+        }
+
+        string json = File.ReadAllText(languagesPath);
+        LanguagesList languagesList = JsonUtility.FromJson<LanguagesList>(json);
+        LocalizationManager.Instance.languagesList = languagesList.languages;
+    }
+
+    public IEnumerator LoadLanguageFiles(string language)
+    {
+        string languagePath = Path.Combine(Application.persistentDataPath, "Languages", $"{language}.json");
+        string iconPath = Path.Combine(Application.persistentDataPath, "Languages", $"{language}_icon.png");
+        if (!File.Exists(languagePath))
+        {
+            using (UnityWebRequest webRequest = UnityWebRequest.Get(fileHostUrl + $"Languages/{language}.json"))
+            {
+                yield return webRequest.SendWebRequest();
+
+                if (webRequest.result == UnityWebRequest.Result.Success)
+                {
+                    File.WriteAllText(languagePath, webRequest.downloadHandler.text);
+                }
+                else
+                {
+                    Debug.LogError($"Failed to download {language}.json");
+                    yield break;
+                }
+            }
+        }
+        
+        
+        if (!File.Exists(iconPath))
+        {
+            using (UnityWebRequest webRequest = UnityWebRequest.Get(fileHostUrl + $"Languages/{language}_icon.png"))
+            {
+                yield return webRequest.SendWebRequest();
+
+                if (webRequest.result == UnityWebRequest.Result.Success)
+                {
+                    File.WriteAllBytes(iconPath, webRequest.downloadHandler.data);
+                }
+                else
+                {
+                    Debug.LogError($"Failed to download {language}_icon.png");
+                    yield break;
+                }
+            }
+        }
+    }
+    public IEnumerator DownloadFile(string path) {
+        string url = fileHostUrl + "/" + path;
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
+        {
+            CustomDebugger.Log("Attempting to download file from");
+            yield return webRequest.SendWebRequest();
+
+            if (webRequest.result == UnityWebRequest.Result.Success){
+                path = Path.Combine(Application.persistentDataPath, path);
+                File.WriteAllText(path, webRequest.downloadHandler.text);
+            }
+            else
+            {
+                Debug.LogError("Failed to download file from: " + url);
+            }
+        }
+    }
+
 }
 
    
@@ -576,6 +704,8 @@ public enum DataLocation
 
 public class ConfigData {
     public int version = 0; // Valor predeterminado 0 para versiones sin este campo
+    public int baseExperiencePoints = 1000;
+    public float experienceIncreasePerLevel = 1.2f;
     public string backgroundColor;
 }
 public enum FileName {

@@ -47,13 +47,14 @@ public class CanvasManager : MonoBehaviour
     public Canvas languageCanvas;
     public Canvas exitCanvas;
     public Canvas selectUpgradeCanvas;
+    public Canvas loadingCanvas;
 
     public CanvasName previousCanvas;
     public CanvasName currentCanvas;
 
     private void Start()
     {
-        
+        allCanvas.Add(CanvasName.LOADING,loadingCanvas); 
         allCanvas.Add(CanvasName.MENU,menuCanvas);
         allCanvas.Add(CanvasName.SELECT_STAGE,selectStageCanvas);
         allCanvas.Add(CanvasName.GAME,gameCanvas);
@@ -62,8 +63,9 @@ public class CanvasManager : MonoBehaviour
         allCanvas.Add(CanvasName.LANGUAGE,languageCanvas);
         allCanvas.Add(CanvasName.EXIT,exitCanvas);
         allCanvas.Add(CanvasName.SELECT_UPGRADE,selectUpgradeCanvas);
-        currentCanvas = CanvasName.MENU;
-        ChangeCanvas(initialCanvas);
+        
+        ChangeCanvas(CanvasName.LOADING);
+        currentCanvas = CanvasName.LOADING;
     }
 
 
@@ -99,6 +101,9 @@ public class CanvasManager : MonoBehaviour
 
     }
 
+    public Canvas GetCanvas(CanvasName canvasName) {
+        return allCanvas[canvasName];
+    }
     private void Update() {
         if (Input.GetKeyUp(KeyCode.Escape) && currentCanvas == CanvasName.MENU) {
             ChangeCanvas(CanvasName.EXIT);
