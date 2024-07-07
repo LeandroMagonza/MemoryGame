@@ -790,7 +790,7 @@ public class GameManager : MonoBehaviour {
     }
 
     public void Reset() {
-        CustomDebugger.Log("Amount of clues "+userConsumableData.GetConsumableData(ConsumableID.Clue).amount);
+        CustomDebugger.Log("Amount of clues "+userConsumableData.GetConsumableEntry(ConsumableID.Clue).amount);
         switch (currentGameMode)
         {
             case GameMode.MEMORY:

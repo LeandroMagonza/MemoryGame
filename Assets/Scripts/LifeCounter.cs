@@ -187,7 +187,7 @@ public static class MyExtensions
         // }
         
         //float partialFill = (index - selectedStartingColorIndex * bracketSize) / bracketSize;
-        CustomDebugger.Log(index+" partial fill "+selectedStartingColorIndex%1);
+        //CustomDebugger.Log(index+" partial fill "+selectedStartingColorIndex%1);
         return Color.Lerp(colors[Mathf.FloorToInt(selectedStartingColorIndex)], colors[Mathf.FloorToInt(selectedStartingColorIndex)+1], selectedStartingColorIndex%1);
     }
 

@@ -44,11 +44,12 @@ public class ConsumableData
 {
     public ConsumableID itemID;
     [FormerlySerializedAs("max")] public int amount;
-    private GameText name;
-    private GameText description;
+    public GameText name;
+    public GameText description;
     public int price;
     public int generationMinutes;
     public int initialStorage;
+    public IconName icon;
     public int ID => (int)itemID;
     public static ConsumableData GetConsumable(ConsumableID itemID)
     {
@@ -62,6 +63,7 @@ public class ConsumableData
                     price = 8,
                     name = GameText.ItemClueName,
                     description = GameText.ItemClueDescription,
+                    icon = IconName.CLUE,
                     amount = 1,
                     generationMinutes = 180,
                     initialStorage =  1
@@ -74,6 +76,7 @@ public class ConsumableData
                     price = 20,
                     name = GameText.ItemRemoveName,
                     description = GameText.ItemRemoveDescription,
+                    icon = IconName.REMOVE,
                     amount = 1,
                     generationMinutes = 480,
                     initialStorage =  0
@@ -86,6 +89,7 @@ public class ConsumableData
                     price = 3,
                     name = GameText.ItemCutName,
                     description = GameText.ItemCutDescription,
+                    icon = IconName.CUT,
                     amount = 1,
                     generationMinutes = 60,
                     initialStorage =  2
@@ -98,6 +102,7 @@ public class ConsumableData
                     price= 30,
                     name = GameText.ItemPeekName,
                     description = GameText.ItemPeekDescription,
+                    icon = IconName.PEEK,
                     amount = 1,
                     generationMinutes = 480,
                     initialStorage =  0
@@ -110,6 +115,7 @@ public class ConsumableData
                     price= 3,
                     name = GameText.ItemHighlightName,
                     description = GameText.ItemHighlightDescription,
+                    icon = IconName.HIGHLIGHT,
                     amount = 1,
                     generationMinutes = 60,
                     initialStorage =  2
@@ -122,6 +128,7 @@ public class ConsumableData
                     price= 5,
                     name = GameText.ItemBombName,
                     description = GameText.ItemBombDescription,
+                    icon = IconName.BOMB,
                     amount = 1,
                     generationMinutes = 120,
                     initialStorage =  1
@@ -134,6 +141,7 @@ public class ConsumableData
                     price= 5,
                     name = GameText.ItemEnergyPotionName,
                     description = GameText.ItemEnergyPotionDescription,
+                    icon = IconName.NONE,
                     amount = 1,
                     generationMinutes = 480,
                     initialStorage = 10,

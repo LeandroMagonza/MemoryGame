@@ -195,8 +195,9 @@ public enum GameText
     UpgradeDeathDefyDescription,
     UpgradeStickerMasterDescription,
     UpgradeConsumableSlotDescription,
-    
-    
-    
 
+
+    FactoryNotificationTitle,
+    FactoryNotificationBody,
+    SecondsAbb
 }

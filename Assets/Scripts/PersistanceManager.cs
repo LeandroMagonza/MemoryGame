@@ -61,11 +61,11 @@ public class PersistanceManager : MonoBehaviour
     
     public PacksData packs = new PacksData();
     public UserData userData;
-    public ConfigData configData;
+    private ConfigData configData;
     public UserConsumableData userConsumableData;
     private int eraseCounter = 3;
     
-    private int stagesVersion = 0;
+    //private int stagesVersion = 0;
     private readonly string fileHostUrl = "https://leandromagonza.github.io/MemoGram/";
     
     [System.Serializable]
@@ -88,15 +88,16 @@ public class PersistanceManager : MonoBehaviour
         yield return StartCoroutine(LoadStages());
         yield return StartCoroutine(LoadStickerLevels());
         yield return StartCoroutine(LoadPacks());
-        yield return StartCoroutine(LoadUserConsumableData());
 
         // initialize tiene que ir dsp de loaduserdata porque usa el idioma de userdata para saber cual cargar
         ;
         yield return StartCoroutine(LocalizationManager.Instance.InitializeLocalizationManager());
+        yield return StartCoroutine(LoadUserConsumableData());
         PlayerLevelManager.Instance.UpdatePlayerLevelButtons();
         
         CanvasManager.Instance.ChangeCanvas(CanvasName.MENU);
         // loading screen ends
+        yield return StartCoroutine(ConsumableFactoryManager.Instance.GenerateAllConsumablesNextGenerationTimes());
     }
 
    private IEnumerator LoadUIMenuConfiguration()
@@ -174,6 +175,7 @@ public class PersistanceManager : MonoBehaviour
         // Descarga de los archivos necesarios después de la eliminación
     }
 
+    PlayerLevelManager.Instance.UpdatePlayerLevelButtons();
     yield return null;
 }
 
@@ -199,51 +201,6 @@ public class PersistanceManager : MonoBehaviour
 
     public IEnumerator LoadStages()
     {
-        // se comenta todo porque ya no hay stages para cargar, se generan de 4 hasta 12 niveles, y de 0 (2 botones) a 7 (9 botones)
-        
-        // string setName = StageManager.Instance.gameVersion.ToString();
-        // string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
-        // string json;
-        // CustomDebugger.Log(filePath);
-        // if (dataLocation == DataLocation.LocalStorage)
-        // {
-        //     if (!File.Exists(filePath))
-        //     {
-        //         Debug.LogError("No saved stages found at " + filePath);
-        //         yield return StartCoroutine(GetJson("stages"));
-        //     }
-        //     json = File.ReadAllText(filePath);
-        // }
-        // else if (dataLocation == DataLocation.ResourcesFolder)
-        // {
-        //     TextAsset file = Resources.Load<TextAsset>("Storage/"+setName+"/stages");
-        //     if (file == null)
-        //     {
-        //         Debug.LogError("No stages found in Resources.");
-        //         yield break;
-        //     }
-        //     json = file.text;
-        // }
-        // else
-        // {
-        //     Debug.LogError("Invalid data location.");
-        //     yield break;
-        // }
-        // //jsonData["stickerLevels"]        
-        // Serialization<StageData> stageList = JsonConvert.DeserializeObject<Serialization<StageData>>(json);
-        // if (stageList == null || stageList.items == null)
-        // {
-        //     Debug.LogError("Failed to deserialize stages.");
-        //     yield break;
-        // }
-        //
-        // foreach (var stageData in stageList.items)
-        // {
-        //     stageData.ConvertColorStringToColorValue();
-        // }
-        //
-        // this.stages = stageList.items.ToDictionary(stage => stage.stageID, stage => stage);
-        // CustomDebugger.Log("Stages loaded, stages count: " + stages.Count);
         yield return null;
         StageManager.Instance.InitializeStages();
     }
@@ -305,7 +262,7 @@ public class PersistanceManager : MonoBehaviour
         if (userData != null)
         {
             userData.ConvertStickerListToDictionary();
-            CustomDebugger.Log("UserData loaded, stages count: " + userData.stages.Count);
+            //CustomDebugger.Log("UserData loaded, stages count: " + userData.stages.Count);
         }
         else
         {
@@ -501,7 +458,7 @@ public class PersistanceManager : MonoBehaviour
         return 0; 
     }    
     public int GetAmountOfConsumables(ConsumableID consumable) {
-        return userConsumableData.GetConsumableData(consumable).amount;
+        return userConsumableData.GetConsumableEntry(consumable).amount;
     }
     public IEnumerator LoadUserConsumableData()
     {
@@ -557,19 +514,23 @@ public class PersistanceManager : MonoBehaviour
             Debug.LogError("Failed to load user consumable data.");
         }
 
+        ConsumableFactoryManager.Instance.factoriesBarUi.UpdateDisplays();
+        yield return StartCoroutine(ConsumableFactoryManager.Instance.GenerateAllConsumablesNextGenerationTimes());
         yield return null;
     }
 
     public void SaveUserConsumableData() {
+            CustomDebugger.Log("Cut next generation times beggining saving:"+userConsumableData.GetNextGenerationTimes(ConsumableID.Cut).Count);
             string setName = StageManager.Instance.gameVersion.ToString();
             string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.UserConsumableData+".json");
         
             // Utilizar SerializeUserData para serializar los datos
+            CustomDebugger.Log("Cut next generation times before saving:"+userConsumableData.GetNextGenerationTimes(ConsumableID.Cut).Count);
             string json = JsonConvert.SerializeObject(userConsumableData);
             CustomDebugger.Log("SaveUserConsumableData :"+json);
             File.WriteAllText(filePath, json);
             
-            CustomDebugger.Log("UserConsumableData saved to " + filePath+ " Clues: "+userConsumableData.GetConsumableData(ConsumableID.Clue).amount);
+            CustomDebugger.Log("UserConsumableData saved to " + filePath+ " Cuts: "+userConsumableData.GetConsumableEntry(ConsumableID.Cut).amount);
     }
     
      public IEnumerator LoadLanguageList()
@@ -664,6 +625,15 @@ public class PersistanceManager : MonoBehaviour
         }
     }
 
+    public int GetBaseExperiencePoints() {
+        if (configData == null) return 0;
+        return configData.baseExperiencePoints;
+    }
+
+    public float GetExperienceIncreasePerLevel() {
+        if (configData == null) return 0f;
+        return configData.experienceIncreasePerLevel;
+    }
 }
 
    
@@ -718,7 +688,8 @@ public enum FileName {
 public class UserConsumableEntry
 {
     public int amount; // Cantidad de consumibles que el jugador tiene
-    public List<(DateTime scheduledTime, int notificationId)> nextGenerationTimes = new (); // Lista de tiempos para generar próximos consumibles
+    [JsonProperty]
+    private List<(DateTime scheduledTime, int notificationId)> nextGenerationTimes = new (); // Lista de tiempos para generar próximos consumibles
 
     public UserConsumableEntry(int initialAmount, List<(DateTime scheduledTime, int notificationId)> nextGenerationTimes)
     {
@@ -726,6 +697,33 @@ public class UserConsumableEntry
         if (nextGenerationTimes is not null) {
             this.nextGenerationTimes = new List<(DateTime scheduledTime, int notificationId)>(nextGenerationTimes);
         }
+    }
+
+    public List<(DateTime scheduledTime, int notificationId)> GetGenerationTimes() {
+        CustomDebugger.Log("NextGenerationTimes: "+nextGenerationTimes.Count);
+        return nextGenerationTimes;
+    }
+
+    public void ModifyConsumable(int amount, List<(DateTime scheduledTime, int notificationId)> nextGenerationTimes) {
+        this.amount += amount;
+        this.nextGenerationTimes = nextGenerationTimes;
+    }
+    public int GetGeneratedAmount(bool delete) {
+
+        CustomDebugger.Log("Called getgeneratedamount with delete:" + delete);
+
+        int generatedAmount = 0;
+        int index = 0;
+        foreach (var VARIABLE in nextGenerationTimes.ToList()) { 
+            if (VARIABLE.scheduledTime < DateTime.Now) {
+                generatedAmount++;
+                if (delete) {
+                    nextGenerationTimes.RemoveAt(index);
+                }
+            }
+            index++;
+        }
+        return generatedAmount;
     }
 }
 
@@ -738,48 +736,29 @@ public class UserConsumableData
 
     public void ModifyConsumable(ConsumableID type, int amount, List<(DateTime scheduledTime, int notificationId)> nextGenerationTimes = null)
     {
-        if (consumables.ContainsKey(type))
-        {
-            // Actualizar los valores existentes
-            consumables[type].amount += amount;
-            if (nextGenerationTimes is not null) {
-                consumables[type].nextGenerationTimes = new List<(DateTime scheduledTime, int notificationId)>(nextGenerationTimes);
-            }
-            else {
-                consumables[type].nextGenerationTimes = new List<(DateTime scheduledTime, int notificationId)>();
-            }
-        }
-        else
-        {
-            // Añadir un nuevo tipo de consumible
-            consumables[type] = new UserConsumableEntry(amount, nextGenerationTimes);
-        }
+        CustomDebugger.Log("ModifyConsumable type:"+type+" amount: "+amount+" nextgenerationtimes: "+
+                           ((nextGenerationTimes != null)?nextGenerationTimes.Count.ToString():"null"));
+        
+        var consumableEntry = GetConsumableEntry(type);
+        consumableEntry.ModifyConsumable(amount,nextGenerationTimes);
+
     }
 
-    public UserConsumableEntry GetConsumableData(ConsumableID type)
+    public UserConsumableEntry GetConsumableEntry(ConsumableID type)
     {
-        if (consumables.TryGetValue(type, out var entry))
+        CustomDebugger.Log("get consumable entry for type:"+type);
+        if (consumables.ContainsKey(type))
         {
-            return entry;
+            CustomDebugger.Log("found type:"+type+" generationTimes"+consumables[type].GetGenerationTimes().Count);
+            
+            return consumables[type];
         }
         else {
+            CustomDebugger.Log("created type:"+type);
             var newUserConsumableEntry = new UserConsumableEntry(0, new List<(DateTime scheduledTime, int notificationId)>());
             consumables.Add(type, newUserConsumableEntry);
             return newUserConsumableEntry;
         }
-    }
-
-    public int RemovePastGenerationTimes(ConsumableID type)
-    {
-        var entry = GetConsumableData(type);
-        int removedCount = 0;
-
-        if (entry != null)
-        {
-            removedCount = entry.nextGenerationTimes.RemoveAll(time => time.scheduledTime < DateTime.Now);
-        }
-
-        return removedCount;
     }
 
     public void RemovePastGenerationsFromAllConsumables()
@@ -789,15 +768,17 @@ public class UserConsumableData
             if (type == ConsumableID.NONE)
                 continue;
 
-            int generatedCount = RemovePastGenerationTimes(type);
+            var entry = GetConsumableEntry(type);
+            int generatedCount = entry.GetGeneratedAmount(true);
             Debug.Log($"Consumible {type}: {generatedCount} tiempos de generación pasados eliminados.");
         }
     }
 
     public List<(DateTime scheduledTime, int notificationId)> GetNextGenerationTimes(ConsumableID type)
     {
-        var entry = GetConsumableData(type);
-        return entry != null ? entry.nextGenerationTimes : new List<(DateTime scheduledTime, int notificationId)>();
+        var entry = GetConsumableEntry(type);
+        CustomDebugger.Log("getting next generation times from: "+type);
+        return entry.GetGenerationTimes();
     }
 }
 

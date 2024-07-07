@@ -323,7 +323,7 @@ public class UserData
             entry => (entry.Key.StickerSet, entry.Key.StickerID),
             entry => entry.Value
         );
-        CustomDebugger.Log("stickers read "+stickerDuplicates.Count);
+        //CustomDebugger.Log("stickers read "+stickerDuplicates.Count);
     }    
     public void ConvertStickerDictionaryToList()
     {
@@ -397,8 +397,8 @@ public class UserData
             expToCheck = experiencePoints;
         }
 
-        int currentExpPerLv = PersistanceManager.Instance.configData.baseExperiencePoints;
-        float experienceIncreasePerLevel = PersistanceManager.Instance.configData.experienceIncreasePerLevel;
+        int currentExpPerLv = PersistanceManager.Instance.GetBaseExperiencePoints();
+        float experienceIncreasePerLevel = PersistanceManager.Instance.GetExperienceIncreasePerLevel();
         
         int remainingExp = expToCheck;
         int calculatedLv = 0;
@@ -413,8 +413,8 @@ public class UserData
     public int ExperienceAccordingToLevel(int level) {
 
         int experienceAtLevel = 0;
-        int currentExpPerLv = PersistanceManager.Instance.configData.baseExperiencePoints;
-        float experienceIncreasePerLevel = PersistanceManager.Instance.configData.experienceIncreasePerLevel;
+        int currentExpPerLv = PersistanceManager.Instance.GetBaseExperiencePoints();
+        float experienceIncreasePerLevel = PersistanceManager.Instance.GetExperienceIncreasePerLevel();
         
         for (int i = 0; i < level; i++) {
             experienceAtLevel += currentExpPerLv;

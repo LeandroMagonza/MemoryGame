@@ -47,7 +47,7 @@ public class DifficultyButton : ChangeCanvasButton
         CustomDebugger.Log("GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null stage "+stage+" dif "+difficulty+" "+GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null );
         CustomDebugger.Log("GameManager.Instance.userData.GetUserStageData(stage, difficulty  - 1).achievements.Contains(Achievement.ClearedEveryImage) stage "+stage+" dif "+
                   (difficulty - 1)+" "+GameManager.Instance.userData.GetUserStageData(stage, difficulty  - 1).achievements.Contains(Achievement.ClearedEveryImage));*/
-        CustomDebugger.Log("button name "+ name);
+        //CustomDebugger.Log("button name "+ name);
         // por que no encuentra el stage en userdata
         //bool conditionStage = GameManager.Instance.userData.GetUserStageData(stage, difficulty).HasUnlockedStage();
         bool conditionDifficulty = GameManager.Instance.userData.GetUserStageData(stage, difficulty - 1) is null ||
@@ -58,7 +58,7 @@ public class DifficultyButton : ChangeCanvasButton
         UserStageData currentUserStageData = GameManager.Instance.userData.GetUserStageData(stage, difficulty);
         
         
-        CustomDebugger.Log("conditionDifficulty " + conditionDifficulty);
+        // CustomDebugger.Log("conditionDifficulty " + conditionDifficulty);
         //if (conditionStage && conditionDifficulty)
         if (conditionDifficulty)
         {

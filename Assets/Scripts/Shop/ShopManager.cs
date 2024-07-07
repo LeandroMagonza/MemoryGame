@@ -162,7 +162,7 @@ public class ShopManager : MonoBehaviour
         ShopButton shopButton = shopConsumableButtons[consumableID].button;
             shopButton.currentText.text = 
                 "Owned: " +
-            PersistanceManager.Instance.userConsumableData.GetConsumableData(consumableID).amount;
+            PersistanceManager.Instance.userConsumableData.GetConsumableEntry(consumableID).amount;
 
         shopButton.priceText.text = ConsumableData.GetConsumable(consumableID).price.ToString();
         shopButton.descriptionText.text  = ConsumableData.GetConsumable(consumableID).GenerateDescription();
