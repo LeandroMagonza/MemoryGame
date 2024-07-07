@@ -10,7 +10,7 @@ public static class ItemHelper
         (ConsumableID.Clue, UpgradeID.FactoryClue) ,
         (ConsumableID.Remove, UpgradeID.FactoryRemove) ,
         (ConsumableID.Cut, UpgradeID.FactoryCut) ,
-        (ConsumableID.Peek, UpgradeID.FactoryPeek) ,
+        //(ConsumableID.Peek, UpgradeID.FactoryPeek) ,
         (ConsumableID.Highlight, UpgradeID.FactoryHighlight) ,
         (ConsumableID.Bomb, UpgradeID.FactoryBomb) ,
     };

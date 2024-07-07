@@ -12,7 +12,7 @@ public enum ConsumableID
     Clue,
     Remove,
     Cut,
-    Peek,
+    //Peek,
     Highlight,
     Bomb,
     EnergyPotion
@@ -22,7 +22,7 @@ public enum UpgradeID
     NONE=-1,
     FactoryClue,
     FactoryRemove,
-    FactoryPeek,
+    //FactoryPeek,
     FactoryHighlight,
     FactoryBomb,
     
@@ -34,7 +34,7 @@ public enum UpgradeID
     BetterCut,
     BlockMistake,
     DeathDefy,
-    StickerMaster,
+    //StickerMaster,
     ConsumableSlot,
 }
 
@@ -95,19 +95,19 @@ public class ConsumableData
                     initialStorage =  2
                 };
                 break;
-            case ConsumableID.Peek:
-                consumable = new ConsumableData()
-                {
-                    itemID = itemID,
-                    price= 30,
-                    name = GameText.ItemPeekName,
-                    description = GameText.ItemPeekDescription,
-                    icon = IconName.PEEK,
-                    amount = 1,
-                    generationMinutes = 480,
-                    initialStorage =  0
-                };
-                break;  
+            // case ConsumableID.Peek:
+            //     consumable = new ConsumableData()
+            //     {
+            //         itemID = itemID,
+            //         price= 30,
+            //         name = GameText.ItemPeekName,
+            //         description = GameText.ItemPeekDescription,
+            //         icon = IconName.PEEK,
+            //         amount = 1,
+            //         generationMinutes = 480,
+            //         initialStorage =  0
+            //     };
+            //     break;  
             case ConsumableID.Highlight:
                 consumable = new ConsumableData()
                 {
@@ -307,20 +307,20 @@ public class UpgradeData
                     iconSecondary = IconName.FACTORY
                 };
                 break;
-            case UpgradeID.FactoryPeek:
-                upgrade = new UpgradeData()
-                {
-                    itemId = upgradeID,
-                    valuePerLevel = 1,
-                    name = GameText.UpgradeFactoryPeekName,
-                    description = GameText.UpgradeFactoryDescription,
-                    backgroundColor = Color.magenta,
-                    playerLevelRequired = new int[] { 12 },
-                    iconMain = IconName.PEEK,
-                    iconSecondary = IconName.FACTORY
-
-                };
-                break;    
+            // case UpgradeID.FactoryPeek:
+            //     upgrade = new UpgradeData()
+            //     {
+            //         itemId = upgradeID,
+            //         valuePerLevel = 1,
+            //         name = GameText.UpgradeFactoryPeekName,
+            //         description = GameText.UpgradeFactoryDescription,
+            //         backgroundColor = Color.magenta,
+            //         playerLevelRequired = new int[] { 12 },
+            //         iconMain = IconName.PEEK,
+            //         iconSecondary = IconName.FACTORY
+            //
+            //     };
+            //     break;    
             case UpgradeID.FactoryHighlight:
                 upgrade = new UpgradeData()
                 {
@@ -433,7 +433,7 @@ public class UpgradeData
                     name = GameText.UpgradeDeathDefyName,
                     description = GameText.UpgradeDeathDefyDescription,
                     backgroundColor = Color.red,
-                    playerLevelRequired = new int[] { 12,15,18 },
+                    playerLevelRequired = new int[] { 11,14,17 },
                     iconMain = IconName.HEART,
                     iconSecondary = IconName.SKULL
                 };
@@ -452,19 +452,19 @@ public class UpgradeData
 
                 };
                 break;            
-            case UpgradeID.StickerMaster:
-                upgrade = new UpgradeData()
-                {
-                    itemId = upgradeID,
-                    valuePerLevel = 1,
-                    name = GameText.UpgradeStickerMasterName,
-                    description = GameText.UpgradeStickerMasterDescription,
-                    backgroundColor = Color.red,
-                    playerLevelRequired = new int[] { 20 },
-                    iconMain = IconName.STICKER,
-                    iconSecondary = IconName.PLUS
-                };
-                break;
+            // case UpgradeID.StickerMaster:
+            //     upgrade = new UpgradeData()
+            //     {
+            //         itemId = upgradeID,
+            //         valuePerLevel = 1,
+            //         name = GameText.UpgradeStickerMasterName,
+            //         description = GameText.UpgradeStickerMasterDescription,
+            //         backgroundColor = Color.red,
+            //         playerLevelRequired = new int[] { 20 },
+            //         iconMain = IconName.STICKER,
+            //         iconSecondary = IconName.PLUS
+            //     };
+            //     break;
             case UpgradeID.ConsumableSlot:
                 upgrade = new UpgradeData()
                 {

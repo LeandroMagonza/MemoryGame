@@ -40,8 +40,9 @@ public class FactoryConsumableDisplay : MonoBehaviour
     void Update() {
         debugLastCheck = lastCheck.ToString();
         // Solo actualizar el estado de los consumibles si estamos en el menú principal
-        if (lastCheck.AddMinutes(1) < DateTime.Now)
+        if (lastCheck.AddSeconds(1) < DateTime.Now)
         { 
+            /*
             int index = 0;
             debugGenerationTimes = "";
             foreach (var VARIABLE in PersistanceManager.Instance.userConsumableData.GetNextGenerationTimes(consumableID)) {
@@ -49,6 +50,7 @@ public class FactoryConsumableDisplay : MonoBehaviour
                 index++;
             }
             CustomDebugger.Log(consumableID+" factoryDisplay "+debugGenerationTimes);
+            */
             UpdateTexts();
             lastCheck = DateTime.Now;
         }
@@ -84,7 +86,7 @@ public class FactoryConsumableDisplay : MonoBehaviour
         backgroundImage.gameObject.transform.parent.gameObject.SetActive(true);
         amount.text = consumableValueToUpdate.ToString();
     
-        CustomDebugger.Log("Update Texts for factory bar called on item " + consumableID + ((isFactory) ? " factory" : " inventory") + ": " + consumableValueToUpdate);
+        //CustomDebugger.Log("Update Texts for factory bar called on item " + consumableID + ((isFactory) ? " factory" : " inventory") + ": " + consumableValueToUpdate);
 
         if (isFactory)
         {

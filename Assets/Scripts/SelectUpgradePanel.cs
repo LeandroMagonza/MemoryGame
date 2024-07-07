@@ -8,32 +8,20 @@ public class SelectUpgradePanel : MonoBehaviour {
     public UserData userData => PersistanceManager.Instance.userData;
     public List<UpgradeSelectionItem> selectionOptions;
 
+    private const string SelectRandomUpgrade1Key = "SelectRandomUpgrade1";
+    private const string SelectRandomUpgrade2Key = "SelectRandomUpgrade2";
+
     public void GetRandomUpgradesForPlayerSelection(int playerLevel) {
-        // Lista para almacenar los upgrades disponibles
         List<UpgradeData> availableUpgrades = new List<UpgradeData>();
 
-        // Recorre todos los IDs de upgrades
         foreach (UpgradeID upgradeID in Enum.GetValues(typeof(UpgradeID))) {
             if (upgradeID == UpgradeID.NONE) continue;
 
             var upgradeData = UpgradeData.GetUpgrade(upgradeID);
-
-            // Obtiene el nivel actual del upgrade para el jugador
             int currentLevel = userData.GetUpgradeLevel(upgradeID);
-
-            // Verifica si el jugador tiene el nivel requerido para el próximo nivel del upgrade
-            CustomDebugger.Log(upgradeData.name);
-            // CustomDebugger.Log("upgradeData.userLevelRequired.Length >= currentLevel");
-            // CustomDebugger.Log(upgradeData.userLevelRequired.Length + " >= " + currentLevel);
-            // CustomDebugger.Log(upgradeData.userLevelRequired.Length >= currentLevel);
-            //
-            // CustomDebugger.Log("playerLevel >= upgradeData.userLevelRequired[currentLevel]");
-            // CustomDebugger.Log(playerLevel + " >= " + (upgradeData.userLevelRequired[currentLevel] ? "" : ""));
-            // CustomDebugger.Log(playerLevel >= upgradeData.userLevelRequired[currentLevel]);
 
             if (upgradeData.playerLevelRequired.Length > currentLevel &&
                 playerLevel >= upgradeData.playerLevelRequired[currentLevel]) {
-                // Verifica si el jugador cumple con los upgrades requeridos para este upgrade
                 bool requirementsMet = true;
                 foreach (var requirement in upgradeData.upgradeRequired) {
                     if (!userData.unlockedUpgrades.ContainsKey(requirement.Key) ||
@@ -43,41 +31,46 @@ public class SelectUpgradePanel : MonoBehaviour {
                     }
                 }
 
-                // Si cumple con los requisitos y no ha alcanzado el nivel máximo, añadir a la lista de disponibles
-                if (requirementsMet
-                    //&& !upgradeData.IsMaxLevel(currentLevel)
-                   ) {
+                if (requirementsMet) {
                     availableUpgrades.Add(upgradeData);
                 }
             }
         }
 
-        // Si hay más de 2 upgrades disponibles, elegir 2 aleatoriamente para mostrar
-        var chosenUpgrades = new List<UpgradeData>();
-        if (availableUpgrades.Count > 2) {
-            while (chosenUpgrades.Count < 2) {
-                var randomUpgrade = availableUpgrades[UnityEngine.Random.Range(0, availableUpgrades.Count)];
-                if (!chosenUpgrades.Contains(randomUpgrade)) {
-                    chosenUpgrades.Add(randomUpgrade);
+        List<UpgradeData> chosenUpgrades = new List<UpgradeData>();
+        if (PlayerPrefs.HasKey(SelectRandomUpgrade1Key) && PlayerPrefs.HasKey(SelectRandomUpgrade2Key)) {
+            // Load saved upgrades
+            var upgradeID1 = (UpgradeID)PlayerPrefs.GetInt(SelectRandomUpgrade1Key);
+            var upgradeID2 = (UpgradeID)PlayerPrefs.GetInt(SelectRandomUpgrade2Key);
+            chosenUpgrades.Add(UpgradeData.GetUpgrade(upgradeID1));
+            chosenUpgrades.Add(UpgradeData.GetUpgrade(upgradeID2));
+        } else {
+            // Randomly select upgrades
+            if (availableUpgrades.Count > 2) {
+                while (chosenUpgrades.Count < 2) {
+                    var randomUpgrade = availableUpgrades[UnityEngine.Random.Range(0, availableUpgrades.Count)];
+                    if (!chosenUpgrades.Contains(randomUpgrade)) {
+                        chosenUpgrades.Add(randomUpgrade);
+                    }
                 }
+            } else if (availableUpgrades.Count > 0) {
+                chosenUpgrades = availableUpgrades;
+            } else {
+                CustomDebugger.Log("No hay upgrades disponibles que cumplan con los criterios.");
             }
-        }
-        else if (availableUpgrades.Count > 0) {
-            chosenUpgrades = availableUpgrades;
-        }
-        else {
-            // No hay upgrades disponibles que cumplan con los criterios
-            CustomDebugger.Log("No hay upgrades disponibles que cumplan con los criterios.");
+
+            // Save chosen upgrades
+            if (chosenUpgrades.Count > 0) PlayerPrefs.SetInt(SelectRandomUpgrade1Key, (int)chosenUpgrades[0].itemId);
+            if (chosenUpgrades.Count > 1) PlayerPrefs.SetInt(SelectRandomUpgrade2Key, (int)chosenUpgrades[1].itemId);
         }
 
         int chosenOptionIndex = 0;
         foreach (var VARIABLE in selectionOptions) {
             if (chosenUpgrades.Count > chosenOptionIndex) {
                 VARIABLE.gameObject.SetActive(true);
-                VARIABLE.SetUpgradeButton(chosenUpgrades[chosenOptionIndex].itemId,true);
+                VARIABLE.SetUpgradeButton(chosenUpgrades[chosenOptionIndex].itemId, true);
                 chosenOptionIndex++;
-            }
-            else {
+            } else {
                 VARIABLE.gameObject.SetActive(false);
             }
         }
@@ -85,12 +78,11 @@ public class SelectUpgradePanel : MonoBehaviour {
 
     public void SelectUpgrade(UpgradeID upgradeID) {
         playerLevelManager.SelectUpgradeToGet(upgradeID);
+        PlayerPrefs.DeleteKey(SelectRandomUpgrade1Key);
+        PlayerPrefs.DeleteKey(SelectRandomUpgrade2Key);
     }
-
 
     public void OnEnable() {
         GetRandomUpgradesForPlayerSelection(userData.GetAmountOfUpgrades());
     }
-
-
 }

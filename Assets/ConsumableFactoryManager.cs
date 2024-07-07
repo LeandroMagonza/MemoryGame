@@ -119,11 +119,12 @@ public class ConsumableFactoryManager : MonoBehaviour
     public void ClaimAllConsumables() {
         foreach (ConsumableID consumableID in Enum.GetValues(typeof(ConsumableID)))
         {
-            ClaimConsumable(consumableID);
+            ClaimConsumable(consumableID,false);
         }
+        PersistanceManager.Instance.SaveUserConsumableData();
     }
 
-    public void ClaimConsumable(ConsumableID consumableID)
+    public void ClaimConsumable(ConsumableID consumableID, bool saveConsumables = true)
     {
         int consumablesToClaim = CalculateAmountOfConsumablesToClaim(consumableID, true);
 
@@ -136,6 +137,9 @@ public class ConsumableFactoryManager : MonoBehaviour
         // Guardar el nuevo LastClaimTime en PlayerPrefs
         factoriesBarUi.UpdateDisplays();
         PlayerPrefs.SetString("LastClaimTime:"+consumableID, DateTime.Now.ToString());
+        if (saveConsumables) {
+            PersistanceManager.Instance.SaveUserConsumableData();
+        }
     }
 
     public int CalculateAmountOfConsumablesToClaim(ConsumableID consumableID, bool delete)

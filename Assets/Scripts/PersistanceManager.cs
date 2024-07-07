@@ -700,17 +700,19 @@ public class UserConsumableEntry
     }
 
     public List<(DateTime scheduledTime, int notificationId)> GetGenerationTimes() {
-        CustomDebugger.Log("NextGenerationTimes: "+nextGenerationTimes.Count);
+        //CustomDebugger.Log("NextGenerationTimes: "+nextGenerationTimes.Count);
         return nextGenerationTimes;
     }
 
     public void ModifyConsumable(int amount, List<(DateTime scheduledTime, int notificationId)> nextGenerationTimes) {
         this.amount += amount;
-        this.nextGenerationTimes = nextGenerationTimes;
+        if (nextGenerationTimes != null) {
+            this.nextGenerationTimes = nextGenerationTimes;
+        }
     }
     public int GetGeneratedAmount(bool delete) {
 
-        CustomDebugger.Log("Called getgeneratedamount with delete:" + delete);
+        //CustomDebugger.Log("Called getgeneratedamount with delete:" + delete);
 
         int generatedAmount = 0;
         int index = 0;
@@ -718,7 +720,7 @@ public class UserConsumableEntry
             if (VARIABLE.scheduledTime < DateTime.Now) {
                 generatedAmount++;
                 if (delete) {
-                    nextGenerationTimes.RemoveAt(index);
+                    nextGenerationTimes.Remove(VARIABLE);
                 }
             }
             index++;
@@ -746,15 +748,15 @@ public class UserConsumableData
 
     public UserConsumableEntry GetConsumableEntry(ConsumableID type)
     {
-        CustomDebugger.Log("get consumable entry for type:"+type);
+        //CustomDebugger.Log("get consumable entry for type:"+type);
         if (consumables.ContainsKey(type))
         {
-            CustomDebugger.Log("found type:"+type+" generationTimes"+consumables[type].GetGenerationTimes().Count);
+            //CustomDebugger.Log("found type:"+type+" generationTimes"+consumables[type].GetGenerationTimes().Count);
             
             return consumables[type];
         }
         else {
-            CustomDebugger.Log("created type:"+type);
+            //CustomDebugger.Log("created type:"+type);
             var newUserConsumableEntry = new UserConsumableEntry(0, new List<(DateTime scheduledTime, int notificationId)>());
             consumables.Add(type, newUserConsumableEntry);
             return newUserConsumableEntry;
@@ -777,7 +779,7 @@ public class UserConsumableData
     public List<(DateTime scheduledTime, int notificationId)> GetNextGenerationTimes(ConsumableID type)
     {
         var entry = GetConsumableEntry(type);
-        CustomDebugger.Log("getting next generation times from: "+type);
+        //CustomDebugger.Log("getting next generation times from: "+type);
         return entry.GetGenerationTimes();
     }
 }

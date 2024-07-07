@@ -116,9 +116,9 @@ public class PowerPanelButtonHolder : MonoBehaviour
             case ConsumableID.Cut:
                 UseCut();
                 break;
-            case ConsumableID.Peek:
-                UsePeek();
-                break;
+            // case ConsumableID.Peek:
+            //     UsePeek();
+            //     break;
             case ConsumableID.Highlight:
                 ToggleHighlight();
                 break; 
