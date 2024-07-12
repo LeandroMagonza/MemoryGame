@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -13,6 +14,7 @@ public class FactoriesBarUi : MonoBehaviour
     public Dictionary<ConsumableID, FactoryConsumableDisplay> consumableDisplaysFactories = new();
     public Dictionary<ConsumableID, FactoryConsumableDisplay> consumableDisplaysInventory = new();
     [FormerlySerializedAs("bar")] public GameObject bars;
+    public TextMeshProUGUI pendingClaimsDisplay;
     public GameObject factoryAndInventoryIcons;
     public GameObject toggleBarButton;
     public float slideBarSpeed = 500f; // Speed in units per second
@@ -42,18 +44,55 @@ public class FactoriesBarUi : MonoBehaviour
         // Ver cual habilitar según upgrades
         toggleBarButton.GetComponent<Button>().onClick.AddListener(() => StartCoroutine(SlideBar()));
         UpdateDisplays();
+        SetBarToHiddenPosition(); // Añadir esta línea para ocultar la barra al iniciar
     }
 
-    public void UpdateDisplays()
+    // Nueva función para ocultar la barra
+    private void SetBarToHiddenPosition()
     {
+        RectTransform barRectTransform = bars.GetComponent<RectTransform>();
+        RectTransform toggleButtonRectTransform = toggleBarButton.GetComponent<RectTransform>();
+        RectTransform factoryAndInventoryIconsRectTransform = factoryAndInventoryIcons.GetComponent<RectTransform>();
+
+        float toggleButtonLeftEdge = toggleButtonRectTransform.localPosition.x - (toggleButtonRectTransform.rect.width / 2);
+        float factoryAndInventoryIconsRightEdge = factoryAndInventoryIconsRectTransform.localPosition.x + (factoryAndInventoryIconsRectTransform.rect.width / 2);
+
+        float targetPositionX = barRectTransform.localPosition.x - (toggleButtonLeftEdge - factoryAndInventoryIconsRightEdge);
+        barRectTransform.localPosition = new Vector3(targetPositionX, barRectTransform.localPosition.y, barRectTransform.localPosition.z);
+
+        toggleBarButton.transform.localScale = new Vector3(-1, 1, 1); // Asegura que el botón apunte en la dirección correcta
+    }
+
+    public void UpdateDisplays() {
+        int pendingClaimsAmount = 0;
+        bool anyFactory = false;
         foreach (var consumableAndDisplay in consumableDisplaysFactories)
         {
-            consumableAndDisplay.Value.UpdateTexts();
+            CustomDebugger.Log("Pending Claims:"+pendingClaimsAmount+" before "+consumableAndDisplay.Key,DebugCategory.CONSUMABLE_DISPLAY);
+            pendingClaimsAmount += consumableAndDisplay.Value.UpdateTexts();
+            CustomDebugger.Log("Pending Claims:"+pendingClaimsAmount+" after "+consumableAndDisplay.Key,DebugCategory.CONSUMABLE_DISPLAY);
         }
         foreach (var consumableAndDisplay in consumableDisplaysInventory)
         {
+            var upgrade = ItemHelper.GetCorrespondingUpgrade(consumableAndDisplay.Key);
+            var upgradeLv = PersistanceManager.Instance.userData.GetUpgradeLevel(upgrade);
+
+            if (upgradeLv > 0) {
+                anyFactory = true;
+            }
             consumableAndDisplay.Value.UpdateTexts();
         }
+
+        if (pendingClaimsAmount == 0) {
+            pendingClaimsDisplay.transform.parent.gameObject.SetActive(false);    
+        }
+        else {
+            pendingClaimsDisplay.transform.parent.gameObject.SetActive(true);    
+            pendingClaimsDisplay.text = pendingClaimsAmount.ToString();
+        }
+
+        //Deshabilito la barra si no hay ninguna factory
+        gameObject.SetActive(anyFactory);
     }
     
     private IEnumerator SlideBar()

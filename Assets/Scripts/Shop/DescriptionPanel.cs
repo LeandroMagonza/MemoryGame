@@ -16,7 +16,7 @@ public class DescriptionPanel : MonoBehaviour
 
     public void SetUserInterface()
     {
-        title.text = "Tittle";
+        title.text = "Title";
         description.text = "Description";
         current.text = "Default";
         aditionalInfo.text = "Default";

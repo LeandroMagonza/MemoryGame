@@ -74,7 +74,7 @@ public class StickerManager : MonoBehaviour
         {
             //TODO: fix Problema ACA
             // no me acuerdo que habia que arreglar jaja
-            LoadAllStickersFromSet(stickerSet);
+            StartCoroutine(LoadAllStickersFromSet(stickerSet));
         }
         if (!currentLoadedSetStickerData.ContainsKey((stickerSet,language)) )
         {
@@ -117,123 +117,128 @@ public class StickerManager : MonoBehaviour
         return level;
     }
 
-    public void LoadAllStickersFromSet(StickerSet setToLoad)
-{
-    string setType = "IMAGES";
-    if (currentLoadedSetStickerData.ContainsKey((setToLoad, language)))
+    public IEnumerator LoadAllStickersFromSet(StickerSet setToLoad)
     {
-        Debug.LogError("Stickers for " + setToLoad + " already loaded.");
-        return;
-    }
-
-    StartCoroutine(LoadStickerData(setToLoad));
-}
-
-private IEnumerator LoadStickerData(StickerSet setToLoad)
-{
-    string folderPath = Path.Combine(Application.persistentDataPath, setToLoad.ToString());
-    Directory.CreateDirectory(folderPath);
-
-    string filePath = Path.Combine(folderPath, $"additionalInfo_{language}.csv");
-    //si no existe el idioma especifico
-    if (!File.Exists(filePath))
-    {
-        //se intenta descargar
-        yield return StartCoroutine(PersistanceManager.Instance.DownloadFile(setToLoad+$"/additionalInfo_{language}.csv"));
-        //si despues de intentar descargar sigue sin existir, se fija si existe el default 
-        if(!File.Exists(filePath))
+        string setType = "IMAGES";
+        if (currentLoadedSetStickerData.ContainsKey((setToLoad, language)))
         {
-            //si no existe, se intenta descargar
-            filePath = Path.Combine(folderPath, "additionalInfo.csv");
-            if (!File.Exists(filePath)) {
-                yield return StartCoroutine(PersistanceManager.Instance.DownloadFile(setToLoad + "/" + "additionalInfo.csv"));
-            }
-            //si sigue sin existir el default, el archivo no estaba en el servidor y tira error
-            if (!File.Exists(filePath)) Debug.LogError("CSV data for stickers not found.");
+            CustomDebugger.Log("Stickers for " + setToLoad + " already loaded.",DebugCategory.LANGUAGES);
+            yield break;
         }
-    
-    }
-    string setType = "IMAGES";
-    
-    if (!File.Exists(filePath))
-    {
-        Debug.LogError("CSV data for stickers not found.");
-        yield break;
+
+        yield return StartCoroutine(LoadStickerData(setToLoad));
     }
 
-    string csvData = File.ReadAllText(filePath);
-    string[] lines = csvData.Split('\n');
-    Sprite[] spritesheet = Array.Empty<Sprite>();
-
-    if (setType == "SPRITESHEET")
+    private IEnumerator LoadStickerData(StickerSet setToLoad)
     {
-        spritesheet = Resources.LoadAll<Sprite>(setToLoad.ToString() + "/" + name);
-    }
+        string folderPath = Path.Combine(Application.persistentDataPath, setToLoad.ToString());
+        Directory.CreateDirectory(folderPath);
+        bool foundLanguage = true;
+        string filePath = Path.Combine(folderPath, $"additionalInfo_{language}.csv");
+        //si no existe el idioma especifico
+        if (!File.Exists(filePath))
+        {
+            //se intenta descargar
+            yield return StartCoroutine(PersistanceManager.Instance.DownloadFile(setToLoad+$"/additionalInfo_{language}.csv"));
+            //si despues de intentar descargar sigue sin existir, se fija si existe el default 
+            if(!File.Exists(filePath)) {
+                foundLanguage = false;
+                //si no existe, se intenta descargar
+                filePath = Path.Combine(folderPath, "additionalInfo.csv");
+                if (!File.Exists(filePath)) {
+                    yield return StartCoroutine(PersistanceManager.Instance.DownloadFile(setToLoad + "/" + "additionalInfo.csv"));
+                }
+                //si sigue sin existir el default, el archivo no estaba en el servidor y tira error
+                if (!File.Exists(filePath)) Debug.LogError("CSV data for stickers not found.");
+            }
+        
+        }
+        string setType = "IMAGES";
+        
+        if (!File.Exists(filePath))
+        {
+            Debug.LogError("CSV data for stickers not found.");
+            yield break;
+        }
 
-    var dictionary = new Dictionary<int, StickerData>();
-    
-    LocalizationManager.Instance.SetGameTitle(language,lines[0].Split(',')[4]);
-    
-    //lines[4] //Nombre del juego en ese idioma
-    for (int i = 1; i < lines.Length; i++)
-    {
-        string[] fields = lines[i].Split(',');
-        if (fields.Length < 4) continue;
+        string csvData = File.ReadAllText(filePath);
+        string[] lines = csvData.Split('\n');
+        Sprite[] spritesheet = Array.Empty<Sprite>();
 
-        int id = int.Parse(fields[0]);
-        string name = fields[1];
-        string type = fields[2];
-        ColorUtility.TryParseHtmlString(fields[3].Trim(), out Color color);
-
-        Sprite sprite = null;
         if (setType == "SPRITESHEET")
         {
-            sprite = spritesheet[id];
+            spritesheet = Resources.LoadAll<Sprite>(setToLoad.ToString() + "/" + name);
         }
-        else if (setType == "IMAGES")
+
+        var dictionary = new Dictionary<int, StickerData>();
+        
+        LocalizationManager.Instance.SetGameTitle(language,lines[0].Split(',')[4]);
+        if (!foundLanguage) {
+            LocalizationManager.Instance.SetGameTitle("english",lines[0].Split(',')[4]);
+        }
+        
+        //lines[4] //Nombre del juego en ese idioma
+        for (int i = 1; i < lines.Length; i++)
         {
-            string imagePath = setToLoad + "/" + id;
-            sprite = Resources.Load<Sprite>(imagePath);
+            string[] fields = lines[i].Split(',');
+            if (fields.Length < 4) continue;
+
+            int id = int.Parse(fields[0]);
+            string name = fields[1];
+            string type = fields[2];
+            ColorUtility.TryParseHtmlString(fields[3].Trim(), out Color color);
+
+            Sprite sprite = null;
+            if (setType == "SPRITESHEET")
+            {
+                sprite = spritesheet[id];
+            }
+            else if (setType == "IMAGES")
+            {
+                string imagePath = setToLoad + "/" + id;
+                sprite = Resources.Load<Sprite>(imagePath);
+                if (sprite == null)
+                {
+                    imagePath = setToLoad + "/" + "(" + id + ")";
+                    sprite = Resources.Load<Sprite>(imagePath);
+                }
+            }
+
             if (sprite == null)
             {
-                imagePath = setToLoad + "/" + "(" + id + ")";
-                sprite = Resources.Load<Sprite>(imagePath);
+                Debug.LogError("Sprite not found for ID: " + id);
+                continue;
+            }
+
+            StickerData stickerData = new StickerData(id, sprite, setToLoad, name, color, type);
+            dictionary.Add(id, stickerData);
+
+            if (!currentLoadedStickerGroups.ContainsKey((setToLoad, language)))
+            {
+                currentLoadedStickerGroups.Add((setToLoad, language), new Dictionary<string, (List<int> stickers, Color color)>());
+            }
+
+            if (!currentLoadedStickerGroups[(setToLoad, language)].ContainsKey(type))
+            {
+                currentLoadedStickerGroups[(setToLoad, language)].Add(type, (new List<int>(), color));
+            }
+            currentLoadedStickerGroups[(setToLoad, language)][type].stickers.Add(id);
+        }
+
+        currentLoadedSetStickerData.Add((setToLoad, language), dictionary);
+        CustomDebugger.Log("Loaded stickers from set " + setToLoad,DebugCategory.LOAD);
+        /*
+        foreach (var set in currentLoadedStickerGroups)
+        {
+            foreach (var group in set.Value)
+            {
+                //CustomDebugger.Log(set.Key + " " + group.Key + " " + group.Value.Count);
             }
         }
-
-        if (sprite == null)
-        {
-            Debug.LogError("Sprite not found for ID: " + id);
-            continue;
-        }
-
-        StickerData stickerData = new StickerData(id, sprite, setToLoad, name, color, type);
-        dictionary.Add(id, stickerData);
-
-        if (!currentLoadedStickerGroups.ContainsKey((setToLoad, language)))
-        {
-            currentLoadedStickerGroups.Add((setToLoad, language), new Dictionary<string, (List<int> stickers, Color color)>());
-        }
-
-        if (!currentLoadedStickerGroups[(setToLoad, language)].ContainsKey(type))
-        {
-            currentLoadedStickerGroups[(setToLoad, language)].Add(type, (new List<int>(), color));
-        }
-        currentLoadedStickerGroups[(setToLoad, language)][type].stickers.Add(id);
+        */
     }
 
-    currentLoadedSetStickerData.Add((setToLoad, language), dictionary);
-    Debug.Log("Loaded stickers from set " + setToLoad);
-    foreach (var set in currentLoadedStickerGroups)
-    {
-        foreach (var group in set.Value)
-        {
-            //CustomDebugger.Log(set.Key + " " + group.Key + " " + group.Value.Count);
-        }
     }
-}
-
-}
 
 
 public class StickerData

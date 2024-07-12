@@ -21,6 +21,11 @@ public class Stage : MonoBehaviour
     public GameObject unlockMessage;
     public bool shining = false;
     public float shiningSpeed = 1;
+    private Image backgroundImage;
+    private void Start() {
+        backgroundImage = GetComponent<Image>();
+    }
+
     public void SetTitle(string title) {
         titleText.text = title;
     }
@@ -64,18 +69,18 @@ public class Stage : MonoBehaviour
     private void FixedUpdate()
     {
         if (shining) {
-            GetComponent<Image>().color = new Color(
-                GetComponent<Image>().color.r - baseColor.r * shiningSpeed * Time.deltaTime,
-                GetComponent<Image>().color.g - baseColor.g * shiningSpeed * Time.deltaTime,
-                GetComponent<Image>().color.b - baseColor.b * shiningSpeed * Time.deltaTime
+            backgroundImage.color = new Color(
+                backgroundImage.color.r - baseColor.r * shiningSpeed * Time.deltaTime,
+                backgroundImage.color.g - baseColor.g * shiningSpeed * Time.deltaTime,
+                backgroundImage.color.b - baseColor.b * shiningSpeed * Time.deltaTime
             );
-            if(GetComponent<Image>().color.r < baseColor.r*0.5f) {
-                GetComponent<Image>().color = baseColor;
+            if(backgroundImage.color.r < baseColor.r*0.5f) {
+                backgroundImage.color = baseColor;
             }
         }
         else
         {
-            GetComponent<Image>().color = baseColor;
+            backgroundImage.color = baseColor;
         }
     }
 }
@@ -165,24 +170,25 @@ public class Match
         int removesUsed = 0;
         bool reachedOneHP = false;
         bool speedrunAchievement = true;
-        CustomDebugger.Log("Ending match with turns:"+turnHistory.Count);
+        CustomDebugger.Log("Ending match with turns:"+turnHistory.Count,DebugCategory.END_MATCH);
         foreach (var turn in turnHistory) {
             score += turn.scoreModification;
             amountOfTurns ++;
-            CustomDebugger.Log("turnNumber: "+amountOfTurns);
-            CustomDebugger.Log("turn.amountOfAppearences == difficulty && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)");
-            CustomDebugger.Log(turn.amountOfAppearences +"=="+ difficulty +"&& ("+turn.action +"=="+ TurnAction.GuessCorrect +"||"+turn.action+" == "+TurnAction.UseClue+")");
-            CustomDebugger.Log(turn.amountOfAppearences == difficulty && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue));
+            
+            CustomDebugger.Log("turnNumber: "+amountOfTurns,DebugCategory.END_MATCH);
+            CustomDebugger.Log("turn.amountOfAppearences == difficulty && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue)",DebugCategory.END_MATCH);
+            CustomDebugger.Log(turn.amountOfAppearences +"=="+ difficulty +"&& ("+turn.action +"=="+ TurnAction.GuessCorrect +"||"+turn.action+" == "+TurnAction.UseClue+")",DebugCategory.END_MATCH);
+            CustomDebugger.Log(turn.amountOfAppearences == difficulty && (turn.action == TurnAction.GuessCorrect ||turn.action == TurnAction.UseClue),DebugCategory.END_MATCH);
             if (turn.amountOfAppearences == difficulty
                 &&
                 (
-                 GameManager.Instance.increaseAmountOfAppearencesOnMistake
-                 || 
-                 turn.action == TurnAction.GuessCorrect || turn.action == TurnAction.UseClue || turn.action == TurnAction.HighlightCorrect
-                 || turn.action == TurnAction.BombCorrect)
-                ) {
+                    GameManager.Instance.increaseAmountOfAppearencesOnMistake
+                    || 
+                    turn.action == TurnAction.GuessCorrect || turn.action == TurnAction.UseClue || turn.action == TurnAction.HighlightCorrect
+                    || turn.action == TurnAction.BombCorrect)
+               ) {
                 clearedImages.Add(turn.imageID);
-                CustomDebugger.Log("Ädding clearedImages stickerID"+turn.imageID);
+                CustomDebugger.Log("Ädding clearedImages stickerID"+turn.imageID,DebugCategory.END_MATCH);
             }
 
             if (turn.remainingLives < maxLives)
@@ -204,15 +210,15 @@ public class Match
 
         }
         
-        CustomDebugger.Log("clearedImages " +clearedImages.Count);
+        CustomDebugger.Log("clearedImages " +clearedImages.Count,DebugCategory.END_MATCH);
         date = DateTime.Now;
         //Check achievements
         int amountOfStickersInStage = GameManager.Instance.selectedLevel;
-        CustomDebugger.Log("-------------------Achievement ClearedEveryImage----------------------");
-        CustomDebugger.Log("amountOfImagesInStage == clearedImages.Count");
-        CustomDebugger.Log(amountOfStickersInStage +" == "+ clearedImages.Count);
-        CustomDebugger.Log(amountOfStickersInStage == clearedImages.Count);
-        CustomDebugger.Log("---------------------------------------------------------");
+        CustomDebugger.Log("-------------------Achievement ClearedEveryImage----------------------",DebugCategory.END_MATCH);
+        CustomDebugger.Log("amountOfImagesInStage == clearedImages.Count",DebugCategory.END_MATCH);
+        CustomDebugger.Log(amountOfStickersInStage +" == "+ clearedImages.Count,DebugCategory.END_MATCH);
+        CustomDebugger.Log(amountOfStickersInStage == clearedImages.Count,DebugCategory.END_MATCH);
+        CustomDebugger.Log("---------------------------------------------------------",DebugCategory.END_MATCH);
         
         if (amountOfStickersInStage-removesUsed <= clearedImages.Count)
         {
@@ -233,10 +239,10 @@ public class Match
            
         }
 
-        CustomDebugger.Log("-------------------Achievement ClearedStageWithMoreThanOneHP----------------------");
-        CustomDebugger.Log("reachedOneHP");
-        CustomDebugger.Log(reachedOneHP);
-        CustomDebugger.Log("---------------------------------------------------------");
+        CustomDebugger.Log("-------------------Achievement ClearedStageWithMoreThanOneHP----------------------",DebugCategory.END_MATCH);
+        CustomDebugger.Log("reachedOneHP",DebugCategory.END_MATCH);
+        CustomDebugger.Log(reachedOneHP,DebugCategory.END_MATCH);
+        CustomDebugger.Log("---------------------------------------------------------",DebugCategory.END_MATCH);
 
         
         
@@ -440,7 +446,6 @@ public class UserData
     public void GainExp(int expToGain) {
         
         experiencePoints += expToGain;
-        PlayerLevelManager.Instance.UpdatePlayerLevelButtons();
         PersistanceManager.Instance.SaveUserData();
     }
     public int GetAmountOfUpgrades() {
@@ -449,6 +454,15 @@ public class UserData
             amountOfUpgrades += VARIABLE.Value;
         }
         return amountOfUpgrades;
+    }
+    public void SaveMatch(Match match)
+    {
+        PersistanceManager.Instance.SaveMatch(match);
+    }
+
+    public List<Match> LoadMatches(int level, int difficulty)
+    {
+        return PersistanceManager.Instance.LoadMatches(level, difficulty);
     }
 }
     
@@ -466,7 +480,7 @@ public class UserStageData
     [JsonProperty("achievements")]
     public List<string> achievementsUnparsed = new List<string>();
     
-    public List<Match> matches = new List<Match>();
+    //public List<Match> matches = new List<Match>();
 
     public UserStageData(int level, int difficulty)
     {
@@ -476,7 +490,7 @@ public class UserStageData
     public List<Achievement> AddMatch(Match currentMatch)
     {
         List<Achievement> firstTimeAchievements = new List<Achievement>();
-        matches.Add(currentMatch);
+        
         var matchResult = currentMatch.EndMatch();
         
         CustomDebugger.Log("achievements fullfilled count"+matchResult.achievementsFullfilled.Count);
@@ -490,6 +504,7 @@ public class UserStageData
         }
         
         CustomDebugger.Log("Added Match with turns "+currentMatch.turnHistory.Count);
+        PersistanceManager.Instance.SaveMatch(currentMatch);
         return firstTimeAchievements;
     }
     /*public bool HasUnlockedStage()

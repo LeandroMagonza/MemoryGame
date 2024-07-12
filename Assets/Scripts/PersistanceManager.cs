@@ -269,6 +269,11 @@ public class PersistanceManager : MonoBehaviour
             Debug.LogError("Failed to load UserData.");
         }
 
+        #region MigrateFromCoinsVersion
+        // un lv es un upgrade
+        //si los puntos de exp que tiene corresponden a un lv menor que la cantidad de upgrades que tiene
+        //hubo un error, o viene de la version anterior donde en vez de tener exp tenias monedas
+        //entonces seteamos su exp a la cantidad de exp que corresponde al lv x la cant de upgrades, mas la cantidad de monedas restantes
         int levelAccordingToExp = userData.ExperiencePointsToLevelUp().calculatedLv;
         int levelAccordingToUpgrades = userData.GetAmountOfUpgrades();
         //si esta condicion es verdadera, el usuario tiene un userdata que es anterior al cambio de monedas a lv
@@ -276,8 +281,45 @@ public class PersistanceManager : MonoBehaviour
             userData.experiencePoints = userData.ExperienceAccordingToLevel(levelAccordingToUpgrades) + userData.coins;
         }
         this.userData = userData;
+        #endregion
+
+        #region MigrateFromMatchesInUserDataVersion
+        MigrateMatchesFromOldFormat(json);
+        #endregion
         
         yield return null;
+    }
+    private void MigrateMatchesFromOldFormat(string json)
+    {
+        // Utiliza JsonConvert para deserializar el JSON a un JObject para un mejor manejo de las claves y valores
+        var oldUserData = JsonConvert.DeserializeObject<JObject>(json);
+    
+        // Verifica si la clave "stages" existe y no es null
+        if (oldUserData.TryGetValue("stages", out JToken stagesToken) && stagesToken.Type != JTokenType.Null)
+        {
+            var stages = stagesToken as JArray;
+
+            foreach (var stageToken in stages)
+            {
+                var stage = stageToken as JObject;
+
+                // Verifica si la clave "matches" existe y no es null
+                if (stage.TryGetValue("matches", out JToken matchesToken) && matchesToken.Type != JTokenType.Null)
+                {
+                    var matches = matchesToken as JArray;
+
+                    foreach (var matchToken in matches)
+                    {
+                        string matchJson = matchToken.ToString();
+                        Match matchData = JsonConvert.DeserializeObject<Match>(matchJson);
+                        SaveMatch(matchData);
+                    }
+
+                    // Elimina la clave "matches" del stage después de migrar los datos
+                    stage.Remove("matches");
+                }
+            }
+        }
     }
 
     public string SerializeUserData()
@@ -514,7 +556,6 @@ public class PersistanceManager : MonoBehaviour
             Debug.LogError("Failed to load user consumable data.");
         }
 
-        ConsumableFactoryManager.Instance.factoriesBarUi.UpdateDisplays();
         yield return StartCoroutine(ConsumableFactoryManager.Instance.GenerateAllConsumablesNextGenerationTimes());
         yield return null;
     }
@@ -633,6 +674,41 @@ public class PersistanceManager : MonoBehaviour
     public float GetExperienceIncreasePerLevel() {
         if (configData == null) return 0f;
         return configData.experienceIncreasePerLevel;
+    }
+    public void SaveMatch(Match match)
+    {
+        string matchesFilePath = GetMatchesFilePath(match.stage, match.difficulty);
+        using (StreamWriter writer = new StreamWriter(matchesFilePath, true))
+        {
+            string json = JsonConvert.SerializeObject(match);
+            writer.WriteLine(json);
+        }
+    }
+
+    public List<Match> LoadMatches(int level, int difficulty)
+    {
+        List<Match> matches = new List<Match>();
+        string matchesFilePath = GetMatchesFilePath(level, difficulty);
+        if (File.Exists(matchesFilePath))
+        {
+            using (StreamReader reader = new StreamReader(matchesFilePath))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    Match match = JsonConvert.DeserializeObject<Match>(line);
+                    matches.Add(match);
+                }
+            }
+        }
+        return matches;
+    }
+
+    private string GetMatchesFilePath(int level, int difficulty)
+    {
+        string setName = StageManager.Instance.gameVersion.ToString();
+        string fileName = $"matches_{level}_{difficulty}.txt";
+        return Path.Combine(Application.persistentDataPath, setName, fileName);
     }
 }
 

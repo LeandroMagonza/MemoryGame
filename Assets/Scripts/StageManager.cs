@@ -68,7 +68,7 @@ public class StageManager : MonoBehaviour
         // Recorro las dificultades, arrancando por 3, hasta 9, creando los stages para cada una, y cortando cuando la dificultad este bloqueada
         // que es cuando la dificultad anterior no tenga por lo menos 1 achievement
         bool nextStageUnlocked = true;
-        int absoluteStageNumber = 1;
+        int absoluteStageNumber = 0;
         for (int difficulty = 2; difficulty < 10; difficulty++)
         {
             
@@ -79,8 +79,8 @@ public class StageManager : MonoBehaviour
                // if (stageIndexAndData.Key != 0) break;
                 //Evita crear stages que ya estan creados. Si el que esta arriba, que es el de (dificultad,stageid) mas alto 
                 
+                absoluteStageNumber++;
                 UserStageData currentUserStageData = userData.GetUserStageData(level, difficulty);
-
                 nextStageUnlocked = unlockAllStages || (currentUserStageData is not null && currentUserStageData.achievements.Count > 0);
                 if (topmostStage is not null &&
                     (topmostStage.difficulty > difficulty || 
@@ -93,7 +93,6 @@ public class StageManager : MonoBehaviour
 
                 //newStage.SetTitle(level+" "+difficultyDisplayLabel+ (difficulty - difficultyDisplayOffset));
                 newStage.SetTitle(absoluteStageNumber.ToString());
-                absoluteStageNumber++;
                 //newStage.SetColor(stageData.ColorValue);
                 newStage.SetStage(level, difficulty);
                 stages.Add((level, difficulty),newStage);
@@ -134,7 +133,7 @@ public class StageManager : MonoBehaviour
     private (string randomGroupSelectedName, Color randomGroupSelectedColor) SelectRandomGroup() {
         if (!StickerManager.Instance.currentLoadedStickerGroups.ContainsKey((gameVersion,userData.language)))
         {
-            StickerManager.Instance.LoadAllStickersFromSet(gameVersion);
+            StartCoroutine(StickerManager.Instance.LoadAllStickersFromSet(gameVersion));
         }
         
         int randomGroupSelectedIndex = Random.Range(0,

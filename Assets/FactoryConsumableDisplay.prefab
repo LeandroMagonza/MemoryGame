@@ -108,7 +108,7 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 3297646167252111756}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.6, y: 0}
+  m_AnchorMin: {x: 0.7, y: -0.1}
   m_AnchorMax: {x: 1, y: 0.4}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
@@ -143,8 +143,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 0
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: e21d9fa883341484f8393b51730ca170, type: 2}
-  m_sharedMaterial: {fileID: -4918373443893110478, guid: e21d9fa883341484f8393b51730ca170, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: dc68cba938d37cc4da260f009735aa32, type: 2}
+  m_sharedMaterial: {fileID: 8690591861142563998, guid: dc68cba938d37cc4da260f009735aa32, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -168,15 +168,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
+  m_fontSize: 25
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 18
+  m_fontSizeMin: 1
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 4
-  m_VerticalAlignment: 1024
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -277,8 +277,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 2 hs
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 493977f7bd3a5aa4d8835aa053f20d1b, type: 2}
-  m_sharedMaterial: {fileID: -6360588970910393389, guid: 493977f7bd3a5aa4d8835aa053f20d1b, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: dc68cba938d37cc4da260f009735aa32, type: 2}
+  m_sharedMaterial: {fileID: 8690591861142563998, guid: dc68cba938d37cc4da260f009735aa32, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -302,7 +302,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 11
+  m_fontSize: 14.35
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -377,8 +377,8 @@ RectTransform:
   m_Father: {fileID: 3297646167252111756}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.15, y: 0.15}
-  m_AnchorMax: {x: 0.85, y: 0.85}
-  m_AnchoredPosition: {x: -0.0000009536743, y: -0.0000009536743}
+  m_AnchorMax: {x: 0.85, y: 0.8}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 44.580116}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3125127513652810598
@@ -450,8 +450,8 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5598754567333605249}
   - {fileID: 8985231950602929748}
+  - {fileID: 5598754567333605249}
   - {fileID: 667654050366140130}
   m_Father: {fileID: 8175952782818879536}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -660,8 +660,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   consumableID: 0
   isFactory: 0
-  backgroundImage: {fileID: 9098976724511502727}
+  iconImage: {fileID: 9098976724511502727}
   amount: {fileID: 4043505266034963960}
   timer: {fileID: 762423618127464275}
   debugLastCheck: 
+  debugGenerationTimes: 
   claimButton: {fileID: 8175952782818879551}
+  originalIconColor: {r: 0, g: 0, b: 0, a: 0}
+  originalBackgroundButtonColor: {r: 0, g: 0, b: 0, a: 0}
+  backgroundButtonImage: {fileID: 6802936347683806155}
+  claimableColor: {r: 0, g: 1, b: 0, a: 1}

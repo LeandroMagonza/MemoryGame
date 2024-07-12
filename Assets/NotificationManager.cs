@@ -43,8 +43,9 @@ public class NotificationManager : MonoBehaviour
 
     private Dictionary<ConsumableID, Dictionary<int, ScheduledNotification>> notificationData = new Dictionary<ConsumableID, Dictionary<int, ScheduledNotification>>();
 
-    void Start()
-    {
+    void Start() {
+        AndroidNotificationCenter.Initialize();
+        AndroidNotificationCenter.CancelAllDisplayedNotifications();
         // Crear un canal para las notificaciones si aún no se ha creado
         var channel = new AndroidNotificationChannel()
         {
@@ -54,6 +55,7 @@ public class NotificationManager : MonoBehaviour
             Description = "Canal para notificaciones regulares"
         };
         AndroidNotificationCenter.RegisterNotificationChannel(channel);
+        ScheduleNotification("TEST", "TEST", DateTime.Now.AddSeconds(15), ConsumableID.Bomb);
     }
 
     /// <summary>
@@ -74,7 +76,7 @@ public class NotificationManager : MonoBehaviour
 
         // Programar la notificación
 #if UNITY_ANDROID
-        
+        ;
         int notificationId = AndroidNotificationCenter.SendNotification(notification, "default_channel");
         // Crear una nueva notificación programada
         var scheduledNotification = new ScheduledNotification(title, text, scheduledTime);
@@ -85,7 +87,8 @@ public class NotificationManager : MonoBehaviour
             notificationData[category] = new Dictionary<int, ScheduledNotification>();
         }
         notificationData[category][notificationId] = scheduledNotification;
-
+        
+        Debug.Log("Schedule Notification: id:"+notificationId+" cat:"+category+"\n"+title+"\n"+text+"\n"+scheduledTime);
         return notificationId;
 #endif
 #if UNITY_EDITOR

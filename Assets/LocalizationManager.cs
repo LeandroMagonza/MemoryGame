@@ -46,7 +46,7 @@ public class LocalizationManager : MonoBehaviour
         
         CanvasManager.Instance.GetCanvas(CanvasName.LANGUAGE).GetComponent<LanguageCanvas>().UpdateLanguageButtons();
         
-        ChangeLanguage(userData.language);
+        yield return StartCoroutine(ChangeLanguage(userData.language));
     }
 
  
@@ -85,7 +85,7 @@ public class LocalizationManager : MonoBehaviour
         }
     }
 
-    public void ChangeLanguage(string newLanguage)
+    public IEnumerator ChangeLanguage(string newLanguage)
     {
         if (!languages.ContainsKey(newLanguage))
         {
@@ -95,7 +95,7 @@ public class LocalizationManager : MonoBehaviour
         currentLanguage = newLanguage;
         userData.language = newLanguage;
 
-        StickerManager.Instance.LoadAllStickersFromSet(StageManager.Instance.gameVersion);
+        yield return StartCoroutine(StickerManager.Instance.LoadAllStickersFromSet(StageManager.Instance.gameVersion));
 
         CanvasManager.Instance.GetCanvas(CanvasName.LANGUAGE).GetComponent<LanguageCanvas>()
             .UpdateActiveLanguageButtonMarker(newLanguage);

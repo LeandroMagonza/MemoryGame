@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -74,6 +75,12 @@ public class PlayerLevelManager : MonoBehaviour
         var previousCanvas = CanvasManager.Instance.previousCanvas;
         CanvasManager.Instance.ChangeCanvas(CanvasName.PLAYER_LEVEL);
         CanvasManager.Instance.previousCanvas = previousCanvas;
+
+        ConsumableID correspondingConsumable = ItemHelper.GetCorrespondingConsumable(upgradeID);
+        if (correspondingConsumable != ConsumableID.NONE) {
+            ConsumableFactoryManager.Instance.GenerateNextGenerationTimes(correspondingConsumable,true);
+            ConsumableFactoryManager.Instance.factoriesBarUi.UpdateDisplays();
+        }
 
     }
     [ContextMenu("LogUpgradeLevelRequiredTable")]

@@ -11,15 +11,20 @@ public class FactoryConsumableDisplay : MonoBehaviour
     // Start is called before the first frame update
     public ConsumableID consumableID;
     public bool isFactory; // factory == true || inventory == false
-    public Image backgroundImage;
+    [FormerlySerializedAs("backgroundImage")] public Image iconImage;
     [FormerlySerializedAs("amountToClaim")] public TextMeshProUGUI amount;
     public TextMeshProUGUI timer;
     public DateTime lastCheck = DateTime.Now;
     public string debugLastCheck;
     public string debugGenerationTimes;
     public Button claimButton;
+
+    [FormerlySerializedAs("originalButtonColor")] public Color originalIconColor;
+    [FormerlySerializedAs("originalButtonColor")] public Color originalBackgroundButtonColor;
+    public Image backgroundButtonImage;
+    public Color claimableColor = Color.green;    
     private void Start() {
-        backgroundImage.sprite = ItemHelper.GetIconSprite(ConsumableData.GetConsumable(consumableID).icon);
+        iconImage.sprite = ItemHelper.GetIconSprite(ConsumableData.GetConsumable(consumableID).icon);
         claimButton.GetComponent<Button>().onClick.AddListener(ClaimConsumable);
 
         int index = 0;
@@ -28,12 +33,15 @@ public class FactoryConsumableDisplay : MonoBehaviour
             debugGenerationTimes += index +" "+ VARIABLE.scheduledTime+"\n";
             index++;
         }
+        originalIconColor = iconImage.color;
+        originalBackgroundButtonColor = backgroundButtonImage.color;
     }
 
     private void ClaimConsumable() {
         if (isFactory && ConsumableFactoryManager.Instance.CalculateAmountOfConsumablesToClaim(consumableID, false) > 0)
         {
             ConsumableFactoryManager.Instance.ClaimConsumable(consumableID);
+            AudioManager.Instance.PlayClip(GameClip.bonus);
         }
     }
 
@@ -56,7 +64,7 @@ public class FactoryConsumableDisplay : MonoBehaviour
         }
     }
 
-    public void UpdateTexts()
+    public int UpdateTexts()// devuelve los pending claims para habilitar o no la badge de notificacion
     {
         int consumableValueToUpdate;
         claimButton.interactable = false;
@@ -66,7 +74,7 @@ public class FactoryConsumableDisplay : MonoBehaviour
 
             if (upgradeLv < 1) {
                 SetInUse(false);
-                return;
+                return 0;
             }
             consumableValueToUpdate = ConsumableFactoryManager.Instance.CalculateAmountOfConsumablesToClaim(consumableID, false);
             if (consumableValueToUpdate > 0) {
@@ -78,12 +86,12 @@ public class FactoryConsumableDisplay : MonoBehaviour
             consumableValueToUpdate = PersistanceManager.Instance.userConsumableData.GetConsumableEntry(consumableID).amount;
             if (consumableValueToUpdate == 0) {
                 SetInUse(false);
-                return;
+                return 0;
             }
         }
         SetInUse(true);
         
-        backgroundImage.gameObject.transform.parent.gameObject.SetActive(true);
+        iconImage.gameObject.transform.parent.gameObject.SetActive(true);
         amount.text = consumableValueToUpdate.ToString();
     
         //CustomDebugger.Log("Update Texts for factory bar called on item " + consumableID + ((isFactory) ? " factory" : " inventory") + ": " + consumableValueToUpdate);
@@ -99,10 +107,14 @@ public class FactoryConsumableDisplay : MonoBehaviour
                 if (DateTime.Now < nextGenerationTime)
                 {
                     timer.text = FormatTimeRemaining(nextGenerationTime);
+                    backgroundButtonImage.color = originalBackgroundButtonColor;
                 }
                 else
                 {
                     timer.text = "CLAIM!";
+                    //CustomDebugger.Log("Claim Color: "+new Color(80,215,00,1),DebugCategory.CONSUMABLE_DISPLAY);
+                    backgroundButtonImage.color = claimableColor;
+                    //CustomDebugger.Log("Actually Set Color: "+backgroundButtonImage.color,DebugCategory.CONSUMABLE_DISPLAY);
                 }
             }
             else
@@ -114,6 +126,8 @@ public class FactoryConsumableDisplay : MonoBehaviour
         {
             timer.transform.parent.gameObject.SetActive(false);
         }
+
+        return consumableValueToUpdate;
     }
 
     private string FormatTimeRemaining(DateTime scheduledTime)
@@ -135,17 +149,21 @@ public class FactoryConsumableDisplay : MonoBehaviour
     }
 
     public void SetInUse(bool inUse) {
+        Color imageColor = iconImage.color;
+        Color buttonBackgroundColor = backgroundButtonImage.color;
+        
         if (inUse) {
-            backgroundImage.color = new Color(
-                backgroundImage.color.r,
-                backgroundImage.color.g,
-                backgroundImage.color.b,
+            imageColor = new Color(
+                imageColor.r,
+                imageColor.g,
+                imageColor.b,
                 1
             );
-            backgroundImage.gameObject.transform.parent.GetComponent<Image>().color = new Color(
-                backgroundImage.color.r,
-                backgroundImage.color.g,
-                backgroundImage.color.b,
+            
+            buttonBackgroundColor = new Color(
+                buttonBackgroundColor.r,
+                buttonBackgroundColor.g,
+                buttonBackgroundColor.b,
                 1
             );
             timer.transform.parent.gameObject.SetActive(true);
@@ -154,20 +172,22 @@ public class FactoryConsumableDisplay : MonoBehaviour
         else {
             timer.transform.parent.gameObject.SetActive(false);
             amount.gameObject.SetActive(false);
-            //backgroundImage.gameObject.transform.parent.gameObject.SetActive(false);
-            backgroundImage.color = new Color(
-                backgroundImage.color.r,
-                backgroundImage.color.g,
-                backgroundImage.color.b,
+            
+            imageColor = new Color(
+                imageColor.r,
+                imageColor.g,
+                imageColor.b,
                 .5f
             );
-            backgroundImage.gameObject.transform.parent.GetComponent<Image>().color = new Color(
-                backgroundImage.color.r,
-                backgroundImage.color.g,
-                backgroundImage.color.b,
+            buttonBackgroundColor = new Color(
+                buttonBackgroundColor.r,
+                buttonBackgroundColor.g,
+                buttonBackgroundColor.b,
                 .68f
             ); 
-            
         }
+
+        iconImage.color = imageColor;
+        backgroundButtonImage.color = buttonBackgroundColor;
     }
 }

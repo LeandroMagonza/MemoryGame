@@ -13,6 +13,6 @@ public class SelectLanguageButton : MonoBehaviour {
     }
 
     public void SelectLanguage() {
-        LocalizationManager.Instance.ChangeLanguage(language);
+        StartCoroutine(LocalizationManager.Instance.ChangeLanguage(language));
     }
 }

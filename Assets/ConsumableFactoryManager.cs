@@ -51,7 +51,7 @@ public class ConsumableFactoryManager : MonoBehaviour
     }
 
 
-   private void GenerateNextGenerationTimes(ConsumableID consumableID)
+   public void GenerateNextGenerationTimes(ConsumableID consumableID, bool now = false)
 {
     CustomDebugger.Log("Generating next generation times for " + consumableID);
 
@@ -61,7 +61,10 @@ public class ConsumableFactoryManager : MonoBehaviour
     if (upgradeLevel == 0) return;
 
     int maxCapacity = consumableData.initialStorage + upgradeLevel;
-    double generationInterval = (consumableData.generationMinutes / (double)upgradeLevel) * 60; // en segundos
+    double generationInterval = 1;
+    if (!now) {
+        generationInterval = (consumableData.generationMinutes / (double)upgradeLevel) * 60; // en segundos
+    }
     CustomDebugger.Log("NGT " + consumableID + " capacity " + maxCapacity);
 
     DateTime nextTime;

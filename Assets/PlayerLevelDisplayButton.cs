@@ -97,12 +97,13 @@ public class PlayerLevelDisplayButton : ChangeCanvasButton
             GameClip.getAchievementStar2
         };
         
+        int gameClipIndex = 0;
         while (currentLevelDisplayed < userData.playerLevel) {
             //sube la barra hasta el final y animacion de subida de level
             while (justGainedExpBar.fillAmount < 1) {
                 justGainedExpBar.fillAmount += barFillSpeed;
                 SetCurrentTextPercentage(justGainedExpBar.fillAmount);
-                int gameClipIndex = userData.playerLevel - currentLevelDisplayed - 1;
+                gameClipIndex = userData.playerLevel - currentLevelDisplayed;
                 if (gameClips.Length > gameClipIndex) {
                     AudioManager.Instance.PlayClip(gameClips[gameClipIndex]);
                 }
@@ -113,6 +114,7 @@ public class PlayerLevelDisplayButton : ChangeCanvasButton
                 
             }
 
+            
             yield return new WaitForSeconds(AudioManager.Instance.PlayClip(GameClip.highScore)-2f);
             
             currentLevelDisplayed++;
@@ -127,7 +129,12 @@ public class PlayerLevelDisplayButton : ChangeCanvasButton
                 justGainedExpBar.fillAmount = finalLevelProgressPercentage;
             }
             SetCurrentTextPercentage(justGainedExpBar.fillAmount);
-            AudioManager.Instance.PlayClip(GameClip.correctGuess);
+            if (gameClips.Length > gameClipIndex) {
+                AudioManager.Instance.PlayClip(gameClips[gameClipIndex]);
+            }
+            else {
+                AudioManager.Instance.PlayClip(gameClips[^1]);
+            }
             yield return new WaitForSeconds(.1f);
             
         }

@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Firebase.Auth;
 using TMPro;
 using Unity.Mathematics;
 using Unity.VisualScripting;
@@ -691,6 +690,8 @@ public class GameManager : MonoBehaviour {
         {
             userData.GetUserStageData(selectedLevel, selectedDifficulty).highScore = score;
         }
+        userData.GainExp(score);
+
         UpdateInventoryAndSave();
         UpdateAchievementAndUnlockedLevels();
         //Aca puede que haya que actualizar las estrellas en el nivel
@@ -716,7 +717,8 @@ public class GameManager : MonoBehaviour {
         delay -= .35f * firstTimeAchievements.Count;
         delay -= 5f;
         yield return new WaitForSeconds(delay);
-        userData.GainExp(score);
+        PlayerLevelManager.Instance.UpdatePlayerLevelButtons();
+
         
         if (lastHighScore < score)
         {
@@ -750,7 +752,6 @@ public class GameManager : MonoBehaviour {
         // }
         
         PersistanceManager.Instance.SaveUserConsumableData();
-        PersistanceManager.Instance.SaveUserData();
     }
     private IEnumerator SetHighScore(int highScoreToSet)
     {
