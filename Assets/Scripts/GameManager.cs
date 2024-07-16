@@ -700,18 +700,7 @@ public class GameManager : MonoBehaviour {
         
         //Grant first time Achievemnts bonus
         yield return new WaitForSeconds(0.2f);
-        /*
-        const int steps = 10;
-        int scoreIncrement = (score)/steps;
-        for (int i = 0; i < steps; i++) {
-            yield return new WaitForSeconds(.1f);
-            delay -= .1f;
-            endGameScoreText.text = (scoreIncrement * i).ToString();
-            currentCoins.text = (formerCoins + scoreIncrement * i).ToString();
-        }
-        currentCoins.text = userData.coins.ToString();
-        endGameScoreText.text = score.ToString();
-        */
+
         yield return endGameAchievementStars.SetAchievements(_currentMatch.achievementsFulfilled,.35f);
         
         delay -= .35f * firstTimeAchievements.Count;

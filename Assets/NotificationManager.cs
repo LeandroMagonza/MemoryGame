@@ -55,7 +55,7 @@ public class NotificationManager : MonoBehaviour
             Description = "Canal para notificaciones regulares"
         };
         AndroidNotificationCenter.RegisterNotificationChannel(channel);
-        ScheduleNotification("TEST", "TEST", DateTime.Now.AddSeconds(15), ConsumableID.Bomb);
+        //ScheduleNotification("TEST", "TEST", DateTime.Now.AddSeconds(15), ConsumableID.Bomb);
     }
 
     /// <summary>
