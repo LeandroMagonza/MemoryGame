@@ -11155,6 +11155,8 @@ MonoBehaviour:
   amountOfTurnsBetweenAddingStickers: 10
   flatAmountOfStickerAdded: 0
   scalingAmountOfStickerAdded: 1
+  delayReductionForWinClip: 4.3
+  delayBetweenStars: 0.4
 --- !u!4 &1079194499
 Transform:
   m_ObjectHideFlags: 0
@@ -11947,7 +11949,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5232140566473959227, guid: 6df703b5f9b4df241b71d62a78d861f1, type: 3}
       propertyPath: m_AdditionalShaderChannelsFlag
-      value: 25
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5232140566473959230, guid: 6df703b5f9b4df241b71d62a78d861f1, type: 3}
       propertyPath: m_Name
@@ -12275,7 +12277,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9132937329709647298, guid: 98a26181fd5565844b3f357e49b6de3e, type: 3}
       propertyPath: m_AdditionalShaderChannelsFlag
-      value: 25
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9132937329709647299, guid: 98a26181fd5565844b3f357e49b6de3e, type: 3}
       propertyPath: m_Pivot.x
@@ -12920,6 +12922,10 @@ PrefabInstance:
     - target: {fileID: 2971118078578926233, guid: b0e61df1763e5c3449f7c4166134eaa0, type: 3}
       propertyPath: m_Name
       value: LoadingCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 4228110186353773302, guid: b0e61df1763e5c3449f7c4166134eaa0, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7870484932959836330, guid: b0e61df1763e5c3449f7c4166134eaa0, type: 3}
       propertyPath: m_Pivot.x
@@ -13809,6 +13815,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4471851493571877042, guid: a8a64a6413b98e443a5a2509e85db577, type: 3}
       propertyPath: m_MatchWidthOrHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4471851493571877043, guid: a8a64a6413b98e443a5a2509e85db577, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4471851493571877047, guid: a8a64a6413b98e443a5a2509e85db577, type: 3}

@@ -61,21 +61,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
   m_Name: ESTA
   m_EditorClassIdentifier: 
-  hashCode: 2425635
-  material: {fileID: -6360588970910393389}
-  materialHashCode: -601915613
   m_Version: 1.1.0
-  m_SourceFontFileGUID: 18656ef7a51c9493bbb7e0a789ec9bf7
-  m_SourceFontFile_EditorRef: {fileID: 0}
-  m_SourceFontFile: {fileID: 0}
-  m_AtlasPopulationMode: 0
   m_FaceInfo:
     m_FaceIndex: 0
     m_FamilyName: Lilita One
     m_StyleName: Regular
     m_PointSize: 32
     m_Scale: 1
-    m_UnitsPerEM: 0
+    m_UnitsPerEM: 2048
     m_LineHeight: 36.576
     m_AscentLine: 29.536
     m_CapLine: 23
@@ -91,6 +84,12 @@ MonoBehaviour:
     m_StrikethroughOffset: 6.8
     m_StrikethroughThickness: 1.6
     m_TabWidth: 6
+  m_Material: {fileID: -6360588970910393389}
+  m_SourceFontFileGUID: 18656ef7a51c9493bbb7e0a789ec9bf7
+  m_SourceFontFile: {fileID: 0}
+  m_SourceFontFilePath: 
+  m_AtlasPopulationMode: 0
+  InternalDynamicOS: 0
   m_GlyphTable:
   - m_Index: 3
     m_Metrics:
@@ -4031,6 +4030,10 @@ MonoBehaviour:
   m_AtlasTextureIndex: 0
   m_IsMultiAtlasTexturesEnabled: 0
   m_ClearDynamicDataOnBuild: 0
+  m_AtlasWidth: 1024
+  m_AtlasHeight: 512
+  m_AtlasPadding: 10
+  m_AtlasRenderMode: 4121
   m_UsedGlyphRects:
   - m_X: 0
     m_Y: 0
@@ -5349,39 +5352,13 @@ MonoBehaviour:
     m_Y: 317
     m_Width: 411
     m_Height: 9
-  m_fontInfo:
-    Name: 
-    PointSize: 0
-    Scale: 0
-    CharacterCount: 0
-    LineHeight: 0
-    Baseline: 0
-    Ascender: 0
-    CapHeight: 0
-    Descender: 0
-    CenterLine: 0
-    SuperscriptOffset: 0
-    SubscriptOffset: 0
-    SubSize: 0
-    Underline: 0
-    UnderlineThickness: 0
-    strikethrough: 0
-    strikethroughThickness: 0
-    TabWidth: 0
-    Padding: 0
-    AtlasWidth: 0
-    AtlasHeight: 0
-  atlas: {fileID: 0}
-  m_AtlasWidth: 1024
-  m_AtlasHeight: 512
-  m_AtlasPadding: 10
-  m_AtlasRenderMode: 4121
-  m_glyphInfoList: []
-  m_KerningTable:
-    kerningPairs: []
   m_FontFeatureTable:
+    m_MultipleSubstitutionRecords: []
+    m_LigatureSubstitutionRecords: []
     m_GlyphPairAdjustmentRecords: []
-  fallbackFontAssets: []
+    m_MarkToBaseAdjustmentRecords: []
+    m_MarkToMarkAdjustmentRecords: []
+  m_ShouldReimportFontFeatures: 0
   m_FallbackFontAssetTable:
   - {fileID: 11400000, guid: 3dae8b3384c127249b93ded7c46dd910, type: 2}
   - {fileID: 11400000, guid: 586b98278fcd07744993e26aa3bb6315, type: 2}
@@ -5390,9 +5367,11 @@ MonoBehaviour:
   m_CreationSettings:
     sourceFontFileName: 
     sourceFontFileGUID: c16eb7d7c3953489db00312b8b09df4b
+    faceIndex: 0
     pointSizeSamplingMode: 1
     pointSize: 32
     padding: 10
+    paddingMode: 0
     packingMode: 0
     atlasWidth: 1024
     atlasHeight: 512
@@ -5432,6 +5411,33 @@ MonoBehaviour:
   boldSpacing: 7
   italicStyle: 35
   tabSize: 10
+  m_fontInfo:
+    Name: 
+    PointSize: 0
+    Scale: 0
+    CharacterCount: 0
+    LineHeight: 0
+    Baseline: 0
+    Ascender: 0
+    CapHeight: 0
+    Descender: 0
+    CenterLine: 0
+    SuperscriptOffset: 0
+    SubscriptOffset: 0
+    SubSize: 0
+    Underline: 0
+    UnderlineThickness: 0
+    strikethrough: 0
+    strikethroughThickness: 0
+    TabWidth: 0
+    Padding: 0
+    AtlasWidth: 0
+    AtlasHeight: 0
+  m_glyphInfoList: []
+  m_KerningTable:
+    kerningPairs: []
+  fallbackFontAssets: []
+  atlas: {fileID: 0}
 --- !u!28 &7090127424344724657
 Texture2D:
   m_ObjectHideFlags: 0

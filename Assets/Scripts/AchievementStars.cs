@@ -42,7 +42,8 @@ public class AchievementStars : MonoBehaviour
 
         yield return new WaitForSeconds(.5f);
         if (stars[2].GetComponent<Image>().sprite == starOn) {
-            AudioManager.Instance.PlayClip(GameClip.highScore);
+            //AudioManager.Instance.PlayClip(GameClip.highScore);
+            //yield return new WaitForSeconds(AudioManager.Instance.PlayClip(GameClip.win));
         }
     }    
     public void SetAchievements(List<Achievement> achievements)

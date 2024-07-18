@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Services.Analytics;
 using UnityEngine;
 using UnityEngine.UI;
 public class NumpadButton : MonoBehaviour {
@@ -28,8 +29,8 @@ public class NumpadButton : MonoBehaviour {
     {
         yield return new WaitForEndOfFrame();
         RectTransform rectTransform = GetComponent<RectTransform>();
-        RectTransform rectReferrence = GameManager.Instance.gameCanvas.numpad.numpadButtons[0].GetComponent<RectTransform>();
-        rectTransform.sizeDelta = new Vector2(rectReferrence.sizeDelta.x, rectTransform.sizeDelta.y);
+        RectTransform rectReference = GameManager.Instance.gameCanvas.numpad.numpadButtons[0].GetComponent<RectTransform>();
+        rectTransform.sizeDelta = new Vector2(rectReference.sizeDelta.x, rectTransform.sizeDelta.y);
     }
     public void OnClick()
     {
@@ -44,4 +45,46 @@ public class NumpadButton : MonoBehaviour {
     {
         _numberText.text = textToSet;
     }
+    public IEnumerator AnimateCut(GameObject referenceObject) {
+        //float rotationSpeed = 10000f;
+        GameObject animationImage = new GameObject("CutAnimationImage");
+        Image img = animationImage.AddComponent<Image>();
+        img.sprite = ItemHelper.GetIconSprite(IconName.CUT);
+        // img.color = Color.red; // Set the color of the animation image
+        RectTransform rectTransform = animationImage.GetComponent<RectTransform>();
+        rectTransform.SetParent(GameManager.Instance.gameCanvas.transform, false);
+
+        Vector3 startPosition = referenceObject.transform.position;
+        Vector3 endPosition = transform.position;
+        rectTransform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        rectTransform.position = startPosition;
+
+        // Calculate the initial rotation of the image
+        Quaternion initialRotation = Quaternion.LookRotation(Vector3.forward, endPosition - startPosition);
+        rectTransform.rotation = initialRotation;
+
+        float duration = 0.2f; // Duration of the animation
+        float elapsedTime = 0;
+
+        while (elapsedTime < duration)
+        {
+            rectTransform.position = Vector3.Lerp(startPosition, endPosition, elapsedTime / duration);
+            elapsedTime += Time.deltaTime;
+
+            // Rotate the image continuously
+            //rectTransform.Rotate(Vector3.forward * (rotationSpeed * Time.deltaTime));
+
+            yield return new WaitForFixedUpdate();
+        }
+
+        rectTransform.position = endPosition;
+
+        Destroy(animationImage);
+
+        // Set button as cut
+        _numberText.color = Color.red;
+        _button.interactable = false;
+    }
+
+
 }

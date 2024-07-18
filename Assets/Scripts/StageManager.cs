@@ -69,12 +69,11 @@ public class StageManager : MonoBehaviour
         // que es cuando la dificultad anterior no tenga por lo menos 1 achievement
         bool nextStageUnlocked = true;
         int absoluteStageNumber = 0;
-        for (int difficulty = 2; difficulty < 10; difficulty++)
-        {
-            
+        //for (int level = 4; level < maxLevel; level++){
+        for (int difficulty = 2; difficulty < 10; difficulty++) {            
             if (!nextStageUnlocked) break;
-            //foreach (var stageIndexAndData in stages) {
-                for (int level = 4; level < maxLevel; level++){
+            //for (int difficulty = 2; difficulty < 10; difficulty++) { 
+            for (int level = 4; level < maxLevel; level++){
                 if (!nextStageUnlocked) break;
                // if (stageIndexAndData.Key != 0) break;
                 //Evita crear stages que ya estan creados. Si el que esta arriba, que es el de (dificultad,stageid) mas alto 
@@ -83,8 +82,11 @@ public class StageManager : MonoBehaviour
                 UserStageData currentUserStageData = userData.GetUserStageData(level, difficulty);
                 nextStageUnlocked = unlockAllStages || (currentUserStageData is not null && currentUserStageData.achievements.Count > 0);
                 if (topmostStage is not null &&
-                    (topmostStage.difficulty > difficulty || 
-                     (topmostStage.difficulty == difficulty && topmostStage.level >= level))) continue;
+                     (topmostStage.difficulty > difficulty || 
+                      (topmostStage.difficulty == difficulty && topmostStage.level >= level))) continue;
+                /*(topmostStage.level > level 
+                 || 
+                     (topmostStage.level == level && topmostStage.difficulty >= difficulty))) continue;*/
                 
                 GameObject stageDisplay = Instantiate(stageDisplayPrefab, stageHolder.transform);
                 stageDisplay.transform.SetSiblingIndex(0);
@@ -109,6 +111,7 @@ public class StageManager : MonoBehaviour
                     
                     newStage.difficultyButton.gameObject.GetComponent<Image>().color = 
                         MyExtensions.GetLerpColor(difficulty-2,9-2,new List<Color>()
+                        //MyExtensions.GetLerpColor(level,maxLevel,new List<Color>()
                             {green, yellow, red});
                     newStage.difficultyButton.stars
                         .SetAchievements(userData.GetUserStageData(level, difficulty).achievements);

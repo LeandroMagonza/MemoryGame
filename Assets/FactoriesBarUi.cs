@@ -68,9 +68,9 @@ public class FactoriesBarUi : MonoBehaviour
         bool anyFactory = false;
         foreach (var consumableAndDisplay in consumableDisplaysFactories)
         {
-            CustomDebugger.Log("Pending Claims:"+pendingClaimsAmount+" before "+consumableAndDisplay.Key,DebugCategory.CONSUMABLE_DISPLAY);
+            //CustomDebugger.Log("Pending Claims:"+pendingClaimsAmount+" before "+consumableAndDisplay.Key,DebugCategory.CONSUMABLE_DISPLAY);
             pendingClaimsAmount += consumableAndDisplay.Value.UpdateTexts();
-            CustomDebugger.Log("Pending Claims:"+pendingClaimsAmount+" after "+consumableAndDisplay.Key,DebugCategory.CONSUMABLE_DISPLAY);
+            //CustomDebugger.Log("Pending Claims:"+pendingClaimsAmount+" after "+consumableAndDisplay.Key,DebugCategory.CONSUMABLE_DISPLAY);
         }
         foreach (var consumableAndDisplay in consumableDisplaysInventory)
         {
@@ -93,6 +93,10 @@ public class FactoriesBarUi : MonoBehaviour
 
         //Deshabilito la barra si no hay ninguna factory
         gameObject.SetActive(anyFactory);
+
+        if (anyFactory) {
+            NotificationManager.Instance.AskForPermission();
+        }
     }
     
     private IEnumerator SlideBar()
@@ -115,6 +119,7 @@ public class FactoriesBarUi : MonoBehaviour
         {
             endPosition = new Vector3(0, startPosition.y, startPosition.z);
             toggleBarButton.transform.localScale = new Vector3(1, 1, 1);
+            AudioManager.Instance.PlayClip(GameClip.getAchievementStar0);
         }
         else
         {
@@ -124,6 +129,7 @@ public class FactoriesBarUi : MonoBehaviour
             float targetPositionX = barRectTransform.localPosition.x - (toggleButtonLeftEdge - factoryAndInventoryIconsRightEdge);
             endPosition = new Vector3(targetPositionX, startPosition.y, startPosition.z);
             toggleBarButton.transform.localScale = new Vector3(-1, 1, 1);
+            AudioManager.Instance.PlayClip(GameClip.getAchievementStar1);
         }
 
         float elapsedTime = 0;

@@ -19,8 +19,8 @@ public class FactoryConsumableDisplay : MonoBehaviour
     public string debugGenerationTimes;
     public Button claimButton;
 
-    [FormerlySerializedAs("originalButtonColor")] public Color originalIconColor;
-    [FormerlySerializedAs("originalButtonColor")] public Color originalBackgroundButtonColor;
+    public Color originalIconColor;
+    [SerializeField] private Color originalBackgroundButtonColor;
     public Image backgroundButtonImage;
     public Color claimableColor = Color.green;    
     private void Start() {
@@ -34,7 +34,6 @@ public class FactoryConsumableDisplay : MonoBehaviour
             index++;
         }
         originalIconColor = iconImage.color;
-        originalBackgroundButtonColor = backgroundButtonImage.color;
     }
 
     private void ClaimConsumable() {
@@ -111,7 +110,8 @@ public class FactoryConsumableDisplay : MonoBehaviour
                 }
                 else
                 {
-                    timer.text = "CLAIM!";
+                    
+                    timer.text = LocalizationManager.Instance.GetGameText(GameText.Claim).ToUpper()+"!";
                     //CustomDebugger.Log("Claim Color: "+new Color(80,215,00,1),DebugCategory.CONSUMABLE_DISPLAY);
                     backgroundButtonImage.color = claimableColor;
                     //CustomDebugger.Log("Actually Set Color: "+backgroundButtonImage.color,DebugCategory.CONSUMABLE_DISPLAY);

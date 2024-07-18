@@ -18,6 +18,7 @@ public class PowerPanelButtonHolder : MonoBehaviour
     }
 
     public void SetAllPowerButtonsText(bool disableUnavailablePowers) {
+        bool anyPowerActive = false;
         foreach (var powerButton in buttons) {
             powerButton.SetButtonText();
             powerButton.SetInteractable();
@@ -29,11 +30,14 @@ public class PowerPanelButtonHolder : MonoBehaviour
                 GameManager.Instance.matchInventory[powerButton.consumableID].max > 0
             ) {
                 powerButton.gameObject.SetActive(true);
+                anyPowerActive = true;
             }
             else {
                 powerButton.gameObject.SetActive(false);
             }
         }
+
+        //gameObject.SetActive(anyPowerActive);
     }
 
  
@@ -161,5 +165,12 @@ public class PowerPanelButtonHolder : MonoBehaviour
         SetAllPowerButtonsText(false);
         CustomDebugger.Log(GameManager.bombActive+" HighlightActive");
         buttons[(int)consumableID].MarkActive(GameManager.bombActive);
+    }
+
+    public PowerButton GetPowerButton(ConsumableID consumableID) {
+        foreach (var VARIABLE in buttons) {
+            if(VARIABLE.consumableID == consumableID) return VARIABLE;
+        }
+        return null;
     }
 }

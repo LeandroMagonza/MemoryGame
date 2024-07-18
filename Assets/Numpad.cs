@@ -10,6 +10,7 @@ public class Numpad : MonoBehaviour
     {
         ResetNumpadUIButtons();
         if (stickerData.matchData == null || stickerData.sticker == null) return;
+    
         //BetterClue
         if (stickerData.matchData.lastClueAppearenceNumber != null)
         {
@@ -22,12 +23,11 @@ public class Numpad : MonoBehaviour
         }
 
         Debug.Log("numbers to cut in updateui: " + stickerData.matchData.cutNumbers.Count);
-        
-        foreach (var cutNumber in stickerData.matchData.cutNumbers) {
-            numpadButtons[cutNumber-1]._numberText.color = Color.red;
-            numpadButtons[cutNumber-1]._button.interactable = false;
+    
+        foreach (var cutNumber in stickerData.matchData.cutNumbers)
+        {
+            StartCoroutine(numpadButtons[cutNumber-1].AnimateCut(GameManager.Instance.GetPowerButton(ConsumableID.Cut).gameObject));
         }
-        
     }
 
     public void ResetNumpadUIButtons()

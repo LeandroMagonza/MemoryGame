@@ -82,7 +82,7 @@ public class ConsumableFactoryManager : MonoBehaviour
 
     CustomDebugger.Log("added first generation times :"+generationTimes.Count);
 
-    for (int i = generationTimes.Count; i <= maxCapacity; i++)
+    for (int i = generationTimes.Count; i < maxCapacity; i++)
     {
         nextTime = nextTime.AddSeconds(generationInterval);
         CustomDebugger.Log("NGT " + consumableID + " order " +i+ " at time "+nextTime);

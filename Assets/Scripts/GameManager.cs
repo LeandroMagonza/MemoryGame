@@ -6,7 +6,6 @@ using TMPro;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Purchasing.Extension;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -173,6 +172,8 @@ public class GameManager : MonoBehaviour {
     public int amountOfTurnsBetweenAddingStickers = 10;
     public int flatAmountOfStickerAdded = 0;
     public int scalingAmountOfStickerAdded = 1;
+    [SerializeField] private float delayReductionForWinClip = 4.2f;
+    [SerializeField] private float delayBetweenStars = .35f;
     private int maxLevel => StageManager.Instance.maxLevel;
 
 
@@ -303,7 +304,6 @@ public class GameManager : MonoBehaviour {
         }
         else if(turnAction != TurnAction.UseCut) {
             //yield return new WaitForSeconds(delayBetweenImages);
-            
             NextTurn();
         }
 
@@ -650,7 +650,8 @@ public class GameManager : MonoBehaviour {
         if (win) {
             CustomDebugger.Log("Win");
             AudioManager.Instance.PlayClip(GameClip.win);
-            delay = AudioManager.Instance.clips[GameClip.win].length;
+            delay = AudioManager.Instance.clips[GameClip.win].length - delayReductionForWinClip;
+            //delay = 0.2f;
         }
         else
         {
@@ -663,7 +664,7 @@ public class GameManager : MonoBehaviour {
         
         endGameButtons.transform.parent.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
-        
+        yield return new WaitForEndOfFrame();
         CustomDebugger.Log("Match Ended");
         endMatchTime = Time.time;
         float elapsedTime = endMatchTime - startMatchTime;
@@ -699,13 +700,10 @@ public class GameManager : MonoBehaviour {
         //animationScore
         
         //Grant first time Achievemnts bonus
-        yield return new WaitForSeconds(0.2f);
-
-        yield return endGameAchievementStars.SetAchievements(_currentMatch.achievementsFulfilled,.35f);
-        
-        delay -= .35f * firstTimeAchievements.Count;
-        delay -= 5f;
         yield return new WaitForSeconds(delay);
+
+        yield return endGameAchievementStars.SetAchievements(_currentMatch.achievementsFulfilled,delayBetweenStars);
+        
         PlayerLevelManager.Instance.UpdatePlayerLevelButtons();
 
         
@@ -772,7 +770,14 @@ public class GameManager : MonoBehaviour {
         }
         else if (selectedDifficulty<9) {
             StageManager.Instance.SetStageAndDifficulty(4, selectedDifficulty+1);
+        }    
+        /*
+        if (selectedDifficulty<8) {
+            StageManager.Instance.SetStageAndDifficulty(selectedLevel, selectedDifficulty+1);
         }
+        else if (selectedLevel < maxLevel - 1) {
+            StageManager.Instance.SetStageAndDifficulty(selectedLevel + 1, 0);
+        }*/
         else {
             throw new Exception("Play Next stage called but there is no next stage");
         }
@@ -875,6 +880,8 @@ public class GameManager : MonoBehaviour {
         }
         stageGroupIntroPanel.gameObject.SetActive(false);
         pause = false;
+        AudioManager.Instance.PlayClip(GameClip.playStage);
+        
     }
 
     private void ResetTimer()
@@ -943,7 +950,6 @@ public class GameManager : MonoBehaviour {
             StartCoroutine(ProcessTurnAction((key - KeyCode.Keypad0)));
         }
     }
-    #endif
         if (Input.GetKeyDown(KeyCode.KeypadEnter))
         {
             CustomDebugger.Log("Numpad key " + (KeyCode.KeypadEnter) + " pressed kp");
@@ -962,6 +968,7 @@ public class GameManager : MonoBehaviour {
             CustomDebugger.Log("Clicked number "+ (KeyCode.Keypad0));
             StartCoroutine(ProcessTurnAction((0)));
         }
+    #endif
     }
 
     private IEnumerator Squash(Transform squashedTransform, float delay, float amount, float speed)
@@ -1127,6 +1134,10 @@ public class GameManager : MonoBehaviour {
         PersistanceManager.Instance.userConsumableData.ModifyConsumable(consumableID, -1);
         PersistanceManager.Instance.SaveUserConsumableData();
         return (turnSticker);
+    }
+
+    public PowerButton GetPowerButton(ConsumableID consumableID) {
+        return gameCanvas.powerPanelButtonHolder.GetPowerButton(consumableID);
     }
 }
 public enum StickerSet {

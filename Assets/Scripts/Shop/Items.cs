@@ -45,6 +45,7 @@ public class ConsumableData
     public ConsumableID itemID;
     [FormerlySerializedAs("max")] public int amount;
     public GameText name;
+    public GameText namePlural;
     public GameText description;
     public int price;
     public int generationMinutes;
@@ -62,11 +63,12 @@ public class ConsumableData
                     itemID = itemID,
                     price = 8,
                     name = GameText.ItemClueName,
+                    namePlural = GameText.ItemClueNamePlural,
                     description = GameText.ItemClueDescription,
                     icon = IconName.CLUE,
                     amount = 1,
                     generationMinutes = 180,
-                    initialStorage =  1
+                    initialStorage =  0
                 };
                 break;
             case ConsumableID.Remove:
@@ -75,6 +77,7 @@ public class ConsumableData
                     itemID = itemID,
                     price = 20,
                     name = GameText.ItemRemoveName,
+                    namePlural = GameText.ItemRemoveNamePlural,
                     description = GameText.ItemRemoveDescription,
                     icon = IconName.REMOVE,
                     amount = 1,
@@ -88,11 +91,12 @@ public class ConsumableData
                     itemID = itemID,
                     price = 3,
                     name = GameText.ItemCutName,
+                    namePlural = GameText.ItemCutNamePlural,
                     description = GameText.ItemCutDescription,
                     icon = IconName.CUT,
                     amount = 1,
                     generationMinutes = 60,
-                    initialStorage =  2
+                    initialStorage =  1
                 };
                 break;
             // case ConsumableID.Peek:
@@ -101,6 +105,7 @@ public class ConsumableData
             //         itemID = itemID,
             //         price= 30,
             //         name = GameText.ItemPeekName,
+            //         namePlural = GameText.ItemPeekNamePlural,,
             //         description = GameText.ItemPeekDescription,
             //         icon = IconName.PEEK,
             //         amount = 1,
@@ -114,11 +119,12 @@ public class ConsumableData
                     itemID = itemID,
                     price= 3,
                     name = GameText.ItemHighlightName,
+                    namePlural = GameText.ItemHighlightNamePlural,
                     description = GameText.ItemHighlightDescription,
                     icon = IconName.HIGHLIGHT,
                     amount = 1,
                     generationMinutes = 60,
-                    initialStorage =  2
+                    initialStorage =  1
                 };
                 break;
             case ConsumableID.Bomb:
@@ -127,11 +133,12 @@ public class ConsumableData
                     itemID = itemID,
                     price= 5,
                     name = GameText.ItemBombName,
+                    namePlural = GameText.ItemBombNamePlural,
                     description = GameText.ItemBombDescription,
                     icon = IconName.BOMB,
                     amount = 1,
                     generationMinutes = 120,
-                    initialStorage =  1
+                    initialStorage =  0
                 };
                 break;  
             case ConsumableID.EnergyPotion:
@@ -140,6 +147,7 @@ public class ConsumableData
                     itemID = itemID,
                     price= 5,
                     name = GameText.ItemEnergyPotionName,
+                    namePlural = GameText.ItemEnergyPotionName,
                     description = GameText.ItemEnergyPotionDescription,
                     icon = IconName.NONE,
                     amount = 1,
@@ -154,8 +162,11 @@ public class ConsumableData
     public string GenerateDescription() {
         return LocalizationManager.Instance.GetGameText(description);
     }
-    public string GetName() {
+    public string GetName(bool plural = false) {
+        if (!plural) {
         return LocalizationManager.Instance.GetGameText(name);
+        }
+        return LocalizationManager.Instance.GetGameText(namePlural);
     }
     
 }
@@ -222,12 +233,10 @@ public class UpgradeData
                 ItemHelper.GetCorrespondingConsumable(itemId)).initialStorage + upgradeLevel);
             
             storageText = LocalizationManager.Instance.GetGameText(GameText.UpgradeFactoryStorage);
-            string localizedName = correspondingConsumable.GetName();
-            string localizedDescription = correspondingConsumable.GenerateDescription();
             
             storageText = ItemHelper.ReplacePlaceholders(storageText, new() {
                 { "textHighlightColor", textHighlightColor },
-                { "correspondingConsumable.name", localizedName+((totalStorageAmount == 1) ? "" : "S")},
+                { "correspondingConsumable.name", correspondingConsumable.GetName(totalStorageAmount != 1)},
                 { "totalStorageAmount", totalStorageAmount.ToString() }
             });
 
@@ -236,8 +245,8 @@ public class UpgradeData
             fullFactoryDescription = ItemHelper.ReplacePlaceholders(fullFactoryDescription, new() {
                 {"generationTimeText",generationTimeText},
                 {"storageText",storageText},
-                {"correspondingConsumable.name",localizedName},
-                {"correspondingConsumable.description",localizedDescription},
+                {"correspondingConsumable.name",correspondingConsumable.GetName()},
+                {"correspondingConsumable.description",correspondingConsumable.GenerateDescription()},
                 {"upgradeLevel",upgradeLevel.ToString()}, // sumar aca valor sacado del string
             });
             return fullFactoryDescription;

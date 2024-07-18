@@ -14,5 +14,7 @@ public class SelectLanguageButton : MonoBehaviour {
 
     public void SelectLanguage() {
         StartCoroutine(LocalizationManager.Instance.ChangeLanguage(language));
+        AudioManager.Instance.PlayClip(GameClip.enterStages);
+
     }
 }

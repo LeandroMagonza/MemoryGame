@@ -69,8 +69,8 @@ public class PersistanceManager : MonoBehaviour
     private readonly string fileHostUrl = "https://leandromagonza.github.io/MemoGram/";
     
     [System.Serializable]
-    private class LanguagesList
-    {
+    private class LanguagesList {
+        public int version = 0;
         public List<string> languages;
     }
 
@@ -574,7 +574,7 @@ public class PersistanceManager : MonoBehaviour
             CustomDebugger.Log("UserConsumableData saved to " + filePath+ " Cuts: "+userConsumableData.GetConsumableEntry(ConsumableID.Cut).amount);
     }
     
-     public IEnumerator LoadLanguageList()
+    public IEnumerator LoadLanguageList()
     {
         string directoryPath = Path.Combine(Application.persistentDataPath, "Languages");
         string languagesPath = Path.Combine(Application.persistentDataPath, "Languages", "languages.json");
@@ -583,29 +583,54 @@ public class PersistanceManager : MonoBehaviour
         {
             Directory.CreateDirectory(directoryPath);
         }
-        
+
+        string downloadedJson = null;
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(fileHostUrl + "Languages/languages.json"))
+        {
+            yield return webRequest.SendWebRequest();
+
+            if (webRequest.result == UnityWebRequest.Result.Success)
+            {
+                downloadedJson = webRequest.downloadHandler.text;
+            }
+            else
+            {
+                Debug.LogError("Failed to download languages.json");
+                yield break;
+            }
+        }
+
         if (!File.Exists(languagesPath))
         {
-            using (UnityWebRequest webRequest = UnityWebRequest.Get(fileHostUrl + "Languages/languages.json"))
-            {
-                yield return webRequest.SendWebRequest();
+            File.WriteAllText(languagesPath, downloadedJson);
+        }
 
-                if (webRequest.result == UnityWebRequest.Result.Success)
+        string localJson = File.ReadAllText(languagesPath);
+        LanguagesList localLanguagesList = JsonUtility.FromJson<LanguagesList>(localJson);
+        LanguagesList downloadedLanguagesList = JsonUtility.FromJson<LanguagesList>(downloadedJson);
+
+        if (downloadedLanguagesList.version > localLanguagesList.version)
+        {
+            CustomDebugger.Log("Found more recent languages.json version");
+            // Replace the local languages.json with the downloaded one
+            File.WriteAllText(languagesPath, downloadedJson);
+
+            // Delete old language files
+            foreach (string language in localLanguagesList.languages)
+            {
+                string languageFilePath = Path.Combine(directoryPath, language + ".json");
+                if (File.Exists(languageFilePath))
                 {
-                    File.WriteAllText(languagesPath, webRequest.downloadHandler.text);
-                }
-                else
-                {
-                    Debug.LogError("Failed to download languages.json");
-                    yield break;
+                    File.Delete(languageFilePath);
                 }
             }
         }
 
-        string json = File.ReadAllText(languagesPath);
-        LanguagesList languagesList = JsonUtility.FromJson<LanguagesList>(json);
-        LocalizationManager.Instance.languagesList = languagesList.languages;
+        string finalJson = File.ReadAllText(languagesPath);
+        LanguagesList finalLanguagesList = JsonUtility.FromJson<LanguagesList>(finalJson);
+        LocalizationManager.Instance.languagesList = finalLanguagesList.languages;
     }
+
 
     public IEnumerator LoadLanguageFiles(string language)
     {

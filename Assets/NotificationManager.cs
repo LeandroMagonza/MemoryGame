@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Notifications.Android;
 using UnityEngine;
+using UnityEngine.Android;
 
 public class NotificationManager : MonoBehaviour
 {
@@ -55,7 +56,8 @@ public class NotificationManager : MonoBehaviour
             Description = "Canal para notificaciones regulares"
         };
         AndroidNotificationCenter.RegisterNotificationChannel(channel);
-        //ScheduleNotification("TEST", "TEST", DateTime.Now.AddSeconds(15), ConsumableID.Bomb);
+        //ScheduleNotification("TEST", "TEST", DateTime.Now.AddSeconds(5), ConsumableID.Bomb);
+
     }
 
     /// <summary>
@@ -122,6 +124,36 @@ public class NotificationManager : MonoBehaviour
             return notifications.ContainsKey(notificationId);
         }
         return false;
+    }
+    public void AskForPermission()//call this function to ask request
+    {
+        if (Permission.HasUserAuthorizedPermission("android.permission.POST_NOTIFICATIONS"))
+        {
+            print("permission granted!!");
+        }
+        else
+        {
+            var callbacks = new PermissionCallbacks();
+            callbacks.PermissionDenied += PermissionCallbacks_PermissionDenied;
+            callbacks.PermissionGranted += PermissionCallbacks_PermissionGranted;
+            callbacks.PermissionDeniedAndDontAskAgain += PermissionCallbacks_PermissionDeniedAndDontAskAgain;
+            Permission.RequestUserPermission("android.permission.POST_NOTIFICATIONS", callbacks);
+        }
+
+    }
+    internal void PermissionCallbacks_PermissionDeniedAndDontAskAgain(string permissionName)
+    {
+        Debug.Log($"{permissionName} PermissionDeniedAndDontAskAgain");
+    }
+
+    internal void PermissionCallbacks_PermissionGranted(string permissionName)
+    {
+        Debug.Log($"{permissionName} PermissionCallbacks_PermissionGranted");
+    }
+
+    internal void PermissionCallbacks_PermissionDenied(string permissionName)
+    {
+        Debug.Log($"{permissionName} PermissionCallbacks_PermissionDenied");
     }
 
 }
