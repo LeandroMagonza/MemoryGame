@@ -58,7 +58,7 @@ public class AudioManager : MonoBehaviour
         maxMusicVolume = audioSourceMusic.volume;
         maxSoundFXVolume = audioSourceFX.volume;
 
-        audioSourceMusic.volume = PlayerPrefs.GetFloat("MusicVolumePercentage",.75f) * maxMusicVolume;
+        audioSourceMusic.volume = PlayerPrefs.GetFloat("MusicVolumePercentage",0.75f) * maxMusicVolume;
         audioSourceFX.volume = PlayerPrefs.GetFloat("SoundFXVolumePercentage",0.75f) * maxSoundFXVolume;
 
         AudioClip mainTheme = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "mainTheme");

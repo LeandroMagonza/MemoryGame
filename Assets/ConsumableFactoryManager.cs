@@ -97,7 +97,7 @@ public class ConsumableFactoryManager : MonoBehaviour
                 {"consumableName", lm.GetGameText(consumableData.name)}
             });
             body = ItemHelper.ReplacePlaceholders(body, new Dictionary<string, string>() {
-                {"consumableName", lm.GetGameText(consumableData.name)}
+                {"consumableName", consumableData.GetName(maxCapacity>1)}
             });
 
             notificationId = NotificationManager.Instance.ScheduleNotification(title, body, nextTime, consumableID);
