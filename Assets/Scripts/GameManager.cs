@@ -841,7 +841,7 @@ public class GameManager : MonoBehaviour {
         _currentMatch = new Match(selectedLevel,selectedDifficulty,false);
         _currentCombo = 0;
         endGameAchievementStars.ResetStars();
-        gameCanvas.UpdateUI(true);
+        gameCanvas.UpdateUI();
         
         pausePanel.SetActive(false);
         tutorialPanel.SetActive(false);

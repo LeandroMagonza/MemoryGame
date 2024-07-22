@@ -17,17 +17,16 @@ public class PowerPanelButtonHolder : MonoBehaviour
             Instance = this;
     }
 
-    public void SetAllPowerButtonsText(bool disableUnavailablePowers) {
+    public void SetAllPowerButtonsText() {
         bool anyPowerActive = false;
         foreach (var powerButton in buttons) {
             powerButton.SetButtonText();
-            powerButton.SetInteractable();
             powerButton.markedActive = false;
-            if (!disableUnavailablePowers) continue; 
+            powerButton.SetInteractable();
             if (
                 GameManager.Instance.matchInventory.ContainsKey(powerButton.consumableID)
-                &&
-                GameManager.Instance.matchInventory[powerButton.consumableID].max > 0
+                 &&
+                 GameManager.Instance.matchInventory[powerButton.consumableID].max > 0
             ) {
                 powerButton.gameObject.SetActive(true);
                 anyPowerActive = true;
@@ -37,7 +36,7 @@ public class PowerPanelButtonHolder : MonoBehaviour
             }
         }
 
-        //gameObject.SetActive(anyPowerActive);
+        gameObject.SetActive(anyPowerActive);
     }
 
  
@@ -147,7 +146,7 @@ public class PowerPanelButtonHolder : MonoBehaviour
             AudioManager.Instance.PlayClip(buttons[(int)consumableID].gameClip,.8f);
         }
 
-        SetAllPowerButtonsText(false);
+        SetAllPowerButtonsText();
         CustomDebugger.Log(GameManager.highlightActive+" HighlightActive");
         buttons[(int)consumableID].MarkActive(GameManager.highlightActive);
     }   
@@ -162,7 +161,7 @@ public class PowerPanelButtonHolder : MonoBehaviour
             AudioManager.Instance.PlayClip(buttons[(int)consumableID].gameClip,.8f);
         }
 
-        SetAllPowerButtonsText(false);
+        SetAllPowerButtonsText();
         CustomDebugger.Log(GameManager.bombActive+" HighlightActive");
         buttons[(int)consumableID].MarkActive(GameManager.bombActive);
     }
