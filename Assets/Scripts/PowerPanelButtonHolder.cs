@@ -6,7 +6,7 @@ using UnityEngine;
 public class PowerPanelButtonHolder : MonoBehaviour
 {
     private GameManager GameManager => GameManager.Instance;
-    public PowerButton[] buttons;
+    [SerializeField] private PowerButton[] buttons;
     public static PowerPanelButtonHolder Instance;
     public GameCanvas gameCanvas;
     [SerializeField] public GameObject pausePanel;
@@ -21,8 +21,9 @@ public class PowerPanelButtonHolder : MonoBehaviour
         bool anyPowerActive = false;
         foreach (var powerButton in buttons) {
             powerButton.SetButtonText();
-            powerButton.markedActive = false;
             powerButton.SetInteractable();
+            powerButton.MarkActive();
+            //powerButton.markedActive = false;
             if (
                 GameManager.Instance.matchInventory.ContainsKey(powerButton.consumableID)
                  &&
@@ -136,34 +137,27 @@ public class PowerPanelButtonHolder : MonoBehaviour
     }
 
     private void ToggleHighlight() {
-        ConsumableID consumableID = ConsumableID.Highlight;
-        GameManager.highlightActive = !GameManager.highlightActive;
-        if (GameManager.highlightActive) {
-            AudioManager.Instance.PlayClip(buttons[(int)consumableID].gameClip,1);
-            GameManager.bombActive = false;
+        PowerButton highlightButton = GetPowerButton(ConsumableID.Highlight);
+        if (GameManager.currentlyActivatedPower != ConsumableID.Highlight) {
+            AudioManager.Instance.PlayClip(highlightButton.gameClip,1);
+            GameManager.currentlyActivatedPower = ConsumableID.Highlight;
         }
         else {
-            AudioManager.Instance.PlayClip(buttons[(int)consumableID].gameClip,.8f);
+            AudioManager.Instance.PlayClip(highlightButton.gameClip,.8f);
+            GameManager.currentlyActivatedPower = ConsumableID.NONE;
         }
 
-        SetAllPowerButtonsText();
-        CustomDebugger.Log(GameManager.highlightActive+" HighlightActive");
-        buttons[(int)consumableID].MarkActive(GameManager.highlightActive);
     }   
     private void ToggleBomb() {
-        ConsumableID consumableID = ConsumableID.Bomb;
-        GameManager.bombActive = !GameManager.bombActive;
-        if (GameManager.bombActive) {
-            AudioManager.Instance.PlayClip(buttons[(int)consumableID].gameClip,1);
-            GameManager.highlightActive = false;
+        PowerButton bombButton = GetPowerButton(ConsumableID.Bomb);
+        if (GameManager.currentlyActivatedPower != ConsumableID.Bomb) {
+            AudioManager.Instance.PlayClip(bombButton.gameClip,1);
+            GameManager.currentlyActivatedPower = ConsumableID.Bomb;
         }
         else {
-            AudioManager.Instance.PlayClip(buttons[(int)consumableID].gameClip,.8f);
+            AudioManager.Instance.PlayClip(bombButton.gameClip,.8f);
+            GameManager.currentlyActivatedPower = ConsumableID.NONE;
         }
-
-        SetAllPowerButtonsText();
-        CustomDebugger.Log(GameManager.bombActive+" HighlightActive");
-        buttons[(int)consumableID].MarkActive(GameManager.bombActive);
     }
 
     public PowerButton GetPowerButton(ConsumableID consumableID) {

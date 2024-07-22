@@ -5119,12 +5119,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 207292368}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.04, y: 0, z: 0}
+  m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 334700923}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!114 &284450734 stripped
 MonoBehaviour:
@@ -10152,8 +10152,7 @@ Transform:
   m_LocalPosition: {x: -0.04, y: 0.5, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 207292371}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!114 &344662858 stripped
@@ -11098,13 +11097,12 @@ MonoBehaviour:
   turnNumber: 1
   firstMistake: 0
   disableInput: 0
-  highlightActive: 0
-  bombActive: 0
   protectedLife: 0
   protectedLifeOnComboAmount: 10
   deathDefyCharges: 0
   baseClearsToHeal: 5
   currentClears: 0
+  currentlyActivatedPower: 0
   timer: 10
   maxTimer: 10
   maxTimerSpeedrun: 2
@@ -11944,6 +11942,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5232140566473959227, guid: 6df703b5f9b4df241b71d62a78d861f1, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 519420031}
+    - target: {fileID: 5232140566473959227, guid: 6df703b5f9b4df241b71d62a78d861f1, type: 3}
+      propertyPath: m_RenderMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5232140566473959227, guid: 6df703b5f9b4df241b71d62a78d861f1, type: 3}
       propertyPath: m_PixelPerfect
       value: 1
       objectReference: {fileID: 0}
@@ -12272,6 +12278,14 @@ PrefabInstance:
       value: -94.5
       objectReference: {fileID: 0}
     - target: {fileID: 9132937329709647298, guid: 98a26181fd5565844b3f357e49b6de3e, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 519420031}
+    - target: {fileID: 9132937329709647298, guid: 98a26181fd5565844b3f357e49b6de3e, type: 3}
+      propertyPath: m_RenderMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9132937329709647298, guid: 98a26181fd5565844b3f357e49b6de3e, type: 3}
       propertyPath: m_PixelPerfect
       value: 1
       objectReference: {fileID: 0}
@@ -12493,7 +12507,7 @@ Canvas:
   m_RenderMode: 1
   m_Camera: {fileID: 519420031}
   m_PlaneDistance: 100
-  m_PixelPerfect: 0
+  m_PixelPerfect: 1
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
@@ -12924,6 +12938,14 @@ PrefabInstance:
       value: LoadingCanvas
       objectReference: {fileID: 0}
     - target: {fileID: 4228110186353773302, guid: b0e61df1763e5c3449f7c4166134eaa0, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 519420031}
+    - target: {fileID: 4228110186353773302, guid: b0e61df1763e5c3449f7c4166134eaa0, type: 3}
+      propertyPath: m_RenderMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4228110186353773302, guid: b0e61df1763e5c3449f7c4166134eaa0, type: 3}
       propertyPath: m_AdditionalShaderChannelsFlag
       value: 1
       objectReference: {fileID: 0}
@@ -13175,10 +13197,10 @@ PrefabInstance:
     - target: {fileID: 3594057874501386062, guid: ecb28b6d0b26eeb4f9cff676c5750d2e, type: 3}
       propertyPath: m_Camera
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 519420031}
     - target: {fileID: 3594057874501386062, guid: ecb28b6d0b26eeb4f9cff676c5750d2e, type: 3}
       propertyPath: m_RenderMode
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3594057874501386062, guid: ecb28b6d0b26eeb4f9cff676c5750d2e, type: 3}
       propertyPath: m_PixelPerfect
@@ -13818,6 +13840,18 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4471851493571877043, guid: a8a64a6413b98e443a5a2509e85db577, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 519420031}
+    - target: {fileID: 4471851493571877043, guid: a8a64a6413b98e443a5a2509e85db577, type: 3}
+      propertyPath: m_RenderMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4471851493571877043, guid: a8a64a6413b98e443a5a2509e85db577, type: 3}
+      propertyPath: m_PixelPerfect
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4471851493571877043, guid: a8a64a6413b98e443a5a2509e85db577, type: 3}
       propertyPath: m_AdditionalShaderChannelsFlag
       value: 1
       objectReference: {fileID: 0}
@@ -14406,6 +14440,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2263625804015464047, guid: 65684e4c9b0c5014ca059ac3ed69e87f, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 519420031}
+    - target: {fileID: 2263625804015464047, guid: 65684e4c9b0c5014ca059ac3ed69e87f, type: 3}
+      propertyPath: m_RenderMode
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5772797838424822148, guid: 65684e4c9b0c5014ca059ac3ed69e87f, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -14582,6 +14624,14 @@ PrefabInstance:
     - target: {fileID: 2401689382978719168, guid: a6f939eb9e05db54b955f530679c0cb8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2401689382978719169, guid: a6f939eb9e05db54b955f530679c0cb8, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 519420031}
+    - target: {fileID: 2401689382978719169, guid: a6f939eb9e05db54b955f530679c0cb8, type: 3}
+      propertyPath: m_RenderMode
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2401689382978719169, guid: a6f939eb9e05db54b955f530679c0cb8, type: 3}
       propertyPath: m_PixelPerfect
@@ -15875,6 +15925,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6707693565595984197, guid: e1d5818bda27d08469dd056abccd6503, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 519420031}
+    - target: {fileID: 6707693565595984197, guid: e1d5818bda27d08469dd056abccd6503, type: 3}
+      propertyPath: m_RenderMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6707693565595984197, guid: e1d5818bda27d08469dd056abccd6503, type: 3}
       propertyPath: m_PixelPerfect
       value: 1
       objectReference: {fileID: 0}
@@ -16710,10 +16768,10 @@ PrefabInstance:
     - target: {fileID: 9132937329709647298, guid: 913c7ab62cb5df144a9bb8c0f49f1a90, type: 3}
       propertyPath: m_Camera
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 519420031}
     - target: {fileID: 9132937329709647298, guid: 913c7ab62cb5df144a9bb8c0f49f1a90, type: 3}
       propertyPath: m_RenderMode
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9132937329709647298, guid: 913c7ab62cb5df144a9bb8c0f49f1a90, type: 3}
       propertyPath: m_PixelPerfect
@@ -16850,6 +16908,7 @@ SceneRoots:
   - {fileID: 435409938}
   - {fileID: 1079194499}
   - {fileID: 334700923}
+  - {fileID: 207292371}
   - {fileID: 330909373}
   - {fileID: 330498486}
   - {fileID: 1588640662}

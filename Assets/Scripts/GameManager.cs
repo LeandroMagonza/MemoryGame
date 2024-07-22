@@ -66,9 +66,8 @@ public class GameManager : MonoBehaviour {
     private float startMatchTime = 0;
     private float endMatchTime = 0; 
     public bool disableInput = false;
-    public bool highlightActive;
-    public bool bombActive;
     private Coroutine currentStickerCoroutine;
+    
     [Header("Skills")]
     public bool protectedLife = false;
     public int protectedLifeOnComboAmount = 10;
@@ -76,7 +75,8 @@ public class GameManager : MonoBehaviour {
     private int deathDefyMagnitude = 0;
     public int baseClearsToHeal = 5;
     public int currentClears = 0;
-
+    public ConsumableID currentlyActivatedPower;
+    
     [Header("Timer")]    
     public float timer = 3;
     public float maxTimer = 10;
@@ -201,7 +201,7 @@ public class GameManager : MonoBehaviour {
         var turnSticker = _currentlySelectedSticker;
         bool defeat = false;
         bool guessedCorrectly;
-        if (bombActive) {
+        if (currentlyActivatedPower == ConsumableID.Bomb && !ranOutOfTime) {
             guessedCorrectly = 
                 guessNumber - 1 == GetCorrectGuess(turnSticker, currentStickerMatchData)
                 ||
@@ -209,6 +209,7 @@ public class GameManager : MonoBehaviour {
                 ||
                 guessNumber + 1 == GetCorrectGuess(turnSticker, currentStickerMatchData)
                 ;
+            numpad.GetComponent<Numpad>().ActivateBombVFX(guessNumber);
             ActivatePower(ConsumableID.Bomb, GameClip.bombExplosion);
         }
         else {
@@ -218,7 +219,7 @@ public class GameManager : MonoBehaviour {
         {
             CustomDebugger.Log("CorrectGuess");
             scoreModification = OnCorrectGuess();
-            if (highlightActive) {
+            if (currentlyActivatedPower == ConsumableID.Highlight) {
                 //TODO: Agregar Animacion de highlight correct
                 turnAction = TurnAction.HighlightCorrect;
                 ActivatePower(ConsumableID.Highlight, GameClip.none);
@@ -235,7 +236,7 @@ public class GameManager : MonoBehaviour {
             deathDefyMagnitude = Mathf.Abs(mistakeMagnitude);
             defeat = OnIncorrectGuess(guessNumber);
             turnAction = TurnAction.GuessIncorrect;
-            if (highlightActive) {
+            if (currentlyActivatedPower == ConsumableID.Highlight) {
                 turnAction = TurnAction.HighlightIncorrect;
                 ActivatePower(ConsumableID.Highlight, GameClip.none);
             }
@@ -348,8 +349,7 @@ public class GameManager : MonoBehaviour {
             AddStickers(flatAmountOfStickerAdded + (turnNumber / amountOfTurnsBetweenAddingStickers) * scalingAmountOfStickerAdded);
         }
 
-        highlightActive = false;
-        bombActive = false;
+        currentlyActivatedPower = ConsumableID.NONE;
         
         SetRandomImage();
         gameCanvas.UpdateUI();
@@ -846,6 +846,7 @@ public class GameManager : MonoBehaviour {
         pausePanel.SetActive(false);
         tutorialPanel.SetActive(false);
 
+        currentlyActivatedPower = ConsumableID.NONE;
         #region FirstMistake
         /*
         if (userData.stages[0].matches.Count == 0)
@@ -1116,10 +1117,8 @@ public class GameManager : MonoBehaviour {
         tutorialPanel.SetActive(pause);
     }
     
-    public (StickerData sticker, StickerMatchData matchData) ActivatePower(ConsumableID consumableID,GameClip clip)
-    {
-        bombActive = false;
-        highlightActive = false;
+    public (StickerData sticker, StickerMatchData matchData) ActivatePower(ConsumableID consumableID,GameClip clip) {
+        currentlyActivatedPower = ConsumableID.NONE;
         CustomDebugger.Log("USE: " + consumableID.ToString());
         var turnSticker = GetCurrentlySelectedSticker();
         if (!matchInventory.ContainsKey(consumableID) || matchInventory[consumableID].current <= 0) return (turnSticker);

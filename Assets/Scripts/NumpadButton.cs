@@ -9,6 +9,7 @@ public class NumpadButton : MonoBehaviour {
     public int number;
     [SerializeField] public TextMeshProUGUI _numberText;
     [SerializeField] public Button _button;
+    [SerializeField] public GameObject bombFx;
     // Start is called before the first frame update
 
     void Awake()

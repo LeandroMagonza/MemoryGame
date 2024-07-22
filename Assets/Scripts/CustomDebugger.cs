@@ -48,5 +48,6 @@ public enum DebugCategory
     PLAYER_LEVEL,
     END_MATCH,
     LANGUAGES,
-    CONSUMABLE_DISPLAY
+    CONSUMABLE_DISPLAY,
+    POWER_BUTTONS
 }

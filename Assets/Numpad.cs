@@ -59,4 +59,26 @@ public class Numpad : MonoBehaviour
             numpadButtons[i].RefreshSize();
         }
     }
+
+    public void ActivateBombVFX(int middleNumber) {
+        /*
+         guess = 1
+         middlenumber = 0 
+         
+         firstbomb = false
+         midbomb = true
+         lastbomb = true
+         */
+        //Le resto uno para pasar de guess a index en numpads
+        middleNumber--;
+        if (middleNumber > 0) {
+            numpadButtons[middleNumber - 1].bombFx.SetActive(true);
+        }
+        
+        numpadButtons[middleNumber].bombFx.SetActive(true);
+        
+        if (middleNumber < numpadButtons.Length-1 && numpadButtons[middleNumber + 1].gameObject.activeInHierarchy) {
+            numpadButtons[middleNumber + 1].bombFx.SetActive(true);
+        }
+    }
 }

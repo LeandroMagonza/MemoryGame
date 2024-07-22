@@ -7,10 +7,9 @@ public class PowerButton : MonoBehaviour
 {
     //[SerializeField] public string name;
     [SerializeField] public ConsumableID consumableID;
-    [SerializeField] public Button button;
+    [SerializeField] private Button button;
     [SerializeField] public TextMeshProUGUI text;
     [SerializeField] public GameClip gameClip;
-    public bool markedActive = false;
     //[SerializeField] public GameObject peekCanvas;
     public PowerPanelButtonHolder powerPanelButtonHolder;
     public void SetButtonText() {
@@ -40,7 +39,6 @@ public class PowerButton : MonoBehaviour
             {
                 button.interactable = false;
             }
-            button.GetComponent<Image>().color = button.interactable ? ((markedActive)?Color.yellow:Color.white) : Color.gray;
         }
     }
     
@@ -58,16 +56,11 @@ public class PowerButton : MonoBehaviour
     }
 
 
-    public void MarkActive(bool active) {
-        markedActive = active;
+    public void MarkActive() {
+        bool active = (GameManager.Instance.currentlyActivatedPower == consumableID);
         CustomDebugger.Log(active+" marked button as");
-        button.GetComponent<Image>().color = button.interactable ? ((markedActive)?Color.yellow:Color.white) : Color.gray;
-        CustomDebugger.Log(button.GetComponent<Image>().color+" button color");
+        button.GetComponent<Image>().color = button.interactable ? ((active)?Color.yellow:Color.white) : Color.gray;
+        CustomDebugger.Log(button.GetComponent<Image>().color+" button color "+ active+" "+consumableID,DebugCategory.POWER_BUTTONS);
     }
- // public void Update() {
-    //     if (markedActive) {
-    //         throw new NotImplementedException();
-    //     }
-    // }
    
 }
