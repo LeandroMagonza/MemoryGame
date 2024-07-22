@@ -170,8 +170,8 @@ public class GameManager : MonoBehaviour {
     public bool speedrunMode = false;
     public int startingStickerAmount = 4;
     public int amountOfTurnsBetweenAddingStickers = 10;
-    public int flatAmountOfStickerAdded = 0;
-    public int scalingAmountOfStickerAdded = 1;
+    public int flatAmountOfStickerAdded => PersistanceManager.Instance.GetFlatAmountOfStickerAdded();
+    public float scalingAmountOfStickerAdded => PersistanceManager.Instance.GetScalingAmountOfStickerAdded();
     [SerializeField] private float delayReductionForWinClip = 4.2f;
     [SerializeField] private float delayBetweenStars = .35f;
     private int maxLevel => StageManager.Instance.maxLevel;
@@ -344,11 +344,13 @@ public class GameManager : MonoBehaviour {
         {
             AddStickers(1);
         }
-        else if (turnNumber % amountOfTurnsBetweenAddingStickers == 0)
+        else if (turnNumber % (amountOfTurnsBetweenAddingStickers + selectedDifficulty - 2 ) == 0)
         {
-            AddStickers(flatAmountOfStickerAdded + (turnNumber / amountOfTurnsBetweenAddingStickers) * scalingAmountOfStickerAdded);
+            AddStickers(flatAmountOfStickerAdded+ Mathf.RoundToInt(
+                                         ((float)turnNumber / (amountOfTurnsBetweenAddingStickers + selectedDifficulty - 2)) *
+                                         scalingAmountOfStickerAdded));
         }
-
+        
         currentlyActivatedPower = ConsumableID.NONE;
         
         SetRandomImage();
@@ -623,7 +625,10 @@ public class GameManager : MonoBehaviour {
         //y se agrega el primer sprite que no este en el pool, al pool
         
         //devuelve verdadero si se pudieron agregar al pool todas las imagenes requeridas
-
+        if (amountOfImages < 1) {
+            return true;
+        }
+        
         List<StickerData> shuffledStickers =
             new List<StickerData >();
         foreach (var sticker in _remainingStickersFromStage) {

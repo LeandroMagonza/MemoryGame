@@ -699,6 +699,14 @@ public class PersistanceManager : MonoBehaviour
     public float GetExperienceIncreasePerLevel() {
         if (configData == null) return 0f;
         return configData.experienceIncreasePerLevel;
+    } 
+    public int GetFlatAmountOfStickerAdded() {
+        if (configData == null) return 0;
+        return configData.flatAmountOfStickerAdded;
+    } 
+    public float GetScalingAmountOfStickerAdded() {
+        if (configData == null) return 1f;
+        return configData.scalingAmountOfStickerAdded;
     }
     public void SaveMatch(Match match)
     {
@@ -778,6 +786,8 @@ public class ConfigData {
     public int baseExperiencePoints = 1000;
     public float experienceIncreasePerLevel = 1.2f;
     public string backgroundColor;
+    public int flatAmountOfStickerAdded = 0;
+    public float scalingAmountOfStickerAdded = 1;
 }
 public enum FileName {
     UserData,
