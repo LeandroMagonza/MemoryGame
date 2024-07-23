@@ -136,9 +136,13 @@ public class LifeCounter : MonoBehaviour
         int add = 0;
         if (GameManager.Instance.userData.unlockedUpgrades.ContainsKey(UpgradeID.ExtraLife))
             add = GameManager.Instance.userData.unlockedUpgrades[UpgradeID.ExtraLife];
-        
-        return MyExtensions.GetLerpColor(heartIndex,baseLives+add-1,new List<Color>(){Color.red,Color.yellow,Color.green});
-    }  
+
+        ColorUtility.TryParseHtmlString("#FF2E00", out var redColor);
+        ColorUtility.TryParseHtmlString("#FDF900", out var yellowColor);
+        ColorUtility.TryParseHtmlString("#2FFF00", out var greenColor);
+
+        return MyExtensions.GetLerpColor(heartIndex, baseLives + add - 1, new List<Color>() { redColor, yellowColor, greenColor });
+    }
 
 
     private void ChangeHeartColor(GameObject heart, Color color)

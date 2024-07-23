@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -79,6 +80,12 @@ public class Numpad : MonoBehaviour
         
         if (middleNumber < numpadButtons.Length-1 && numpadButtons[middleNumber + 1].gameObject.activeInHierarchy) {
             numpadButtons[middleNumber + 1].bombFx.SetActive(true);
+        }
+    }
+
+    public void UpdateButtonColors(int amountOfAppearences) {
+        foreach (var VARIABLE in numpadButtons) {
+            VARIABLE.UpdateButtonColor(amountOfAppearences);
         }
     }
 }

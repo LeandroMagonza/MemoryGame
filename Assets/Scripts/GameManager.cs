@@ -610,6 +610,10 @@ public class GameManager : MonoBehaviour {
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             selectedDifficulty,
             0);
+
+
+        numpad.GetComponent<Numpad>()
+            .UpdateButtonColors(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences);
     }
 
     public void RemoveStickerFromPool() {
@@ -756,11 +760,28 @@ public class GameManager : MonoBehaviour {
         highScoreText.text = highScoreToSet.ToString();
         yield return new WaitForSeconds(clipDuration - timeUntillHighScoreTextUpdate);
     }
-    public void SetTimer(float timer) {
-        this.timer = Mathf.Clamp(timer,0,maxTimer);
-        timerText.text = ((int)this.timer).ToString();
+    public void SetTimer(float timerToSet) {
+        string previousTimer = ((int)timer).ToString();
+
+        timer = Mathf.Clamp(timerToSet,0,math.INFINITY);
+        timerText.text = ((int)timer).ToString();
+        string newTimer = ((int)timer).ToString();
+
+        if (previousTimer != newTimer && timer < 4) {
+            switch (newTimer) {
+                case "3":
+                    AudioManager.Instance.PlayClip(GameClip.beep1);
+                    break;
+                case "2":
+                    AudioManager.Instance.PlayClip(GameClip.beep2);
+                    break;
+                case "1":
+                    AudioManager.Instance.PlayClip(GameClip.beep3);
+                    break;
+            }
+        }
         
-        if (this.timer<=1) {
+        if (timer<=1) {
             OnRanOutOfTime();
         }
     }
@@ -887,6 +908,8 @@ public class GameManager : MonoBehaviour {
         stageGroupIntroPanel.gameObject.SetActive(false);
         pause = false;
         AudioManager.Instance.PlayClip(GameClip.playStage);
+        numpad.GetComponent<Numpad>()
+            .UpdateButtonColors(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences);
         
     }
 

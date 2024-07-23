@@ -49,5 +49,6 @@ public enum DebugCategory
     END_MATCH,
     LANGUAGES,
     CONSUMABLE_DISPLAY,
+    NUMPAD,
     POWER_BUTTONS
 }
