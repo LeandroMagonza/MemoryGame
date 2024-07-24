@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Unity.Notifications.Android;
 using UnityEngine;
 
-using System;
-using System.Collections.Generic;
+#if UNITY_ANDROID
 using Unity.Notifications.Android;
-using UnityEngine;
 using UnityEngine.Android;
+#endif
 
 public class NotificationManager : MonoBehaviour
 {
@@ -44,7 +42,9 @@ public class NotificationManager : MonoBehaviour
 
     private Dictionary<ConsumableID, Dictionary<int, ScheduledNotification>> notificationData = new Dictionary<ConsumableID, Dictionary<int, ScheduledNotification>>();
 
-    void Start() {
+#if UNITY_ANDROID
+    void Start()
+    {
         AndroidNotificationCenter.Initialize();
         AndroidNotificationCenter.CancelAllDisplayedNotifications();
         // Crear un canal para las notificaciones si aún no se ha creado
@@ -56,9 +56,14 @@ public class NotificationManager : MonoBehaviour
             Description = "Canal para notificaciones regulares"
         };
         AndroidNotificationCenter.RegisterNotificationChannel(channel);
-        //ScheduleNotification("TEST", "TEST", DateTime.Now.AddSeconds(5), ConsumableID.Bomb);
-
+        // ScheduleNotification("TEST", "TEST", DateTime.Now.AddSeconds(5), ConsumableID.Bomb);
     }
+#else
+    void Start()
+    {
+        // No hacer nada en plataformas que no sean Android
+    }
+#endif
 
     /// <summary>
     /// Programa una notificación para el dispositivo Android.
@@ -69,6 +74,7 @@ public class NotificationManager : MonoBehaviour
     /// <param name="category">El identificador de la categoría de la notificación.</param>
     public int ScheduleNotification(string title, string text, DateTime scheduledTime, ConsumableID category)
     {
+#if UNITY_ANDROID
         var notification = new AndroidNotification()
         {
             Title = title,
@@ -77,8 +83,6 @@ public class NotificationManager : MonoBehaviour
         };
 
         // Programar la notificación
-#if UNITY_ANDROID
-        ;
         int notificationId = AndroidNotificationCenter.SendNotification(notification, "default_channel");
         // Crear una nueva notificación programada
         var scheduledNotification = new ScheduledNotification(title, text, scheduledTime);
@@ -89,14 +93,13 @@ public class NotificationManager : MonoBehaviour
             notificationData[category] = new Dictionary<int, ScheduledNotification>();
         }
         notificationData[category][notificationId] = scheduledNotification;
-        
-        Debug.Log("Schedule Notification: id:"+notificationId+" cat:"+category+"\n"+title+"\n"+text+"\n"+scheduledTime);
+
+        Debug.Log("Schedule Notification: id:" + notificationId + " cat:" + category + "\n" + title + "\n" + text + "\n" + scheduledTime);
         return notificationId;
-#endif
-#if UNITY_EDITOR
-        CustomDebugger.Log("Schedule Notification: "+category+"\n"+title+"\n"+text+"\n"+scheduledTime);
-#endif            
+#else
+        CustomDebugger.Log("Schedule Notification: " + category + "\n" + title + "\n" + text + "\n" + scheduledTime);
         return 0;
+#endif
     }
 
     /// <summary>
@@ -105,18 +108,22 @@ public class NotificationManager : MonoBehaviour
     /// <param name="category">La categoría de la notificación que se eliminará.</param>
     public void CancelNotificationsFromCategory(ConsumableID category)
     {
+#if UNITY_ANDROID
         if (notificationData.TryGetValue(category, out Dictionary<int, ScheduledNotification> notifications))
         {
             foreach (var notificationId in notifications.Keys)
             {
-                if (notificationId == 0) {
+                if (notificationId == 0)
+                {
                     continue;
                 }
                 AndroidNotificationCenter.CancelNotification(notificationId);
             }
             notificationData.Remove(category);
         }
+#endif
     }
+
     public bool HasNotification(int notificationId, ConsumableID category)
     {
         if (notificationData.TryGetValue(category, out Dictionary<int, ScheduledNotification> notifications))
@@ -125,8 +132,10 @@ public class NotificationManager : MonoBehaviour
         }
         return false;
     }
-    public void AskForPermission()//call this function to ask request
+
+    public void AskForPermission() // call this function to ask request
     {
+#if UNITY_ANDROID
         if (Permission.HasUserAuthorizedPermission("android.permission.POST_NOTIFICATIONS"))
         {
             print("permission granted!!");
@@ -139,8 +148,9 @@ public class NotificationManager : MonoBehaviour
             callbacks.PermissionDeniedAndDontAskAgain += PermissionCallbacks_PermissionDeniedAndDontAskAgain;
             Permission.RequestUserPermission("android.permission.POST_NOTIFICATIONS", callbacks);
         }
-
+#endif
     }
+
     internal void PermissionCallbacks_PermissionDeniedAndDontAskAgain(string permissionName)
     {
         Debug.Log($"{permissionName} PermissionDeniedAndDontAskAgain");
@@ -155,7 +165,6 @@ public class NotificationManager : MonoBehaviour
     {
         Debug.Log($"{permissionName} PermissionCallbacks_PermissionDenied");
     }
-
 }
 
 public class ScheduledNotification

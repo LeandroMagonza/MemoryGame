@@ -1,5 +1,8 @@
 ﻿using System.Collections;
+#if UNITY_ANDROID
 using Unity.Notifications.Android;
+using UnityEngine.Android;
+#endif
 using UnityEngine;
 
 public class TestManager : MonoBehaviour
