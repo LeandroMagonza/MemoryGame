@@ -11151,8 +11151,6 @@ MonoBehaviour:
   speedrunMode: 0
   startingStickerAmount: 4
   amountOfTurnsBetweenAddingStickers: 10
-  flatAmountOfStickerAdded: 0
-  scalingAmountOfStickerAdded: 1
   delayReductionForWinClip: 4.3
   delayBetweenStars: 0.4
 --- !u!4 &1079194499
@@ -11957,6 +11955,18 @@ PrefabInstance:
       propertyPath: m_AdditionalShaderChannelsFlag
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5232140566473959228, guid: 6df703b5f9b4df241b71d62a78d861f1, type: 3}
+      propertyPath: m_ScreenMatchMode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5232140566473959228, guid: 6df703b5f9b4df241b71d62a78d861f1, type: 3}
+      propertyPath: m_ReferenceResolution.x
+      value: 450
+      objectReference: {fileID: 0}
+    - target: {fileID: 5232140566473959228, guid: 6df703b5f9b4df241b71d62a78d861f1, type: 3}
+      propertyPath: m_ReferenceResolution.y
+      value: 800
+      objectReference: {fileID: 0}
     - target: {fileID: 5232140566473959230, guid: 6df703b5f9b4df241b71d62a78d861f1, type: 3}
       propertyPath: m_Name
       value: SelectUpgradePanel
@@ -12372,6 +12382,18 @@ PrefabInstance:
     - target: {fileID: 9132937329709647299, guid: 98a26181fd5565844b3f357e49b6de3e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9132937329709647301, guid: 98a26181fd5565844b3f357e49b6de3e, type: 3}
+      propertyPath: m_ScreenMatchMode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 9132937329709647301, guid: 98a26181fd5565844b3f357e49b6de3e, type: 3}
+      propertyPath: m_ReferenceResolution.x
+      value: 450
+      objectReference: {fileID: 0}
+    - target: {fileID: 9132937329709647301, guid: 98a26181fd5565844b3f357e49b6de3e, type: 3}
+      propertyPath: m_ReferenceResolution.y
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 9132937329709647303, guid: 98a26181fd5565844b3f357e49b6de3e, type: 3}
       propertyPath: m_Name
@@ -12933,6 +12955,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 137643326719737535, guid: b0e61df1763e5c3449f7c4166134eaa0, type: 3}
+      propertyPath: m_ScreenMatchMode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 137643326719737535, guid: b0e61df1763e5c3449f7c4166134eaa0, type: 3}
+      propertyPath: m_ReferenceResolution.x
+      value: 450
+      objectReference: {fileID: 0}
+    - target: {fileID: 137643326719737535, guid: b0e61df1763e5c3449f7c4166134eaa0, type: 3}
+      propertyPath: m_ReferenceResolution.y
+      value: 800
+      objectReference: {fileID: 0}
     - target: {fileID: 2971118078578926233, guid: b0e61df1763e5c3449f7c4166134eaa0, type: 3}
       propertyPath: m_Name
       value: LoadingCanvas
@@ -13219,8 +13253,12 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3594057874501386063, guid: ecb28b6d0b26eeb4f9cff676c5750d2e, type: 3}
+      propertyPath: m_ScreenMatchMode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3594057874501386063, guid: ecb28b6d0b26eeb4f9cff676c5750d2e, type: 3}
       propertyPath: m_ReferenceResolution.x
-      value: 1080
+      value: 450
       objectReference: {fileID: 0}
     - target: {fileID: 3594057874501386063, guid: ecb28b6d0b26eeb4f9cff676c5750d2e, type: 3}
       propertyPath: m_ReferenceResolution.y
@@ -13836,8 +13874,20 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4471851493571877042, guid: a8a64a6413b98e443a5a2509e85db577, type: 3}
+      propertyPath: m_ScreenMatchMode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4471851493571877042, guid: a8a64a6413b98e443a5a2509e85db577, type: 3}
       propertyPath: m_MatchWidthOrHeight
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4471851493571877042, guid: a8a64a6413b98e443a5a2509e85db577, type: 3}
+      propertyPath: m_ReferenceResolution.x
+      value: 450
+      objectReference: {fileID: 0}
+    - target: {fileID: 4471851493571877042, guid: a8a64a6413b98e443a5a2509e85db577, type: 3}
+      propertyPath: m_ReferenceResolution.y
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 4471851493571877043, guid: a8a64a6413b98e443a5a2509e85db577, type: 3}
       propertyPath: m_Camera
@@ -14440,6 +14490,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2263625804015464046, guid: 65684e4c9b0c5014ca059ac3ed69e87f, type: 3}
+      propertyPath: m_ScreenMatchMode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2263625804015464046, guid: 65684e4c9b0c5014ca059ac3ed69e87f, type: 3}
+      propertyPath: m_ReferenceResolution.x
+      value: 450
+      objectReference: {fileID: 0}
+    - target: {fileID: 2263625804015464046, guid: 65684e4c9b0c5014ca059ac3ed69e87f, type: 3}
+      propertyPath: m_ReferenceResolution.y
+      value: 800
+      objectReference: {fileID: 0}
     - target: {fileID: 2263625804015464047, guid: 65684e4c9b0c5014ca059ac3ed69e87f, type: 3}
       propertyPath: m_Camera
       value: 
@@ -14648,6 +14710,18 @@ PrefabInstance:
     - target: {fileID: 2401689382978719172, guid: a6f939eb9e05db54b955f530679c0cb8, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2401689382978719174, guid: a6f939eb9e05db54b955f530679c0cb8, type: 3}
+      propertyPath: m_ScreenMatchMode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2401689382978719174, guid: a6f939eb9e05db54b955f530679c0cb8, type: 3}
+      propertyPath: m_ReferenceResolution.x
+      value: 450
+      objectReference: {fileID: 0}
+    - target: {fileID: 2401689382978719174, guid: a6f939eb9e05db54b955f530679c0cb8, type: 3}
+      propertyPath: m_ReferenceResolution.y
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 2942527141894377169, guid: a6f939eb9e05db54b955f530679c0cb8, type: 3}
       propertyPath: m_AnchorMax.y
@@ -15924,6 +15998,18 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6707693565595984196, guid: e1d5818bda27d08469dd056abccd6503, type: 3}
+      propertyPath: m_ScreenMatchMode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6707693565595984196, guid: e1d5818bda27d08469dd056abccd6503, type: 3}
+      propertyPath: m_ReferenceResolution.x
+      value: 450
+      objectReference: {fileID: 0}
+    - target: {fileID: 6707693565595984196, guid: e1d5818bda27d08469dd056abccd6503, type: 3}
+      propertyPath: m_ReferenceResolution.y
+      value: 800
+      objectReference: {fileID: 0}
     - target: {fileID: 6707693565595984197, guid: e1d5818bda27d08469dd056abccd6503, type: 3}
       propertyPath: m_Camera
       value: 
@@ -16870,8 +16956,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9132937329709647301, guid: 913c7ab62cb5df144a9bb8c0f49f1a90, type: 3}
+      propertyPath: m_ScreenMatchMode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 9132937329709647301, guid: 913c7ab62cb5df144a9bb8c0f49f1a90, type: 3}
       propertyPath: m_ReferenceResolution.x
-      value: 1080
+      value: 450
       objectReference: {fileID: 0}
     - target: {fileID: 9132937329709647301, guid: 913c7ab62cb5df144a9bb8c0f49f1a90, type: 3}
       propertyPath: m_ReferenceResolution.y

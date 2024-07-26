@@ -490,7 +490,6 @@ public class UpgradeData
 
             default:
                 throw new Exception("Upgrade ID not found");
-                break;
         }
         return upgrade;
     }

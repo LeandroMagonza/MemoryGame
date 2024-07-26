@@ -105,7 +105,7 @@ public class StickerManager : MonoBehaviour
         CustomDebugger.Log("GetStickerLevelByAmountOfDuplicates",DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
         CustomDebugger.Log("amount of duplicates "+amountOfDuplicates,DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
         int level = 0;
-        CustomDebugger.Log("stikcerlevels count "+PersistanceManager.Instance.StickerLevels.Count,DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
+        CustomDebugger.Log("stickerLevels count "+PersistanceManager.Instance.StickerLevels.Count,DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
         foreach (var VARIABLE in PersistanceManager.Instance.StickerLevels)
         {
             
@@ -113,13 +113,13 @@ public class StickerManager : MonoBehaviour
             if (amountOfDuplicates < VARIABLE.Value.amountRequired) break;
             level = VARIABLE.Key;
         }
-        CustomDebugger.Log("resulitng level "+level,DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
+        CustomDebugger.Log("resulting level "+level,DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
         return level;
     }
 
     public IEnumerator LoadAllStickersFromSet(StickerSet setToLoad)
     {
-        string setType = "IMAGES";
+        //string setType = "IMAGES";
         if (currentLoadedSetStickerData.ContainsKey((setToLoad, language)))
         {
             CustomDebugger.Log("Stickers for " + setToLoad + " already loaded.",DebugCategory.LANGUAGES);
@@ -129,40 +129,21 @@ public class StickerManager : MonoBehaviour
         yield return StartCoroutine(LoadStickerData(setToLoad));
     }
 
-    private IEnumerator LoadStickerData(StickerSet setToLoad)
-    {
-        string folderPath = Path.Combine(Application.persistentDataPath, setToLoad.ToString());
-        Directory.CreateDirectory(folderPath);
-        bool foundLanguage = true;
-        string filePath = Path.Combine(folderPath, $"additionalInfo_{language}.csv");
-        //si no existe el idioma especifico
-        if (!File.Exists(filePath))
-        {
-            //se intenta descargar
-            yield return StartCoroutine(PersistanceManager.Instance.DownloadFile(setToLoad+$"/additionalInfo_{language}.csv"));
-            //si despues de intentar descargar sigue sin existir, se fija si existe el default 
-            if(!File.Exists(filePath)) {
-                foundLanguage = false;
-                //si no existe, se intenta descargar
-                filePath = Path.Combine(folderPath, "additionalInfo.csv");
-                if (!File.Exists(filePath)) {
-                    yield return StartCoroutine(PersistanceManager.Instance.DownloadFile(setToLoad + "/" + "additionalInfo.csv"));
-                }
-                //si sigue sin existir el default, el archivo no estaba en el servidor y tira error
-                if (!File.Exists(filePath)) Debug.LogError("CSV data for stickers not found.");
-            }
-        
-        }
-        string setType = "IMAGES";
-        
-        if (!File.Exists(filePath))
-        {
-            Debug.LogError("CSV data for stickers not found.");
-            yield break;
-        }
+    private IEnumerator LoadStickerData(StickerSet setToLoad) {
 
-        string csvData = File.ReadAllText(filePath);
-        string[] lines = csvData.Split('\n');
+        bool foundLanguage = true;
+        yield return PersistanceManager.Instance.LoadFile("additionalInfo_" + language, "csv");
+        string languageFileContents = PersistanceManager.Instance.GetLoadedFile("additionalInfo_" + language);
+
+        if (languageFileContents is null) {
+            yield return PersistanceManager.Instance.LoadFile("additionalInfo", "csv");
+            languageFileContents = PersistanceManager.Instance.GetLoadedFile("additionalInfo");
+            foundLanguage = false;
+        }
+        
+        string setType = "IMAGES";
+
+        string[] lines = languageFileContents.Split('\n');
         Sprite[] spritesheet = Array.Empty<Sprite>();
 
         if (setType == "SPRITESHEET")

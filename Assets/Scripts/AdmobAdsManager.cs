@@ -1,8 +1,10 @@
 using UnityEngine;
-using GoogleMobileAds.Api;
 using TMPro;
 using UnityEngine.UI;
 using Newtonsoft.Json.Linq;
+#if UNITY_ANDROID
+using GoogleMobileAds.Api;
+#endif
 
 public class AdmobAdsManager : MonoBehaviour
 {
@@ -10,11 +12,14 @@ public class AdmobAdsManager : MonoBehaviour
     public string appId = "ca-app-pub-1385093244148841~5602672977";
 
 
-    [SerializeField] string interId = "ca-app-pub-3940256099942544/1033173712";
+    [SerializeField] string interId = "ca-app-pub-1071952418870103/7578659386";
 #if UNITY_ANDROID
     //[SerializeField] string bannerId = "ca-app-pub-1385093244148841/2952458907";
     //[SerializeField] string rewardedId = "ca-app-pub-3940256099942544/5224354917";
     //[SerializeField] string nativeId = "ca-app-pub-3940256099942544/2247696110";
+    BannerView bannerView;
+    InterstitialAd interstitialAd;
+    RewardedAd rewardedAd;
 
 #elif UNITY_IPHONE
     string bannerId = "ca-app-pub-3940256099942544/2934735716";
@@ -24,12 +29,9 @@ public class AdmobAdsManager : MonoBehaviour
 
 #endif
 
-    BannerView bannerView;
-    InterstitialAd interstitialAd;
-    RewardedAd rewardedAd;
 
     public bool showInterstitial;
-    public float timeToInterstitial = 60;
+    public float timeToInterstitial = 90;
     private float currentTimeToInterstitial = 0;
     
     private void Awake()
@@ -41,13 +43,15 @@ public class AdmobAdsManager : MonoBehaviour
     }
     private void Start()
     {
-        MobileAds.RaiseAdEventsOnUnityMainThread = true;
-        MobileAds.Initialize(initStatus =>
+        #if UNITY_ANDROID
+            MobileAds.RaiseAdEventsOnUnityMainThread = true;
+            MobileAds.Initialize(initStatus =>
         {
             print("Ads Initialised !!");
             LoadInterstitialAd();
 
         });
+        #endif
     }
     /*
     #region Banner
@@ -139,7 +143,8 @@ public class AdmobAdsManager : MonoBehaviour
     
     public void LoadInterstitialAd()
     {
-
+        #if  UNITY_ANDROID
+        
         if (interstitialAd != null)
         {
             interstitialAd.Destroy();
@@ -148,7 +153,7 @@ public class AdmobAdsManager : MonoBehaviour
         var adRequest = new AdRequest();
         adRequest.Keywords.Add("unity-admob-sample");
 
-        InterstitialAd.Load(interId, adRequest, (InterstitialAd ad, LoadAdError error) =>
+        InterstitialAd.Load(interId, adRequest, (ad, error) =>
         {
             if (error != null || ad == null)
             {
@@ -161,12 +166,16 @@ public class AdmobAdsManager : MonoBehaviour
             interstitialAd = ad;
             InterstitialEvent(interstitialAd);
         });
+        #endif
 
     }
 
     [ContextMenu("ShowInterstitialAd")]
     public void ShowInterstitialAd()
     {
+#if UNITY_ANDROID
+
+
         if (!showInterstitial) return;
         if (interstitialAd != null && interstitialAd.CanShowAd())
         {
@@ -213,6 +222,7 @@ public class AdmobAdsManager : MonoBehaviour
             Debug.LogError("Interstitial ad failed to open full screen content " +
                            "with error : " + error);
         };
+#endif
     }
 
     public void ReduceInstertitialTime(float elapsedTime)

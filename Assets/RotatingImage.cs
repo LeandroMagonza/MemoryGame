@@ -13,7 +13,7 @@ public class RotatingImage : MonoBehaviour
     private bool accelerating = true; // Indicador de si está acelerando
     private Vector3 originalScale; // Escala original del objeto
     private float scaleTimer = 0f; // Temporizador para el escalado
-    private bool scalingUp = true; // Indicador de si está escalando hacia arriba
+    //private bool scalingUp = true; // Indicador de si está escalando hacia arriba
 
     private void Start()
     {

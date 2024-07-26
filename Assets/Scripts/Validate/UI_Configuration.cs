@@ -1,5 +1,4 @@
-#if UNITY_EDITOR
-
+/*
 using System.Data;
 using TMPro;
 using Unity.VisualScripting;
@@ -8,15 +7,16 @@ using UnityEngine.UI;
 
 public class UI_Configuration : MonoBehaviour
 {
-    [SerializeField] private bool onValidate = false;
+    public bool onValidate = false;
     [Space(5)]
-    [SerializeField] private TextConfiguration[] textToConfig;
-    [SerializeField] private ImageConfiguration[] imageToConfig;
+    public TextConfiguration[] textToConfig;
+    public ImageConfiguration[] imageToConfig;
 
     private void OnValidate()
     {
-        if (onValidate)
-            ValidateData();
+        #if UNITY_EDITOR
+            if (onValidate) ValidateData();
+        #endif      
     }
     [ContextMenu("ValidateData")]
     public void ValidateData()
@@ -34,12 +34,12 @@ public class UI_Configuration : MonoBehaviour
 [System.Serializable]
 public struct UI_ConfigurationData
 {
-    [SerializeField] public string name;
+    public string name;
     [Space(10)]
-    [SerializeField] public TextConfiguration[] textToConfig;
+    public TextConfiguration[] textToConfig;
 
     [Space(10)]
-    [SerializeField] public ImageConfiguration[] imageToConfig;
+    public ImageConfiguration[] imageToConfig;
 
     public void Initialize()
     {
@@ -57,10 +57,10 @@ public struct UI_ConfigurationData
 [System.Serializable]
 public struct TextConfiguration
 {
-    [SerializeField] public string name;
-    [SerializeField] public TMP_FontAsset fontToSet;
+    public string name;
+    public TMP_FontAsset fontToSet;
     [Space(10)]
-    [SerializeField] public TextDataConfiguration[] dataToSet;
+    public TextDataConfiguration[] dataToSet;
 
     public void Initialize()
     {
@@ -74,12 +74,12 @@ public struct TextConfiguration
 [System.Serializable]
 public struct TextDataConfiguration
 {
-    [SerializeField] public string name;
-    [SerializeField] public Color colorToSet;
+    public string name;
+    public Color colorToSet;
     [Space(5)]
-    [SerializeField] public OutlineDataConfiguration outlineToSet; 
+    public OutlineDataConfiguration outlineToSet; 
     [Header("TMP Component To Change")]
-    [SerializeField] public TextMeshProUGUI[] textsComponentsToChange;
+    public TextMeshProUGUI[] textsComponentsToChange;
 
     public void Set(TextConfiguration configuration)
     {
@@ -99,10 +99,10 @@ public struct TextDataConfiguration
 [System.Serializable]
 public struct ImageConfiguration
 {
-    [SerializeField] public string name;
-    [SerializeField] public Sprite spriteToSet;
+    public string name;
+    public Sprite spriteToSet;
     [Space(10)]
-    [SerializeField] public ImageDataConfiguration[] dataToSet;
+    public ImageDataConfiguration[] dataToSet;
 
     public void Initialize()
     {
@@ -115,12 +115,12 @@ public struct ImageConfiguration
 [System.Serializable]
 public struct ImageDataConfiguration
 {
-    [SerializeField] public string name;
-    [SerializeField] public Color colorToSet;
+    public string name;
+    public Color colorToSet;
     [Space(5)]
-    [SerializeField] public OutlineDataConfiguration outlineToSet;
+    public OutlineDataConfiguration outlineToSet;
     [Header ("Images Component To Change")]
-    [SerializeField] public Image[] imagesComponentsToChange;
+    public Image[] imagesComponentsToChange;
 
     public void Set(ImageConfiguration configuration)
     {
@@ -140,10 +140,8 @@ public struct ImageDataConfiguration
 [System.Serializable]
 public struct OutlineDataConfiguration
 {
-
-
-    [SerializeField] public float outlineThicknessToSet;
-    [SerializeField] public Color outlineColorToSet;
+    public float outlineThicknessToSet;
+    public Color outlineColorToSet;
 }
 
-#endif
+*/

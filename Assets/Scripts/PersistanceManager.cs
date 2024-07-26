@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Transactions;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
@@ -51,7 +51,7 @@ public class PersistanceManager : MonoBehaviour
     
     //public Dictionary<int, StageData> stages;
     private Dictionary<int, StickerLevelsData> stickerLevels = new Dictionary<int, StickerLevelsData>();
-    private Dictionary<FileName, string> loadedFiles = new Dictionary<FileName, string>();
+    private Dictionary<string, string> loadedFiles = new Dictionary<string, string>();
 
     public Dictionary<int, StickerLevelsData> StickerLevels
     {
@@ -67,14 +67,26 @@ public class PersistanceManager : MonoBehaviour
     
     //private int stagesVersion = 0;
     private readonly string fileHostUrl = "https://leandromagonza.github.io/MemoGram/";
-    
+
+
     [System.Serializable]
     private class LanguagesList {
         public int version = 0;
         public List<string> languages;
     }
-
+    /*
+#if UNITY_WEBGL
+    [DllImport("__Internal")]
+    private static extern void _JS_FileSystem_Sync();
+#endif
+*/
     void Start() {
+        #if UNITY_WEBGL
+        dataLocation = DataLocation.ResourcesFolder;
+        #endif
+        #if UNITY_ANDROID
+        dataLocation = DataLocation.CloudAndLocalStorage;
+        #endif
         StartCoroutine(LoadDataAndSetup());
     }
 
@@ -103,33 +115,17 @@ public class PersistanceManager : MonoBehaviour
    private IEnumerator LoadUIMenuConfiguration()
 {
     string setName = StageManager.Instance.gameVersion.ToString();
-    string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.Stages + ".json");
-    string latestFilePath = Path.Combine(Application.persistentDataPath, setName, "latestStages.json");
-    string json;
 
-    if (!File.Exists(filePath))
-    {
-        CustomDebugger.Log("No saved stages found at " + filePath);
-        yield return StartCoroutine(GetJson(FileName.Stages));
-    }
-    else
-    {
-        yield return StartCoroutine(GetJson(FileName.Stages, "latestStages"));
-    }
-
-    // Cargar la configuración actual
-    json = File.ReadAllText(filePath);
+    yield return StartCoroutine(LoadFile(FileName.Stages,"json"));
+    string json = GetLoadedFile(FileName.Stages);
     JObject jsonData = JObject.Parse(json);
     ConfigData currentConfig = jsonData["config"].ToObject<ConfigData>();
 
-    // Cargar la última configuración, si está disponible
-    ConfigData latestConfig = null;
-    if (File.Exists(latestFilePath))
-    {
-        json = File.ReadAllText(latestFilePath);
-        JObject latestJsonData = JObject.Parse(json);
-        latestConfig = latestJsonData["config"].ToObject<ConfigData>();
-    }
+    
+    yield return StartCoroutine(LoadFile(FileName.Stages,"json","",true));
+    string latestJson = GetLoadedFile(FileName.Stages);
+    JObject latestJsonData = JObject.Parse(latestJson);
+    ConfigData latestConfig = latestJsonData["config"].ToObject<ConfigData>();
 
     // Inicializar finalConfig con la configuración actual
     ConfigData finalConfig = currentConfig;
@@ -156,23 +152,12 @@ public class PersistanceManager : MonoBehaviour
     // Opcional: reemplazar la configuración actual por la última si es más nueva
     if (finalConfig == latestConfig)
     {
-        File.Copy(latestFilePath, filePath, true);
-
         // Borrar todos los archivos que contengan additionalInfo en el nombre dentro de la carpeta con el mismo nombre que el setName
         string setFolderPath = Path.Combine(Application.persistentDataPath, setName);
         foreach (var file in Directory.GetFiles(setFolderPath, "additionalInfo*"))
         {
             File.Delete(file);
         }
-
-        // Borrar la carpeta languages que está en el Application.persistentDataPath
-        string languagesFolderPath = Path.Combine(Application.persistentDataPath, "Languages");
-        if (Directory.Exists(languagesFolderPath))
-        {
-            Directory.Delete(languagesFolderPath, true);
-        }
-
-        // Descarga de los archivos necesarios después de la eliminación
     }
 
     PlayerLevelManager.Instance.UpdatePlayerLevelButtons();
@@ -225,44 +210,14 @@ public class PersistanceManager : MonoBehaviour
 
     public IEnumerator LoadUserData()
     {
-        string setName = StageManager.Instance.gameVersion.ToString();
-        string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.UserData+".json");
-        string json;
-
-        if (dataLocation == DataLocation.LocalStorage)
-        {
-            if (!File.Exists(filePath))
-            {
-                Debug.LogError("No userdata found at " + filePath);
-                yield return StartCoroutine(GetJson(FileName.UserData));
-            }
-            json = File.ReadAllText(filePath);
-        }
-        else if (dataLocation == DataLocation.ResourcesFolder)
-        {
-            TextAsset file = Resources.Load<TextAsset>("Storage/" + setName + "/userData");
-            if (file == null)
-            {
-                yield return StartCoroutine(GetJson(FileName.UserData));
-                json = loadedFiles[FileName.UserData];
-                Debug.LogError("No userdata found in Resources.");
-            }
-            else {
-                json = file.text;
-            }
-        }
-        else
-        {
-            Debug.LogError("Invalid data location.");
-            yield break;
-        }
+        yield return StartCoroutine(LoadFile(FileName.UserData,"json"));
+        string json = GetLoadedFile(FileName.UserData);
 
         // Utilizar DeserializeUserData para deserializar los datos
         UserData userData = DeserializeUserData(json);
         if (userData != null)
         {
             userData.ConvertStickerListToDictionary();
-            //CustomDebugger.Log("UserData loaded, stages count: " + userData.stages.Count);
         }
         else
         {
@@ -356,15 +311,9 @@ public class PersistanceManager : MonoBehaviour
     {
         string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.Stages+".json");
-        string json;
-        if (!File.Exists(filePath))
-        {
-            CustomDebugger.Log("No saved stages found at " + filePath);
-            yield return StartCoroutine(GetJson(FileName.Stages));
-        }
-
-        CustomDebugger.Log(filePath);
-        json = File.ReadAllText(filePath);
+        
+        yield return StartCoroutine(LoadFile(FileName.Stages,"json"));
+        string json = GetLoadedFile(FileName.Stages);
 
         // Parse the JSON into a JObject
         JObject jsonData = JObject.Parse(json);
@@ -390,16 +339,11 @@ public class PersistanceManager : MonoBehaviour
     public IEnumerator LoadPacks()
     {
         string setName = StageManager.Instance.gameVersion.ToString();
-        string filePath = Path.Combine(Application.persistentDataPath, setName, "stages.json");
+        string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.Stages+".json");
         string json;
-        if (!File.Exists(filePath))
-        {
-            CustomDebugger.Log("No saved stages found at " + filePath);
-            yield return StartCoroutine(GetJson(FileName.Stages));
-        }
-
-        CustomDebugger.Log(filePath);
-        json = File.ReadAllText(filePath);
+        
+        yield return StartCoroutine(LoadFile(FileName.Stages,"json"));
+        json = GetLoadedFile(FileName.Stages);
 
         // Parse the JSON into a JObject
         JObject jsonData = JObject.Parse(json);
@@ -424,50 +368,57 @@ public class PersistanceManager : MonoBehaviour
         yield return null;
     }
 
-    IEnumerator GetJson(FileName file_name,string save_name = "")
-    {
-        if (save_name == "") {
-            save_name = file_name.ToString();
-        }
-        string setName = StageManager.Instance.gameVersion.ToString();
-        string url = fileHostUrl + setName + "/" + file_name + ".json";
+    public string GetLoadedFile(FileName fileName) {
+        return loadedFiles[fileName.ToString()];
+    }    
+    public string GetLoadedFile(string fileName) {
+        return loadedFiles[fileName];
+    }
 
+    public IEnumerator LoadFile(string file_name,string extension, string subfolder = "", bool forceReload = false) {
+        if (subfolder == "") subfolder = StageManager.Instance.gameVersion.ToString();
+            
+        if (loadedFiles.ContainsKey(file_name) && !forceReload) yield break;
         // Construye la ruta completa del directorio donde se guardará el archivo
-        string directoryPath = Path.Combine(Application.persistentDataPath, setName);
-
+        string directoryPath = Path.Combine(Application.persistentDataPath, subfolder);
         // Verifica si el directorio existe; si no, créalo
-        if (!Directory.Exists(directoryPath))
-        {
-            Directory.CreateDirectory(directoryPath);
-        }
-
-        using (UnityWebRequest www = UnityWebRequest.Get(url))
-        {
-            yield return www.SendWebRequest();
-
-            if (www.result == UnityWebRequest.Result.ConnectionError ||
-                www.result == UnityWebRequest.Result.ProtocolError)
-            {
-                Debug.LogError(www.error + " at " + url);
-            }
-            else
-            {
-                // Construye la ruta completa del archivo, incluyendo el nombre del archivo
-                string filePath = Path.Combine(directoryPath, save_name + ".json");
+        if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
         
-                // Escribe el texto en el archivo
-                File.WriteAllText(filePath, www.downloadHandler.text);
+        if (dataLocation == DataLocation.ResourcesFolder) {
+            TextAsset file = Resources.Load<TextAsset>("Storage/" + subfolder + "/"+file_name);
+            if (file is null) Debug.LogError("No "+subfolder+"/"+file_name+" found in resources");
+            if (!loadedFiles.ContainsKey(file_name)) {
+                loadedFiles.Add(file_name,file?.text);
+            }
+            else {
+                loadedFiles[file_name] = file?.text;
+            }
+        }
+        else if (dataLocation == DataLocation.CloudAndLocalStorage) {
+            string url = fileHostUrl + subfolder + "/" + file_name + "."+extension;
+            string filePath = Path.Combine(directoryPath, file_name + "."+extension);
+            if (File.Exists(filePath) && !forceReload)
+            {
+                string fileContents = File.ReadAllText(filePath);
                 if (!loadedFiles.ContainsKey(file_name)) {
-                    loadedFiles.Add(file_name,www.downloadHandler.text);
+                    loadedFiles.Add(file_name,fileContents);
                 }
                 else {
-                    loadedFiles[file_name] = www.downloadHandler.text;
+                    loadedFiles[file_name] = fileContents;
                 }
-                Debug.Log("File saved to " + filePath);
             }
+            else {
+                yield return StartCoroutine(DownloadFile(url,file_name));
+            }
+            
+           
         }
-        
     }
+    IEnumerator LoadFile(FileName file_name,string extension,string subfolder = "", bool forceReload = false) {
+        //modificar a patron builder si se siguen agregando parametros opcionales
+        yield return StartCoroutine(LoadFile(file_name.ToString(), extension, subfolder, forceReload));
+    }
+
     public void OnEraseDataButtonPressed() {
         eraseCounter--;
         if (eraseCounter<=0) {
@@ -478,7 +429,7 @@ public class PersistanceManager : MonoBehaviour
 
     public IEnumerator ResetUserData() {
         //TODO: Agregar chequeo/confirm
-        yield return StartCoroutine(GetJson(FileName.UserData));
+        yield return StartCoroutine(LoadFile(FileName.UserData,"json","",true));
         yield return StartCoroutine(LoadUserData());
     }
     public int GetStickerDuplicates(StickerSet stickerSet,int stickerID)
@@ -504,41 +455,8 @@ public class PersistanceManager : MonoBehaviour
     }
     public IEnumerator LoadUserConsumableData()
     {
-        string setName = StageManager.Instance.gameVersion.ToString();
-        string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.UserConsumableData+".json");
-        string json = String.Empty;
-
-        if (dataLocation == DataLocation.LocalStorage)
-        {
-            if (!File.Exists(filePath))
-            {
-                Debug.LogError("No consumable data found at " + filePath);
-                yield return StartCoroutine(GetJson(FileName.UserConsumableData));
-            }
-
-            if (File.Exists(filePath)) {
-                json = File.ReadAllText(filePath);
-            }
-        }
-        else if (dataLocation == DataLocation.ResourcesFolder)
-        {
-            TextAsset file = Resources.Load<TextAsset>("Storage/" + setName + "/userConsumableData");
-            if (file == null)
-            {
-                yield return StartCoroutine(GetJson(FileName.UserConsumableData));
-                json = loadedFiles[FileName.UserConsumableData];
-                Debug.LogError("No consumable data found in Resources.");
-            }
-            else
-            {
-                json = file.text;
-            }
-        }
-        else
-        {
-            Debug.LogError("Invalid data location.");
-            yield break;
-        }
+        yield return StartCoroutine(LoadFile(FileName.UserConsumableData,"json"));
+        string json = GetLoadedFile(FileName.UserConsumableData);
 
         // Deserializar los datos JSON a un objeto UserConsumableData
         if (!string.IsNullOrEmpty(json)) {
@@ -574,50 +492,21 @@ public class PersistanceManager : MonoBehaviour
             CustomDebugger.Log("UserConsumableData saved to " + filePath+ " Cuts: "+userConsumableData.GetConsumableEntry(ConsumableID.Cut).amount);
     }
     
-    public IEnumerator LoadLanguageList()
-    {
-        string directoryPath = Path.Combine(Application.persistentDataPath, "Languages");
-        string languagesPath = Path.Combine(Application.persistentDataPath, "Languages", "languages.json");
+    public IEnumerator LoadLanguageList() {
+        
 
-        if (!Directory.Exists(directoryPath))
-        {
-            Directory.CreateDirectory(directoryPath);
-        }
-
-        string downloadedJson = null;
-        using (UnityWebRequest webRequest = UnityWebRequest.Get(fileHostUrl + "Languages/languages.json"))
-        {
-            yield return webRequest.SendWebRequest();
-
-            if (webRequest.result == UnityWebRequest.Result.Success)
-            {
-                downloadedJson = webRequest.downloadHandler.text;
-            }
-            else
-            {
-                Debug.LogError("Failed to download languages.json");
-                yield break;
-            }
-        }
-
-        if (!File.Exists(languagesPath))
-        {
-            File.WriteAllText(languagesPath, downloadedJson);
-        }
-
-        string localJson = File.ReadAllText(languagesPath);
+        yield return StartCoroutine(LoadFile(FileName.Languages,"json", "Languages"));
+        string localJson = GetLoadedFile(FileName.Languages);
         LanguagesList localLanguagesList = JsonUtility.FromJson<LanguagesList>(localJson);
+        yield return StartCoroutine(LoadFile(FileName.Languages,"json", "Languages",true));
+        string downloadedJson = GetLoadedFile(FileName.Languages);
         LanguagesList downloadedLanguagesList = JsonUtility.FromJson<LanguagesList>(downloadedJson);
 
-        if (downloadedLanguagesList.version > localLanguagesList.version)
-        {
-            CustomDebugger.Log("Found more recent languages.json version");
-            // Replace the local languages.json with the downloaded one
-            File.WriteAllText(languagesPath, downloadedJson);
-
-            // Delete old language files
+        if (downloadedLanguagesList.version > localLanguagesList.version) {
+            localLanguagesList = downloadedLanguagesList;
             foreach (string language in localLanguagesList.languages)
             {
+                string directoryPath = Path.Combine(Application.persistentDataPath, "Languages");
                 string languageFilePath = Path.Combine(directoryPath, language + ".json");
                 if (File.Exists(languageFilePath))
                 {
@@ -626,36 +515,15 @@ public class PersistanceManager : MonoBehaviour
             }
         }
 
-        string finalJson = File.ReadAllText(languagesPath);
-        LanguagesList finalLanguagesList = JsonUtility.FromJson<LanguagesList>(finalJson);
-        LocalizationManager.Instance.languagesList = finalLanguagesList.languages;
+        LocalizationManager.Instance.languagesList = localLanguagesList.languages;
     }
 
 
-    public IEnumerator LoadLanguageFiles(string language)
-    {
-        string languagePath = Path.Combine(Application.persistentDataPath, "Languages", $"{language}.json");
+    public IEnumerator LoadLanguageFiles(string language) {
+        yield return StartCoroutine(LoadFile(language,"json","Languages"));
         string iconPath = Path.Combine(Application.persistentDataPath, "Languages", $"{language}_icon.png");
-        if (!File.Exists(languagePath))
-        {
-            using (UnityWebRequest webRequest = UnityWebRequest.Get(fileHostUrl + $"Languages/{language}.json"))
-            {
-                yield return webRequest.SendWebRequest();
 
-                if (webRequest.result == UnityWebRequest.Result.Success)
-                {
-                    File.WriteAllText(languagePath, webRequest.downloadHandler.text);
-                }
-                else
-                {
-                    Debug.LogError($"Failed to download {language}.json");
-                    yield break;
-                }
-            }
-        }
-        
-        
-        if (!File.Exists(iconPath))
+        if (!File.Exists(iconPath) && dataLocation == DataLocation.CloudAndLocalStorage)
         {
             using (UnityWebRequest webRequest = UnityWebRequest.Get(fileHostUrl + $"Languages/{language}_icon.png"))
             {
@@ -673,20 +541,26 @@ public class PersistanceManager : MonoBehaviour
             }
         }
     }
-    public IEnumerator DownloadFile(string path) {
+    public IEnumerator DownloadFile(string path, string file_name) {
         string url = fileHostUrl + "/" + path;
         using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
         {
             CustomDebugger.Log("Attempting to download file from");
             yield return webRequest.SendWebRequest();
-
-            if (webRequest.result == UnityWebRequest.Result.Success){
-                path = Path.Combine(Application.persistentDataPath, path);
-                File.WriteAllText(path, webRequest.downloadHandler.text);
+            string text;
+            if (webRequest.result == UnityWebRequest.Result.Success) {
+                text = webRequest.downloadHandler.text;
             }
             else
             {
+                text = "";
                 Debug.LogError("Failed to download file from: " + url);
+            }
+            if (!loadedFiles.ContainsKey(file_name)) {
+                loadedFiles.Add(file_name,text);
+            }
+            else {
+                loadedFiles[file_name] = null;
             }
         }
     }
@@ -777,7 +651,7 @@ public class StickerSetConverter : JsonConverter
 }
 public enum DataLocation
 {
-    LocalStorage,
+    CloudAndLocalStorage,
     ResourcesFolder
 }
 
@@ -793,7 +667,8 @@ public enum FileName {
     UserData,
     Stages,
     /*Matches*/
-    UserConsumableData
+    UserConsumableData,
+    Languages
 }
 [Serializable]
 public class UserConsumableEntry
