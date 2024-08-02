@@ -37,10 +37,10 @@ public class LocalizationManager : MonoBehaviour
         CustomDebugger.Log("found language: "+userData.language);
         currentLanguage = userData.language;
         localizedTexts = FindObjectsOfType<LocalizedText>(true).ToList();
-        yield return StartCoroutine(PersistanceManager.Instance.LoadLanguageList());
+        yield return StartCoroutine(PersistanceManager.Instance.LoadLanguagesList());
         foreach (var language in languagesList)
         {
-            yield return StartCoroutine(PersistanceManager.Instance.LoadLanguageFiles(language));
+            yield return StartCoroutine(PersistanceManager.Instance.LoadLanguageIcon(language));
         }
 
         PopulateLanguageIcons(languagesList);
@@ -71,7 +71,7 @@ public class LocalizationManager : MonoBehaviour
 
     private IEnumerator LoadLanguage(string language)
         {
-            yield return StartCoroutine(PersistanceManager.Instance.LoadFile(language,"Languages"));
+            yield return StartCoroutine(PersistanceManager.Instance.LoadFile(language,"json","Languages"));
             string json = PersistanceManager.Instance.GetLoadedFile(language);
             var texts = JsonConvert.DeserializeObject<Dictionary<GameText, string>>(json);
             languages[language] = texts;
@@ -199,5 +199,8 @@ public enum GameText
 
     FactoryNotificationTitle,
     FactoryNotificationBody,
-    SecondsAbb
+    SecondsAbb,
+    StreakNotificationTitle,
+    StreakNotificationDescription,
+    Streak
 }

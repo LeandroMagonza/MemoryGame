@@ -134,10 +134,12 @@ public class StickerManager : MonoBehaviour
         bool foundLanguage = true;
         yield return PersistanceManager.Instance.LoadFile("additionalInfo_" + language, "csv");
         string languageFileContents = PersistanceManager.Instance.GetLoadedFile("additionalInfo_" + language);
+        Debug.Log("LFC"+language+" "+languageFileContents);
 
         if (languageFileContents is null) {
             yield return PersistanceManager.Instance.LoadFile("additionalInfo", "csv");
             languageFileContents = PersistanceManager.Instance.GetLoadedFile("additionalInfo");
+            Debug.Log("LFC"+languageFileContents);
             foundLanguage = false;
         }
         

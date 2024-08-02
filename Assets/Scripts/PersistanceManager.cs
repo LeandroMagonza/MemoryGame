@@ -107,6 +107,9 @@ public class PersistanceManager : MonoBehaviour
         yield return StartCoroutine(LoadUserConsumableData());
         PlayerLevelManager.Instance.UpdatePlayerLevelButtons();
         
+        GameManager.Instance.CheckStreakStart();
+
+        
         CanvasManager.Instance.ChangeCanvas(CanvasName.MENU);
         // loading screen ends
         yield return StartCoroutine(ConsumableFactoryManager.Instance.GenerateAllConsumablesNextGenerationTimes());
@@ -124,6 +127,7 @@ public class PersistanceManager : MonoBehaviour
     
     yield return StartCoroutine(LoadFile(FileName.Stages,"json","",true));
     string latestJson = GetLoadedFile(FileName.Stages);
+        Debug.Log(latestJson);
     JObject latestJsonData = JObject.Parse(latestJson);
     ConfigData latestConfig = latestJsonData["config"].ToObject<ConfigData>();
 
@@ -400,6 +404,7 @@ public class PersistanceManager : MonoBehaviour
             if (File.Exists(filePath) && !forceReload)
             {
                 string fileContents = File.ReadAllText(filePath);
+                CustomDebugger.Log(filePath);
                 if (!loadedFiles.ContainsKey(file_name)) {
                     loadedFiles.Add(file_name,fileContents);
                 }
@@ -409,6 +414,7 @@ public class PersistanceManager : MonoBehaviour
             }
             else {
                 yield return StartCoroutine(DownloadFile(url,file_name));
+                if (loadedFiles[file_name] is not null) File.WriteAllText(filePath, loadedFiles[file_name]);
             }
             
            
@@ -492,7 +498,7 @@ public class PersistanceManager : MonoBehaviour
             CustomDebugger.Log("UserConsumableData saved to " + filePath+ " Cuts: "+userConsumableData.GetConsumableEntry(ConsumableID.Cut).amount);
     }
     
-    public IEnumerator LoadLanguageList() {
+    public IEnumerator LoadLanguagesList() {
         
 
         yield return StartCoroutine(LoadFile(FileName.Languages,"json", "Languages"));
@@ -519,8 +525,7 @@ public class PersistanceManager : MonoBehaviour
     }
 
 
-    public IEnumerator LoadLanguageFiles(string language) {
-        yield return StartCoroutine(LoadFile(language,"json","Languages"));
+    public IEnumerator LoadLanguageIcon(string language) {
         string iconPath = Path.Combine(Application.persistentDataPath, "Languages", $"{language}_icon.png");
 
         if (!File.Exists(iconPath) && dataLocation == DataLocation.CloudAndLocalStorage)
@@ -542,8 +547,7 @@ public class PersistanceManager : MonoBehaviour
         }
     }
     public IEnumerator DownloadFile(string path, string file_name) {
-        string url = fileHostUrl + "/" + path;
-        using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(path))
         {
             CustomDebugger.Log("Attempting to download file from");
             yield return webRequest.SendWebRequest();
@@ -553,14 +557,14 @@ public class PersistanceManager : MonoBehaviour
             }
             else
             {
-                text = "";
-                Debug.LogError("Failed to download file from: " + url);
+                text = null;
+                Debug.LogError("Failed to download file from: " + path);
             }
             if (!loadedFiles.ContainsKey(file_name)) {
                 loadedFiles.Add(file_name,text);
             }
             else {
-                loadedFiles[file_name] = null;
+                loadedFiles[file_name] = text;
             }
         }
     }

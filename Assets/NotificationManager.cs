@@ -74,6 +74,7 @@ public class NotificationManager : MonoBehaviour
     /// <param name="category">El identificador de la categoría de la notificación.</param>
     public int ScheduleNotification(string title, string text, DateTime scheduledTime, ConsumableID category)
     {
+        CustomDebugger.Log("Schedule Notification: " + category + "\n" + title + "\n" + text + "\n" + scheduledTime,DebugCategory.NOTIFICATIONS);
 #if UNITY_ANDROID
         var notification = new AndroidNotification()
         {
@@ -108,12 +109,13 @@ public class NotificationManager : MonoBehaviour
     /// <param name="category">La categoría de la notificación que se eliminará.</param>
     public void CancelNotificationsFromCategory(ConsumableID category)
     {
+        CustomDebugger.Log("CancelNotificationsFromCategory" + category,DebugCategory.NOTIFICATIONS);
 #if UNITY_ANDROID
         if (notificationData.TryGetValue(category, out Dictionary<int, ScheduledNotification> notifications))
         {
             foreach (var notificationId in notifications.Keys)
             {
-                if (notificationId == 0)
+                if (notificationId == 0 || notificationId == -1)
                 {
                     continue;
                 }

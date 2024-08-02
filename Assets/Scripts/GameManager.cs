@@ -678,8 +678,9 @@ public class GameManager : MonoBehaviour {
         endMatchTime = Time.time;
         float elapsedTime = endMatchTime - startMatchTime;
         AdmobAdsManager.Instance.ReduceInstertitialTime(elapsedTime);
-        //int formerCoins = userData.coins;
-        //userData.GainExp(score);
+
+        CheckStreakGameEnd();
+        
         var firstTimeAchievements = userData.GetUserStageData(selectedLevel, selectedDifficulty).AddMatch(_currentMatch);
 
 
@@ -700,7 +701,11 @@ public class GameManager : MonoBehaviour {
         {
             userData.GetUserStageData(selectedLevel, selectedDifficulty).highScore = score;
         }
-        userData.GainExp(score);
+
+        int streak = PlayerPrefs.GetInt("StreakAmount", 0);
+        streak = Math.Clamp(streak, 0, 11) - 1;
+        userData.GainExp(score + Mathf.RoundToInt( score * streak * 0.05f));
+        CustomDebugger.Log("Gained exp = base:"+score+" streakBonus:" + Mathf.RoundToInt( score * streak * 0.05f), DebugCategory.END_MATCH);
 
         UpdateInventoryAndSave();
         UpdateAchievementAndUnlockedLevels();
@@ -1166,6 +1171,85 @@ public class GameManager : MonoBehaviour {
     public PowerButton GetPowerButton(ConsumableID consumableID) {
         return gameCanvas.powerPanelButtonHolder.GetPowerButton(consumableID);
     }
+
+    #region Streak
+
+    [SerializeField] private StreakDisplay streakDisplay;
+    [SerializeField] private int debugStreakAmount;
+    [SerializeField] private int debugDaysBack;
+
+    public void UpdateStreakDisplay()
+    {
+        int streakAmount = PlayerPrefs.GetInt("StreakAmount", 0);
+        streakDisplay.UpdateStreakText(streakAmount);
+    }
+
+    public void CheckStreakStart()
+    {
+        string lastMatchString = PlayerPrefs.GetString("LastMatch", DateTime.MinValue.ToString());
+        DateTime lastMatchDate = DateTime.Parse(lastMatchString);
+
+        if ((DateTime.Now - lastMatchDate).Days > 1)
+        {
+            PlayerPrefs.SetInt("StreakAmount", 0);
+        }
+        UpdateStreakDisplay();
+    }
+
+    public void CheckStreakGameEnd()
+    {
+        string lastMatchString = PlayerPrefs.GetString("LastMatch", DateTime.MinValue.ToString());
+        DateTime lastMatchDate = DateTime.Parse(lastMatchString).Date;
+        DateTime currentDate = DateTime.Now.Date;
+
+        bool isStreakExtended = false;
+
+        if ((currentDate - lastMatchDate).Days == 1)
+        {
+            int currentStreak = PlayerPrefs.GetInt("StreakAmount", 0);
+            PlayerPrefs.SetInt("StreakAmount", currentStreak + 1);
+            isStreakExtended = true;
+        }
+        else if ((currentDate - lastMatchDate).Days > 1)
+        {
+            PlayerPrefs.SetInt("StreakAmount", 1);
+        }
+
+        PlayerPrefs.SetString("LastMatch", DateTime.Now.ToString());
+        UpdateStreakDisplay();
+
+        //if (isStreakExtended || (currentDate - lastMatchDate).Days == 0)
+        //{
+            ScheduleStreakNotification();
+        //}
+    }
+
+    private void ScheduleStreakNotification()
+    {
+        string notifTitle = LocalizationManager.Instance.GetGameText(GameText.StreakNotificationTitle);
+        string notifDesc = LocalizationManager.Instance.GetGameText(GameText.StreakNotificationDescription);
+
+        DateTime notificationTime;
+        notificationTime = DateTime.Today.AddDays(1).AddHours(20); // 20:00 is 4 hours before the end of the day (midnight)
+
+        NotificationManager.Instance.ScheduleNotification(notifTitle, notifDesc, notificationTime, ConsumableID.EnergyPotion);
+    }
+    
+    [ContextMenu("Set Debug Streak Amount")]
+    public void SetDebugStreakAmount()
+    {
+        PlayerPrefs.SetInt("StreakAmount", debugStreakAmount);
+        UpdateStreakDisplay();
+    }
+    [ContextMenu("Set Debug Last Match Date")]
+    public void SetDebugLastMatchDate()
+    {
+        DateTime debugDate = DateTime.Now.Date.AddDays(-debugDaysBack);
+        PlayerPrefs.SetString("LastMatch", debugDate.ToString());
+        CheckStreakStart();
+    }
+
+    #endregion
 }
 public enum StickerSet {
     Pokemon,

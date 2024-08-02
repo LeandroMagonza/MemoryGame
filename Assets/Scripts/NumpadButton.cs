@@ -18,7 +18,7 @@ public class NumpadButton : MonoBehaviour
     public float lerpDuration = 1.0f; // Duración del Lerp
 
     private bool originalColorSet = false; // Bandera para controlar la inicialización del color original
-
+    private Coroutine previousCoroutine;
     void Awake()
     {
         SetText(number.ToString());
@@ -101,10 +101,11 @@ public class NumpadButton : MonoBehaviour
     {
         CheckAndSetColor();
         bool startingLevel = GameManager.Instance.selectedDifficulty == 2 && GameManager.Instance.selectedLevel == 4;
-
+        if (previousCoroutine is not null) StopCoroutine(previousCoroutine);
+        
         if (number == correctGuess && startingLevel && gameObject.activeInHierarchy)
         {
-            StartCoroutine(LerpToColor(correctGuessColor));
+            previousCoroutine = StartCoroutine(LerpToColor(correctGuessColor));
         }
         else
         {
@@ -128,6 +129,7 @@ public class NumpadButton : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
-        buttonImage.color = targetColor; // Ensure the color is set to the target color at the end
+        buttonImage.color = targetColor;
+        previousCoroutine = null;
     }
 }

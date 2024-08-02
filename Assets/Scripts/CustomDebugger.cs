@@ -22,9 +22,8 @@ public static class CustomDebugger
     private static void Initialize()
     {
         disabledCategories.Add(DebugCategory.GENERAL);
-        disabledCategories.Add(DebugCategory.LOAD);
+        //disabledCategories.Add(DebugCategory.LOAD);
         disabledCategories.Add(DebugCategory.SAVE);
-        disabledCategories.Add(DebugCategory.END_MATCH);
         disabledCategories.Add(DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
         #if UNITY_EDITOR
             initialized = true;
@@ -50,5 +49,6 @@ public enum DebugCategory
     LANGUAGES,
     CONSUMABLE_DISPLAY,
     NUMPAD,
-    POWER_BUTTONS
+    POWER_BUTTONS,
+    NOTIFICATIONS
 }
