@@ -68,7 +68,7 @@ public class StageManager : MonoBehaviour
         // Recorro las dificultades, arrancando por 3, hasta 9, creando los stages para cada una, y cortando cuando la dificultad este bloqueada
         // que es cuando la dificultad anterior no tenga por lo menos 1 achievement
         bool nextStageUnlocked = true;
-        int absoluteStageNumber = 0;
+        int absoluteStageNumber = -1;
         //for (int level = 4; level < maxLevel; level++){
         for (int difficulty = 2; difficulty < 10; difficulty++) {            
             if (!nextStageUnlocked) break;
@@ -94,7 +94,13 @@ public class StageManager : MonoBehaviour
                 //stageData.stageObject = newStage;
 
                 //newStage.SetTitle(level+" "+difficultyDisplayLabel+ (difficulty - difficultyDisplayOffset));
-                newStage.SetTitle(absoluteStageNumber.ToString());
+                if (absoluteStageNumber == 0) {
+                    newStage.SetTitle(GameText.Tutorial);
+                }
+                else {
+                    newStage.SetTitle(absoluteStageNumber.ToString());
+                    
+                }
                 //newStage.SetColor(stageData.ColorValue);
                 newStage.SetStage(level, difficulty);
                 stages.Add((level, difficulty),newStage);

@@ -4,7 +4,11 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 public class TimerEnabledButton : MonoBehaviour
 {
     public float timer = 8f;
@@ -15,6 +19,7 @@ public class TimerEnabledButton : MonoBehaviour
         gameObject.GetComponent<Button>().interactable = false;
         buttonText.color = new Color(buttonText.color.r, buttonText.color.g, buttonText.color.b, 0);
         timer = maxTimer;
+        GetComponent<Button>().onClick.AddListener(OnClick);
     }
 
     // Update is called once per frame
@@ -27,5 +32,9 @@ public class TimerEnabledButton : MonoBehaviour
             return;
         }
         timer -= Time.deltaTime;
+    }
+    public void OnClick()
+    {
+        GameManager.Instance.CloseTutorialPanel();
     }
 }

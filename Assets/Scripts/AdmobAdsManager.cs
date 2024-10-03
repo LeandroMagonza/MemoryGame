@@ -52,6 +52,7 @@ public class AdmobAdsManager : MonoBehaviour
 
         });
         #endif
+        currentTimeToInterstitial = PlayerPrefs.GetFloat("CurrentTimeToInterstitial", timeToInterstitial);
     }
     /*
     #region Banner
@@ -227,12 +228,13 @@ public class AdmobAdsManager : MonoBehaviour
 
     public void ReduceInstertitialTime(float elapsedTime)
     {
-        currentTimeToInterstitial += elapsedTime;
-        if (currentTimeToInterstitial > timeToInterstitial)
+        currentTimeToInterstitial -= elapsedTime;
+        if (currentTimeToInterstitial < 0)
         {
-            currentTimeToInterstitial = 0;
+            currentTimeToInterstitial = timeToInterstitial;
             showInterstitial = true;
         }
+        PlayerPrefs.SetFloat("CurrentTimeToInterstitial", currentTimeToInterstitial);
     }
     
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -28,6 +29,12 @@ public class Stage : MonoBehaviour
 
     public void SetTitle(string title) {
         titleText.text = title;
+
+    }
+    public void SetTitle(GameText gameText) {
+        titleText.AddComponent<LocalizedText>().gameText = gameText;
+        LocalizationManager.Instance.localizedTexts.Add(titleText.GetComponent<LocalizedText>());
+        SetTitle(LocalizationManager.Instance.GetGameText(gameText));
     }
 
     public void SetColor(Color color)

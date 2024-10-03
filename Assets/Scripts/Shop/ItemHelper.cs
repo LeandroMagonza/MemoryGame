@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -120,6 +121,23 @@ public static class ItemHelper
     
             return template;
         }
+    public static string FormatTimeRemaining(DateTime scheduledTime)
+    {
+        TimeSpan timeRemaining = scheduledTime.Subtract(DateTime.Now);
+        var lm = LocalizationManager.Instance;
+        if (timeRemaining.TotalHours >= 1)
+        {
+            return string.Format("{0}:{1:D2} "+lm.GetGameText(GameText.HoursAbb), (int)timeRemaining.TotalHours, timeRemaining.Minutes);
+        }
+        else if (timeRemaining.TotalMinutes >= 1)
+        {
+            return string.Format("{0} "+lm.GetGameText(GameText.MinutesAbb), (int)timeRemaining.TotalMinutes);
+        }
+        else
+        {
+            return string.Format("{0} "+lm.GetGameText(GameText.SecondsAbb), (int)timeRemaining.TotalSeconds);
+        }
+    }
 }
 
 public enum IconName {

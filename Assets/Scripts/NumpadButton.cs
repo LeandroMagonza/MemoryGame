@@ -101,6 +101,7 @@ public class NumpadButton : MonoBehaviour
     {
         CheckAndSetColor();
         bool startingLevel = GameManager.Instance.selectedDifficulty == 2 && GameManager.Instance.selectedLevel == 4;
+        
         if (previousCoroutine is not null) StopCoroutine(previousCoroutine);
         
         if (number == correctGuess && startingLevel && gameObject.activeInHierarchy)

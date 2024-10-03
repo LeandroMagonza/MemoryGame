@@ -24,7 +24,8 @@ public class AudioManager : MonoBehaviour
 
     protected void Awake()
     {
-        if (_instance == null) {
+        if (_instance == null)
+        {
             _instance = this as AudioManager;
             audioSourceMusic = GetComponents<AudioSource>()[0];
             audioSourceFX = GetComponents<AudioSource>()[1];
@@ -42,6 +43,7 @@ public class AudioManager : MonoBehaviour
     }
 
     #endregion
+
     public AudioSource audioSourceMusic;
     public AudioSource audioSourceFX;
     public Dictionary<GameClip, AudioClip> clips = new();
@@ -49,23 +51,26 @@ public class AudioManager : MonoBehaviour
     public GameObject muteMusicButtonImage;
     public Sprite musicOnSprite;
     public Sprite musicOffSprite;
-    
+
     private float maxMusicVolume;
     private float maxSoundFXVolume;
 
     public ConfigCanvas configCanvas;
-    public void Start() {
+
+    public void Start()
+    {
         maxMusicVolume = audioSourceMusic.volume;
         maxSoundFXVolume = audioSourceFX.volume;
 
-        audioSourceMusic.volume = PlayerPrefs.GetFloat("MusicVolumePercentage",0.75f) * maxMusicVolume;
-        audioSourceFX.volume = PlayerPrefs.GetFloat("SoundFXVolumePercentage",0.75f) * maxSoundFXVolume;
+        audioSourceMusic.volume = PlayerPrefs.GetFloat("MusicVolumePercentage", 0.75f) * maxMusicVolume;
+        audioSourceFX.volume = PlayerPrefs.GetFloat("SoundFXVolumePercentage", 0.75f) * maxSoundFXVolume;
 
         AudioClip mainTheme = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + "mainTheme");
-        if (mainTheme is null) mainTheme = Resources.Load<AudioClip>("defaultAssets/audio/"+ "mainTheme");
+        if (mainTheme is null) mainTheme = Resources.Load<AudioClip>("defaultAssets/audio/" + "mainTheme");
         if (mainTheme is not null) audioSourceMusic.clip = mainTheme;
 
-        foreach (GameClip gameClip in Enum.GetValues(typeof(GameClip))) {
+        foreach (GameClip gameClip in Enum.GetValues(typeof(GameClip)))
+        {
             AudioClip clip = Resources.Load<AudioClip>(StageManager.Instance.gameVersion + "/audio/" + gameClip.ToString());
             if (clip is null) clip = Resources.Load<AudioClip>("defaultAssets/audio/" + gameClip.ToString());
             if (clip is not null) clips[gameClip] = clip;
@@ -73,25 +78,29 @@ public class AudioManager : MonoBehaviour
         if (playMusic && !audioSourceMusic.isPlaying) audioSourceMusic.Play();
     }
 
-    public float PlayClip(GameClip clipToPlay) {
+    public float PlayClip(GameClip clipToPlay)
+    {
         if (!clips.ContainsKey(clipToPlay)) return 0f;
-        if ((clipToPlay == GameClip.win || clipToPlay == GameClip.highScore)
-            && playMusic) {
+        if ((clipToPlay == GameClip.win || clipToPlay == GameClip.highScore) && playMusic)
+        {
             audioSourceMusic.Stop();
             StartCoroutine(RestartMusicInDelay(clips[clipToPlay].length));
         }
 
-
         audioSourceFX.PlayOneShot(clips[clipToPlay]);
         return clips[clipToPlay].length;
     }
-    public float PlayClip(GameClip clipToPlay, float pitchShift) {
+
+    public float PlayClip(GameClip clipToPlay, float pitchShift)
+    {
         audioSourceFX.pitch = pitchShift;
         return PlayClip(clipToPlay);
     }
 
-    public IEnumerator RestartMusicInDelay(float delay) {
-        while (delay > 0) {
+    public IEnumerator RestartMusicInDelay(float delay)
+    {
+        while (delay > 0)
+        {
             delay -= Time.deltaTime;
             yield return null;
         }
@@ -109,19 +118,21 @@ public class AudioManager : MonoBehaviour
         }
         else
         {
-            audioSourceMusic.Stop ();
+            audioSourceMusic.Stop();
             muteMusicButtonImage.GetComponent<Image>().sprite = musicOffSprite;
         }
     }
 
-    public void AdjustMusicVolume(float volumePercentage) {
+    public void AdjustMusicVolume(float volumePercentage)
+    {
         audioSourceMusic.volume = maxMusicVolume * volumePercentage;
-        PlayerPrefs.SetFloat("MusicVolumePercentage",volumePercentage);
+        PlayerPrefs.SetFloat("MusicVolumePercentage", volumePercentage);
     }
 
-    public void AdjustSoundFXVolume(float volumePercentage) {
+    public void AdjustSoundFXVolume(float volumePercentage)
+    {
         audioSourceFX.volume = maxSoundFXVolume * volumePercentage;
-        PlayerPrefs.SetFloat("SoundFXVolumePercentage",volumePercentage);
+        PlayerPrefs.SetFloat("SoundFXVolumePercentage", volumePercentage);
     }
 }
 

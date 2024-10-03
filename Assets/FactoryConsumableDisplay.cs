@@ -105,7 +105,7 @@ public class FactoryConsumableDisplay : MonoBehaviour
                 DateTime nextGenerationTime = generationTimes[0].scheduledTime;
                 if (DateTime.Now < nextGenerationTime)
                 {
-                    timer.text = FormatTimeRemaining(nextGenerationTime);
+                    timer.text = ItemHelper.FormatTimeRemaining(nextGenerationTime);
                     backgroundButtonImage.color = originalBackgroundButtonColor;
                 }
                 else
@@ -130,23 +130,7 @@ public class FactoryConsumableDisplay : MonoBehaviour
         return consumableValueToUpdate;
     }
 
-    private string FormatTimeRemaining(DateTime scheduledTime)
-    {
-        TimeSpan timeRemaining = scheduledTime.Subtract(DateTime.Now);
-        var lm = LocalizationManager.Instance;
-        if (timeRemaining.TotalHours >= 1)
-        {
-            return string.Format("{0}:{1:D2} "+lm.GetGameText(GameText.HoursAbb), (int)timeRemaining.TotalHours, timeRemaining.Minutes);
-        }
-        else if (timeRemaining.TotalMinutes >= 1)
-        {
-            return string.Format("{0} "+lm.GetGameText(GameText.MinutesAbb), (int)timeRemaining.TotalMinutes);
-        }
-        else
-        {
-            return string.Format("{0} "+lm.GetGameText(GameText.SecondsAbb), (int)timeRemaining.TotalSeconds);
-        }
-    }
+
 
     public void SetInUse(bool inUse) {
         Color imageColor = iconImage.color;

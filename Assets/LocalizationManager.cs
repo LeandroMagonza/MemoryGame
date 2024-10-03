@@ -71,6 +71,7 @@ public class LocalizationManager : MonoBehaviour
 
     private IEnumerator LoadLanguage(string language)
         {
+            if (language == "") language = "english";
             yield return StartCoroutine(PersistanceManager.Instance.LoadFile(language,"json","Languages"));
             string json = PersistanceManager.Instance.GetLoadedFile(language);
             var texts = JsonConvert.DeserializeObject<Dictionary<GameText, string>>(json);
@@ -125,9 +126,9 @@ public class LocalizationManager : MonoBehaviour
                 language = currentLanguage;
             }
             if (!languages.ContainsKey(language)) {
-                LoadLanguage(language);
+                StartCoroutine(LoadLanguage(language));
             }
-            if (languages[language].ContainsKey(gameTextToGet)) {
+            if (languages.ContainsKey(language) && languages[language].ContainsKey(gameTextToGet)) {
                 return languages[language][gameTextToGet];
             }
             return "";
@@ -202,5 +203,9 @@ public enum GameText
     SecondsAbb,
     StreakNotificationTitle,
     StreakNotificationDescription,
-    Streak
+    Streak,
+    Tutorial,
+    TutorialText,
+    Welcome,
+    VibrationControlTitle
 }

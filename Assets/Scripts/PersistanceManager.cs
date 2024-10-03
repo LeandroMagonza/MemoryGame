@@ -97,13 +97,13 @@ public class PersistanceManager : MonoBehaviour
         // LOAD UI TIENE QUE LLAMARSE PRIMERO PORQUE AHI VIENE LA VERSION DEL STAGES
         // SE FIJA SI HAY UNO MAS NUEVO Y LO REEMPLAZA
         
-        yield return StartCoroutine(LoadStages());
+        yield return StartCoroutine(LocalizationManager.Instance.InitializeLocalizationManager());
         yield return StartCoroutine(LoadStickerLevels());
         yield return StartCoroutine(LoadPacks());
 
         // initialize tiene que ir dsp de loaduserdata porque usa el idioma de userdata para saber cual cargar
         ;
-        yield return StartCoroutine(LocalizationManager.Instance.InitializeLocalizationManager());
+        yield return StartCoroutine(LoadStages());
         yield return StartCoroutine(LoadUserConsumableData());
         PlayerLevelManager.Instance.UpdatePlayerLevelButtons();
         

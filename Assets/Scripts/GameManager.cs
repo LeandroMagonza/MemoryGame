@@ -118,7 +118,6 @@ public class GameManager : MonoBehaviour {
     [Header("Tutorial")]
     public GameObject tutorialPanel;
     public List<GameObject> newPlayerTutorialTexts;
-    public List<GameObject> firstMistakeTutorialTexts;
     
     [Header("Particles")]
     public ParticleSystem correctGuessParticle;
@@ -470,11 +469,13 @@ public class GameManager : MonoBehaviour {
     {
         currentStickerCoroutine = StartCoroutine(Squash(stickerDisplay.spriteHolder.transform.parent.transform, squashDelay, squashAmount, squashSpeed));
         correctGuessParticle.Play();
+        TriggerHapticFeedback(true);
     }
     private void IncorrectGuessFX()
     {
         currentStickerCoroutine = StartCoroutine(Shake(stickerDisplay.spriteHolder.transform, shakeDelay, shakeAmount, shakeSpeed));
         incorrectGuessParticle.Play();
+        TriggerHapticFeedback(false);
     }
 
     [ContextMenu("GainBonus")]
@@ -660,6 +661,7 @@ public class GameManager : MonoBehaviour {
             CustomDebugger.Log("Win");
             AudioManager.Instance.PlayClip(GameClip.win);
             delay = AudioManager.Instance.clips[GameClip.win].length - delayReductionForWinClip;
+            TriggerHapticFeedback(false);
             //delay = 0.2f;
         }
         else
@@ -702,10 +704,10 @@ public class GameManager : MonoBehaviour {
             userData.GetUserStageData(selectedLevel, selectedDifficulty).highScore = score;
         }
 
-        int streak = PlayerPrefs.GetInt("StreakAmount", 0);
-        streak = Math.Clamp(streak, 0, 11) - 1;
-        userData.GainExp(score + Mathf.RoundToInt( score * streak * 0.05f));
-        CustomDebugger.Log("Gained exp = base:"+score+" streakBonus:" + Mathf.RoundToInt( score * streak * 0.05f), DebugCategory.END_MATCH);
+ 
+            
+        userData.GainExp(score + Mathf.RoundToInt( score * GetStreakBonusPercentage()));
+        CustomDebugger.Log("Gained exp = base:"+score+" streakBonus:" + Mathf.RoundToInt( score* GetStreakBonusPercentage()), DebugCategory.END_MATCH);
 
         UpdateInventoryAndSave();
         UpdateAchievementAndUnlockedLevels();
@@ -731,6 +733,13 @@ public class GameManager : MonoBehaviour {
         //animation achievements
 
         AdmobAdsManager.Instance.ShowInterstitialAd();
+    }
+
+    public float GetStreakBonusPercentage() {
+        float bonusPercentagePerStreak = 0.05f;
+        int streak = PlayerPrefs.GetInt("StreakAmount", 0);
+        streak = Math.Clamp(streak, 0, 11);
+        return streak * bonusPercentagePerStreak;
     }
 
     public void UpdateAchievementAndUnlockedLevels()
@@ -878,6 +887,8 @@ public class GameManager : MonoBehaviour {
         tutorialPanel.SetActive(false);
 
         currentlyActivatedPower = ConsumableID.NONE;
+        
+        
         #region FirstMistake
         /*
         if (userData.stages[0].matches.Count == 0)
@@ -910,11 +921,14 @@ public class GameManager : MonoBehaviour {
             AudioManager.Instance.PlayClip(GameClip.enterStages);
             yield return new WaitForSeconds(1f);
         }
-        stageGroupIntroPanel.gameObject.SetActive(false);
+        bool startingLevel = selectedDifficulty == 2 && Instance.selectedLevel == 4;
         pause = false;
+        if (startingLevel)  OpenTutorialPanel();
+        stageGroupIntroPanel.gameObject.SetActive(false);
         AudioManager.Instance.PlayClip(GameClip.playStage);
         numpad.GetComponent<Numpad>()
             .UpdateButtonColors(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences);
+
         
     }
 
@@ -932,6 +946,7 @@ public class GameManager : MonoBehaviour {
 
 
     private void FixedUpdate() {
+        CheckStreakStart();
         if (gameEnded || pause || disableInput) return;
         SetTimer(timer - Time.deltaTime);
     }
@@ -1125,29 +1140,16 @@ public class GameManager : MonoBehaviour {
         pause = !pause;
         pausePanel.SetActive(pause);
     }    
-    public void OpenTutorialPanel(int tutorialNumber)
+    public void OpenTutorialPanel()
     {
-        switch (tutorialNumber)
-        {
-            case 0:
-                foreach (var VARIABLE in newPlayerTutorialTexts) VARIABLE.SetActive(true);
-                foreach (var VARIABLE in firstMistakeTutorialTexts) VARIABLE.SetActive(false);
-                break;
-            case 1 :
-                foreach (var VARIABLE in firstMistakeTutorialTexts) VARIABLE.SetActive(true);
-                foreach (var VARIABLE in newPlayerTutorialTexts) VARIABLE.SetActive(false);
-                break;
-            default:
-                    CustomDebugger.Log("tutorialNumber not found",DebugCategory.TUTORIAL);
-                    return;
-        }
+        foreach (var VARIABLE in newPlayerTutorialTexts) VARIABLE.SetActive(true);
         pause = true;
-        tutorialPanel.SetActive(pause);
+        tutorialPanel.SetActive(true);
     }    
     public void CloseTutorialPanel()
     {
         pause = false;
-        tutorialPanel.SetActive(pause);
+        tutorialPanel.SetActive(false);
     }
     
     public (StickerData sticker, StickerMatchData matchData) ActivatePower(ConsumableID consumableID,GameClip clip) {
@@ -1173,21 +1175,34 @@ public class GameManager : MonoBehaviour {
     }
 
     #region Streak
-
     [SerializeField] private StreakDisplay streakDisplay;
     [SerializeField] private int debugStreakAmount;
     [SerializeField] private int debugDaysBack;
+
+    private bool hasPlayedToday;
+
+
 
     public void UpdateStreakDisplay()
     {
         int streakAmount = PlayerPrefs.GetInt("StreakAmount", 0);
         streakDisplay.UpdateStreakText(streakAmount);
+        streakDisplay.UpdateTimerText(hasPlayedToday);
+
+        foreach (var VARIABLE in FindObjectsOfType<StreakExpBonusDisplay>()) 
+        {
+            VARIABLE.UpdateExpText();
+        }
+
+
     }
 
     public void CheckStreakStart()
     {
         string lastMatchString = PlayerPrefs.GetString("LastMatch", DateTime.MinValue.ToString());
         DateTime lastMatchDate = DateTime.Parse(lastMatchString);
+
+        hasPlayedToday = (DateTime.Now.Date == lastMatchDate.Date);
 
         if ((DateTime.Now - lastMatchDate).Days > 1)
         {
@@ -1218,35 +1233,83 @@ public class GameManager : MonoBehaviour {
         PlayerPrefs.SetString("LastMatch", DateTime.Now.ToString());
         UpdateStreakDisplay();
 
-        //if (isStreakExtended || (currentDate - lastMatchDate).Days == 0)
-        //{
+        if (isStreakExtended || (currentDate - lastMatchDate).Days == 0)
+        {
             ScheduleStreakNotification();
-        //}
+        }
+
+        hasPlayedToday = true;
     }
 
     private void ScheduleStreakNotification()
     {
+        NotificationManager.Instance.CancelNotificationsFromCategory(ConsumableID.EnergyPotion);
+        
         string notifTitle = LocalizationManager.Instance.GetGameText(GameText.StreakNotificationTitle);
         string notifDesc = LocalizationManager.Instance.GetGameText(GameText.StreakNotificationDescription);
 
-        DateTime notificationTime;
-        notificationTime = DateTime.Today.AddDays(1).AddHours(20); // 20:00 is 4 hours before the end of the day (midnight)
+        DateTime notificationTime = DateTime.Today.AddDays(1).AddHours(20); // 20:00 is 4 hours before the end of the day (midnight)
 
         NotificationManager.Instance.ScheduleNotification(notifTitle, notifDesc, notificationTime, ConsumableID.EnergyPotion);
     }
-    
+
     [ContextMenu("Set Debug Streak Amount")]
     public void SetDebugStreakAmount()
     {
         PlayerPrefs.SetInt("StreakAmount", debugStreakAmount);
         UpdateStreakDisplay();
     }
+
     [ContextMenu("Set Debug Last Match Date")]
     public void SetDebugLastMatchDate()
     {
         DateTime debugDate = DateTime.Now.Date.AddDays(-debugDaysBack);
         PlayerPrefs.SetString("LastMatch", debugDate.ToString());
         CheckStreakStart();
+    }
+
+    #endregion
+
+    #region HapticFeedback
+
+    public void TriggerHapticFeedback(bool correct)
+    {
+        // Verificar si el feedback háptico está habilitado en PlayerPrefs
+        if (PlayerPrefs.GetInt("HapticFeedbackEnabled", 1) == 0)
+        {
+            return;
+        }
+
+        #if UNITY_ANDROID || UNITY_IOS
+        // Determinar el patrón de vibración basado en si la respuesta es correcta o incorrecta
+        if (correct)
+        {
+            // Vibración corta para respuesta correcta
+            CustomDebugger.Log("vibrar correcto",DebugCategory.NUMPAD);
+            Handheld.Vibrate();
+        }
+        else
+        {
+            // Vibración más larga para respuesta incorrecta
+            CustomDebugger.Log("vibrar incorrect",DebugCategory.NUMPAD);
+            StartCoroutine(LongVibration());
+        }
+        #else
+            // Si no está en una plataforma con soporte háptico, no hacer nada
+            CustomDebugger.Log("no es android",DebugCategory.NUMPAD);
+            return;
+        #endif
+    }
+
+    // Corutina para una vibración más larga
+    private IEnumerator LongVibration()
+    {
+        // Vibrar varias veces para simular una vibración más larga
+        for (int i = 0; i < 7; i++)
+        {
+            Handheld.Vibrate();
+            yield return new WaitForSeconds(0.1f); // Pausa breve entre vibraciones
+        }
     }
 
     #endregion
