@@ -74,12 +74,12 @@ public class PersistanceManager : MonoBehaviour
         public int version = 0;
         public List<string> languages;
     }
-    /*
-#if UNITY_WEBGL
-    [DllImport("__Internal")]
-    private static extern void _JS_FileSystem_Sync();
-#endif
-*/
+        /*
+    #if UNITY_WEBGL
+        [DllImport("__Internal")]
+        private static extern void _JS_FileSystem_Sync();
+    #endif
+    */
     void Start() {
         #if UNITY_WEBGL
         dataLocation = DataLocation.ResourcesFolder;
@@ -218,14 +218,16 @@ public class PersistanceManager : MonoBehaviour
         string json = GetLoadedFile(FileName.UserData);
 
         // Utilizar DeserializeUserData para deserializar los datos
+ 
         UserData userData = DeserializeUserData(json);
-        if (userData != null)
+        if (json == "" || userData == null)
         {
-            userData.ConvertStickerListToDictionary();
+            Debug.LogError("Failed to load UserData.");
+            userData = new UserData();
         }
         else
         {
-            Debug.LogError("Failed to load UserData.");
+            userData.ConvertStickerListToDictionary();
         }
 
         #region MigrateFromCoinsVersion
@@ -379,47 +381,58 @@ public class PersistanceManager : MonoBehaviour
         return loadedFiles[fileName];
     }
 
-    public IEnumerator LoadFile(string file_name,string extension, string subfolder = "", bool forceReload = false) {
+    public IEnumerator LoadFile(string file_name, string extension, string subfolder = "", bool forceReload = false) {
         if (subfolder == "") subfolder = StageManager.Instance.gameVersion.ToString();
             
         if (loadedFiles.ContainsKey(file_name) && !forceReload) yield break;
-        // Construye la ruta completa del directorio donde se guardará el archivo
+
         string directoryPath = Path.Combine(Application.persistentDataPath, subfolder);
-        // Verifica si el directorio existe; si no, créalo
         if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
         
         if (dataLocation == DataLocation.ResourcesFolder) {
-            TextAsset file = Resources.Load<TextAsset>("Storage/" + subfolder + "/"+file_name);
-            if (file is null) Debug.LogError("No "+subfolder+"/"+file_name+" found in resources");
-            if (!loadedFiles.ContainsKey(file_name)) {
-                loadedFiles.Add(file_name,file?.text);
-            }
-            else {
-                loadedFiles[file_name] = file?.text;
-            }
+            yield return StartCoroutine(LoadFromResources(file_name,subfolder));
         }
         else if (dataLocation == DataLocation.CloudAndLocalStorage) {
-            string url = fileHostUrl + subfolder + "/" + file_name + "."+extension;
-            string filePath = Path.Combine(directoryPath, file_name + "."+extension);
-            if (File.Exists(filePath) && !forceReload)
-            {
-                string fileContents = File.ReadAllText(filePath);
-                CustomDebugger.Log(filePath);
-                if (!loadedFiles.ContainsKey(file_name)) {
-                    loadedFiles.Add(file_name,fileContents);
-                }
-                else {
-                    loadedFiles[file_name] = fileContents;
-                }
-            }
-            else {
-                yield return StartCoroutine(DownloadFile(url,file_name));
-                if (loadedFiles[file_name] is not null) File.WriteAllText(filePath, loadedFiles[file_name]);
-            }
-            
-           
+            yield return StartCoroutine(LoadFromCloudAndLocalStorage(file_name, extension, subfolder, forceReload));
         }
     }
+
+    private IEnumerator LoadFromResources(string file_name, string subfolder) {
+        TextAsset file = Resources.Load<TextAsset>("Storage/" + subfolder + "/" + file_name);
+        if (file is null) {
+            Debug.LogError("No " + file_name + " found in resources");
+            yield break;
+        }
+        loadedFiles[file_name] = file.text;
+    }
+
+    private IEnumerator LoadFromCloudAndLocalStorage(string file_name, string extension, string subfolder, bool forceReload) {
+        
+        string directoryPath = Path.Combine(Application.persistentDataPath, subfolder);
+        if (IsInternetAvailable()) { // Check for internet connectivity
+            string url = fileHostUrl + subfolder + "/" + file_name + "."+extension;
+            string filePath = Path.Combine(directoryPath, file_name + "." + extension);
+            if (File.Exists(filePath) && !forceReload) {
+                string fileContents = File.ReadAllText(filePath);
+                loadedFiles[file_name] = fileContents;
+            }
+            else {
+                yield return StartCoroutine(DownloadFile(url, file_name));
+                if (loadedFiles[file_name] is not null) File.WriteAllText(filePath, loadedFiles[file_name]);
+            }
+        } else {
+            // Use the current files if no internet
+            string filePath = Path.Combine(directoryPath, file_name + "." + extension);
+            if (File.Exists(filePath)) {
+                string fileContents = File.ReadAllText(filePath);
+                loadedFiles[file_name] = fileContents;
+            } else {
+                // If no local file, try to load from resources
+                yield return StartCoroutine(LoadFromResources(file_name,subfolder));
+            }
+        }
+    }
+
     IEnumerator LoadFile(FileName file_name,string extension,string subfolder = "", bool forceReload = false) {
         //modificar a patron builder si se siguen agregando parametros opcionales
         yield return StartCoroutine(LoadFile(file_name.ToString(), extension, subfolder, forceReload));
@@ -435,9 +448,10 @@ public class PersistanceManager : MonoBehaviour
 
     public IEnumerator ResetUserData() {
         //TODO: Agregar chequeo/confirm
-        yield return StartCoroutine(LoadFile(FileName.UserData,"json","",true));
-        yield return StartCoroutine(LoadUserData());
+        yield return null;
+        userData = new UserData();
     }
+
     public int GetStickerDuplicates(StickerSet stickerSet,int stickerID)
     {
         CustomDebugger.Log(stickerSet+" sticker id "+stickerID,DebugCategory.STICKERLOAD_AMOUNTOFCATEGORIES);
@@ -620,6 +634,14 @@ public class PersistanceManager : MonoBehaviour
         string setName = StageManager.Instance.gameVersion.ToString();
         string fileName = $"matches_{level}_{difficulty}.txt";
         return Path.Combine(Application.persistentDataPath, setName, fileName);
+    }
+
+    private bool IsInternetAvailable() {
+    using (UnityWebRequest webRequest = UnityWebRequest.Get("https://www.google.com")) {
+        var operation = webRequest.SendWebRequest();
+        while (!operation.isDone) { }
+        return webRequest.result == UnityWebRequest.Result.Success;
+        }
     }
 }
 
