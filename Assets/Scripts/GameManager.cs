@@ -12,11 +12,14 @@ using Random = UnityEngine.Random;
 
 //revisar el cut tal vez el continue cambia el valor del iterador
 
-public class GameManager : MonoBehaviour {
+public class GameManager : MonoBehaviour
+{
     #region Singleton
     private static GameManager _instance;
-    public static GameManager Instance {
-        get {
+    public static GameManager Instance
+    {
+        get
+        {
             if (_instance == null)
                 _instance = FindObjectOfType<GameManager>();
             if (_instance == null)
@@ -24,32 +27,35 @@ public class GameManager : MonoBehaviour {
             return _instance;
         }
     }
-    protected void Awake() {
-        if (_instance == null) {
+    protected void Awake()
+    {
+        if (_instance == null)
+        {
             _instance = this as GameManager;
-            
+
 
             quizOptionButtons = new List<(string, NumpadButton)>();
             foreach (Transform option in quizOptionPad.transform)
             {
-                quizOptionButtons.Add(("EMPTY",option.GetComponent<NumpadButton>()));
+                quizOptionButtons.Add(("EMPTY", option.GetComponent<NumpadButton>()));
             }
         }
         else if (_instance != this)
             DestroySelf();
     }
-    private void DestroySelf() {
+    private void DestroySelf()
+    {
         if (Application.isPlaying)
             Destroy(this);
         else
             DestroyImmediate(this);
     }
-    
+
 
     #endregion
 
     [Header("Config")]
-    public GameMode currentGameMode = GameMode.QUIZ; 
+    public GameMode currentGameMode = GameMode.QUIZ;
     public float delayBetweenImages = .72f;
     public bool limitOptionsToStage = true;
     public bool increaseAmountOfAppearencesOnMistake;
@@ -61,13 +67,13 @@ public class GameManager : MonoBehaviour {
     public int turnNumber = 1;
     public bool firstMistake = false;
     private StickerData _currentlySelectedSticker;
-    private Dictionary<int,StickerData> _remainingStickersFromStage = new Dictionary<int, StickerData>();
-    public Dictionary<StickerData,StickerMatchData> currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
+    private Dictionary<int, StickerData> _remainingStickersFromStage = new Dictionary<int, StickerData>();
+    public Dictionary<StickerData, StickerMatchData> currentlyInGameStickers = new Dictionary<StickerData, StickerMatchData>();
     private float startMatchTime = 0;
-    private float endMatchTime = 0; 
+    private float endMatchTime = 0;
     public bool disableInput = false;
     private Coroutine currentStickerCoroutine;
-    
+
     [Header("Skills")]
     public bool protectedLife = false;
     public int protectedLifeOnComboAmount = 10;
@@ -76,22 +82,22 @@ public class GameManager : MonoBehaviour {
     public int baseClearsToHeal = 5;
     public int currentClears = 0;
     public ConsumableID currentlyActivatedPower;
-    
-    [Header("Timer")]    
+
+    [Header("Timer")]
     public float timer = 3;
     public float maxTimer = 10;
     public float maxTimerSpeedrun = 2;
-    
+
     [Header("Score")]
     public int score = 0;
     public int bonusMultiplicator = 1;
-    
+
     [Header("Combo")]
     [SerializeField] private int _currentCombo = 0;
     [SerializeField] private int maxComboBonus = 5;
-    
+
     [Header("End Game Panel")]
-    public TextMeshProUGUI highScoreText; 
+    public TextMeshProUGUI highScoreText;
     public TextMeshProUGUI endGameScoreText;
     public TextMeshProUGUI currentCoins;
     public AchievementStars endGameAchievementStars;
@@ -101,53 +107,53 @@ public class GameManager : MonoBehaviour {
 
     //[Header("Pause")] 
     public GameObject pausePanel => gameCanvas.pausePanel;
-    
+
     [Header("NumpadQuizOptionsPad")]
     public GameObject numpad;
-    
+
     [Header("QuizOptionsPad")]
     public GameObject quizOptionPad;
     public List<(string optionName, NumpadButton numpadButton)> quizOptionButtons = new List<(string optionName, NumpadButton numpadButton)>();
 
-    
-    [Header("Frame")]   
-    public FadeOut amountOfAppearencesText; 
+
+    [Header("Frame")]
+    public FadeOut amountOfAppearencesText;
     public Sticker stickerDisplay;
     public Vector3 startScale;
-    
+
     [Header("Tutorial")]
     public GameObject tutorialPanel;
     public List<GameObject> newPlayerTutorialTexts;
-    
+
     [Header("Particles")]
     public ParticleSystem correctGuessParticle;
     public ParticleSystem incorrectGuessParticle;
-        
+
     public float squashDelay = 0.2f;
     public float squashAmount = 0.1f;
     public float squashSpeed = 5f;
-    
+
     public float shakeDelay = .2f;
     public float shakeAmount = 5;
     public float shakeSpeed = 80;
-    
+
     [Header("Visualizations")]
     public int currentlyInGameStickersTotalAmount;
     public int currentlySelectedStickerID;
     public string currentlySelectedStickerName;
     public int currentlySelectedStickerAmountOfAppearences;
     public string[] currentlyInGameStickersNames;
-    
+
 
     //[Header("References")]
     #region References
     #region Game Canvas Header
-    
+
     public GameCanvas gameCanvas => CanvasManager.Instance.gameCanvas.GetComponent<GameCanvas>();
     public GameCanvasHeader gameCanvasHeader => gameCanvas.gameCanvasHeader;
     public StageGroupIntroPanel stageGroupIntroPanel => gameCanvas.stageGroupIntroPanel;
-    public LifeCounter lifeCounter  => gameCanvasHeader.lifeCounter ;
-    public TextMeshProUGUI timerText => gameCanvasHeader.timerText; 
+    public LifeCounter lifeCounter => gameCanvasHeader.lifeCounter;
+    public TextMeshProUGUI timerText => gameCanvasHeader.timerText;
     public TextMeshProUGUI scoreText => gameCanvasHeader.scoreText;
     public TextMeshProUGUI comboText => gameCanvasHeader.comboText;
     public TextMeshProUGUI comboBonusText => gameCanvasHeader.comboBonusText;
@@ -157,7 +163,7 @@ public class GameManager : MonoBehaviour {
     public UserConsumableData userConsumableData => PersistanceManager.Instance.userConsumableData;
     //public Dictionary<int, StageData> stages => PersistanceManager.Instance.stages;
     private Dictionary<int, StickerLevelsData> stickerLevels => PersistanceManager.Instance.StickerLevels;
-    public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> matchInventory = new ();
+    public Dictionary<ConsumableID, (int current, int max, (int baseValue, int consumableValue) initial)> matchInventory = new();
     public PacksData packs => PersistanceManager.Instance.packs;
     public int selectedLevel => StageManager.Instance.selectedStage;
     public int selectedDifficulty => StageManager.Instance.selectedDifficulty;
@@ -176,13 +182,16 @@ public class GameManager : MonoBehaviour {
     private int maxLevel => StageManager.Instance.maxLevel;
 
 
-    public void SetScoreTexts() {
-        if (userData.GetUserStageData(selectedLevel, selectedDifficulty) is not null) {
+    public void SetScoreTexts()
+    {
+        if (userData.GetUserStageData(selectedLevel, selectedDifficulty) is not null)
+        {
             currentCoins.text = userData.coins.ToString();
             endGameScoreText.text = "0";
             highScoreText.text = userData.GetUserStageData(selectedLevel, selectedDifficulty).highScore.ToString();
         }
-        else {
+        else
+        {
             CustomDebugger.Log("stage data not found when setting highscore on endmatchscreen");
         }
     }
@@ -200,8 +209,9 @@ public class GameManager : MonoBehaviour {
         var turnSticker = _currentlySelectedSticker;
         bool defeat = false;
         bool guessedCorrectly;
-        if (currentlyActivatedPower == ConsumableID.Bomb && !ranOutOfTime) {
-            guessedCorrectly = 
+        if (currentlyActivatedPower == ConsumableID.Bomb && !ranOutOfTime)
+        {
+            guessedCorrectly =
                 guessNumber - 1 == GetCorrectGuess(turnSticker, currentStickerMatchData)
                 ||
                 guessNumber == GetCorrectGuess(turnSticker, currentStickerMatchData)
@@ -211,20 +221,23 @@ public class GameManager : MonoBehaviour {
             numpad.GetComponent<Numpad>().ActivateBombVFX(guessNumber);
             ActivatePower(ConsumableID.Bomb, GameClip.bombExplosion);
         }
-        else {
+        else
+        {
             guessedCorrectly = guessNumber == GetCorrectGuess(turnSticker, currentStickerMatchData);
         }
         if (guessedCorrectly)
         {
             CustomDebugger.Log("CorrectGuess");
             scoreModification = OnCorrectGuess();
-            if (currentlyActivatedPower == ConsumableID.Highlight) {
+            if (currentlyActivatedPower == ConsumableID.Highlight)
+            {
                 //TODO: Agregar Animacion de highlight correct
                 turnAction = TurnAction.HighlightCorrect;
                 ActivatePower(ConsumableID.Highlight, GameClip.none);
                 currentlyInGameStickers[_currentlySelectedSticker].AddBetterClueEffect(guessNumber);
             }
-            else {
+            else
+            {
                 turnAction = TurnAction.GuessCorrect;
             }
         }
@@ -235,25 +248,27 @@ public class GameManager : MonoBehaviour {
             deathDefyMagnitude = Mathf.Abs(mistakeMagnitude);
             defeat = OnIncorrectGuess(guessNumber);
             turnAction = TurnAction.GuessIncorrect;
-            if (currentlyActivatedPower == ConsumableID.Highlight) {
+            if (currentlyActivatedPower == ConsumableID.Highlight)
+            {
                 turnAction = TurnAction.HighlightIncorrect;
                 ActivatePower(ConsumableID.Highlight, GameClip.none);
             }
-            else if (ranOutOfTime) {
+            else if (ranOutOfTime)
+            {
                 turnAction = TurnAction.RanOutOfTime;
             }
         }
-        
+
         if (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
         {
             currentlyInGameStickers[_currentlySelectedSticker].cutNumbers = new List<int>();
         }
-        
+
         //usar el dato del sticker tomado antes de la funcion oncorrectguess
-        yield return FinishProcessingTurnAction(guessNumber, turnAction, scoreModification, turnSticker,currentStickerMatchData,defeat);
+        yield return FinishProcessingTurnAction(guessNumber, turnAction, scoreModification, turnSticker, currentStickerMatchData, defeat);
     }
 
-    public int GetCorrectGuess(StickerData turnSticker,StickerMatchData stickerMatchData)
+    public int GetCorrectGuess(StickerData turnSticker, StickerMatchData stickerMatchData)
     {
         switch (currentGameMode)
         {
@@ -273,36 +288,39 @@ public class GameManager : MonoBehaviour {
         ResetTimer();
         SaveTurn(number, timerModification, turnAction, scoreModification, stickerData, stickerMatchData);
         //Checkeamos si el sticker que adivinamos recien es el ultimo que queda en el pool, y de ser asi le damos todos los puntos de una y sacamos el sticker
-        if ((turnAction == TurnAction.GuessCorrect || turnAction== TurnAction.UseClue || turnAction == TurnAction.HighlightCorrect || turnAction == TurnAction.BombCorrect) 
+        if ((turnAction == TurnAction.GuessCorrect || turnAction == TurnAction.UseClue || turnAction == TurnAction.HighlightCorrect || turnAction == TurnAction.BombCorrect)
             && currentlyInGameStickers.Count == 1
             && currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
         {
             //se repite este while hasta que el sticker salga del pool, para sumar sus puntos, el check amount of appearences lo saca del pool cuando llega
             //a la cant de apariciones de la dificultad 
             int amountOfAppearences;
-            while (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker)) {
+            while (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
+            {
                 scoreModification = 0;
                 currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences++;
                 amountOfAppearences = currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences;
                 scoreModification += CalculateCorrectGuessBasePointsAndCombo();
-                SetCurrentCombo(_currentCombo+1);
-                
+                SetCurrentCombo(_currentCombo + 1);
+
                 scoreModification += CheckAmountOfAppearences();
                 score += scoreModification;
                 SaveTurn(amountOfAppearences, 0, turnAction, scoreModification, stickerData, stickerMatchData);
-                
+
             }
         }
         yield return new WaitForSeconds(delayBetweenImages);
-        
+
         if (defeat)
         {
             StartCoroutine(EndGame(false));
         }
-        else if (currentlyInGameStickers.Count == 0) {
+        else if (currentlyInGameStickers.Count == 0)
+        {
             StartCoroutine(EndGame(true));
         }
-        else if(turnAction != TurnAction.UseCut) {
+        else if (turnAction != TurnAction.UseCut)
+        {
             //yield return new WaitForSeconds(delayBetweenImages);
             NextTurn();
         }
@@ -310,7 +328,7 @@ public class GameManager : MonoBehaviour {
         disableInput = false;
     }
 
-    private void SaveTurn(int number, float timerModification, TurnAction turnAction, int scoreModification,StickerData stickerData,StickerMatchData stickerMatchData)
+    private void SaveTurn(int number, float timerModification, TurnAction turnAction, int scoreModification, StickerData stickerData, StickerMatchData stickerMatchData)
     {
         _currentMatch.AddTurn(
             stickerData.stickerID,
@@ -336,22 +354,22 @@ public class GameManager : MonoBehaviour {
 
         return scoreModificationBonus;
     }
-    public void NextTurn() 
+    public void NextTurn()
     {
         turnNumber++;
         if (currentlyInGameStickers.Count < 3)
         {
             AddStickers(1);
         }
-        else if (turnNumber % (amountOfTurnsBetweenAddingStickers + selectedDifficulty - 2 ) == 0)
+        else if (turnNumber % (amountOfTurnsBetweenAddingStickers + selectedDifficulty - 2) == 0)
         {
-            AddStickers(flatAmountOfStickerAdded+ Mathf.RoundToInt(
+            AddStickers(flatAmountOfStickerAdded + Mathf.RoundToInt(
                                          ((float)turnNumber / (amountOfTurnsBetweenAddingStickers + selectedDifficulty - 2)) *
                                          scalingAmountOfStickerAdded));
         }
-        
+
         currentlyActivatedPower = ConsumableID.NONE;
-        
+
         SetRandomImage();
         gameCanvas.UpdateUI();
     }
@@ -362,7 +380,8 @@ public class GameManager : MonoBehaviour {
 
     public bool OnIncorrectGuess(int number)
     {
-        if (currentlyInGameStickers[_currentlySelectedSticker].cutNumbers.Count > 0 ) {
+        if (currentlyInGameStickers[_currentlySelectedSticker].cutNumbers.Count > 0)
+        {
             currentlyInGameStickers[_currentlySelectedSticker].remainingCuts++;
         }
         if (userData.GetUpgradeLevel(UpgradeID.BlockMistake) > 0)
@@ -374,30 +393,33 @@ public class GameManager : MonoBehaviour {
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             false);
-        AudioManager.Instance.PlayClip(GameClip.incorrectGuess,1);
-        if (increaseAmountOfAppearencesOnMistake) {
+        AudioManager.Instance.PlayClip(GameClip.incorrectGuess, 1);
+        if (increaseAmountOfAppearencesOnMistake)
+        {
             CheckAmountOfAppearences(false);
         }
-        else {
+        else
+        {
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences--;
         }
 
-       
+
         SetCurrentCombo(0);
         bool hasDefiedDeath = GetDeathDefy(deathDefyMagnitude);
 
-        if (hasDefiedDeath) {
+        if (hasDefiedDeath)
+        {
             //TODO: Agregar death defy animation
             return false;
         }
-            
+
         return lifeCounter.LoseLive(ref protectedLife);
     }
 
     private bool GetDeathDefy(float magnitude)
     {
         bool isSmallMistake = false;
-        if (magnitude <= 1) 
+        if (magnitude <= 1)
         {
             isSmallMistake = true;
         }
@@ -412,44 +434,44 @@ public class GameManager : MonoBehaviour {
         _currentCombo = newCurrentComboAmount;
         int calculatedComboBonus = CalculateScoreComboBonus();
         comboBonusText.text = calculatedComboBonus.ToString();
-        if (newCurrentComboAmount == 0 )
+        if (newCurrentComboAmount == 0)
         {
-            comboText.text = "";  
+            comboText.text = "";
         }
         else
         {
-            comboText.text = _currentCombo.ToString() + " COMBO!"; 
+            comboText.text = _currentCombo.ToString() + " COMBO!";
         }
-        
+
         if (!protectedLife &&
-            _currentCombo >= protectedLifeOnComboAmount && 
-            userData.unlockedUpgrades.ContainsKey(UpgradeID.LifeProtector) && 
+            _currentCombo >= protectedLifeOnComboAmount &&
+            userData.unlockedUpgrades.ContainsKey(UpgradeID.LifeProtector) &&
             userData.unlockedUpgrades[UpgradeID.LifeProtector] > 0)
         {
             protectedLife = true;
             lifeCounter.ProtectHearts();
-            AudioManager.Instance.PlayClip(GameClip.bonus); 
+            AudioManager.Instance.PlayClip(GameClip.bonus);
         }
 
         //TODO: add animation  y que ahga el ruido siempre que llegues al combo maximo, pero no despoues
     }
-   
+
     public int OnCorrectGuess()
     {
         CorrectGuessFX();
         amountOfAppearencesText.SetAmountOfGuessesAndShowText(
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
             true);
-        AudioManager.Instance.PlayClip(GameClip.correctGuess,1);
+        AudioManager.Instance.PlayClip(GameClip.correctGuess, 1);
         // probe pitch shift pero no me convence, me distrae y hace que sea mas complicado con los otros sonidos
         // necesitaria un audio soucer especifico para este clip asi el resto no hace shift tmb mientras se reproduce este sonido
         // y podria tener otro igual para el bonus, y que se haga mas augudo mientras mas bonus tengas / menos imagenes te queden
         // y podria haber otro para los errores, que se haga mas grave mientras menos vida tengas
         //AudioManager.Instance.PlayClip(GameClip.correctGuess,Mathf.Pow(1.05946f, 2 * CalculateScoreComboBonus()));
-        
-        
+
+
         int scoreModification = CalculateCorrectGuessBasePointsAndCombo();
-        SetCurrentCombo(_currentCombo+1);
+        SetCurrentCombo(_currentCombo + 1);
         ModifyScore(scoreModification);
         //Reset blocked and cut numbers for next appearence
 
@@ -488,44 +510,49 @@ public class GameManager : MonoBehaviour {
         bonusMultiplicator++;
         currentClears++;
         AudioManager.Instance.PlayClip(GameClip.bonus);
-        if (userData.GetUpgradeLevel(UpgradeID.HealOnClear) > 0 && 
-            (currentClears % (baseClearsToHeal - userData.GetUpgradeLevel(UpgradeID.HealOnClear)) ) == 0) {
+        if (userData.GetUpgradeLevel(UpgradeID.HealOnClear) > 0 &&
+            (currentClears % (baseClearsToHeal - userData.GetUpgradeLevel(UpgradeID.HealOnClear))) == 0)
+        {
             lifeCounter.GainLive();
         }
         return scoreModificationBonus;
     }
 
-    public void ModifyScore(int modificationAmount) 
+    public void ModifyScore(int modificationAmount)
     {
         score += modificationAmount;
         scoreText.text = score.ToString();
-        
+
     }
-  
-    private void SetScore(int newScore) {
+
+    private void SetScore(int newScore)
+    {
         score = newScore;
         scoreText.text = score.ToString();
     }
 
-    private void LoadStickers() {
+    private void LoadStickers()
+    {
 
         _remainingStickersFromStage = new Dictionary<int, StickerData>();
-        CustomDebugger.Log("Loading stickers for stage "+selectedLevel+" from set "+ StageManager.Instance.gameVersion);
+        CustomDebugger.Log("Loading stickers for stage " + selectedLevel + " from set " + StageManager.Instance.gameVersion);
         //david cantidad total stages[selectedStage].stickers.Count
         int amountOfStickersToSelect = selectedLevel;
-        
+
         //StickerManager.Instance.currentLoadedSetStickerData
-  
-        
+
+
         var randomGroupSelected = StageManager.Instance.selectedStickerGroup;
 
-        if (StickerManager.Instance.currentLoadedStickerGroups[(StageManager.Instance.gameVersion,userData.language)][randomGroupSelected.name].stickers.Count < amountOfStickersToSelect) {
+        if (StickerManager.Instance.currentLoadedStickerGroups[(StageManager.Instance.gameVersion, userData.language)][randomGroupSelected.name].stickers.Count < amountOfStickersToSelect)
+        {
             Debug.LogError("Se intentaron seleccionar mas stickers que los que hay en el grupo");
         }
 
-        var shuffledStickers = StickerManager.Instance.currentLoadedStickerGroups[(StageManager.Instance.gameVersion,userData.language)][randomGroupSelected.name].stickers.ToList().Shuffle();
+        var shuffledStickers = StickerManager.Instance.currentLoadedStickerGroups[(StageManager.Instance.gameVersion, userData.language)][randomGroupSelected.name].stickers.ToList().Shuffle();
 
-        for (int currentStickerSelectedIndex = 0; currentStickerSelectedIndex < amountOfStickersToSelect; currentStickerSelectedIndex++) {
+        for (int currentStickerSelectedIndex = 0; currentStickerSelectedIndex < amountOfStickersToSelect; currentStickerSelectedIndex++)
+        {
             int selectedStickerID = shuffledStickers[currentStickerSelectedIndex];
             StickerData stickerData =
                 StickerManager.Instance.GetStickerDataFromSetByStickerID(StageManager.Instance.gameVersion, selectedStickerID);
@@ -536,22 +563,24 @@ public class GameManager : MonoBehaviour {
         //seleccionar amountOfStickersToSelect, ordenar random y quedar con los amountoftickestoselect primeros?
     }
 
-    
 
 
-    private void SetRandomImage() {
-        
-         
+
+    private void SetRandomImage()
+    {
+
+
         int nextStickerIndex = Random.Range(0, currentlyInGameStickers.Count);
         StickerData nextSticker = currentlyInGameStickers.Keys.ToList()[nextStickerIndex];
 
-        while (_currentlySelectedSticker == nextSticker && currentlyInGameStickers.Count > 1) {
+        while (_currentlySelectedSticker == nextSticker && currentlyInGameStickers.Count > 1)
+        {
             nextStickerIndex = Random.Range(0, currentlyInGameStickers.Count);
             nextSticker = currentlyInGameStickers.Keys.ToList()[nextStickerIndex];
         }
-        
+
         stickerDisplay.SetStickerData(nextSticker);
-        
+
         _currentlySelectedSticker = nextSticker;
 
         #region QuizMode
@@ -605,7 +634,7 @@ public class GameManager : MonoBehaviour {
         */
         #endregion
         currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences++;
-        
+
         //agrego un cut con 0 para que se apliquen los remaining cuts
         currentlyInGameStickers[_currentlySelectedSticker].AddCutEffect(
             currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences,
@@ -617,47 +646,56 @@ public class GameManager : MonoBehaviour {
             .UpdateButtonColors(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences);
     }
 
-    public void RemoveStickerFromPool() {
+    public void RemoveStickerFromPool()
+    {
         //currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences = 0;
         currentlyInGameStickers.Remove(_currentlySelectedSticker);
         gameCanvas.barController.IncreaseCounter();
         // aca se setea si la imagen vuelve al set general o no  
         //_remainingStickersFromStage.Remove(_currentlySelectedSticker.stickerID);
     }
-  
-    private bool AddStickers(int amountOfImages) {
+
+    private bool AddStickers(int amountOfImages)
+    {
         //para agregar una imagen al pool, se mezclan todos los sprites,
         //y se agrega el primer sprite que no este en el pool, al pool
-        
+
         //devuelve verdadero si se pudieron agregar al pool todas las imagenes requeridas
-        if (amountOfImages < 1) {
+        if (amountOfImages < 1)
+        {
             return true;
         }
-        
+
         List<StickerData> shuffledStickers =
-            new List<StickerData >();
-        foreach (var sticker in _remainingStickersFromStage) {
+            new List<StickerData>();
+        foreach (var sticker in _remainingStickersFromStage)
+        {
             shuffledStickers.Add(sticker.Value);
         }
 
         shuffledStickers.Shuffle();
 
-        foreach (var sticker in shuffledStickers) {
-            if (!currentlyInGameStickers.ContainsKey(sticker)) {
-                currentlyInGameStickers.Add(sticker,new StickerMatchData());
+        foreach (var sticker in shuffledStickers)
+        {
+            if (!currentlyInGameStickers.ContainsKey(sticker))
+            {
+                currentlyInGameStickers.Add(sticker, new StickerMatchData());
                 _remainingStickersFromStage.Remove(sticker.stickerID);
                 amountOfImages--;
-                if (amountOfImages == 0) {
-                    return true; 
+                if (amountOfImages == 0)
+                {
+                    return true;
                 }
             }
         }
 
         return false;
     }
-    public IEnumerator EndGame(bool win) {
+    public IEnumerator EndGame(bool win)
+    {
         float delay;
-        if (win) {
+        if (win)
+        {
             CustomDebugger.Log("Win");
             AudioManager.Instance.PlayClip(GameClip.win);
             delay = AudioManager.Instance.clips[GameClip.win].length - delayReductionForWinClip;
@@ -670,9 +708,9 @@ public class GameManager : MonoBehaviour {
             AudioManager.Instance.PlayClip(GameClip.endGame);
             delay = AudioManager.Instance.clips[GameClip.endGame].length;
         }
-        
-        
-        
+
+
+
         endGameButtons.transform.parent.transform.parent.gameObject.SetActive(true);
         gameEnded = true;
         yield return new WaitForEndOfFrame();
@@ -682,7 +720,7 @@ public class GameManager : MonoBehaviour {
         AdmobAdsManager.Instance.ReduceInstertitialTime(elapsedTime);
 
         CheckStreakGameEnd();
-        
+
         var firstTimeAchievements = userData.GetUserStageData(selectedLevel, selectedDifficulty).AddMatch(_currentMatch);
 
 
@@ -691,51 +729,54 @@ public class GameManager : MonoBehaviour {
             &&
             (userData.GetUserStageData(selectedLevel, selectedDifficulty).achievements
                 .Contains(Achievement.BarelyClearedStage))
-            ) {
+            )
+        {
             nextStageButton.gameObject.SetActive(true);
         }
-        else {
+        else
+        {
             nextStageButton.gameObject.SetActive(false);
         }
-        
+
         int lastHighScore = userData.GetUserStageData(selectedLevel, selectedDifficulty).highScore;
         if (lastHighScore < score)
         {
             userData.GetUserStageData(selectedLevel, selectedDifficulty).highScore = score;
         }
 
- 
-            
-        userData.GainExp(score + Mathf.RoundToInt( score * GetStreakBonusPercentage()));
-        CustomDebugger.Log("Gained exp = base:"+score+" streakBonus:" + Mathf.RoundToInt( score* GetStreakBonusPercentage()), DebugCategory.END_MATCH);
+
+
+        userData.GainExp(score + Mathf.RoundToInt(score * GetStreakBonusPercentage()));
+        CustomDebugger.Log("Gained exp = base:" + score + " streakBonus:" + Mathf.RoundToInt(score * GetStreakBonusPercentage()), DebugCategory.END_MATCH);
 
         UpdateInventoryAndSave();
         UpdateAchievementAndUnlockedLevels();
         //Aca puede que haya que actualizar las estrellas en el nivel
         StageManager.Instance.InitializeStages();
         //animationScore
-        
+
         //Grant first time Achievemnts bonus
         yield return new WaitForSeconds(delay);
 
-        yield return endGameAchievementStars.SetAchievements(_currentMatch.achievementsFulfilled,delayBetweenStars);
-        
+        yield return endGameAchievementStars.SetAchievements(_currentMatch.achievementsFulfilled, delayBetweenStars);
+
         PlayerLevelManager.Instance.UpdatePlayerLevelButtons();
 
-        
+
         if (lastHighScore < score)
         {
             //yield return StartCoroutine(SetHighScore(score));
-            StageManager.Instance.stages[(selectedLevel,selectedDifficulty)].SetScore(score);
+            StageManager.Instance.stages[(selectedLevel, selectedDifficulty)].SetScore(score);
         }
-        
-       
+
+
         //animation achievements
 
         AdmobAdsManager.Instance.ShowInterstitialAd();
     }
 
-    public float GetStreakBonusPercentage() {
+    public float GetStreakBonusPercentage()
+    {
         float bonusPercentagePerStreak = 0.05f;
         int streak = PlayerPrefs.GetInt("StreakAmount", 0);
         streak = Math.Clamp(streak, 0, 11);
@@ -744,45 +785,50 @@ public class GameManager : MonoBehaviour {
 
     public void UpdateAchievementAndUnlockedLevels()
     {
-        foreach (var stageIndexAndData in StageManager.Instance.stages) {
+        foreach (var stageIndexAndData in StageManager.Instance.stages)
+        {
             stageIndexAndData.Value.UpdateDifficultyUnlockedAndAmountOfStickersUnlocked();
         }
     }
 
-    private void UpdateInventoryAndSave() {
-        
+    private void UpdateInventoryAndSave()
+    {
+
         // Desactivado que el update de los consumibles se haga al final de las partidas para que se haga en cada turno
         // ya que no hay consumibles gratis por upgrade, si no que se generan cada x tiempo en factory
-        
+
         // foreach (ConsumableID consumable in matchInventory.Keys)
         // {
         //     int result = matchInventory[consumable].initial.consumableValue - matchInventory[consumable].current;
         //     if (result > 0)
         //         userConsumableData.ModifyConsumable(consumable, -result);
         // }
-        
+
         PersistanceManager.Instance.SaveUserConsumableData();
     }
     private IEnumerator SetHighScore(int highScoreToSet)
     {
         float clipDuration = AudioManager.Instance.PlayClip(GameClip.highScore);
         float timeUntillHighScoreTextUpdate = 0.25f;
-        StageManager.Instance.stages[(selectedLevel,selectedDifficulty)].SetScore(highScoreToSet);
+        StageManager.Instance.stages[(selectedLevel, selectedDifficulty)].SetScore(highScoreToSet);
         yield return new WaitForSeconds(timeUntillHighScoreTextUpdate);
-        
+
         //Todo: agregar animacion de texto estrellas colores whatever
         highScoreText.text = highScoreToSet.ToString();
         yield return new WaitForSeconds(clipDuration - timeUntillHighScoreTextUpdate);
     }
-    public void SetTimer(float timerToSet) {
+    public void SetTimer(float timerToSet)
+    {
         string previousTimer = ((int)timer).ToString();
 
-        timer = Mathf.Clamp(timerToSet,0,math.INFINITY);
+        timer = Mathf.Clamp(timerToSet, 0, math.INFINITY);
         timerText.text = ((int)timer).ToString();
         string newTimer = ((int)timer).ToString();
 
-        if (previousTimer != newTimer && timer < 4) {
-            switch (newTimer) {
+        if (previousTimer != newTimer && timer < 4)
+        {
+            switch (newTimer)
+            {
                 case "3":
                     AudioManager.Instance.PlayClip(GameClip.beep1);
                     break;
@@ -794,23 +840,28 @@ public class GameManager : MonoBehaviour {
                     break;
             }
         }
-        
-        if (timer<=1) {
+
+        if (timer <= 1)
+        {
             OnRanOutOfTime();
         }
     }
 
-    private void OnRanOutOfTime() {
+    private void OnRanOutOfTime()
+    {
         StartCoroutine(ProcessTurnAction(0, true));
     }
 
-    public void PlayNextStage() {
-        if (selectedLevel < maxLevel - 1) {
+    public void PlayNextStage()
+    {
+        if (selectedLevel < maxLevel - 1)
+        {
             StageManager.Instance.SetStageAndDifficulty(selectedLevel + 1, selectedDifficulty);
         }
-        else if (selectedDifficulty<9) {
-            StageManager.Instance.SetStageAndDifficulty(4, selectedDifficulty+1);
-        }    
+        else if (selectedDifficulty < 9)
+        {
+            StageManager.Instance.SetStageAndDifficulty(4, selectedDifficulty + 1);
+        }
         /*
         if (selectedDifficulty<8) {
             StageManager.Instance.SetStageAndDifficulty(selectedLevel, selectedDifficulty+1);
@@ -818,14 +869,16 @@ public class GameManager : MonoBehaviour {
         else if (selectedLevel < maxLevel - 1) {
             StageManager.Instance.SetStageAndDifficulty(selectedLevel + 1, 0);
         }*/
-        else {
+        else
+        {
             throw new Exception("Play Next stage called but there is no next stage");
         }
         Reset();
     }
 
-    public void Reset() {
-        CustomDebugger.Log("Amount of clues "+userConsumableData.GetConsumableEntry(ConsumableID.Clue).amount);
+    public void Reset()
+    {
+        CustomDebugger.Log("Amount of clues " + userConsumableData.GetConsumableEntry(ConsumableID.Clue).amount);
         switch (currentGameMode)
         {
             case GameMode.MEMORY:
@@ -837,20 +890,21 @@ public class GameManager : MonoBehaviour {
                 quizOptionPad.SetActive(true);
                 break;
         }
-        
+
         pause = true;
         startMatchTime = Time.time;
         endMatchTime = 0;
         AdmobAdsManager.Instance.LoadInterstitialAd();
         SetScoreTexts();
-        if (stickerDisplay == null) {
+        if (stickerDisplay == null)
+        {
             stickerDisplay = StickerManager.Instance.GetStickerHolder();
         }
         startScale = stickerDisplay.spriteHolder.transform.parent.transform.localScale;
         stickerDisplay.ConfigureForGame(currentGameMode);
         SetMatchInventory();
-        protectedLife = userData.GetUpgradeLevel(UpgradeID.LifeProtector) > 0; 
-        deathDefyCharges = userData.GetUpgradeLevel(UpgradeID.DeathDefy); 
+        protectedLife = userData.GetUpgradeLevel(UpgradeID.LifeProtector) > 0;
+        deathDefyCharges = userData.GetUpgradeLevel(UpgradeID.DeathDefy);
         gameCanvas.numpad.SetNumpadByDifficulty(selectedDifficulty);
         gameEnded = false;
         stickerDisplay.gameObject.SetActive(true);
@@ -878,17 +932,17 @@ public class GameManager : MonoBehaviour {
         _currentlySelectedSticker = null;
         SetRandomImage();
         disableInput = false;
-        _currentMatch = new Match(selectedLevel,selectedDifficulty,false);
+        _currentMatch = new Match(selectedLevel, selectedDifficulty, false);
         _currentCombo = 0;
         endGameAchievementStars.ResetStars();
         gameCanvas.UpdateUI();
-        
+
         pausePanel.SetActive(false);
         tutorialPanel.SetActive(false);
 
         currentlyActivatedPower = ConsumableID.NONE;
-        
-        
+
+
         #region FirstMistake
         /*
         if (userData.stages[0].matches.Count == 0)
@@ -915,21 +969,23 @@ public class GameManager : MonoBehaviour {
         StartCoroutine(StartMatchCountdown());
     }
 
-    private IEnumerator StartMatchCountdown() {
-        for (int i = 3; i > 0; i--) {
+    private IEnumerator StartMatchCountdown()
+    {
+        for (int i = 3; i > 0; i--)
+        {
             stageGroupIntroPanel.SetCountdown(i);
             AudioManager.Instance.PlayClip(GameClip.enterStages);
             yield return new WaitForSeconds(1f);
         }
         bool startingLevel = selectedDifficulty == 2 && Instance.selectedLevel == 4;
         pause = false;
-        if (startingLevel)  OpenTutorialPanel();
+        if (startingLevel) OpenTutorialPanel();
         stageGroupIntroPanel.gameObject.SetActive(false);
         AudioManager.Instance.PlayClip(GameClip.playStage);
         numpad.GetComponent<Numpad>()
             .UpdateButtonColors(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences);
 
-        
+
     }
 
     private void ResetTimer()
@@ -945,7 +1001,8 @@ public class GameManager : MonoBehaviour {
     }
 
 
-    private void FixedUpdate() {
+    private void FixedUpdate()
+    {
         CheckStreakStart();
         if (gameEnded || pause || disableInput) return;
         SetTimer(timer - Time.deltaTime);
@@ -953,71 +1010,75 @@ public class GameManager : MonoBehaviour {
 
     private void Update()
     {
-    #if UNITY_EDITOR
-     currentlyInGameStickersTotalAmount = currentlyInGameStickers.Count;
-     currentlyInGameStickersNames = new string[currentlyInGameStickers.Count];
-     int stickerOrderNumber = 0;
-     foreach (var currentSticker in currentlyInGameStickers)
-     {
-         currentlyInGameStickersNames[stickerOrderNumber] = currentSticker.Key.name;
-         stickerOrderNumber++;
-     }
-     if (_currentlySelectedSticker is not null)
-     {
-        currentlySelectedStickerID = _currentlySelectedSticker.stickerID;
-        currentlySelectedStickerName = _currentlySelectedSticker.name;
-        if (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
+#if UNITY_EDITOR
+        currentlyInGameStickersTotalAmount = currentlyInGameStickers.Count;
+        currentlyInGameStickersNames = new string[currentlyInGameStickers.Count];
+        int stickerOrderNumber = 0;
+        foreach (var currentSticker in currentlyInGameStickers)
         {
-            currentlySelectedStickerAmountOfAppearences = currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences;
+            currentlyInGameStickersNames[stickerOrderNumber] = currentSticker.Key.name;
+            stickerOrderNumber++;
         }
-     }
-     
-     
-     for (int i = 0; i <= 9; i++)
-    {
-        if (Input.GetKeyDown(i.ToString()))
+        if (_currentlySelectedSticker is not null)
         {
-            CustomDebugger.Log("Number key " + i + " pressed");
-             if (gameEnded || disableInput) {
-                 return;
-             }
-             CustomDebugger.Log("Clicked number "+ i);
-             StartCoroutine(ProcessTurnAction(i));
-        }
-    }
-
-    // Check for numpad keys
-    for (KeyCode key = KeyCode.Keypad1; key <= KeyCode.Keypad9; key++)
-    {
-        if (Input.GetKeyDown(key))
-        {
-            CustomDebugger.Log("Numpad key " + (key - KeyCode.Keypad0) + " pressed kp");
-            if (gameEnded || disableInput) {
-                return;
+            currentlySelectedStickerID = _currentlySelectedSticker.stickerID;
+            currentlySelectedStickerName = _currentlySelectedSticker.name;
+            if (currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
+            {
+                currentlySelectedStickerAmountOfAppearences = currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences;
             }
-            CustomDebugger.Log("Clicked number "+ (key - KeyCode.Keypad0));
-            StartCoroutine(ProcessTurnAction((key - KeyCode.Keypad0)));
         }
-    }
+
         if (Input.GetKeyDown(KeyCode.KeypadEnter))
         {
             CustomDebugger.Log("Numpad key " + (KeyCode.KeypadEnter) + " pressed kp");
-            if (gameEnded || disableInput) {
+            if (gameEnded || disableInput)
+            {
                 return;
             }
-            CustomDebugger.Log("Clicked number "+ (KeyCode.KeypadEnter));
+            CustomDebugger.Log("Clicked number " + (KeyCode.KeypadEnter));
             StartCoroutine(ProcessTurnAction(currentlyInGameStickers[_currentlySelectedSticker].amountOfAppearences));
         }
         if (Input.GetKeyDown(KeyCode.Keypad0))
         {
             CustomDebugger.Log("Numpad key " + (KeyCode.Keypad0) + " pressed kp");
-            if (gameEnded || disableInput) {
+            if (gameEnded || disableInput)
+            {
                 return;
             }
-            CustomDebugger.Log("Clicked number "+ (KeyCode.Keypad0));
+            CustomDebugger.Log("Clicked number " + (KeyCode.Keypad0));
             StartCoroutine(ProcessTurnAction((0)));
         }
-    #endif
+#endif
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR
+        for (int i = 0; i <= 9; i++)
+        {
+            if (Input.GetKeyDown(i.ToString()))
+            {
+                CustomDebugger.Log("Number key " + i + " pressed");
+                if (gameEnded || disableInput)
+                {
+                    return;
+                }
+                CustomDebugger.Log("Clicked number " + i);
+                StartCoroutine(ProcessTurnAction(i));
+            }
+        }
+        // Check for numpad keys
+        for (KeyCode key = KeyCode.Keypad1; key <= KeyCode.Keypad9; key++)
+        {
+            if (Input.GetKeyDown(key))
+            {
+                CustomDebugger.Log("Numpad key " + (key - KeyCode.Keypad0) + " pressed kp");
+                if (gameEnded || disableInput)
+                {
+                    return;
+                }
+                CustomDebugger.Log("Clicked number " + (key - KeyCode.Keypad0));
+                StartCoroutine(ProcessTurnAction((key - KeyCode.Keypad0)));
+            }
+        }
+#endif
     }
 
     private IEnumerator Squash(Transform squashedTransform, float delay, float amount, float speed)
@@ -1065,7 +1126,8 @@ public class GameManager : MonoBehaviour {
     }
 
 
-    private List<bool> ParseSavedClears(string allClears) {
+    private List<bool> ParseSavedClears(string allClears)
+    {
         string[] clearedArray = allClears.Split(';');
         List<bool> clears = new List<bool>();
 
@@ -1086,7 +1148,8 @@ public class GameManager : MonoBehaviour {
         // }
         return clears;
     }
-    public static List<int> ParseSavedScore(string allScores) {
+    public static List<int> ParseSavedScore(string allScores)
+    {
         //string highScoreString = PlayerPrefs.GetString("HighScore", "0;0;0");
         string[] highScoreArray = allScores.Split(';');
         List<int> highScores = new List<int>();
@@ -1103,8 +1166,9 @@ public class GameManager : MonoBehaviour {
             }
         }
 
-        if (highScores.Count != 3) {
-                CustomDebugger.LogError("Cantidad incorrecta de puntajes " + allScores);
+        if (highScores.Count != 3)
+        {
+            CustomDebugger.LogError("Cantidad incorrecta de puntajes " + allScores);
         }
         return highScores;
     }
@@ -1122,14 +1186,15 @@ public class GameManager : MonoBehaviour {
         matchInventory = userData.GetMatchInventory();
     }
 
-    public (StickerData sticker,StickerMatchData matchData) GetCurrentlySelectedSticker()
+    public (StickerData sticker, StickerMatchData matchData) GetCurrentlySelectedSticker()
     {
         if (_currentlySelectedSticker is null)
         {
             return (null, null);
         }
 
-        if (!currentlyInGameStickers.ContainsKey(_currentlySelectedSticker)) {
+        if (!currentlyInGameStickers.ContainsKey(_currentlySelectedSticker))
+        {
             return (_currentlySelectedSticker, null);
         }
         return (_currentlySelectedSticker, currentlyInGameStickers[_currentlySelectedSticker]);
@@ -1139,20 +1204,21 @@ public class GameManager : MonoBehaviour {
     {
         pause = !pause;
         pausePanel.SetActive(pause);
-    }    
+    }
     public void OpenTutorialPanel()
     {
         foreach (var VARIABLE in newPlayerTutorialTexts) VARIABLE.SetActive(true);
         pause = true;
         tutorialPanel.SetActive(true);
-    }    
+    }
     public void CloseTutorialPanel()
     {
         pause = false;
         tutorialPanel.SetActive(false);
     }
-    
-    public (StickerData sticker, StickerMatchData matchData) ActivatePower(ConsumableID consumableID,GameClip clip) {
+
+    public (StickerData sticker, StickerMatchData matchData) ActivatePower(ConsumableID consumableID, GameClip clip)
+    {
         currentlyActivatedPower = ConsumableID.NONE;
         CustomDebugger.Log("USE: " + consumableID.ToString());
         var turnSticker = GetCurrentlySelectedSticker();
@@ -1170,7 +1236,8 @@ public class GameManager : MonoBehaviour {
         return (turnSticker);
     }
 
-    public PowerButton GetPowerButton(ConsumableID consumableID) {
+    public PowerButton GetPowerButton(ConsumableID consumableID)
+    {
         return gameCanvas.powerPanelButtonHolder.GetPowerButton(consumableID);
     }
 
@@ -1189,7 +1256,7 @@ public class GameManager : MonoBehaviour {
         streakDisplay.UpdateStreakText(streakAmount);
         streakDisplay.UpdateTimerText(hasPlayedToday);
 
-        foreach (var VARIABLE in FindObjectsOfType<StreakExpBonusDisplay>()) 
+        foreach (var VARIABLE in FindObjectsOfType<StreakExpBonusDisplay>())
         {
             VARIABLE.UpdateExpText();
         }
@@ -1244,7 +1311,7 @@ public class GameManager : MonoBehaviour {
     private void ScheduleStreakNotification()
     {
         NotificationManager.Instance.CancelNotificationsFromCategory(ConsumableID.EnergyPotion);
-        
+
         string notifTitle = LocalizationManager.Instance.GetGameText(GameText.StreakNotificationTitle);
         string notifDesc = LocalizationManager.Instance.GetGameText(GameText.StreakNotificationDescription);
 
@@ -1280,46 +1347,51 @@ public class GameManager : MonoBehaviour {
             return;
         }
 
-        #if UNITY_ANDROID || UNITY_IOS
+#if UNITY_ANDROID || UNITY_IOS
         // Determinar el patrón de vibración basado en si la respuesta es correcta o incorrecta
         if (correct)
         {
             // Vibración corta para respuesta correcta
-            CustomDebugger.Log("vibrar correcto",DebugCategory.NUMPAD);
+            CustomDebugger.Log("vibrar correcto", DebugCategory.NUMPAD);
             Handheld.Vibrate();
         }
         else
         {
             // Vibración más larga para respuesta incorrecta
-            CustomDebugger.Log("vibrar incorrect",DebugCategory.NUMPAD);
+            CustomDebugger.Log("vibrar incorrect", DebugCategory.NUMPAD);
             StartCoroutine(LongVibration());
         }
-        #else
+#else
             // Si no está en una plataforma con soporte háptico, no hacer nada
             CustomDebugger.Log("no es android",DebugCategory.NUMPAD);
             return;
-        #endif
+#endif
     }
 
     // Corutina para una vibración más larga
     private IEnumerator LongVibration()
     {
+        #if UNITY_ANDROID || UNITY_IOS
         // Vibrar varias veces para simular una vibración más larga
         for (int i = 0; i < 7; i++)
         {
             Handheld.Vibrate();
             yield return new WaitForSeconds(0.1f); // Pausa breve entre vibraciones
         }
+        #endif
+        yield return null;
     }
 
     #endregion
 }
-public enum StickerSet {
+public enum StickerSet
+{
     Pokemon,
     Landscapes,
     AnatomyFractures,
     AnatomyBones,
-    WorldFlags
+    WorldFlags,
+    AnimalKingdom
 }
 
 public enum ShopItemType
@@ -1341,12 +1413,12 @@ public enum ShopItemType
     Upgrade_DeathDefy
 }
 
-[Serializable] 
+[Serializable]
 public class Serialization<T>
 {
     [SerializeField]
     public List<T> items;
-    
+
     public Serialization(List<T> items)
     {
         this.items = items;

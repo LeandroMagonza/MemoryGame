@@ -197,10 +197,11 @@ public class PersistanceManager : MonoBehaviour
 
     public void SaveUserData()
     {
-        /*if (userData.stickerDuplicates.Count == 0)
+        if (string.IsNullOrEmpty(userData.language))
         {
-            throw new Exception("Sticker duplicates was empty, user data save aborted");
-        }*/
+            CustomDebugger.LogError("Language was empty, user data save aborted");
+            return;
+        }
         userData.ConvertStickerDictionaryToList();
         string setName = StageManager.Instance.gameVersion.ToString();
         string filePath = Path.Combine(Application.persistentDataPath, setName, FileName.UserData+".json");
@@ -219,16 +220,17 @@ public class PersistanceManager : MonoBehaviour
 
         // Utilizar DeserializeUserData para deserializar los datos
  
-        UserData userData = DeserializeUserData(json);
-        if (json == "" || userData == null)
+        if (string.IsNullOrEmpty(json))
         {
             Debug.LogError("Failed to load UserData.");
             userData = new UserData();
         }
         else
         {
+            userData = DeserializeUserData(json);
             userData.ConvertStickerListToDictionary();
         }
+        CustomDebugger.Log("UserData language: " + userData.language);
 
         #region MigrateFromCoinsVersion
         // un lv es un upgrade
@@ -241,7 +243,6 @@ public class PersistanceManager : MonoBehaviour
         if (levelAccordingToUpgrades > levelAccordingToExp) {
             userData.experiencePoints = userData.ExperienceAccordingToLevel(levelAccordingToUpgrades) + userData.coins;
         }
-        this.userData = userData;
         #endregion
 
         #region MigrateFromMatchesInUserDataVersion
@@ -252,6 +253,7 @@ public class PersistanceManager : MonoBehaviour
     }
     private void MigrateMatchesFromOldFormat(string json)
     {
+        if (string.IsNullOrEmpty(json)) return;
         // Utiliza JsonConvert para deserializar el JSON a un JObject para un mejor manejo de las claves y valores
         var oldUserData = JsonConvert.DeserializeObject<JObject>(json);
     
@@ -375,9 +377,19 @@ public class PersistanceManager : MonoBehaviour
     }
 
     public string GetLoadedFile(FileName fileName) {
+        if (!loadedFiles.ContainsKey(fileName.ToString()))
+        {
+            CustomDebugger.LogError("No " + fileName.ToString() + " found in loadedFiles");
+            return null;
+        }
         return loadedFiles[fileName.ToString()];
     }    
     public string GetLoadedFile(string fileName) {
+        if (!loadedFiles.ContainsKey(fileName))
+        {
+            CustomDebugger.LogError("No " + fileName + " found in loadedFiles");
+            return null;
+        }
         return loadedFiles[fileName];
     }
 
@@ -398,9 +410,10 @@ public class PersistanceManager : MonoBehaviour
     }
 
     private IEnumerator LoadFromResources(string file_name, string subfolder) {
-        TextAsset file = Resources.Load<TextAsset>("Storage/" + subfolder + "/" + file_name);
+        string path = "Storage/" + subfolder + "/" + file_name;
+        TextAsset file = Resources.Load<TextAsset>(path);
         if (file is null) {
-            Debug.LogError("No " + file_name + " found in resources");
+            Debug.LogError("No " + file_name + " found in resources "+path);
             yield break;
         }
         loadedFiles[file_name] = file.text;

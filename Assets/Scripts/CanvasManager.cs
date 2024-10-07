@@ -35,11 +35,11 @@ public class CanvasManager : MonoBehaviour
     #endregion
 
 
-    public Image backgroundImage;
+    [SerializeField] private Image backgroundImage => menuCanvas.backgroundImage;
     public CanvasName initialCanvas = CanvasName.MENU;
     public Dictionary<CanvasName,Canvas> allCanvas = new Dictionary<CanvasName, Canvas>();
 
-    public Canvas menuCanvas;
+    public MenuCanvas menuCanvas;
     public Canvas selectStageCanvas;
     public Canvas gameCanvas;
     [FormerlySerializedAs("shopCanvas")] public Canvas playerLevelCanvas;
@@ -55,7 +55,7 @@ public class CanvasManager : MonoBehaviour
     private void Start()
     {
         allCanvas.Add(CanvasName.LOADING,loadingCanvas); 
-        allCanvas.Add(CanvasName.MENU,menuCanvas);
+        allCanvas.Add(CanvasName.MENU,menuCanvas.canvas);
         allCanvas.Add(CanvasName.SELECT_STAGE,selectStageCanvas);
         allCanvas.Add(CanvasName.GAME,gameCanvas);
         allCanvas.Add(CanvasName.PLAYER_LEVEL,playerLevelCanvas);
@@ -95,10 +95,37 @@ public class CanvasManager : MonoBehaviour
             color = colorValue;
         }
         Camera.main.backgroundColor = color;
-        Sprite backgound = Resources.Load<Sprite>(StageManager.Instance.gameVersion + "/background");
-        if (backgound is Sprite)
-            backgroundImage.sprite = backgound;
-
+        string path = StageManager.Instance.gameVersion + "/backgroundImage";
+        Debug.Log("Attempting to load sprite from path: " + path);
+        Sprite background = Resources.Load<Sprite>(path);
+        
+        if (background != null)
+        {
+            Debug.Log("Sprite loaded successfully");
+            backgroundImage.sprite = background;
+            backgroundImage.enabled = true; // Asegurarse de que la imagen esté habilitada
+        }
+        else
+        {
+            Debug.LogError("Failed to load background sprite from path: " + path);
+            // Intenta cargar sin la versión del juego
+            string alternativePath = "backgroundImage";
+            Debug.Log("Attempting to load sprite from alternative path: " + alternativePath);
+            background = Resources.Load<Sprite>(alternativePath);
+            
+            if (background != null)
+            {
+                Debug.Log("Sprite loaded successfully from alternative path");
+                backgroundImage.sprite = background;
+                backgroundImage.enabled = true;
+            }
+            else
+            {
+                CustomDebugger.LogError("No valid backgroundImage found in either path.");
+                // Opcionalmente, establece una imagen por defecto o deshabilita el componente Image
+                // backgroundImage.enabled = false;
+            }
+        }
     }
 
     public Canvas GetCanvas(CanvasName canvasName) {

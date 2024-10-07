@@ -1,0 +1,25 @@
+{
+  "stickerLevels":{
+    "1":{"amountRequired":5},
+    "2":{"amountRequired":15},
+    "3":{"amountRequired":35},
+    "4":{"amountRequired":75},
+    "5":{"amountRequired":150}
+  },
+  "packs":{
+    "rareChance":0.009,
+    "rareAmountOfStickers": 35,
+    "legendaryChance":0.001,
+    "legendaryAmountOfStickers": 150,
+    "stickersPerPack":5
+  },
+  "config":{
+    "version":4,
+    "backgroundColor": "098E20",
+    "baseExperiencePoints": 200,
+    "experienceIncreasePerLevel": 1.5,
+    "flatAmountOfStickerAdded":0,
+    "scalingAmountOfStickerAdded":1,
+    "source": "Storage"
+  }
+}

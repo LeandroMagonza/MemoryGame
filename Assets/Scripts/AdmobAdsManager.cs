@@ -32,7 +32,7 @@ public class AdmobAdsManager : MonoBehaviour
 
     public bool showInterstitial;
     public float timeToInterstitial = 90;
-    private float currentTimeToInterstitial = 0;
+    [SerializeField] private float currentTimeToInterstitial = 0;
     
     private void Awake()
     {

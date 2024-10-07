@@ -291,7 +291,7 @@ public class UserData
     public int id;
     public int coins;
     public int experiencePoints;
-    public List<UserStageData> stages;
+    public List<UserStageData> stages = new List<UserStageData>();
     [JsonIgnore] // Ignora esta propiedad durante la deserialización
     public int playerLevel => CalculatePlayerLevel();
     public int CalculatePlayerLevel() {
